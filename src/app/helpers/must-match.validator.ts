@@ -8,14 +8,16 @@ export function MustMatch(controlName: string, matchingControlName: string) {
 
         if (matchingControl.errors && !matchingControl.errors.mustMatch) {
             // return if another validator has already found an error on the matchingControl
-            return;
+            return null;
         }
 
         // set error on matchingControl if validation fails
         if (control.value !== matchingControl.value) {
             matchingControl.setErrors({ mustMatch: true });
+            return { mustMatch: true };
         } else {
             matchingControl.setErrors(null);
+            return null;
         }
     }
 }

@@ -96,7 +96,7 @@
                                     <ng-select [items]="items.profession" bindLabel="name" [addTag]="true"
                                         addTagText="Agregar profesión" formControlName="profession"
                                         placeholder="Profesión"
-                                        [ngClass]="{ 'is-invalid': submitted && f.profession.errors }">
+                                        [ngClass]="{ 'is-invalid': submitted && f.profession.errors }"> 
                                     </ng-select>
                                     <div *ngIf="submitted && f.profession.errors">
                                         <div *ngIf="f.profession.errors.required" class="invalid-feedback-select">

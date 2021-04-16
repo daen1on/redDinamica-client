@@ -1,5 +1,5 @@
 import { ModuleWithProviders } from '@angular/core';
-import { Routes, RouterModule} from '@angular/router';
+import { Route, Routes, RouterModule} from '@angular/router';
 
 import { LandingComponent } from './components/landing/landing.component';
 import { LoginComponent } from './components/login/login.component';
@@ -21,4 +21,4 @@ const routes: Routes = [
 ];
 
 export const appRoutingProviders: any[] = [];
-export const Routing: ModuleWithProviders = RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled', onSameUrlNavigation: 'reload'});
+export const Routing: ModuleWithProviders<Route> = RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled', onSameUrlNavigation: 'reload'});

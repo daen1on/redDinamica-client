@@ -81,7 +81,7 @@ export class RegisterComponent implements OnInit {
             tyc: [false, CheckboxRequiredValidator ]
         },
             {
-                validator: MustMatch('password', 'confirmPassword')
+                validators: MustMatch('password', 'confirmPassword')
             });
     }
 
