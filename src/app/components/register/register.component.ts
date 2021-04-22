@@ -13,6 +13,7 @@ import { TYC_FILE } from 'src/app/services/DATA';
 import { GLOBAL } from 'src/app/services/global';
 
 
+
 @Component({
     selector: 'register',
     templateUrl: './register.component.html'
@@ -58,17 +59,21 @@ export class RegisterComponent implements OnInit {
             profession: []
         };
 
+        
+
+
     }
 
     ngDoCheck(): void {
     }
 
     ngOnInit() {
-
         this.getAllInstitutions();
         this.getAllProfessions();
 
-        this.registerForm = this._formBuilder.group({
+        //aca iba antes formBuilder
+        
+            this.registerForm = this._formBuilder.group({
             name: ['', Validators.required],
             surname: ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
@@ -78,11 +83,12 @@ export class RegisterComponent implements OnInit {
             institution: ['', Validators.required],
             category: ['', Validators.required],
             experience: '',
-            tyc: [false, CheckboxRequiredValidator ]
+            tyc: [false, Validators.requiredTrue ] //problema aca con el validators del checkbox
         },
             {
                 validators: MustMatch('password', 'confirmPassword')
             });
+        
     }
 
 

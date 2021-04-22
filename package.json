@@ -1,6 +1,7 @@
 {
   "name": "client",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -53,4 +54,5 @@
     "tslint": "~5.20.1",
     "typescript": "^4.1.5"
   }
+  
 }

@@ -303,7 +303,7 @@
                             [ngClass]="{ 'is-invalid': editSubmitted && f2[field.id].errors}"
                             (keydown)="onKeydown($event)" readonly>
 
-                        <textarea *ngIf="field.type === 'textarea'" class="form-control" id="experience" rows="3"
+                        <textarea *ngIf="field.type === 'textarea'" class="form-control" id="{{field.id}}" rows="3"
                             formControlName="{{field.id}}" readonly>
                                 </textarea>
 
