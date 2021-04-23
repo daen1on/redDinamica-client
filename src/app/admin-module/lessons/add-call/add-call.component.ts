@@ -13,6 +13,7 @@ import { BasicDataService } from 'src/app/services/basicData.service';
 import { Call } from 'src/app/models/call.model';
 import { Lesson } from 'src/app/models/lesson.model';
 
+
 @Component({
     selector: 'add-call',
     templateUrl: './add-call.component.html'
@@ -67,7 +68,8 @@ export class AddCallComponent implements OnInit {
     ngOnInit(): void {
 
         this.callForm.patchValue({
-            areas: this.lesson.knowledge_area
+            areas: this.lesson.knowledge_area,
+            text: this.lesson.resume //el resumen de la propuesta se convierte en Detalle de la convocatoria
         });
     }
 
@@ -115,8 +117,9 @@ export class AddCallComponent implements OnInit {
 
         this.call = new Call(this.callForm.value.text);
         this.call.visible = true;
-        this.call.author = this.identity.id;        
-
+        this.call.author = this.identity.id;      
+        this.call.interested = [this.identity.id]; //agrega implicitamente al creador en el grupo
+        
         if (this.nextVersion) {
             this.newLesson.state = 'proposed';
 

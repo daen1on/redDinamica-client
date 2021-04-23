@@ -14,17 +14,16 @@ export const FIELDS_SUGGEST_FORM = [
         required: true
     },
     {
-        id: "references",
-        label: "Referencias",
-        type: "textarea",
-        attr: "references",
-        required: true
-    },
-    {
         id: "justification",
         label: "Justificación",
         type: "textarea",
         attr: "justification",
+        required: true
+    },{
+        id: "references",
+        label: "Referencias",
+        type: "textarea",
+        attr: "references",
         required: true
     }
     

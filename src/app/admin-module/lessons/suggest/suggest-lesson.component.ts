@@ -7,6 +7,7 @@ import { GLOBAL } from 'src/app/services/global';
 import { Lesson } from 'src/app/models/lesson.model';
 import { LessonService } from 'src/app/services/lesson.service';
 import { EventEmitter } from '@angular/core';
+import { BasicDataService } from 'src/app/services/basicData.service';
 
 @Component({
     selector: 'suggest-lesson',
@@ -24,17 +25,21 @@ export class SuggestLessonComponent implements OnInit {
 
     public status;
     public submitted;
+    //public check;
 
     public errorMsg;
     public successMsg;
 
     public lesson;
 
+    //@Input() areas;
+    
     @Output() added = new EventEmitter();
 
     constructor(
         private _userService: UserService,
-        private _lessonService: LessonService
+        private _lessonService: LessonService,
+        private _bDService: BasicDataService
     ) {
         this.title = 'Agregar';
         this.identity = this._userService.getIdentity();
@@ -57,6 +62,13 @@ export class SuggestLessonComponent implements OnInit {
                 required: true
             },
             {
+                id: "justification",
+                label: "Justificación",
+                type: "textarea",
+                attr: "justification",
+                required: true
+            },
+            {
                 id: "references",
                 label: "Referencias",
                 type: "textarea",
@@ -72,37 +84,71 @@ export class SuggestLessonComponent implements OnInit {
         this.addForm = new FormGroup({
             title: new FormControl('', Validators.required),
             resume: new FormControl('', Validators.required),
+            justification: new FormControl('', Validators.required),
+            //areas: new FormControl('', Validators.required),
+            //level: new FormControl('', Validators.required),
             references: new FormControl('')
-        });
+            });
     }
 
     ngOnInit(): void {
-
+       /* this.addForm.patchValue({
+            areas: this.lesson.knowledge_area
+        });*/
     }
+    /*ngDoCheck(): void {
+
+        if (this.check && this.lesson._id) {
+
+            this.addForm.patchValue({
+                areas: this.lesson.knowledge_area,
+                title: '',
+                resume:'',
+                justification:'',
+                references:'',
+                level: ''
+                
+            });
+
+            this.check = false;
+        }
+
+    }*/
 
     get f() { return this.addForm.controls; }
 
     restartValues() {
         this.status = null;
         this.submitted = false;
+       // this.check = true;
     }
 
     onSubmit() {
-
+        
+        //let tempArray = []; //array de areas de conocimiento
         this.submitted = true;
 
         if (this.addForm.invalid) {
             return;
         }
+        
+        this.addForm.value.areas.forEach(element => {
+          //  tempArray.push(element._id);
+        });
 
         this.lesson = new Lesson();
-
+        
         this.lesson.title = this.addForm.value.title;
         this.lesson.resume = this.addForm.value.resume;
         this.lesson.references = this.addForm.value.references;
         this.lesson.accepted = true;
         this.lesson.author = this.identity._id;
+
+        //this.lesson.knowledge_area = tempArray;
+        this.lesson.level = this.addForm.value.level;
+        
         this.lesson.state = 'proposed';
+        
 
         this._lessonService.addLesson(this.token, this.lesson).subscribe(
             response => {

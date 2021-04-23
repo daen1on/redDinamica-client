@@ -48,9 +48,9 @@ export class SuggestLessonComponent implements OnInit {
         this.addForm = new FormGroup({
             title: new FormControl('', Validators.required),
             resume: new FormControl('', Validators.required),
+            justification: new FormControl('', Validators.required),
             references: new FormControl('', Validators.required),
-            justification: new FormControl('', Validators.required)
-        });
+            });
     }
 
     ngOnInit(): void { 
@@ -81,6 +81,11 @@ export class SuggestLessonComponent implements OnInit {
         this.lesson.justification = this.addForm.value.justification;        
         this.lesson.accepted = false;
         this.lesson.author = this.identity._id;
+        let tempArraygp = [];
+        tempArraygp.push(this.identity._id);    // agregar implicitamente al lider-autor que sugirió la lección
+        this.lesson.development_group = tempArraygp;
+        this.lesson.leader = this.identity._id; // agregar implicitamente al lider-autor que sugirió la lección
+        
         this.lesson.class = 'suggest';
         
         this._lessonService.addLesson(this.token, this.lesson).subscribe(

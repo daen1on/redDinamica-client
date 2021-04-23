@@ -48,7 +48,7 @@
                             autocomplete="off" formControlName="{{field.id}}"
                             [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}">
 
-                        <textarea *ngIf="field.type === 'textarea'" class="form-control" id="experience" rows="3"
+                        <textarea *ngIf="field.type === 'textarea'" class="form-control" id="{{field.id}}" rows="3"
                             formControlName="{{field.id}}" [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}">
                                 </textarea>
 

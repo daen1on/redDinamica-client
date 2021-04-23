@@ -4,7 +4,7 @@
         <div class="modal-content">
             <!-- modal-header -->
             <div class="modal-header">
-                <h5 class="modal-title" id="detailsTitle">Detalles del recurso</h5>
+                <h5 class="modal-title" id="detailsTitle">Detalles de la convocatoria</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -13,22 +13,8 @@
 
             <!-- modal-body -->
             <div class="modal-body">
-                <p *ngFor="let text of lesson.call.text.split('\n')" class="text-break">
-                    {{text}}
-                </p>
-
-
-
-                <p><strong>Lección</strong></p>
-                <div class="row mb-2">
-                    <div class="col-3">
-                        <strong>Título:</strong>
-                    </div>
-                    <div class="col-9">
-                        {{lesson.title}}
-                    </div>
-                </div>
-
+                <h4 class="mb-3"><strong>{{lesson.title}}</strong></h4>
+                
                 <div class="row mb-4">
                     <div class="col-3">
                         <strong>Resumen:</strong>

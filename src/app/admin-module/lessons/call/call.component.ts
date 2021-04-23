@@ -66,7 +66,7 @@ export class CallComponent implements OnInit {
         this.url = GLOBAL.url;
 
         this.leader = new FormControl('', Validators.required);
-        this.leader.disable();
+        
         this.expert = new FormControl('', Validators.required);
 
         this.profile_label = LABEL_PROFILE;
@@ -75,9 +75,21 @@ export class CallComponent implements OnInit {
 
     ngOnInit(): void { 
         this.getExpertUsers();
+        this.leader.setValue(this.getLeader());
+        this.setLeader();
+        
+    }       
+    setLeader(){
+        if(this.lesson.development_group.length > 0){
+            this.leader.enable();
+        } 
+        else{
+        this.leader.disable();
+        }
     }
-
-    
+    getLeader(){
+        this.lesson.leader;
+    }
     restartValues() {
         this.status = null;
         this.submitted = false;

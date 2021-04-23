@@ -40,7 +40,7 @@
                     <input *ngIf="field.type === 'text'" type="text" class="form-control" id="{{field.id}}"
                         formControlName="{{field.id}}" (change)="onChanges()">
 
-                    <textarea *ngIf="field.type === 'textarea'" class="form-control" id="experience" rows="3"
+                    <textarea *ngIf="field.type === 'textarea'" class="form-control" id="{{field.id}}" rows="3"
                         formControlName="{{field.id}}" placeholder="{{field.placeholder}}" (change)="onChanges()">
                     </textarea>
 

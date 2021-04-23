@@ -37,4 +37,9 @@ export class AppComponent {
         localStorage.clear();
         this._router.navigate(['']);
     }
+    openP(){
+        let url ="https://forms.gle/n7jGyGgAM9ERfK4d9";
+        var newW=(window as any).open(url, "_blank");
+        newW.opener =null;  } //must search about "_blank  rel= nopener"
+        
 }
