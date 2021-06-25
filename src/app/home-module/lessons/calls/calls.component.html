@@ -211,9 +211,6 @@
                                                 </button>
                                             </ng-template>
 
-
-
-
                                         </div>
                                     </div>
                                 </div>
@@ -345,15 +342,15 @@
                                                     <i class="fas fa-eye"></i>
                                                 </button>
 
-                                                <ng-container *ngIf="!hasJoined(lesson); else leaveGroup">
+                                                <ng-container *ngIf="!hasJoined(lesson); else leaveGroup2">
                                                     <button class="btn btn-success mr-2" title="Unirse"
                                                         (click)="editLesson(lesson, 'add')">
                                                         <i class="fas fa-user-plus"></i>
                                                     </button>
                                                 </ng-container>
-                                                <ng-template #leaveGroup>
-                                                    <button class="btn btn-danger mr-2" title="Retirarse"
-                                                        (click)="editLesson(lesson, 'remove')">
+                                                <ng-template #leaveGroup2>
+                                                    <button class="btn btn-danger mr-2" title="Retirarse" data-toggle="modal" data-target="#leftconvo"
+                                                        (click)="getLesson(lesson)">
                                                         <i class="fas fa-user-minus"></i>
                                                     </button>
                                                 </ng-template>
@@ -401,7 +398,7 @@
 <details-call *ngIf="callLesson" [lesson]="callLesson" [isJoin]="isJoin" (isJoined)="setNeedReload($event)">
 </details-call>
 
-<!-- Modal warning -->
+<!-- Modal warning left group -->
 <div class="modal fade" id="leftconvo" tabindex="-1" role="dialog" aria-labelledby="leaveGroup" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">

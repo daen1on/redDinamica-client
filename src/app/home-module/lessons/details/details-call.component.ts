@@ -66,6 +66,13 @@ export class DetailsCallComponent {
 
     }
 
+    public Templesson;
+    getLesson(lesson){
+        this.Templesson = lesson;
+    }
+    abandonLesson(){
+        this.editLesson(this.Templesson, 'remove');
+    }
     editLesson(lesson, action) {
         let editLesson = lesson;
         let tempArray = [];
