@@ -348,7 +348,7 @@
                                                         <i class="fas fa-user-plus"></i>
                                                     </button>
                                                 </ng-container>
-                                                <ng-template #leaveGroup2>
+                                                <ng-template #leaveGroup2> <!-- diferente a leaveGroup, genera error si se deja igual-->
                                                     <button class="btn btn-danger mr-2" title="Retirarse" data-toggle="modal" data-target="#leftconvo"
                                                         (click)="getLesson(lesson)">
                                                         <i class="fas fa-user-minus"></i>
@@ -416,7 +416,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class=" btn btn-danger" data-dismiss="modal" (click)="abandonLesson()">Sí</button>
+                <button class=" btn btn-danger" data-dismiss="modal" (click)="unfollow()">Sí</button>
                 <button class="btn btn-primary text-white" data-dismiss="modal">No</button>
             </div>
 

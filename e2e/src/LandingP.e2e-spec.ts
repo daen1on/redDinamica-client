@@ -1,18 +1,18 @@
-import { AppPage } from './app.po';
+import { ReddinamicaLandingPage } from './LandingP.po';
 import { browser, logging } from 'protractor';
 
 describe('workspace-project App', () => {
-  let page: AppPage;
+  let page: ReddinamicaLandingPage;
 
   beforeEach(() => {
-    page = new AppPage();
+    page = new ReddinamicaLandingPage();
   });
 
   it('should display welcome message', () => {
     page.navigateTo();
-    expect(page.getTitleText()).toEqual('Welcome to client!');
+    expect(page.getTitleText()).toEqual('RedDinámica');
   });
-
+  
   afterEach(async () => {
     // Assert that there are no errors emitted from the browser
     const logs = await browser.manage().logs().get(logging.Type.BROWSER);

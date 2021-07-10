@@ -296,9 +296,20 @@ export class UsersComponent {
         )
     }
 
+    public TempU;
+    
+    getU(userId){
+        console.log(userId);
+        this.TempU = userId;
+        
+    }
+    unfollow(){
+        this.unfollowUser(this.TempU);
+        this.TempU="";
+     
+    }
     unfollowUser(userId){
         let index;
-
         this._followService.removeFollow(this.token, userId).subscribe(
             response => {
                 index = this.following.indexOf(response.followed);

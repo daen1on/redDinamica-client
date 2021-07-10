@@ -40,6 +40,8 @@ export class FollowsComponent {
     public prevPage;
     public page;
 
+    public throttle = 0;
+    public distance = 2;
 
 
     constructor(
@@ -60,10 +62,9 @@ export class FollowsComponent {
             let id = params['id'];
             this.ownProfile._id = id;
         });
-
         this.actualPage();
         this.loadPage();
-        this.getFollowerUsers(this.page);
+        
 
 
 
@@ -79,7 +80,7 @@ export class FollowsComponent {
             this.getFollowingUsers(this.page);
         }
     }
-
+    
     loadPage() {
         this.identity = this._userService.getIdentity();
 
@@ -122,6 +123,7 @@ export class FollowsComponent {
         });
     }
 
+    
     getUser(userId) {
         this._userService.getUser(userId).subscribe(
             response => {
@@ -147,10 +149,21 @@ export class FollowsComponent {
         this._followService.getFollowingUsers(this.token, this.ownProfile._id, page).subscribe(
             response => {
                 if (response) {
+                    if (page==1){
                     this.status = 'success';
                     this.following = response.follows;
                     this.followingPages = response.pages;
                     this.followingTotal = response.total;
+                    }
+                    else{
+                        //console.log(response.follows);
+                        //console.log(this.following);
+                        //Cuando se hace scroll, se envía por acá la petición
+                        for (let i in response.follows){
+                            this.following.push(response.follows[i]);
+                        }
+                        //console.log(this.following);
+                        }
                 } else {
                     this.status = 'error';
                 }
@@ -165,13 +178,21 @@ export class FollowsComponent {
         this._followService.getFollowersUsers(this.token, this.ownProfile._id, page).subscribe(
             response => {
                 if (response) {
+                    if (page==1){
                     this.status = 'success';
                     this.followers = response.follows;
                     this.followersPages = response.pages;
                     this.followersTotal = response.total;
                     this.followerUsersId = response.followers;
                     this.followingUsersId = response.following;
-                    
+                    }
+                    else{
+                        //se envia al array  de followers
+                        for (let i in response.follows){
+
+                            this.followers.push(response.follows[i]);
+                        }
+                    }
 
                 } else {
                     this.status = 'error';
@@ -213,13 +234,45 @@ export class FollowsComponent {
             }
         )
     }
+    public TempU;
+    getU(userId){
+        //console.log(userId);
+        this.TempU = userId;
+        
+    }
+    unfollow(){
+        this.unfollowUser(this.TempU);
+        this.TempU="";
+     
+    }
+    onScrolld(){
+        //following
+        if (this.page<this.followingPages){
+            this.page++;
+            this.getFollowingUsers(this.page);
+            //console.log("seguidos",this.followingPages);
+            //console.log("actual",this.page)
+        }
 
+
+    }
+    onScroll(){  
+        //followers
+        if (this.page<this.followersPages){
+            console.log(this.page);
+            this.page++;
+            
+            this.getFollowerUsers(this.page);
+            
+        }
+
+    }
     unfollowUser(userId) {
         let index;
 
         this._followService.removeFollow(this.token, userId).subscribe(
             response => {
-                console.log(response)
+                //console.log(response)
                 if (response) {
                     this.getFollowingUsers(this.page);
                     this.getFollowerUsers(this.page);

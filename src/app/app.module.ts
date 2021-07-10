@@ -6,6 +6,7 @@ import { Routing, appRoutingProviders } from './app.routing';
 import { HttpClientModule } from '@angular/common/http';
 import { MomentModule } from 'ngx-moment';
 import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
+import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 
 // Modules
 import { HomeModule } from './home-module/home.module';
@@ -63,7 +64,8 @@ import { LandingGuard } from './guards/landing.guard';
     ProfileModule,
     MessageModule,
     MomentModule,
-    NgSelectModule
+    NgSelectModule,
+    InfiniteScrollModule
   ],
   providers: [
     appRoutingProviders,    

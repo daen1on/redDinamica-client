@@ -14,7 +14,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { ProfileGuard } from './guards/profile.guard';
 import { PublicationsComponent } from './publications/publications.component';
 import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
-
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
 @NgModule({
     declarations: [
@@ -24,6 +24,7 @@ import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
         LessonsComponent,
         FollowsComponent,
         PublicationsComponent
+        
         
     ],
     imports: [
@@ -35,6 +36,8 @@ import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
         ProfileRoutingModule,
         MomentModule,
         NgSelectModule,
+        InfiniteScrollModule
+        
         
     ],
     exports: [

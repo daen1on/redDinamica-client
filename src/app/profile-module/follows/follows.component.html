@@ -8,6 +8,7 @@
             <div class="col-6 pr-1">
                 <button class="btn btn-block btn-info" (click)="setActiveButton('followers')">
                     <h5>
+
                         Seguidores
                     </h5>
                 </button>
@@ -23,69 +24,70 @@
 
         <!-- Followers -->
         <div class="mt-3" *ngIf="followers && activeButton == 'followers' && followers.length > 0; else noFollowers">
-
-            <div *ngFor="let follow of followers">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-2">
-                                <div class="picture rounded-circle border-4 overflow-hidden"
-                                    style="width: 80px; height: 80px;">
-                                    <img *ngIf="!follow.user.picture" class="img-fluid"
-                                        src="assets/images/user-default.png">
-                                    <img *ngIf="follow.user.picture" class="img-fluid"
-                                        src="{{this.url+'get-image-user/'+ follow.user.picture}}">
+            <!--todo: agregar infintescrolldiv aca-->
+            <div
+            infiniteScroll
+            [infiniteScrollDistance]="2"
+            [infiniteScrollThrottle]="50"
+            (scrolled)="onScroll()"
+            >
+                <div *ngFor="let follow of followers">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-2">
+                                    <div class="picture rounded-circle border-4 overflow-hidden"
+                                        style="width: 80px; height: 80px;">
+                                        <img *ngIf="!follow.user.picture" class="img-fluid"
+                                            src="assets/images/user-default.png">
+                                        <img *ngIf="follow.user.picture" class="img-fluid"
+                                            src="{{this.url+'get-image-user/'+ follow.user.picture}}">
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="col">
+                                <div class="col">
 
-                                <a class="text-primary" [routerLink]="[ '/perfil', follow.user._id]">
-                                    <h5>{{follow.user.name}} {{follow.user.surname}}</h5>
-                                </a>
+                                    <a class="text-primary" [routerLink]="[ '/perfil', follow.user._id]">
+                                        <h5>{{follow.user.name}} {{follow.user.surname}}</h5>
+                                    </a>
 
-                                <span
-                                    class="badge {{labelProfile[follow.user.role].class}}">{{labelProfile[follow.user.role].label}}</span>
-                            </div>
+                                    <span
+                                        class="badge {{labelProfile[follow.user.role].class}}">{{labelProfile[follow.user.role].label}}</span>
+                                </div>
 
-                            <div *ngIf="follow.user._id != identity._id" class="col text-center">
-                                <button *ngIf="followingUsersId.indexOf(follow.user._id) < 0" type="button"
-                                    class="btn btn-outline-primary btn-sm" (click)="followUser(follow.user._id)">
-                                    <i class="fas fa-plus-square mr-2"></i>
-                                    Seguir
-                                </button>
-                                <button *ngIf="followingUsersId.indexOf(follow.user._id) >= 0" type="button"
-                                    class="btn btn-primary btn-sm" (mouseenter)="mouseEnter(follow.user._id)"
-                                    (mouseleave)="mouseLeave()" [class.btn-danger]="follow.user._id == followUserOver"
-                                    (click)="unfollowUser(follow.user._id)">
-                                    <span *ngIf="follow.user._id == followUserOver; else following">
-                                        <i class="fas fa-minus-square mr-2"></i>
-                                        Dejar de seguir
-                                    </span>
-                                    <ng-template #following>
-                                        <span>
-                                            <i class="fas fa-check-square mr-2"></i>
-                                            Siguiendo
+                                <div *ngIf="follow.user._id != identity._id" class="col text-center">
+                                    <button *ngIf="followingUsersId.indexOf(follow.user._id) < 0" type="button"
+                                        class="btn btn-outline-primary btn-sm" (click)="followUser(follow.user._id)">
+                                        <i class="fas fa-plus-square mr-2"></i>
+                                        Seguir
+                                    </button>
+                                    <button *ngIf="followingUsersId.indexOf(follow.user._id) >= 0" type="button"
+                                        class="btn btn-primary btn-sm" (mouseenter)="mouseEnter(follow.user._id)"
+                                        (mouseleave)="mouseLeave()" [class.btn-danger]="follow.user._id == followUserOver"
+                                        (click)="getU(follow.user._id)" data-toggle="modal" data-target="#unfollowU">
+                                        <span *ngIf="follow.user._id == followUserOver; else following">
+                                            <i class="fas fa-minus-square mr-2"></i>
+                                            Dejar de seguir
                                         </span>
-                                    </ng-template>
+                                        <ng-template #following>
+                                            <span>
+                                                <i class="fas fa-check-square mr-2"></i>
+                                                Siguiendo
+                                            </span>
+                                        </ng-template>
 
-                                </button>
+                                    </button>
+                                </div>
+
                             </div>
 
                         </div>
-
                     </div>
                 </div>
             </div>
-
-
-
-
-
-
         </div>
 
-
+        
         <ng-template #noFollowers>
                 <div *ngIf="activeButton == 'followers'" class="mt-3">
                     <div class="card">
@@ -103,59 +105,69 @@
         <!-- /Followers -->
 
         <!-- Following -->
+        
         <div class="mt-3" *ngIf="following && activeButton == 'following' && following.length > 0; else noFollowing">
-            <div *ngFor="let follow of following">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-2">
-                                <div class="picture rounded-circle border-4 overflow-hidden"
-                                    style="width: 80px; height: 80px;">
-                                    <img *ngIf="!follow.followed.picture" class="img-fluid"
-                                        src="assets/images/user-default.png">
-                                    <img *ngIf="follow.followed.picture" class="img-fluid"
-                                        src="{{this.url+'get-image-user/'+ follow.followed.picture}}">
-                                </div>
-                            </div>
+            <div
+            infiniteScroll
+            [infiniteScrollDistance]="2"
+            [infiniteScrollThrottle]="50"
+            (scrolled)="onScrolld()"
+            >
+                <div *ngFor="let follow of following">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                    <div class="col-2">
+                                        <div class="picture rounded-circle border-4 overflow-hidden"
+                                            style="width: 80px; height: 80px;">
+                                            <img *ngIf="!follow.followed.picture" class="img-fluid"
+                                                src="assets/images/user-default.png">
+                                            <img *ngIf="follow.followed.picture" class="img-fluid"
+                                                src="{{this.url+'get-image-user/'+ follow.followed.picture}}">
+                                        </div>
+                                    </div>
 
-                            <div class="col">
+                                    <div class="col">
 
-                                <a class="text-primary" [routerLink]="[ '/perfil', follow.followed._id]">
-                                    <h5>{{follow.followed.name}} {{follow.followed.surname}}</h5>
-                                </a>
+                                        <a class="text-primary" [routerLink]="[ '/perfil', follow.followed._id]">
+                                            <h5>{{follow.followed.name}} {{follow.followed.surname}}</h5>
+                                        </a>
 
-                                <span
-                                    class="badge {{labelProfile[follow.followed.role].class}}">{{labelProfile[follow.followed.role].label}}</span>
-                            </div>
+                                        <span
+                                            class="badge {{labelProfile[follow.followed.role].class}}">{{labelProfile[follow.followed.role].label}}</span>
+                                    </div>
 
 
-                            <div *ngIf="follow.followed._id != identity._id" class="col text-center">
+                                    <div *ngIf="follow.followed._id != identity._id" class="col text-center">
 
-                                <button type="button" class="btn btn-primary btn-sm"
-                                    (mouseenter)="mouseEnter(follow.followed._id)" (mouseleave)="mouseLeave()"
-                                    [class.btn-danger]="follow.followed._id == followUserOver"
-                                    (click)="unfollowUser(follow.followed._id)">
-                                    <span *ngIf="follow.followed._id == followUserOver; else following">
-                                        <i class="fas fa-minus-square mr-2"></i>
-                                        Dejar de seguir
-                                    </span>
-                                    <ng-template #following>
-                                        <span>
-                                            <i class="fas fa-check-square mr-2"></i>
-                                            Siguiendo
-                                        </span>
-                                    </ng-template>
+                                        <button type="button" class="btn btn-primary btn-sm"
+                                            (mouseenter)="mouseEnter(follow.followed._id)" (mouseleave)="mouseLeave()"
+                                            [class.btn-danger]="follow.followed._id == followUserOver"
+                                            (click)="getU(follow.followed._id)" data-toggle="modal" data-target="#unfollowU">
+                                            <span *ngIf="follow.followed._id == followUserOver; else following">
+                                                <i class="fas fa-minus-square mr-2"></i>
+                                                Dejar de seguir
+                                            </span>
+                                            <ng-template #following>
+                                                <span>
+                                                    <i class="fas fa-check-square mr-2"></i>
+                                                    Siguiendo
+                                                </span>
+                                            </ng-template>
 
-                                </button>
+                                        </button>
+                                    </div>
+
                             </div>
 
                         </div>
-
                     </div>
                 </div>
             </div>
-        </div>
+            
 
+        </div>
+        
         <ng-template #noFollowing>
                 <div *ngIf="activeButton == 'following'" class="mt-3">
                     <div class="card">
@@ -172,3 +184,29 @@
     </div>
 </div>
 <!-- /Red -->
+<!-- Modal warning unfollow  -->
+<div class="modal fade" id="unfollowU" tabindex="-1" role="dialog" aria-labelledby="unfollowUsuario" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="unfollowUsr">Dejar de seguir a esta persona</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="alert alert-warning mb-0" role="alert">
+                    <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
+                    No verás sus publicaciones ni su actividad en el inicio de Reddinámica, ¿deseas continuar?
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class=" btn btn-danger" data-dismiss="modal" (click)="unfollow()">Sí</button>
+                <button class="btn btn-primary text-white" data-dismiss="modal">No</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- /Modal warning-->

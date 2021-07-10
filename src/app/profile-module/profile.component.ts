@@ -169,7 +169,17 @@ export class ProfileComponent implements OnInit {
             }
         )
     }
-
+    public TempU;
+    getU(userId){
+        //console.log(userId);
+        this.TempU = userId;
+        
+    }
+    unfollow(){
+        this.unfollowUser(this.TempU);
+        this.TempU="";
+     
+    }
     unfollowUser(userId) {
         let index;
 
