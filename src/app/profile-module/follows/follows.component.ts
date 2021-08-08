@@ -27,6 +27,7 @@ export class FollowsComponent {
     public followers = [];
     public followingUsersId = [];
     public followerUsersId = [];
+    public followingThisU = [];
     public followersTotal;
     public followersPages;
     public followersPage;
@@ -62,15 +63,17 @@ export class FollowsComponent {
             let id = params['id'];
             this.ownProfile._id = id;
         });
-        this.actualPage();
-        this.loadPage();
         
 
 
-
     }
-
-    public activeButton = 'followers';
+    ngOnInit(){
+        this.actualPage();
+        this.loadPage();
+        
+    }
+    
+    public activeButton;
     setActiveButton(activeButton) {
         this.activeButton = activeButton;
 
@@ -82,12 +85,15 @@ export class FollowsComponent {
     }
     
     loadPage() {
-        this.identity = this._userService.getIdentity();
-
+        //console.log("identidad1: ", this.identity);
+        //this.identity = this._userService.getIdentity(); desactivada pq esta redundando
+        //console.log(this.identity); //probando si cambia 
+        
         this._route.parent.params.subscribe(params => {
             let id = params['id'];
 
             this.getUser(id);
+            
         });
 
         this._route.params.subscribe(params => {
@@ -129,8 +135,9 @@ export class FollowsComponent {
             response => {
                 if (response.user) {
                     this.ownProfile = response.user;
+                    this.followersPage=1; // desde aquí permite que entre a la función
                     this.getFollowerUsers(this.followersPage);
-                    this.getFollowingUsers(this.followingPage);
+                    //this.getFollowingUsers(this.followingPage);
 
                 } else {
                     this.status = 'error';
@@ -183,8 +190,9 @@ export class FollowsComponent {
                     this.followers = response.follows;
                     this.followersPages = response.pages;
                     this.followersTotal = response.total;
-                    this.followerUsersId = response.followers;
-                    this.followingUsersId = response.following;
+                    this.followerUsersId = response.followers; //seguidores del perfil que se visita
+                    this.followingUsersId = response.following; //seguidos del perfil que se visita
+                    console.log("oh");      
                     }
                     else{
                         //se envia al array  de followers
@@ -237,10 +245,13 @@ export class FollowsComponent {
     public TempU;
     getU(userId){
         //console.log(userId);
+
         this.TempU = userId;
         
     }
+
     unfollow(){
+        //así se llama a la función desde el botón de continuar
         this.unfollowUser(this.TempU);
         this.TempU="";
      

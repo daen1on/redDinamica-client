@@ -170,7 +170,7 @@ export class ProfileComponent implements OnInit {
         )
     }
     public TempU;
-    getU(userId){
+    getus(userId){
         //console.log(userId);
         this.TempU = userId;
         

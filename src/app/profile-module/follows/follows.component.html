@@ -139,8 +139,12 @@
 
 
                                     <div *ngIf="follow.followed._id != identity._id" class="col text-center">
-
-                                        <button type="button" class="btn btn-primary btn-sm"
+                                        <button *ngIf="followingUsersId.indexOf(follow.followed._id) < 0" type="button"
+                                        class="btn btn-outline-primary btn-sm" (click)="followUser(follow.followed._id)">
+                                        <i class="fas fa-plus-square mr-2"></i>
+                                        Seguir
+                                        </button>
+                                        <button *ngIf="followingUsersId.indexOf(follow.followed._id) >= 0"  type="button" class="btn btn-primary btn-sm"
                                             (mouseenter)="mouseEnter(follow.followed._id)" (mouseleave)="mouseLeave()"
                                             [class.btn-danger]="follow.followed._id == followUserOver"
                                             (click)="getU(follow.followed._id)" data-toggle="modal" data-target="#unfollowU">

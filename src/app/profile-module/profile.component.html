@@ -33,7 +33,7 @@
                                     <button *ngIf="following" type="button" class="btn btn-primary"
                                         (mouseenter)="mouseEnter(ownProfile._id)" (mouseleave)="mouseLeave()"
                                         [class.btn-danger]="ownProfile._id == followUserOver"
-                                        (click)="getU(ownProfile._id)" data-toggle="modal" data-target="#unfollowU">
+                                        (click)="getus(ownProfile._id)" data-toggle="modal" data-target="#unfollowus">
                                         <span *ngIf="ownProfile._id == followUserOver; else following">
                                             <i class="fas fa-minus-square mr-2"></i>
                                             Dejar de seguir
@@ -167,7 +167,7 @@
 <!-- /Profile -->
 
 <!-- Modal warning left group -->
-<div class="modal fade" id="unfollowU" tabindex="-1" role="dialog" aria-labelledby="unfollowUsuario" aria-hidden="true">
+<div class="modal fade" id="unfollowus" tabindex="-1" role="dialog" aria-labelledby="unfollowUsuario" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
