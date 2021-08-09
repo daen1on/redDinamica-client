@@ -26,8 +26,8 @@ export class FollowsComponent {
 
     public followers = [];
     public followingUsersId = [];
-    public followerUsersId = [];
-    public followingThisU = [];
+    //public followerUsersId = [];
+    //public followingThisU = [];
     public followersTotal;
     public followersPages;
     public followersPage;
@@ -190,8 +190,8 @@ export class FollowsComponent {
                     this.followers = response.follows;
                     this.followersPages = response.pages;
                     this.followersTotal = response.total;
-                    this.followerUsersId = response.followers; //seguidores del perfil que se visita
-                    this.followingUsersId = response.following; //seguidos del perfil que se visita
+                    //this.followerUsersId = response.followers; //
+                    this.followingUsersId = response.following; //los que esta siguiendo el perfil logueado
                     console.log("oh");      
                     }
                     else{
@@ -232,8 +232,9 @@ export class FollowsComponent {
             response => {
 
                 if (response) {
-                    this.getFollowingUsers(this.page);
+                    
                     this.getFollowerUsers(this.page);
+                    this.getFollowingUsers(this.page);
                 }
 
             },
@@ -285,8 +286,9 @@ export class FollowsComponent {
             response => {
                 //console.log(response)
                 if (response) {
-                    this.getFollowingUsers(this.page);
                     this.getFollowerUsers(this.page);
+                    this.getFollowingUsers(this.page);
+                    
                 }
 
             },
