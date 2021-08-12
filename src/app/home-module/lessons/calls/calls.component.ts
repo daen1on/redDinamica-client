@@ -238,10 +238,11 @@ export class CallsComponent implements OnInit {
 
     hasJoined(lesson) {
         let tempArray = [];
-        
+        //console.log(lesson);
         if (lesson && lesson.call.interested.length > 0) {
 
             lesson.call.interested.forEach(interested => {
+                //console.log(interested);
                 tempArray.push(interested._id);
             });
 
@@ -264,17 +265,10 @@ export class CallsComponent implements OnInit {
     }
     editLesson(lesson, action) {
         let editLesson = lesson;
-        let tempArray = [];
-
-        lesson.call.interested.forEach(interested => {
-            tempArray.push(interested._id);
-        });
-
-        editLesson.call.interested = tempArray;
-
+        
         if (action == 'remove') {
             let ix = editLesson.call.interested.indexOf(this.identity._id);
-            console.log(ix)
+            //console.log("ix",ix);
             lesson.call.interested.splice(ix, 1);            
 
         } else if (action == 'add') {

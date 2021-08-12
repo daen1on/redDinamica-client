@@ -85,7 +85,7 @@ export class DetailsCallComponent {
 
         if (action == 'remove') {
             let ix = editLesson.call.interested.indexOf(this.identity._id);
-            console.log(ix)
+            //console.log(ix)
             lesson.call.interested.splice(ix, 1);
 
         } else if (action == 'add') {

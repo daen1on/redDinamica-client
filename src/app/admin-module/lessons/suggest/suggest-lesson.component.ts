@@ -132,9 +132,9 @@ export class SuggestLessonComponent implements OnInit {
             return;
         }
         
-        this.addForm.value.areas.forEach(element => {
-          //  tempArray.push(element._id);
-        });
+        //this.addForm.value.areas.forEach(element => {
+        // tempArray.push(element._id);
+        //});
 
         this.lesson = new Lesson();
         
@@ -145,7 +145,7 @@ export class SuggestLessonComponent implements OnInit {
         this.lesson.author = this.identity._id;
 
         //this.lesson.knowledge_area = tempArray;
-        this.lesson.level = this.addForm.value.level;
+        //this.lesson.level = this.addForm.value.level;
         
         this.lesson.state = 'proposed';
         

@@ -49,7 +49,9 @@ export class RecoverPasswordComponent implements OnInit {
                     this.status = 'success';
 
                 }else{
+                    console.log("error entró x aca");
                     this.status = 'error';
+
                 }
 
             },

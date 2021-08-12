@@ -50,6 +50,7 @@ export class AddCallComponent implements OnInit {
     ) {
         this.title = 'Crear convocatoria';
         this.identity = this._userService.getIdentity();
+        
         this.token = this._userService.getToken();
         this.url = GLOBAL.url;
 
@@ -100,6 +101,7 @@ export class AddCallComponent implements OnInit {
 
     onSubmit() {
         let tempArray = [];
+        let tempInterested =[];
         this.submitted = true;
 
 
@@ -117,8 +119,8 @@ export class AddCallComponent implements OnInit {
 
         this.call = new Call(this.callForm.value.text);
         this.call.visible = true;
-        this.call.author = this.identity.id;      
-        this.call.interested = [this.identity.id]; //agrega implicitamente al creador en el grupo
+        this.call.author = this.identity._id;  //Call author becomes Admin
+        
         
         if (this.nextVersion) {
             this.newLesson.state = 'proposed';
@@ -138,6 +140,10 @@ export class AddCallComponent implements OnInit {
             this.saveLesson(this.newLesson, this.call);
 
         } else {
+            tempInterested.push(this.lesson.author); 
+            this.call.interested = tempInterested;
+            this.lesson.development_group = tempInterested;
+            //console.log("call es: ",this.call);
 
             this.lesson.call = this.call;
             this.editLesson(this.lesson);
