@@ -44,7 +44,7 @@
             </button>
             
             
-            <button *ngIf="lesson.father_lesson" class="btn btn-primary" title="Versión anterior"
+            <button *ngIf="lesson.father_lesson && selectedOption!= edit " class="btn btn-primary" title="Versión anterior"
             [routerLink]="['/', parentUrl ,'leccion', lesson.father_lesson]">
                 <i class="fas fa-angle-left icon-message"></i>
             </button>

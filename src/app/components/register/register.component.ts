@@ -85,7 +85,7 @@ export class RegisterComponent implements OnInit {
             profession: ['', Validators.required],
             institution: ['', Validators.required],
             category: ['', Validators.required],
-            experience: ['',[Validators.required,Validators.maxLength(1000)]], //revisar
+            experience: ['',[Validators.maxLength(1000)]], //revisar
             tyc: [false, Validators.requiredTrue ] //problema aca con el validators del checkbox
         },
             {
@@ -99,8 +99,6 @@ export class RegisterComponent implements OnInit {
 
     async onSubmit() {
         this.submitted = true;
-
-        // stop here if form is invalid
         if (this.registerForm.invalid) {
             this.loading = false;
             return;
