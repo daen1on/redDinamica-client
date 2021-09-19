@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, CheckboxRequiredValidator } from '@angular/forms';
+import { Component, OnInit, ElementRef,Renderer2, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { MustMatch } from '../../helpers/must-match.validator';
 import { User } from 'src/app/models/user.model';
@@ -19,6 +19,8 @@ import { GLOBAL } from 'src/app/services/global';
     templateUrl: './register.component.html'
 })
 export class RegisterComponent implements OnInit {
+    @ViewChild('contador')
+    contador: ElementRef;
     public title: string;
     public registerForm: FormGroup;
     public submitted = false;
@@ -46,7 +48,8 @@ export class RegisterComponent implements OnInit {
         private _bDService: BasicDataService,
         private _messageService: MessageService,
         private _route: ActivatedRoute,
-        private _router: Router
+        private _router: Router,
+        private renderer: Renderer2
     ) {
         this.title = 'Registro';
         this.user = new User();
@@ -82,7 +85,7 @@ export class RegisterComponent implements OnInit {
             profession: ['', Validators.required],
             institution: ['', Validators.required],
             category: ['', Validators.required],
-            experience: '',
+            experience: ['',[Validators.required,Validators.maxLength(1000)]], //revisar
             tyc: [false, Validators.requiredTrue ] //problema aca con el validators del checkbox
         },
             {
@@ -237,6 +240,22 @@ export class RegisterComponent implements OnInit {
             });
 
     }
+    private Contador = 1000 ;
+    //
+    onKey(event){
+        var element = event.target as HTMLInputElement ; //funciona
+
+        this.Contador = 1000-element.value.length;
+        
+        if(this.Contador<0){
+            this.renderer.setStyle(this.contador.nativeElement,'color','red'); //over 1000char, so it turns red
+        }
+        else{
+            this.renderer.setStyle(this.contador.nativeElement,'color','black');
+            
+        }
+         
+        }
 
     getAllAreas() {
 

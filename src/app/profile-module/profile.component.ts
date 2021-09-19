@@ -8,6 +8,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { User } from '../models/user.model';
 import { FollowService } from '../services/follow.service';
 import { Follow } from '../models/follow.model';
+import { NewUsersComponent } from '../admin-module/users/newUsers/newUsers.component';
 
 @Component({
     selector: 'profile',
@@ -24,11 +25,10 @@ export class ProfileComponent implements OnInit {
     public ownProfile: User = new User();
     public status: string;
     public identity: any;
-
     public following;
     public follower;
     public counters;
-
+    public about: string;
     constructor(
         private _userService: UserService,
         private _router: Router,
@@ -82,6 +82,8 @@ export class ProfileComponent implements OnInit {
                     this.following = response.following;
                     this.follower = response.follower;
                     this.ownProfile = response.user;
+                    this.about = this.ownProfile.about.toString();
+                    this.about=this.truncateChar(this.about);
                     this.getCounters(userId);
 
                 } else {
@@ -92,13 +94,25 @@ export class ProfileComponent implements OnInit {
 
             },
             error => {
-                console.log(<any>error);
+                console.log("error en profile: ",<any>error);
                 this.ownProfile = this.identity;
                 this._router.navigate(['/perfil/' + this.identity._id]);
             }
         );
     }
 
+    truncateChar(text: string): string {
+        let charlimit = 218;
+        if(!text || text.length <= charlimit )
+        {
+            return text;
+        }
+    
+      let without_html = text.replace(/<(?:.|\n)*?>/gm, '');
+      let shortened = text.substring(0, charlimit) + "...";
+      return shortened;
+    }
+   
     getCounters(userId){
                 
             this._userService.getCounters(userId).subscribe(

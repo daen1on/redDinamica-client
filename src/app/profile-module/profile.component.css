@@ -20,3 +20,41 @@
     width: 253px;    
 }
 
+.div-about-more{
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#div-container {
+    display: flex;
+    font-size: 20px;
+    line-height: normal;
+    font-size: 18px;
+    height: 140px;
+    max-height: 140px;
+    max-width: 500px;
+    
+  }
+
+#div-aboutP{
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+#div-social{
+  margin-top:1.5%;
+  margin-left: 1.5%;
+  margin-right: 3%;
+  height: 90px;
+  overflow:hidden;
+}  
+.showMore {
+  margin: 0; padding: 0 0 0 10px;
+  background-color: transparent; border-width: 0; outline-width: 0;
+  font-size: 14px; color: #3f8f7b;
+  position: absolute;
+  bottom: 15px;
+  right: 0;
+  cursor: pointer;
+  
+  }

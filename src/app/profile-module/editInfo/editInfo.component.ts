@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 
 import { FIELDS_FORM } from '../services/profileData';
-import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { User } from 'src/app/models/user.model';
 import { UploadService } from 'src/app/services/upload.service';
 import { GLOBAL } from 'src/app/services/global';
@@ -72,19 +72,21 @@ export class EditInfoComponent {
         this.loadPage();
         this.getAllCities();
         this.getAllInstitutions();
-        this.getAllProfessions();
-
+        this.getAllProfessions();   
+        
         this.editForm = this._formBuilder.group({
-            name: this.identity.name,
-            surname: this.identity.surname,
-            about: this.identity.about,
-            city: this.identity.city,
-            profession: this.identity.profession,
-            institution: this.identity.institution,
-            postgraduate: this.identity.postgraduate,
+            name: [this.identity.name,[Validators.required,Validators.maxLength(80)]],
+            surname: [this.identity.surname, [Validators.required,Validators.maxLength(80)]],
+            about: [this.identity.about,[Validators.required, Validators.maxLength(1000)]],
+            city: [this.identity.city],
+            profession: [this.identity.profession,Validators.required,],
+            institution: [this.identity.institution,Validators.required],
+            postgraduate: [this.identity.postgraduate,Validators.maxLength(1000)],
             profileImage: '',
-            contactNumber: this.identity.contactNumber,
+            contactNumber: [this.identity.contactNumber,[Validators.pattern('[- +()0-9]+'),Validators.maxLength(15)]],
             socialNetworks: this.identity.socialNetworks
+        },{
+            //TODO validar en html del edit y hacer que el numero sea solo de numeros...
         });
 
 
@@ -131,6 +133,13 @@ export class EditInfoComponent {
 
 
     async onSubmit() {
+          // stop here if form is invalid
+          if (this.editForm.invalid) {
+            document.scrollingElement.scrollTop = 0;
+            this.status = "error";
+            return;
+        }
+
 
         this.user.name = this.editForm.value.name;
         this.user.surname = this.editForm.value.surname;
@@ -245,7 +254,7 @@ export class EditInfoComponent {
 
                 });
             }
-
+            
             this.getAllCities();
             this.getAllInstitutions();
             this.getAllProfessions();

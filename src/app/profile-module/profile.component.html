@@ -61,7 +61,7 @@
 
                         <div class="col pt-5 text-white">
                             <h4 class="mb-0">
-                                <strong>{{ownProfile.name}} {{ownProfile.surname}}</strong>
+                                <div class='text-capitalize' style="margin: 6px;"><strong>{{ownProfile.name  }} {{ownProfile.surname }}</strong></div>
                                 <span *ngIf="ownProfile.role && categories[ownProfile.role.toString()]"
                                     class="badge {{categories[ownProfile.role.toString()].class}}"
                                     style="position:relative; top: -15px; left: 10px">
@@ -69,7 +69,7 @@
                                 </span>
                             </h4>
                             <p *ngIf="ownProfile.profession" class="card-text mb-0">
-                                <small>{{ownProfile.profession.name}}</small>
+                                <small>{{ownProfile.profession.name }}</small>
                             </p>
                             <p *ngIf="ownProfile.institution" class="card-text mb-0">
                                 <small>{{ownProfile.institution.name}}</small>
@@ -128,14 +128,32 @@
                 <div class="col-auto">
                     <div class="px-3" style="width:10rem"></div>
                 </div>
-                <div *ngIf="ownProfile.about" class="col py-3">
-                    <p *ngFor="let text of ownProfile.about.split('\n')" class="text-break text-muted mb-0">
-                        <small>{{text}}</small>                        
-                    </p>
+                <div  class="col py-3" id="div-container"  >
+                    <div  *ngIf="ownProfile.about && about!=null"  id="div-aboutP" >
+                        <p  *ngFor="let text of about.split('\n')" class="text-break mb-0">
+                            <span>{{text}}</span>                        
+                        </p>
+                        <div *ngIf="ownProfile.about.length>218" id="showMore" [routerLink]="['/perfil/', ownProfile._id, 'info']" >
+                            <div  role="button" style="float:right;" >
+                                Mostrar más
+                            </div>
+                        
+                        </div>    
+                    </div>
+                    
                     
                 </div>
-
+                <div class="row bg-white" *ngIf="ownProfile.socialNetworks" id="div-social" >
+                    <i class="fas fa-link"></i>
+                    <td>
+                    <tr *ngFor = "let link of ownProfile.socialNetworks.split(',')" style="display:block" >
+                        <span innerHTML="{{link | linkify}}"></span>
+                    </tr> 
+                    </td>
+                </div>
+              
             </div>
+              
 
         </div>
 

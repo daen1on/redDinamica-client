@@ -225,10 +225,11 @@
 
                             <div *ngIf="f.category.value=='expert' || f.category.value==='teacher'" class="form-group">
                                 <label for="experience">Perfil profesional*</label>
-                                <textarea class="form-control" id="experience" rows="3"
-                                    placeholder="Describe tu perfil profesional" formControlName="experience">
+                                <textarea (keyup)="onKey($event)" class="form-control" id="experience" max-length="1000" rows="3"
+                                    placeholder="Describe brevemente tu perfil profesional (Máximo 1000 caracteres)" formControlName="experience" [ngClass]="{ 'is-invalid': submitted && f.category.errors }" >
                                     </textarea>
-                                <small id="experienceHelp" class="form-text text-muted">
+                                    <span #contador >{{Contador}}</span>
+                                <small id="experienceHelp" class="form-text">
                                     Por favor describa brevemente su perfil profesional y su experiencia como
                                     <span *ngIf="f.category.value=='expert'; else teacher">
                                         profesional en dinámica de sistemas.
@@ -238,7 +239,14 @@
                                     </ng-template>
 
                                 </small>
-
+                                <div *ngIf="submitted && f.experience.errors">
+                                    <div *ngIf="f.experience.errors.required" class="invalid-feedback-select">
+                                        Debes describir brevemente tu perfil
+                                    </div>
+                                    <div *ngIf="f.experience.hasError('maxlength')" class="invalid-feedback-select">
+                                        El texto tiene más de 1000 caracteres.
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="form-group form-check">

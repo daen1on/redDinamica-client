@@ -37,31 +37,49 @@
                     <strong>{{field.label}}</strong>
                 </label>
                 <div class="col-9">
-                    <input *ngIf="field.type === 'text'" type="text" class="form-control" id="{{field.id}}"
-                        formControlName="{{field.id}}" (change)="onChanges()">
+                    <div *ngIf="field.type === 'text' ">
+                        <input  type="text" class="form-control" id="{{field.id}}"
+                        formControlName="{{field.id}}" (change)="onChanges() "  [ngClass]="{ 'is-invalid': editForm.get(field.id).touched && editForm.get(field.id).invalid}">
+                        <div class="invalid-feedback-select" *ngIf="editForm.get(field.id).touched && 
+                        editForm.get(field.id).invalid">Campo requerido</div>
 
-                    <textarea *ngIf="field.type === 'textarea'" class="form-control" id="{{field.id}}" rows="3"
-                        formControlName="{{field.id}}" placeholder="{{field.placeholder}}" (change)="onChanges()">
-                    </textarea>
+                    </div>                                                               
+                    <div *ngIf="field.type=== 'textarea' ">
+                        <textarea  class="form-control" id="{{field.id}}" rows="3"
+                            formControlName="{{field.id}}" placeholder="{{field.placeholder}}" (change)="onChanges()" [ngClass]="{ 'is-invalid': editForm.get(field.id).touched && editForm.get(field.id).invalid}">
+                        </textarea>
+                        <div class="invalid-feedback-select" *ngIf="editForm.get(field.id).touched && 
+                        editForm.get(field.id).invalid">Campo requerido - Debe tener menos de 1000 caracteres</div>
 
-                    <ng-select *ngIf="field.type == 'select' && field.autocomplete && field.id != 'city'" [items]="items[field.id]" bindLabel="name" [addTag]="true" addTagText="Agregar {{field.label}}" formControlName="{{field.id}}" placeholder="{{field.label}}" (change)="onChanges()">                        
-                    </ng-select>
+                    </div>
+                        
+                    <div *ngIf="field.type == 'select' && field.autocomplete && field.id != 'city'" >
+                        <ng-select [items]="items[field.id]" bindLabel="name" [addTag]="true" addTagText="Agregar {{field.label}}" formControlName="{{field.id}}" placeholder="{{field.label}}" (change)="onChanges()" [ngClass]="{ 'is-invalid': editForm.get(field.id).touched && editForm.get(field.id).invalid}">                        
+                        </ng-select>
+                        <div class="invalid-feedback-select" *ngIf="editForm.get(field.id).touched && 
+                        editForm.get(field.id).invalid">Campo requerido</div>
 
-                    <ng-select *ngIf="field.type == 'select' && field.autocomplete && field.id == 'city'" [items]="items[field.id]"
+                    </div>
+                    <div *ngIf="field.type == 'select' && field.autocomplete && field.id == 'city'" >
+                        <ng-select  [items]="items[field.id]"
                         bindLabel="name" [addTag]="true" addTagText="Agregar {{field.label}}"
                         formControlName="{{field.id}}" placeholder="{{field.label}}"
                         (change)="addCityData($event, field.id); onChanges()">
                         <ng-template ng-option-tmp let-item="item">
                             {{item.name}}, {{item.state}}, {{item.country}}
                         </ng-template>
+                        
                     </ng-select>
 
-                    <input *ngIf="field.id == 'city' && addCity" type="text" class="form-control" id="state"
+                    </div>
+                    <div *ngIf="field.id == 'city' && addCity">
+                        <input  type="text" class="form-control" id="state"
                         [formControl]="state" placeholder="Departamento/Estado/Provincia" autocomplete="off">
-
-                    <input *ngIf="field.id == 'city' && addCity" type="text" class="form-control" id="country"
+                        <input *ngIf="field.id == 'city' && addCity" type="text" class="form-control" id="country"
                         [formControl]="country" placeholder="Pais" autocomplete="off" >
 
+                    </div>
+                    
                 </div>
             </div>
 
