@@ -190,7 +190,6 @@ export class FollowsComponent {
                     this.followers = response.follows;
                     this.followersPages = response.pages;
                     this.followersTotal = response.total;
-                    //this.followerUsersId = response.followers; //
                     this.followingUsersId = response.following; //los que esta siguiendo el perfil logueado
                     console.log("oh");      
                     }

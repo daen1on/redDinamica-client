@@ -109,7 +109,7 @@ export class ProfileComponent implements OnInit {
         }
     
       let without_html = text.replace(/<(?:.|\n)*?>/gm, '');
-      let shortened = text.substring(0, charlimit) + "...";
+      let shortened = without_html.substring(0, charlimit) + "...";
       return shortened;
     }
    

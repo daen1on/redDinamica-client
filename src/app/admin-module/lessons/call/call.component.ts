@@ -134,17 +134,46 @@ export class CallComponent implements OnInit {
     }
 
     isInDevelopmentGroup(interested){
+
         let found = this.lesson.development_group.find(item => {
+            
             return item._id == interested._id;
         });
 
         if(found){
+            
             return true;
         }else{
+            
             return false;
         }
     }
 
+    belongsTo(expert){
+        //if the expert was 
+        let found = this.lesson.development_group.find(item => {
+            
+            return item._id == expert;
+        });    
+        
+        if (!found){
+            let expertU = this.expertUsers.find(item => {
+            
+                return item._id == expert;
+            });
+
+            this.lesson.development_group.push(expertU);
+            console.log("entra")
+            
+        
+            
+        }
+        else{
+            
+        }
+            
+    
+    }
     editLesson() {
         this.submitted = true;
 
@@ -154,14 +183,14 @@ export class CallComponent implements OnInit {
 
         this.lesson.leader = this.leader.value;
         this.lesson.expert = this.expert.value;
-
+        
         if(this.lesson.leader == this.lesson.expert){
             console.log("son iguales");
         }
-
         this.lesson.state = 'assigned';
         this.lesson.call.visible = false;
-
+        
+        this.belongsTo(this.expert.value);
         this._lessonService.editLesson(this.token, this.lesson).subscribe(
             response => {
                 if (response && response.lesson._id) {

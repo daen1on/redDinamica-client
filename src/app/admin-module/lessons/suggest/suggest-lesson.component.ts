@@ -140,6 +140,7 @@ export class SuggestLessonComponent implements OnInit {
         
         this.lesson.title = this.addForm.value.title;
         this.lesson.resume = this.addForm.value.resume;
+        this.lesson.justification = this.addForm.value.justification;
         this.lesson.references = this.addForm.value.references;
         this.lesson.accepted = true;
         this.lesson.author = this.identity._id;

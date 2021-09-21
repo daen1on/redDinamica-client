@@ -86,7 +86,9 @@ export class NewMessageComponent {
             response => {
                 
                 if(response && response.message._id){
+                    this.messageForm.reset(); //reset message recipe
                     this.status = 'success';
+                    
                 }else{
                     this.status = 'error';
 
