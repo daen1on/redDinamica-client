@@ -23,7 +23,7 @@ export class FollowsComponent {
     public token;
 
     public status;
-
+    public loading = false;
     public followers = [];
     public followingUsersId = [];
     //public followerUsersId = [];
@@ -258,13 +258,18 @@ export class FollowsComponent {
     }
     onScrolld(){
         //following
+        this.loading = true;
         if (this.page<this.followingPages){
+            
             this.page++;
             this.getFollowingUsers(this.page);
             //console.log("seguidos",this.followingPages);
             //console.log("actual",this.page)
         }
-
+        else{
+            this.loading = false;
+        }
+        
 
     }
     onScroll(){  

@@ -119,7 +119,7 @@
 
                                             <div *ngIf="lesson.development_group.length > 0" class="row p-1">
                                                 <div *ngFor="let user of lesson.development_group" class="col-12">
-                                                    <div *ngIf="lesson.leader && user._id != lesson.leader._id"
+                                                    <div *ngIf="lesson.leader && user._id != lesson.leader._id && lesson.expert && user._id != lesson.expert._id"
                                                         class="row mt-1">
                                                         <div class="col-auto pr-0">
                                                             <a class="text-primary ml-1">
@@ -184,7 +184,7 @@
                                                             <img *ngIf="item.picture" class="img-fluid"
                                                                 src="{{this.url+'get-image-user/'+ item.picture}}">
                                                         </div>
-                                                        {{item.name}} {{item.surname}} <br>
+                                                        {{item.name}} {{item.surname}} - {{labelP[item.role].label}} <br>
                                                     </ng-template>
                                                 </ng-select>
         

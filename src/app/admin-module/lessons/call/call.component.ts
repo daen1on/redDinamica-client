@@ -149,7 +149,7 @@ export class CallComponent implements OnInit {
         }
     }
 
-    belongsTo(expert){
+    belongsTo(expert): void{
         //if the expert was 
         let found = this.lesson.development_group.find(item => {
             

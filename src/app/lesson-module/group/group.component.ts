@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { LABEL_PROFILE } from 'src/app/profile-module/services/profileData';
 import { isRegExp } from 'util';
 
 @Component({
@@ -26,7 +27,7 @@ export class GroupComponent implements OnInit {
 
     public errorMsg;
     public successMsg;
-
+    public labelP = LABEL_PROFILE;
     constructor(
         private _route: ActivatedRoute,
         private _userService: UserService,
@@ -119,7 +120,7 @@ export class GroupComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.initExpertSelect();
+        this.initExpertSelect(); 
 
         this._route.parent.url.subscribe(value => {
             this.parentUrl = value[0].path;
@@ -177,6 +178,7 @@ export class GroupComponent implements OnInit {
     onChanges() {
         this.status = null;
         this.submitted = false;
+        
 
 
     }
