@@ -36,7 +36,7 @@ export let HOME_MENU = [
         id: "resources",
         buttonClass: "btn-danger pl-3",
         iconClass: "fa-paperclip",
-        spanContent: "Recursos",
+        spanContent: "Repositorio",
         routerLink: "/inicio/recursos",
         subOptions: []
     },

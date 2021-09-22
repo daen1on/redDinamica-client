@@ -51,7 +51,7 @@ export class ResourcesComponent implements OnInit {
         private _router: Router,
         private _route: ActivatedRoute
     ) {
-        this.title = 'Recursos';
+        this.title = 'Repositorio';
         this.url = GLOBAL.url;
         this.token = this._userService.getToken();
         this.identity = this._userService.getIdentity();

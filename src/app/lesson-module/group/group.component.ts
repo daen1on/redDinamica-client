@@ -146,13 +146,34 @@ export class GroupComponent implements OnInit {
 
     public submitted;
     public status;
+
+    //asks if the expert belongs to the lesson, if not, it will add him/her. 
+    belongsTo(expert):void{
+        let found = this.lesson.development_group.find(item => {
+            
+            return item._id == expert._id; 
+        });
+        //console.log("found",found);
+        if (!found){
+
+            this.lesson.development_group.push(expert);
+            this.groupForm.patchValue({
+                members: this.lesson.development_group
+            });
+        }    
+        else{
+            console.log("ya pertenece al grupo");
+        }
+
+    }
     onSubmit() {
         this.submitted = true;
 
         this.lesson.development_group = this.groupForm.value.members;
-        this.lesson.expert = this.groupForm.value.expert;
+        this.lesson.expert = this.groupForm.value.expert._id;
         this.lesson.leader = this.groupForm.value.leader;
-
+        this.belongsTo(this.groupForm.value.expert);
+        //console.log(this.lesson.expert);
         this._lessonService.editLesson(this.token, this.lesson).subscribe(
             response => {
 
