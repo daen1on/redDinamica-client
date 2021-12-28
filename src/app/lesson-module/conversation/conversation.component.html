@@ -11,7 +11,12 @@
             </div>
         </div>
     </div>
-
+    
+    <div *ngIf="status === 'deleted'; successMessage" class="alert alert-primary fade show text-center"
+    role="alert">
+        <i class="fas fa-check-circle icon-message mr-2"></i>
+        {{deletedMsg}}
+    </div>
     <div *ngIf="lesson.conversations.length > 0 || identity._id == lesson.leader._id" class="row">
 
         <div class="col-4">
@@ -21,13 +26,24 @@
                 <div *ngFor="let group of groups, let ix = index" class="nav-link" [ngClass]="{'show active': ix == 0}"
                     id="{{removeSpaces(group)}}-tab" data-toggle="pill" attr.href="#{{removeSpaces(group)}}" role="tab"
                     attr.aria-controls="{{removeSpaces(group)}}" attr.aria-selected="true"
-                    (click)="restartValues(group)">
+                    (click)="restartValues(group)" style="display: flex;" >
                     {{group}}
+
+                    <div *ngIf="selectedGroup == group && showResources()" class="iconOpt"> 
+                        
+                        <i class="fas fa-ellipsis-v" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
+                        </i>
+                        
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                            <button class="dropdown-item" type="button"(click)="getIndex(ix)" data-toggle="modal" data-target="#deleteModal" aria-label ="delete" >Eliminar Conversación</button>
+                            <!--mirar si a futuro se necesita también modificar el nombre o así-->
+                          </div>
+                    </div>
                 </div>
 
 
-                <div *ngIf="identity._id == lesson.leader._id" class="nav-link"
-                    [ngClass]="{'show active': lesson.conversations.length == 0}" id="addGroup-tab" data-toggle="pill"
+                <div *ngIf="showResources()" class="nav-link" style="cursor: pointer;" 
+                    [ngClass]="{'show active': lesson.conversations.length == 0}" id="addGroup-tab" data-toggle="pill" [ngClass]="{disable: submitted}"
                     href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
                     (click)="restartValues()">
                     <i class="fas fa-plus"></i> Crear conversación
@@ -156,7 +172,7 @@
 
                 </div>
 
-                <div *ngIf="identity._id == lesson.leader._id" class="tab-pane fade"
+                <div *ngIf="showResources()" class="tab-pane fade"
                     [ngClass]="{'show active': lesson.conversations.length == 0}" id="addGroup" role="tabpanel"
                     aria-labelledby="addGroup-tab">
 
@@ -177,6 +193,11 @@
                                         {{successMsg}}
                                     </div>
 
+                                    <div *ngIf="status === 'warning'; successMessage" class="alert alert-warning fade show text-center"
+                                    role="alert">
+                                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                                        {{warningMsg}}
+                                    </div>
                                     <form>
                                         <div class="form-group">
                                             <label for="name"><strong>Título*</strong></label>
@@ -209,6 +230,11 @@
                                                 enctype="multipart/form-data" (change)="fileChangeEvent($event)"
                                                 [formControl]="files"
                                                 [ngClass]="{ 'is-invalid': submitted && files.errors || maxSizeError}">
+
+                                            <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
+                                                    <div #progress  class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width]="barWidth"
+                                                     aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
+                                            </div>
                                             <div *ngIf="submitted && files.errors || maxSizeError"
                                                 class="invalid-feedback">
                                                 <div *ngIf="files.errors && files.errors.required">
@@ -221,8 +247,13 @@
                                             </div>
                                         </div>
 
-                                        <button type="submit" class="btn btn-success mb-2 float-right"
-                                            (click)="onSubmit()">Guardar</button>
+                                        <button type="submit" [disabled]="submitted" class="btn btn-success mb-2 float-right"
+                                            (click)="onSubmit()">
+                                            <span *ngIf="loading && !addForm.invalid" class="spinner-border spinner-border-sm" role="status"
+                                            aria-hidden="true"></span>
+                                            <span class="sr-only">Guardar</span>
+                                            Guardar
+                                        </button>
 
                                     </form>
 
@@ -252,3 +283,31 @@
 
 </div>
 <!-- /conversation -->
+
+
+<!-- Modal warning cancel resource -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="Eliminar conversacion" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eliminarConv">Eliminar conversación</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="alert alert-warning mb-0" role="alert">
+                    <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
+                    ¿Estas seguro que quieres eliminar la conversación? Perderás el acceso a los archivos que se hayan compartido dentro de la conversación
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class=" btn btn-danger" data-dismiss="modal" (click)="eliminar()">Sí</button>
+                <button class="btn btn-primary text-white" data-dismiss="modal">No</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- /Modal warning-->

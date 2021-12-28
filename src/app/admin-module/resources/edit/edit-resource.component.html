@@ -1,12 +1,13 @@
 <!-- Resources suggest modal-->
-<div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
+<div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true" data-keyboard="false" data-backdrop="static" >
     <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
         <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="modal-content" enctype="multipart/form-data"
             (input)="onChanges()">
             <!-- modal-header -->
             <div class="modal-header">
                 <h5 class="modal-title" id="editTitle">{{title}}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="restartValues()">
+                
+                <button *ngIf="loading ==false" type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="restartValues()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -20,7 +21,11 @@
                     <i class="fas fa-times-circle icon-message mr-2"></i>
                     {{errorMsg}}
                 </div>
-
+                <div *ngIf="status === 'warning'; successMessage" class="alert alert-warning fade show text-center"
+                    role="alert">
+                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    {{warningMsg}}
+                </div>
                 <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center"
                     role="alert">
                     <i class="fas fa-check-circle icon-message mr-2"></i>
@@ -121,6 +126,11 @@
                         <input formControlName="file" type="file" class="form-control" name="file" id="file"
                             (change)="fileChangeEvent($event)"
                             [ngClass]="{'is-invalid': submitted && f.file.errors || maxSizeError}">
+                        
+                        <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
+                            <div #progress  class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width]="barWidth"
+                                aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
+                        </div>
                         <div *ngIf="maxSizeError" class="invalid-feedback">
                             <div *ngIf="maxSizeError">
                                 El archivo es demasiado grande, el tamaño maximo permitido es de
@@ -157,8 +167,16 @@
 
             <!-- modal-footer -->
             <div class="modal-footer">
-                <button class="btn btn-danger" data-dismiss="modal" (click)="restartValues()">Cancelar</button>
-                <button type="submit" class="btn btn-success">Guardar</button>
+                <button *ngIf="loading==false" class="btn btn-danger" data-dismiss="modal" (click)="restartValues()">Cancelar</button>
+                
+                <button type= "submit"  [disabled]="loading" class="btn btn-success">
+                        <span *ngIf="loading && !editForm.invalid" class="spinner-border spinner-border-sm" role="status"
+                            aria-hidden="true"></span>
+                        <span class="sr-only">Guardar</span>
+                        Guardar
+                </button>
+                
+                
             </div>
             <!-- /modal-footer -->
 
@@ -168,3 +186,4 @@
     </div>
 </div>
 <!-- /Resources suggest modal-->
+

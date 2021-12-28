@@ -9,13 +9,17 @@ import { UploadService } from 'src/app/services/upload.service';
 import { LessonFile } from 'src/app/models/lesson-file.model';
 import { Router, ActivatedRoute } from '@angular/router';
 import { resolveNaptr } from 'dns';
-
+import { HttpEvent, HttpEventType } from '@angular/common/http';
+import { HostListener } from '@angular/core';
 @Component({
     selector: 'resources',
     templateUrl: './resources.component.html'
 
 })
 export class ResourcesComponent implements OnInit {
+
+
+    
     public title: string;
     public identity;
     public token;
@@ -33,7 +37,10 @@ export class ResourcesComponent implements OnInit {
     public successMsg;
     public errorMsgEdit;
     public successMsgEdit;
-
+    public warningMsg;
+    public deletedMsg ;
+    readonly warningMsgF = 'Se esta eliminando el grupo';
+    public deletedMsgF = 'Se ha eliminado el archivo';
     public groups;
 
     public editMode = false;
@@ -47,7 +54,7 @@ export class ResourcesComponent implements OnInit {
     public MAX_FILE_SIZE = MAX_FILE_SIZE;
     public maxSize = MAX_FILE_SIZE * 1024 * 1024;
     public maxSizeError = false;
-
+    public barWidth: string = "0%";
     constructor(
         private _userService: UserService,
         private _lessonService: LessonService,
@@ -55,7 +62,7 @@ export class ResourcesComponent implements OnInit {
         private _router: Router,
         private _route: ActivatedRoute
     ) {
-        this.title = 'Recursos';
+        this.title = 'Recursos de la lección';
         this.identity = this._userService.getIdentity();
         this.token = this._userService.getToken();
         this.url = GLOBAL.url;
@@ -65,7 +72,9 @@ export class ResourcesComponent implements OnInit {
         this.successMsg = 'Se ha creado el grupo de recursos correctamente.';
         this.errorMsgEdit = 'Hubo un error editando el grupo. Intentalo de nuevo más tarde.';
         this.successMsgEdit = 'Se ha editado el grupo de recursos correctamente.';
-
+        this.warningMsg =  'Se estan subiendo los archivos, por favor espera y evita cerrar esta ventana.';
+        this.deletedMsg= 'Se ha eliminado el grupo de recursos';
+        
         this.name = new FormControl('', Validators.required);
         this.files = new FormControl('', Validators.required);
     }
@@ -102,6 +111,20 @@ export class ResourcesComponent implements OnInit {
 
     }
 
+    disableForm(command:Boolean):void{
+        if(command == true){
+        this.name.disable();
+        this.files.disable();
+        
+        }    
+        else{
+            
+        this.name.enable();
+        this.files.enable();
+        }
+        
+    }
+
     deleteFile(id){
         let tempfilesArray = [];
         this.lesson.files.forEach(file => {
@@ -112,7 +135,7 @@ export class ResourcesComponent implements OnInit {
 
         this.lesson.files = tempfilesArray;
 
-        this.editLesson(this.lesson);
+        this.editLesson(this.lesson,'deletedF');
     }
 
     getfiles(group) {
@@ -148,17 +171,18 @@ export class ResourcesComponent implements OnInit {
     }
 
     deleteGroup(group) {
+        //erases a group
         let tempFilesArray = [];
 
         tempFilesArray = this.lesson.files.filter(file => {
             return file.groupTitle != group;
-        });
-
+        }); 
+        console.log(tempFilesArray);
         this.lesson.files = tempFilesArray;
 
         this.groups.splice(this.groups.indexOf(group), 1);
 
-        this.editLesson(this.lesson);
+        this.editLesson(this.lesson, 'deleted');
     }
 
     initEditGroup(event, group) {
@@ -172,6 +196,9 @@ export class ResourcesComponent implements OnInit {
 
     public filesUploaded = [];
     onSubmit(group = null) {
+
+
+       
         let tempFile;
         this.submitted = true;
 
@@ -215,17 +242,20 @@ export class ResourcesComponent implements OnInit {
             }
         }
         
-        this.editLesson(this.lesson);
+        this.editLesson(this.lesson, 'success');
         
     }
     
-    editLesson(lesson) {
+    editLesson(lesson, statusE = null) {
+
+        if(statusE =='deleted') {this.status = 'warningD';}
+        if (statusE == 'success'){this.status='warning';}
         this._lessonService.editLesson(this.token, lesson).subscribe(
             response => {
                 
                 if (response.lesson && response.lesson._id) {
                     this.lesson = response.lesson;
-
+                    //todo: checkear qué hace esto.
                     if (!this.editMode) {
                         this.name.reset();                        
                     }
@@ -238,17 +268,37 @@ export class ResourcesComponent implements OnInit {
                             this.filesToUpload,
                             this.token,
                             'files'
-                        ).then((result: any) => {
+                        ).subscribe((event: HttpEvent<any>) => { // client call
+                            switch(event.type) { //checks events
+                            case HttpEventType.UploadProgress: // If upload is in progress
+                            this.status = 'warning';
+                            this.barWidth = Math.round(event.loaded / event.total * 100).toString()+'%'; // get upload percentage
+                            break;
+                            case HttpEventType.Response: // give final response
+                            console.log('User successfully added!', event.body);
                             
-                    
-                        }).catch((error) => {
+                            this.submitted = false;
+                            //this.disableForm(false);
+                            //this.name.reset();
+                            //this.files.reset();
+                            //this.message.reset();
+                            //this.getGroups();
+                            this.status =statusE;
+                            this.barWidth ='0%';
+                            }
+                        }, error=>{
+
+                             
                             this.status = 'error';
+                            this.barWidth ='0%';
+                            this.submitted = false;
                             console.log(<any>error);
+
                         });
                     }
 
                     this.files.reset();
-                    this.status = 'success';
+                    //this.status = 'success';
                     this.submitted = false;
                     this.getGroups();
 
@@ -266,7 +316,17 @@ export class ResourcesComponent implements OnInit {
         );
 
     }
-
+    
+    @HostListener('window:beforeunload', ['$event'])
+    beforeunloadHandler(event) {
+        if (this.submitted){ //checar
+            return undefined;
+        }
+        else{
+            return false;
+        }
+      
+      }
     showResources(){
         let response;
         if(this.lesson.leader && this.lesson.leader._id == this.identity._id
@@ -289,6 +349,7 @@ export class ResourcesComponent implements OnInit {
                 this.submitted = false;
             }
         });
+        
     }
 
 }

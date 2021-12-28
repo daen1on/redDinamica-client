@@ -179,13 +179,25 @@ export class ReviewComponent implements OnInit {
                             this.filesToUpload,
                             this.token,
                             'files'
-                        ).then((result: any) => {
+                        );/*
+                        .subscribe((event: HttpEvent<any>) => { // client call
+                            switch(event.type) { //checks events
+                              case HttpEventType.UploadProgress: // If upload is in progress
+                              this.barWidth = Math.round(event.loaded / event.total * 100).toString(); // get upload percentage
+                              break;
+                              case HttpEventType.Response: // give final response
+                              console.log('User successfully added!', event.body);
+                              this.status ='success';
+                              this.loading = false;
+                            }
+                         });
+                        .then((result: any) => {
 
 
                         }).catch((error) => {
                             this.status = 'error';
                             console.log(<any>error);
-                        });
+                        });*/
                     }
 
                     this.files.reset();

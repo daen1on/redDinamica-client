@@ -248,11 +248,23 @@ export class EditInfoComponent {
                     this.filesToUpload,
                     this.token,
                     'image'
-                ).then((result: any) => {
+                )/*
+                .subscribe((event: HttpEvent<any>) => { // client call
+                            switch(event.type) { //checks events
+                              case HttpEventType.UploadProgress: // If upload is in progress
+                              this.barWidth = Math.round(event.loaded / event.total * 100).toString(); // get upload percentage
+                              break;
+                              case HttpEventType.Response: // give final response
+                              console.log('User successfully added!', event.body);
+                              this.status ='success';
+                              this.loading = false;
+                            }
+                         });
+                .then((result: any) => {
                     this.identity.picture = result.user.picture;
                     localStorage.setItem('identity', JSON.stringify(this.identity));
 
-                });
+                });*/;
             }
             
             this.getAllCities();

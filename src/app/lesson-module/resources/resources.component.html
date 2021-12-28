@@ -8,9 +8,25 @@
                         {{title}} - {{lesson.title}}
                     </h5>
                 </div>
+                
+            
             </div>
+            <div *ngIf="status === 'deleted'; successMessage" class="alert alert-primary fade show text-center"
+                role="alert">
+                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    {{deletedMsg}}
+                </div>
+                <div *ngIf="status === 'warningD'; successMessage" class="alert alert-primary fade show text-center"
+                role="alert">
+                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    {{warningMsgF}}
+                </div>
+            
+            
         </div>
     </div>
+
+    
 
     <div *ngIf="lesson.files.length > 0 || showResources()" class="row">
 
@@ -32,9 +48,9 @@
                 </div>
 
 
-                <div *ngIf="showResources()" class="nav-link"
-                    [ngClass]="{'active': lesson.files.length == 0}" id="addGroup-tab" data-toggle="pill"
-                    href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
+                <div *ngIf="showResources()" class="nav-link" style="cursor: pointer;" 
+                    [ngClass]="{'show active': lesson.files.length == 0}" id="addGroup-tab" data-toggle="pill"
+                    [ngClass]="{disable: submitted}" href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
                     (click)="restartValues()">
                     <i class="fas fa-plus"></i> Agregar grupo de recursos
                 </div>
@@ -55,7 +71,11 @@
                         <div class="col">
                             <div class="card">
                                 <div class="card-body">
-
+                                    <div *ngIf="status === 'deletedF'; successMessage" class="alert alert-primary fade show text-center"
+                                    role="alert">
+                                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                                        {{deletedMsgF}}
+                                    </div>
                                     <section *ngIf="editMode && showResources()">
                                         <div *ngIf="status === 'error'; successMessage"
                                             class="alert alert-danger fade show text-center" role="alert">
@@ -67,6 +87,11 @@
                                             class="alert alert-success fade show text-center" role="alert">
                                             <i class="fas fa-check-circle icon-message mr-2"></i>
                                             {{successMsgEdit}}
+                                        </div>
+                                        <div *ngIf="status === 'warning'; successMessage"
+                                        class="alert alert-success fade show text-center" role="alert">
+                                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                                        {{warningMsg}}
                                         </div>
 
                                         <div class="form-group">
@@ -90,6 +115,10 @@
                                                 id="resourcesFiles" enctype="multipart/form-data"
                                                 (change)="fileChangeEvent($event)" [formControl]="files"
                                                 [ngClass]="{ 'is-invalid': submitted && files.errors || maxSizeError}">
+                                            <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
+                                                    <div #progress  class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width]="barWidth"
+                                                     aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
+                                                </div>
                                             <div *ngIf="submitted && files.errors || maxSizeError"
                                                 class="invalid-feedback">
                                                 <div *ngIf="files.errors && files.errors.required">
@@ -103,7 +132,7 @@
                                             </div>
                                         </div>
 
-                                        <button type="submit" class="btn btn-success mb-2 float-right"
+                                        <button type="submit" [disabled]="submitted"  class="btn btn-success mb-2 float-right"
                                             (click)="onSubmit(group)">Guardar</button>
                                     </section>
 
@@ -141,6 +170,11 @@
                                         {{errorMsg}}
                                     </div>
 
+                                    <div *ngIf="status === 'deleted'; successMessage" class="alert alert-primary fade show text-center"
+                                    role="alert">
+                                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                                        {{deletedMsg}}
+                                    </div>
                                     <div *ngIf="status === 'success'; successMessage"
                                         class="alert alert-success fade show text-center" role="alert">
                                         <i class="fas fa-check-circle icon-message mr-2"></i>
@@ -161,12 +195,16 @@
 
                                         </div>
 
-                                        <div class="form-group">
+                                        <div class="form-group" >
                                             <label for="resourcesFiles"><strong>Archivos</strong></label>
                                             <input multiple type="file" class="form-control" name="files"
                                                 id="resourcesFiles" enctype="multipart/form-data"
                                                 (change)="fileChangeEvent($event)" [formControl]="files"
                                                 [ngClass]="{ 'is-invalid': submitted && files.errors || maxSizeError}">
+                                            <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
+                                                    <div #progress  class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width]="barWidth"
+                                                     aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
+                                            </div>
                                             <div *ngIf="submitted && files.errors || maxSizeError"
                                                 class="invalid-feedback">
                                                 <div *ngIf="files.errors && files.errors.required">
@@ -180,7 +218,7 @@
                                             </div>
                                         </div>
 
-                                        <button type="submit" class="btn btn-success mb-2 float-right"
+                                        <button  [disabled]="submitted"  type="submit" class="btn btn-success mb-2 float-right"
                                             (click)="onSubmit()">Guardar</button>
 
                                     </form>

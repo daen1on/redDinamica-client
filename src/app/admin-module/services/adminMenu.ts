@@ -39,10 +39,10 @@ export const ADMIN_MENU = [
         "id": "resources",
         "buttonClass": "btn-danger",
         "iconClass": "fa-paperclip",
-        "spanContent": "Recursos",
+        "spanContent": "Repositorio",
         "subOptions": [
             {
-                "text": "Todos recursos",
+                "text": "Todos los recursos",
                 "routerLink": "/admin/recursos"
             },
             {

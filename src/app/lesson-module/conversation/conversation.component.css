@@ -1,0 +1,12 @@
+.disable {  
+    pointer-events: none;  
+    opacity: 2.0;
+  }
+.iconOpt{
+    
+    position: absolute;
+    right: 13%;
+    float: right;
+    color: white;
+    cursor: pointer;
+}

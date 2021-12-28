@@ -1,12 +1,13 @@
 <!-- Resources suggest modal-->
-<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="add" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="add" aria-hidden="true" data-keyboard="false" data-backdrop="static" >
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document" id="modalD">
         <form [formGroup]="addForm" (ngSubmit)="onSubmit()" class="modal-content" enctype="multipart/form-data"
             (input)="onChanges()">
             <!-- modal-header -->
             <div class="modal-header">
                 <h5 class="modal-title" id="addTitle">Sugerir un recurso para el repositorio</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="restartValues()">
+                <button type="button" class="buttonClose" id="closeBtn" data-dismiss="modal" style="display: none;"> Close</button>
+                <button  type="button" class="close" data-toggle="modal" data-target="#cancelModal" aria-label="Close" >
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -25,8 +26,19 @@
                     role="alert">
                     <i class="fas fa-check-circle icon-message mr-2"></i>
                     {{successMsg}}
-                </div>
+                </div>  
 
+                <div *ngIf="status === 'warning'; successMessage" class="alert alert-warning fade show text-center"
+                    role="alert">
+                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    {{warningMsg}}
+                </div>
+                <div *ngIf="status === 'deleted'; successMessage" class="alert alert-info fade show text-center"
+                    role="alert">
+                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    {{deletedMsg}}
+                </div>  
+                
                 <div *ngFor="let field of fields" class="form-group row">
                     <label for="{{field.id}}" class="col-3 col-form-label">
                         <strong>{{field.label}}<span *ngIf="field.required">*</span></strong>
@@ -35,7 +47,7 @@
                     <div class="col-9">
                         <input *ngIf="field.type == 'text'" type="text" class="form-control" id="{{field.id}}"
                             autocomplete="off" formControlName="{{field.id}}"
-                            [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}">
+                            [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}"  >
 
                         <textarea *ngIf="field.type === 'textarea'" class="form-control" id="{{field.id}}" rows="3"
                             formControlName="{{field.id}}" [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}">
@@ -48,21 +60,28 @@
                                 {{option.label}}</option>
                         </select>
 
-                        <input *ngIf="field.type == 'file'" formControlName="{{field.id}}" type="file"
-                            class="form-control" name="file" id="{{field.id}}" (change)="fileChangeEvent($event)"
-                            [ngClass]="{'is-invalid': submitted && f[field.id].errors|| maxSizeError}">
-
+                        <div *ngIf="field.type == 'file'">
+                            <input *ngIf="field.type == 'file'" formControlName="{{field.id}}" type="file"
+                                class="form-control" name="file" id="{{field.id}}" (change)="fileChangeEvent($event)"
+                                [ngClass]="{'is-invalid': submitted && f[field.id].errors|| maxSizeError}">
+                            
+                            <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
+                                <div #progress  class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width]="barWidth"
+                                 aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
+                            </div>
+                            <div *ngIf="maxSizeError && field.id == 'file'" class="invalid-feedback">
+                                <div *ngIf="maxSizeError">
+                                    El archivo es demasiado grande, el tamaño maximo permitido es de
+                                    {{MAX_FILE_SIZE}}MB.
+                                </div>
+                            </div>    
+                        </div>
                         <div *ngIf="submitted && f[field.id].errors" class="invalid-feedback">
                             <div *ngIf="f[field.id].errors.required">
                                 El campo {{field.label}} es obligatorio.
                             </div>
                         </div>
-                        <div *ngIf="maxSizeError && field.id == 'file'" class="invalid-feedback">
-                            <div *ngIf="maxSizeError">
-                                El archivo es demasiado grande, el tamaño maximo permitido es de
-                                {{MAX_FILE_SIZE}}MB.
-                            </div>
-                        </div>
+                        
 
 
                     </div>
@@ -73,8 +92,10 @@
 
             <!-- modal-footer -->
             <div class="modal-footer">
-                <button class="btn btn-danger" data-dismiss="modal" (click)="restartValues()">Cancelar</button>
-                <button type="submit" class="btn btn-success">
+                <div data-toggle="modal" data-target="#cancelModal" >
+                <button type="button" class="btn btn-danger"   >Cancelar</button>
+                </div>
+                <button type="submit" [disabled]="loading" class="btn btn-success">
                     <span *ngIf="loading && !addForm.invalid" class="spinner-border spinner-border-sm" role="status"
                         aria-hidden="true"></span>
                     <span class="sr-only">Enviar</span>
@@ -87,3 +108,30 @@
     </div>
 </div>
 <!-- /Resources suggest modal-->
+
+<!-- Modal warning cancel resource -->
+<div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelBtn" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelUpload">Cancelar sugerencia de recurso para el Repositorio</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="alert alert-warning mb-0" role="alert">
+                    <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
+                    ¿Estas seguro que quieres cancelar la carga del recurso? Si continuas se eliminará la sugerencia  
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class=" btn btn-danger" data-dismiss="modal" (click)="restartValues()">Sí</button>
+                <button class="btn btn-primary text-white" data-dismiss="modal">No</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- /Modal warning-->
