@@ -12,6 +12,8 @@ import { City } from 'src/app/models/city.model';
 import { Profession } from 'src/app/models/profession.model';
 import { Institution } from 'src/app/models/institution.model';
 import { Router, ActivatedRoute } from '@angular/router';
+import { HttpEvent, HttpEventType } from '@angular/common/http';
+import { MAX_FILE_SIZE } from 'src/app/services/DATA';
 
 @Component({
     selector: 'editInfo',
@@ -25,7 +27,9 @@ export class EditInfoComponent {
     public identity;
     public addCity = false;
     public fieldsForm;
-
+    public MAX_FILE_SIZE = MAX_FILE_SIZE;
+    public maxSize = MAX_FILE_SIZE * 1024 * 1024;
+    public maxSizeError = false;
     public status;
     public city = new City();
     public profession = new Profession('');
@@ -39,6 +43,7 @@ export class EditInfoComponent {
     public allCities;
     public allProfessions;
     public allInstitutions;
+    barWidth: string = "0%";
 
     constructor(
         private _formBuilder: FormBuilder,
@@ -131,15 +136,43 @@ export class EditInfoComponent {
         );
     }
 
-
+    public typeError = false;
     async onSubmit() {
+     
           // stop here if form is invalid
           if (this.editForm.invalid) {
             document.scrollingElement.scrollTop = 0;
             this.status = "error";
             return;
         }
+        if (this.filesToUpload[0]) {
+            // Validate file type
+            if (['image/jpeg', 'image/gif', 'image/png'].includes(this.filesToUpload[0].type)) {
+                this.typeError = false;
+            } else {
+                window.scroll({ 
+                    top: 0, 
+                    left: 0, 
+                    behavior: 'smooth' 
+                 });
+                this.typeError = true;
+                return;
+            }
 
+            // Validate file size
+            if (this.maxSize < this.filesToUpload[0].size) {
+                window.scroll({ 
+                    top: 0, 
+                    left: 0, 
+                    behavior: 'smooth' 
+                 });
+                this.typeError = true;
+                this.maxSizeError = true;
+                return;
+            } else {
+                this.maxSizeError = false;
+            }
+        } 
 
         this.user.name = this.editForm.value.name;
         this.user.surname = this.editForm.value.surname;
@@ -235,6 +268,7 @@ export class EditInfoComponent {
         });
 
         if (response.user && response.user._id) {
+            document.scrollingElement.scrollTop = 0;
             this.identity = response.user;
             this.status = 'success';
             localStorage.setItem('identity', JSON.stringify(this.identity));
@@ -248,23 +282,31 @@ export class EditInfoComponent {
                     this.filesToUpload,
                     this.token,
                     'image'
-                )/*
-                .subscribe((event: HttpEvent<any>) => { // client call
-                            switch(event.type) { //checks events
-                              case HttpEventType.UploadProgress: // If upload is in progress
-                              this.barWidth = Math.round(event.loaded / event.total * 100).toString(); // get upload percentage
-                              break;
-                              case HttpEventType.Response: // give final response
-                              console.log('User successfully added!', event.body);
-                              this.status ='success';
-                              this.loading = false;
-                            }
-                         });
-                .then((result: any) => {
-                    this.identity.picture = result.user.picture;
-                    localStorage.setItem('identity', JSON.stringify(this.identity));
+                ).subscribe((event: HttpEvent<any>) => { // client call
+                    switch(event.type) { //checks events
+                    case HttpEventType.UploadProgress: // If upload is in progress
+                    this.status = 'warning';
+                    this.barWidth = Math.round(event.loaded / event.total * 100).toString()+'%'; // get upload percentage
+                    break;
+                    case HttpEventType.Response: // give final response
+                    console.log('User successfully added!', event.body);
+                    //this.submitted = false;
+                    
+                    this.status ='success';
+                    this.barWidth ='0%';
+                    
+                    }
+                }, error=>{
 
-                });*/;
+                     
+                    this.status = 'error';
+                    this.barWidth ='0%';
+                    
+                    
+                    console.log(<any>error);
+
+                });
+            
             }
             
             this.getAllCities();
@@ -276,7 +318,7 @@ export class EditInfoComponent {
             this.status = "error";
         }
 
-        document.scrollingElement.scrollTop = 0;
+        
     }
 
     public filesToUpload = [];

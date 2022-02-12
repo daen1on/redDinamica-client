@@ -3,7 +3,14 @@
         <h3 class="m-0 text-primary font-weight-bolder">{{title}}</h3>
     </div>
     <div class="card-body">
-
+        <div *ngIf="status === 'warning'" class="alert alert-warning alert-dismissible fade show text-center"
+        role="alert">
+        <i class="fas fa-check-circle icon-message mr-2"></i>
+        Se estan subiendo la foto, por favor evita cerrar la página.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
         <div *ngIf="status === 'success'" class="alert alert-success alert-dismissible fade show text-center"
             role="alert">
             <i class="fas fa-check-circle icon-message mr-2"></i>
@@ -12,7 +19,9 @@
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
-
+        <div *ngIf="typeError"  class="alert alert-danger alert-dismissible fade show text-center">
+            Archivo inválido, solo se permite cargar imágenes con extensión jpg, png o gif.
+        </div>
         <div *ngIf="status === 'error'" class="alert alert-danger alert-dismissible fade show text-center" role="alert">
             <i class="fas fa-times-circle icon-message mr-2"></i>
             Los datos no pudieron ser actualizados. Intentalo de nuevo.
@@ -30,8 +39,12 @@
                     <input type="file" class="form-control" name="image" id="profileImage"
                         formControlName="profileImage" enctype="multipart/form-data" (change)="fileChangeEvent($event); onChanges()" >
                 </div>
+                
             </div>
-
+            <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
+                <div #progress  class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width]="barWidth"
+                 aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
+        </div>
             <div *ngFor="let field of fieldsForm" class="form-group row">
                 <label for="{{field.id}}" class="col-3 col-form-label">
                     <strong>{{field.label}}</strong>

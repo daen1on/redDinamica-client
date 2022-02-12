@@ -41,6 +41,10 @@
                     <textarea class="bg-light text-justify" formControlName="textPost" class="form-control" rows="3"
                         (input)="onChanges()"
                         [ngClass]="{ 'is-invalid': submitted && (formError || typeError || maxSizeError)}"></textarea>
+                    <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
+                            <div #progress  class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width]="barWidth"
+                             aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
+                    </div>
                     <div *ngIf="submitted && (formError || typeError || maxSizeError)" class="invalid-feedback">
                         <div *ngIf="formError">
                             Es necesario escribir algo o cargar una imagen para poder crear la publicación.
@@ -69,7 +73,11 @@
                             <i class="fas fa-times-circle icon-message mr-2"></i>
                             Hubo un error creando la publicación. Intentalo de nuevo.
                         </div>
-
+                        <div *ngIf="status === 'warning'; successMessage"
+                        class="alert alert-warning fade show text-center m-0" role="alert">
+                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                        La publicación se esta subiendo, por favor evita cerrar.
+                    </div>
                         <div *ngIf="status === 'success'; successMessage"
                             class="alert alert-success fade show text-center m-0" role="alert">
                             <i class="fas fa-check-circle icon-message mr-2"></i>
@@ -86,7 +94,7 @@
 
                     </div>
                     <div class="col bg-transparent">
-                        <button type="submit" class="btn btn-success btn-block">Publicar</button>
+                        <button type="submit" class="btn btn-success btn-block" [disabled]="submitted">Publicar</button>
                     </div>
                 </div>
             </div>

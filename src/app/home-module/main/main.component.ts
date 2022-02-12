@@ -11,6 +11,7 @@ import { GLOBAL } from 'src/app/services/global';
 import { Publication } from 'src/app/models/publication.model';
 import { Comment } from 'src/app/models/comment.model';
 import { MAX_FILE_SIZE } from 'src/app/services/DATA';
+import { HttpEvent, HttpEventType } from '@angular/common/http';
 
 @Component({
     selector: 'main',
@@ -48,6 +49,7 @@ export class MainComponent {
     public commentForm;
     public comment;
     public loading = true;
+    barWidth: string =  "0%";
 
     constructor(
         private _userService: UserService,
@@ -195,46 +197,53 @@ export class MainComponent {
                             this.filesToUpload,
                             this.token,
                             'image'
-                        );/*
-                        .subscribe((event: HttpEvent<any>) => { // client call
+                        ).subscribe((event: HttpEvent<any>) => { // client call
                             switch(event.type) { //checks events
-                              case HttpEventType.UploadProgress: // If upload is in progress
-                              this.barWidth = Math.round(event.loaded / event.total * 100).toString(); // get upload percentage
-                              break;
-                              case HttpEventType.Response: // give final response
-                              console.log('User successfully added!', event.body);
-                              this.status ='success';
-                              this.loading = false;
-                            }
-                         });
-                        
-                        .then((result: any) => {
-                            this.status = 'success';
+                            case HttpEventType.UploadProgress: // If upload is in progress
+                            this.status = 'warning';
+                            this.barWidth = Math.round(event.loaded / event.total * 100).toString()+'%'; // get upload percentage
+                            break;
+                            case HttpEventType.Response: // give final response
+                            console.log('User successfully added!', event.body);
+                            this.submitted = false;
+                            this.postForm.reset();
+                            this.status ='success';
+                            this.barWidth ='0%';
                             this.getPublications(this.page);
+                            }
+                        }, error=>{
 
-                        }).catch((error) => {
-                            console.log(<any>error);
+                             
                             this.status = 'error';
-                            return;
-                        });*/
+                            this.barWidth ='0%';
+                            this.submitted = false;
+                            
+                            console.log(<any>error);
 
+                        });
                     } else {
                         this.status = 'success';
+                        this.submitted = false;
+                        this.postForm.reset();
+                        this.getPublications(this.page);
                     }
 
                 } else {
                     this.status = 'error';
+                    this.submitted = false;
+                    this.getPublications(this.page);
                 }
 
-                this.submitted = false;
-                this.postForm.reset();
-                this.getPublications(this.page);
+//                this.submitted = false;
+  //              this.postForm.reset();
+    //            this.getPublications(this.page);
 
                 setInterval(() => { this.status = null; }, 5000);
             },
             error => {
                 console.log(<any>error);
                 this.status = 'error';
+                this.submitted = false;
             }
         )
     }

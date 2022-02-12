@@ -12,6 +12,7 @@ import { User } from 'src/app/models/user.model';
 import { Publication } from 'src/app/models/publication.model';
 import { Comment } from 'src/app/models/comment.model';
 import { MAX_FILE_SIZE } from 'src/app/services/DATA';
+import { HttpEvent, HttpEventType } from '@angular/common/http';
 
 @Component({
     selector: 'publications',
@@ -43,10 +44,13 @@ export class PublicationsComponent {
     public MAX_FILE_SIZE = MAX_FILE_SIZE;
     public maxSize = MAX_FILE_SIZE * 1024 * 1024;
     public maxSizeError = false;
+    readonly deletedMsg = 'Se ha eliminado la publicación';
+    readonly warningMsg = 'Se estan subiendo los archivos, por favor espera mientras finaliza y evita cerrar esta ventana.';
     
     // Comments
     public commentForm;
     public comment;
+    barWidth: string = "0%";
 
     constructor(
         private _userService: UserService,
@@ -221,40 +225,42 @@ export class PublicationsComponent {
                             this.filesToUpload,
                             this.token,
                             'image'
-                        )/*
-                        .subscribe((event: HttpEvent<any>) => { // client call
+                        ).subscribe((event: HttpEvent<any>) => { // client call
                             switch(event.type) { //checks events
-                              case HttpEventType.UploadProgress: // If upload is in progress
-                              this.barWidth = Math.round(event.loaded / event.total * 100).toString(); // get upload percentage
-                              break;
-                              case HttpEventType.Response: // give final response
-                              console.log('User successfully added!', event.body);
-                              this.status ='success';
-                              this.loading = false;
-                            }
-                         });
-                        
-                        .then((result: any) => {                            
-                            this.status = 'success';
+                            case HttpEventType.UploadProgress: // If upload is in progress
+                            this.status = 'warning';
+                            this.barWidth = Math.round(event.loaded / event.total * 100).toString()+'%'; // get upload percentage
+                            break;
+                            case HttpEventType.Response: // give final response
+                            console.log('User successfully added!', event.body);
+                            this.submitted = false;
+                            this.postForm.reset();
+                            this.status ='success';
+                            this.barWidth ='0%';
                             this.getUserPublications(this.page);
+                            }
+                        }, error=>{
 
-                        }).catch((error)=>{
-                            console.log(<any> error);                            
+                             
                             this.status = 'error';
-                            return;
-                        });*/
+                            this.barWidth ='0%';
+                            this.submitted = false;
+                            
+                            console.log(<any>error);
 
+                        });
+                    
                     } else {
                         this.status = 'success';
+                        this.submitted = false;
+                        this.postForm.reset();
+                        this.getUserPublications(this.page);
                     } 
 
                 } else {
                     this.status = 'error';
+                    this.submitted = false;
                 }
-
-                this.submitted = false;
-                this.postForm.reset();
-                this.getUserPublications(this.page);
 
                 setInterval(()=>{this.status = null;}, 5000);
             },
@@ -276,6 +282,7 @@ export class PublicationsComponent {
             response => {
                 if (response.publication) {
                     this.tempPublicationId = null;
+                    this.status = "deleted";    
                     this.getUserPublications(this.page);
                 }
             },
