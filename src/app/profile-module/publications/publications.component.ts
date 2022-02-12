@@ -267,6 +267,7 @@ export class PublicationsComponent {
             error => {
                 console.log(<any>error);
                 this.status = 'error';
+                this.submitted = false;
             }
         )
     }
