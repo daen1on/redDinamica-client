@@ -140,7 +140,8 @@
                                     <div class="row">
                                         <div class="col">
                                             <div class="text-center p-2 py-3 rounded-lg border border-ligth text-center bg-{{lesson_states[lesson.state].class}}"
-                                                style="width: 80px; height: 80px; overflow: hidden;">
+                                                [routerLink]="['/inicio','leccion', lesson._id]"
+                                                style="width: 80px; height: 80px; overflow: hidden;cursor: pointer;">
                                                 <i class="text-white fas fa-chalkboard-teacher"
                                                     style="font-size:50px"></i>
 
@@ -173,9 +174,12 @@
                                 <div class="col">
                                     <div class="row">
                                         <div class="col">
-                                            <h5 class="my-0">
-                                                <strong>{{lesson.title}}</strong>
-                                            </h5>
+                                            <div style="cursor: pointer;" [routerLink]="['/inicio','leccion', lesson._id]">
+                                                <h5 class="my-0"> 
+                                                    <strong>{{lesson.title}}</strong>
+                                                </h5>
+                                            </div>
+                                            
                                             <small class=" text-muted">
                                                 {{ (lesson.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LL' }}
                                             </small>
@@ -363,7 +367,9 @@
                                     <div class="row">
                                         <div class="col">
                                             <div class="text-center p-2 py-3 rounded-lg border border-ligth text-center bg-{{lesson_states[lesson.state].class}}"
-                                                style="width: 80px; height: 80px; overflow: hidden;">
+                                                
+                                                [routerLink]="['/inicio','leccion', lesson._id]"
+                                                style="width: 80px; height: 80px; overflow: hidden;cursor: pointer;">
                                                 <i class="text-white fas fa-chalkboard-teacher"
                                                     style="font-size:50px"></i>
 
@@ -396,9 +402,12 @@
                                 <div class="col">
                                     <div class="row">
                                         <div class="col">
-                                            <h5 class="my-0">
-                                                <strong>{{lesson.title}}</strong>
-                                            </h5>
+                                            <div style="cursor: pointer;" [routerLink]="['/inicio','leccion', lesson._id]">
+                                                <h5 class="my-0"> 
+                                                    <strong>{{lesson.title}}</strong>
+                                                </h5>
+                                            </div>
+                                            
                                             <small class=" text-muted">
                                                 {{ (lesson.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LL' }}
                                             </small>

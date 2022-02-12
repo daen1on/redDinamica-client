@@ -11,16 +11,26 @@
                 
             
             </div>
-            <div *ngIf="status === 'deleted'; successMessage" class="alert alert-primary fade show text-center"
+            <div *ngIf="status === 'deletedD'" class="alert alert-primary fade show text-center"
                 role="alert">
                     <i class="fas fa-check-circle icon-message mr-2"></i>
                     {{deletedMsg}}
-                </div>
-                <div *ngIf="status === 'warningD'; successMessage" class="alert alert-primary fade show text-center"
-                role="alert">
-                    <i class="fas fa-check-circle icon-message mr-2"></i>
-                    {{warningMsgF}}
-                </div>
+            </div>
+            <div *ngIf="status === 'warningD'" class="alert alert-info fade show text-center"
+            role="alert">
+                <i class="fas fa-check-circle icon-message mr-2"></i>
+                {{warningMsgF}}
+            </div>
+            <div *ngIf="status === 'successE'" class="alert alert-success fade show text-center"
+            role="alert">
+                <i class="fas fa-check-circle icon-message mr-2"></i>
+                {{successMsgEdit}}
+            </div>
+            <div *ngIf="status === 'success'" class="alert alert-success fade show text-center"
+            role="alert">
+                <i class="fas fa-check-circle icon-message mr-2"></i>
+                {{successMsg}}
+            </div>
             
             
         </div>
@@ -37,6 +47,7 @@
                 <div *ngFor="let group of groups, let ix = index" class="nav-link" [ngClass]="{'active': ix == 0}"
                     id="{{removeSpaces(group)}}-tab" data-toggle="pill" attr.href="#{{removeSpaces(group)}}" role="tab"
                     attr.aria-controls="{{removeSpaces(group)}}" attr.aria-selected="true"
+                    [ngClass]="{disable: loading}"
                     (click)="restartValues(group)">
                     {{group}}
                     <section *ngIf="selectedGroup == group && showResources()" class="float-right">
@@ -50,7 +61,7 @@
 
                 <div *ngIf="showResources()" class="nav-link" style="cursor: pointer;" 
                     [ngClass]="{'show active': lesson.files.length == 0}" id="addGroup-tab" data-toggle="pill"
-                    [ngClass]="{disable: submitted}" href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
+                    [ngClass]="{disable: loading}" href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
                     (click)="restartValues()">
                     <i class="fas fa-plus"></i> Agregar grupo de recursos
                 </div>
@@ -88,8 +99,8 @@
                                             <i class="fas fa-check-circle icon-message mr-2"></i>
                                             {{successMsgEdit}}
                                         </div>
-                                        <div *ngIf="status === 'warning'; successMessage"
-                                        class="alert alert-success fade show text-center" role="alert">
+                                        <div *ngIf="status === 'warning'"
+                                        class="alert alert-warning fade show text-center" role="alert">
                                         <i class="fas fa-check-circle icon-message mr-2"></i>
                                         {{warningMsg}}
                                         </div>
@@ -107,7 +118,7 @@
 
                                         </div>
                                     </section>
-
+                                        <!-- edición de recurso-->
                                     <section *ngIf="editMode && showResources()">
                                         <div class="form-group">
                                             <label for="resourcesFiles"><strong>Archivos</strong></label>
@@ -132,7 +143,7 @@
                                             </div>
                                         </div>
 
-                                        <button type="submit" [disabled]="submitted"  class="btn btn-success mb-2 float-right"
+                                        <button type="submit" [disabled]="loading"  class="btn btn-success mb-2 float-right"
                                             (click)="onSubmit(group)">Guardar</button>
                                     </section>
 
@@ -152,7 +163,7 @@
                     </div>
 
                 </div>
-
+                <!--need to pop up a modal once it abruptly exits-->
                 <div *ngIf="showResources()" class="tab-pane fade"
                     [ngClass]="{'show active': lesson.files.length == 0}" id="addGroup" role="tabpanel"
                     aria-labelledby="addGroup-tab">
@@ -180,7 +191,11 @@
                                         <i class="fas fa-check-circle icon-message mr-2"></i>
                                         {{successMsg}}
                                     </div>
-
+                                    <div *ngIf="status === 'warning'; successMessage"
+                                        class="alert alert-warning fade show text-center" role="alert">
+                                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                                        {{warningMsg}}
+                                    </div>
                                     <form>
                                         <div class="form-group">
                                             <label for="name"><strong>Nombre*</strong></label>
@@ -218,7 +233,7 @@
                                             </div>
                                         </div>
 
-                                        <button  [disabled]="submitted"  type="submit" class="btn btn-success mb-2 float-right"
+                                        <button  [disabled]="loading"  type="submit" class="btn btn-success mb-2 float-right"
                                             (click)="onSubmit()">Guardar</button>
 
                                     </form>

@@ -61,7 +61,7 @@ export class ConversationComponent implements OnInit {
 
         this.errorMsg = 'Hubo un error agregando la conversación. Intentalo de nuevo más tarde.';
         this.successMsg = 'Se ha creado la conversación correctamente.';
-        this.warningMsg =  'Se estan subiendo los archivos, por favor espera y evita cerrar esta ventana.';
+        this.warningMsg =  'Se estan subiendo los archivos, por favor espera mientras finaliza y evita cerrar esta ventana.';
         
         this.name = new FormControl('', Validators.required);
         this.message = new FormControl('', Validators.required);
@@ -77,6 +77,7 @@ export class ConversationComponent implements OnInit {
         });
     }
     
+  
     getGroups() {
         this.groups = [];
 
@@ -164,6 +165,15 @@ export class ConversationComponent implements OnInit {
 
                 }
 
+            },error =>{
+
+                if (error!=null){
+                    this.status = 'error';
+                    console.log(<any>error);
+                }
+                else{
+                    this.status = 'error';
+                }
             });     
     }
 

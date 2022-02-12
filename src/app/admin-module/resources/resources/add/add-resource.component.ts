@@ -39,8 +39,8 @@ export class AddResourceComponent implements OnInit {
    
     public errorMsg;
     public warningMsg;  
-    readonly  successMsg = 'Se ha guardado el nuevo recurso correctamente. Si deseas, puedes enviar otro recurso';
-    readonly deletedMsg ="Se ha cancelado correctamente el recurso. Puedes volver a enviar un recurso";
+    public  successMsg ;
+    public deletedMsg;
     
     public resource;
     public MAX_FILE_SIZE = MAX_FILE_SIZE;
@@ -66,7 +66,8 @@ export class AddResourceComponent implements OnInit {
 
         this.errorMsg = 'Hubo un error agregando el nuevo recurso. Intentalo de nuevo más tarde.';
         this.warningMsg= 'Se estan subiendo los archivos, por favor evita cerrar la ventana. '; 
-        
+        this.successMsg = 'Se ha guardado el nuevo recurso correctamente. Si deseas, puedes enviar otro recurso';
+        this.deletedMsg ="Se ha cancelado correctamente el recurso. Puedes volver a enviar un recurso";
         this.addForm = new FormGroup({
             name: new FormControl('', Validators.required),
             type: new FormControl('', Validators.required),
@@ -255,13 +256,15 @@ export class AddResourceComponent implements OnInit {
                                 
                                 break;
                                 case HttpEventType.Response: // give final response
-                                this.status ='success';
+                                
+                                //console.log("enter here edit Document");
                                 this.added.emit();
                                 this.addForm.reset();                    
                                 this.disableForm(false);
                                 //console.log("respuesta: ", event.body.resource);
                                 this.barWidth ='0%';
                                 this.loading = false;
+                                this.status ='success';
                                                                                     
 
                                 }

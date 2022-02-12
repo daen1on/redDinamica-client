@@ -57,7 +57,7 @@ export class EditResourceComponent implements OnInit {
         this.fields = FIELDS_FORM;
 
         this.errorMsg = 'Hubo un error al editar el recurso. Intentalo de nuevo más tarde.';
-        this.successMsg = 'Se ha editado el recurso correctamente.';
+        this.successMsg = 'Se ha editado el recurso correctamente. También puedes editar nuevamente el recurso';
         this.warningMsg= 'Se estan subiendo los archivos, por favor evita cerrar la ventana. '; 
         this.editForm = new FormGroup({
             name: new FormControl('', Validators.required),
@@ -214,12 +214,12 @@ export class EditResourceComponent implements OnInit {
                                 break;
                                 case HttpEventType.Response: // give final response
                                 console.log('User successfully added!', event.body);
-                                this.status ='success';
+                                
                                 this.disableForm(false);
                                 this.resource = event.body.resource;
                                 this.barWidth ='0%';
                                 this.loading = false
-                                
+                                this.status ='success';
                             
                                 }
                                 

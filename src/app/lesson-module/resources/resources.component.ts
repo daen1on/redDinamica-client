@@ -11,9 +11,11 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { resolveNaptr } from 'dns';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { HostListener } from '@angular/core';
+import { Observable } from 'rxjs/internal/Observable';
 @Component({
     selector: 'resources',
-    templateUrl: './resources.component.html'
+    templateUrl: './resources.component.html',
+    styleUrls: ['./resources.component.css']
 
 })
 export class ResourcesComponent implements OnInit {
@@ -32,6 +34,7 @@ export class ResourcesComponent implements OnInit {
     public files;
 
     public submitted = false;
+    public loading;
     public status;
     public errorMsg;
     public successMsg;
@@ -55,6 +58,7 @@ export class ResourcesComponent implements OnInit {
     public maxSize = MAX_FILE_SIZE * 1024 * 1024;
     public maxSizeError = false;
     public barWidth: string = "0%";
+    public unsaved = [];
     constructor(
         private _userService: UserService,
         private _lessonService: LessonService,
@@ -105,7 +109,12 @@ export class ResourcesComponent implements OnInit {
         this.status = null;
         this.maxSizeError = false;
         this.submitted = false;
+        if (this.editMode == true){
+            this.lesson.files = this.unsaved; //user didn't save, so It will restart values
+        }
         this.editMode = false;
+        this.name.reset();
+        this.files.reset();
         this.files.setValidators(Validators.required);
         this.getGroups();
 
@@ -132,10 +141,11 @@ export class ResourcesComponent implements OnInit {
                 tempfilesArray.push(file);
             }
         });
+        this.unsaved = this.lesson.files; //save temp in case they don't save
+        this.lesson.files = tempfilesArray; 
 
-        this.lesson.files = tempfilesArray;
+       // this.editLesson(this.lesson,'deletedF'); no lo tiene que enviar todavía pq no se ha guardado, 
 
-        this.editLesson(this.lesson,'deletedF');
     }
 
     getfiles(group) {
@@ -196,7 +206,13 @@ export class ResourcesComponent implements OnInit {
 
     public filesUploaded = [];
     onSubmit(group = null) {
+        
+        this.loading = true;
+        /*if (this.editMode == true){
+            this.editMode = false;
+            this.selectedGroup = group; //revisar qué pasa cuando se quiere guardar archivos, necesitamos que se vea la barra de carga.
 
+        }*/
 
        
         let tempFile;
@@ -242,22 +258,25 @@ export class ResourcesComponent implements OnInit {
             }
         }
         
-        this.editLesson(this.lesson, 'success');
+        this.editLesson(this.lesson, 'success', group);
         
     }
     
-    editLesson(lesson, statusE = null) {
+    editLesson(lesson, statusE = null, group=null) {
 
-        if(statusE =='deleted') {this.status = 'warningD';}
-        if (statusE == 'success'){this.status='warning';}
+        
+        
+        if(statusE =='deleted') {this.status = 'warningD';} //case when deleting group
+        if (statusE == 'success'){this.status='warning';} //case when uploading a resource
         this._lessonService.editLesson(this.token, lesson).subscribe(
             response => {
                 
                 if (response.lesson && response.lesson._id) {
                     this.lesson = response.lesson;
                     //todo: checkear qué hace esto.
-                    if (!this.editMode) {
-                        this.name.reset();                        
+                    if (!this.editMode) { //prevents page from getting outside the group edited once saved.
+                        this.name.reset();   
+                        
                     }
 
                     if (this.filesToUpload.length > 0) {
@@ -271,20 +290,26 @@ export class ResourcesComponent implements OnInit {
                         ).subscribe((event: HttpEvent<any>) => { // client call
                             switch(event.type) { //checks events
                             case HttpEventType.UploadProgress: // If upload is in progress
-                            this.status = 'warning';
+                            //this.status = 'warning';
                             this.barWidth = Math.round(event.loaded / event.total * 100).toString()+'%'; // get upload percentage
                             break;
                             case HttpEventType.Response: // give final response
                             console.log('User successfully added!', event.body);
                             
                             this.submitted = false;
-                            //this.disableForm(false);
+                            
+                            //this.disableForm(false); is it not being used?
                             //this.name.reset();
                             //this.files.reset();
                             //this.message.reset();
                             //this.getGroups();
-                            this.status =statusE;
+                            this.status = statusE;
                             this.barWidth ='0%';
+                            
+                            this.files.reset();
+                            this.loading = false;
+                            
+                          
                             }
                         }, error=>{
 
@@ -301,32 +326,61 @@ export class ResourcesComponent implements OnInit {
                     //this.status = 'success';
                     this.submitted = false;
                     this.getGroups();
+                    if (this.editMode == true){
+                        this.editMode = false;
+                        this.status = 'successE';
+                        this.selectedGroup = group; //revisar qué pasa cuando se quiere guardar archivos, necesitamos que se vea la barra de carga.
+                        this.loading = false;
+                    }
+                    if (statusE=='deleted'){
+                        this.status = 'deletedD';
+                        this.loading = false;
+                            
+                    }
 
                 } else {
                     this.status = 'error';
+                    this.loading = false;
+
 
                 }
             },
             error => {
                 if (error != null) {
                     this.status = 'error';
+                    this.loading = false;
                     console.log(<any>error);
                 }
             }
         );
+        
+        this.submitted = false;
 
     }
     
-    @HostListener('window:beforeunload', ['$event'])
-    beforeunloadHandler(event) {
-        if (this.submitted){ //checar
-            return undefined;
-        }
-        else{
-            return false;
-        }
-      
-      }
+    @HostListener('window:beforeunload')
+    canDeactivate(): Observable<boolean> | boolean {
+    // insert logic to check if there are pending changes here;
+    // returning true will navigate without confirmation
+    // returning false will show a confirm dialog before navigating away
+    if ( this.name.value !='' || this.files.length > 0 ){
+        console.log("falseName or file: ",this.name.value);
+        return false;
+    }
+    else  if (this.editMode == true){
+        console.log("edit ");
+        return false;
+
+    }else if (this.submitted == true){
+        console.log("submitted");
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+    }
+    
     showResources(){
         let response;
         if(this.lesson.leader && this.lesson.leader._id == this.identity._id
