@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 
 import { FIELDS_FORM } from '../services/profileData';
-import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { User } from 'src/app/models/user.model';
 import { UploadService } from 'src/app/services/upload.service';
 import { GLOBAL } from 'src/app/services/global';
@@ -36,7 +36,7 @@ export class EditInfoComponent {
     public institution = new Institution();
     public state;
     public country;
-    public editForm: FormGroup;
+    public editForm: UntypedFormGroup;
     public user;
 
     public items;
@@ -46,7 +46,7 @@ export class EditInfoComponent {
     barWidth: string = "0%";
 
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _userService: UserService,
         private _uploadService: UploadService,
         private _bDService: BasicDataService,
@@ -63,8 +63,8 @@ export class EditInfoComponent {
 
         this.fieldsForm = FIELDS_FORM;
 
-        this.state = new FormControl('');
-        this.country = new FormControl('');
+        this.state = new UntypedFormControl('');
+        this.country = new UntypedFormControl('');
         this.items = {
             city: [],
             institution: [],

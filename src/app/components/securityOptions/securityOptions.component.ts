@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 
 
-import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { User } from 'src/app/models/user.model';
 import { GLOBAL } from 'src/app/services/global';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -20,8 +20,8 @@ export class SecurityOptionsComponent {
     public token: string;
     public identity;
     public fieldsForm;
-    public editPassword: FormGroup;
-    public password: FormControl;
+    public editPassword: UntypedFormGroup;
+    public password: UntypedFormControl;
 
     public user: User = new User();
     public status: string;
@@ -32,7 +32,7 @@ export class SecurityOptionsComponent {
 
     constructor(
         private _userService: UserService,
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _route: ActivatedRoute,
         private _router: Router,
         private _location: Location
@@ -84,7 +84,7 @@ export class SecurityOptionsComponent {
                 validator: MustMatch('newPassword', 'confirmPassword')
             });
 
-        this.password = new FormControl('', Validators.required);
+        this.password = new UntypedFormControl('', Validators.required);
 
 
     }

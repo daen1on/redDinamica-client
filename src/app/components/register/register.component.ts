@@ -1,5 +1,5 @@
 import { Component, OnInit, ElementRef,Renderer2, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 
 import { MustMatch } from '../../helpers/must-match.validator';
 import { User } from 'src/app/models/user.model';
@@ -22,7 +22,7 @@ export class RegisterComponent implements OnInit {
     @ViewChild('contador')
     contador: ElementRef;
     public title: string;
-    public registerForm: FormGroup;
+    public registerForm: UntypedFormGroup;
     public submitted = false;
     public url;
     public tyc_file;
@@ -43,7 +43,7 @@ export class RegisterComponent implements OnInit {
     public loading;
 
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _userService: UserService,
         private _bDService: BasicDataService,
         private _messageService: MessageService,

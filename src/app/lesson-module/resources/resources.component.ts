@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { LESSON_STATES, ICON_STYLE, MAX_FILE_SIZE } from 'src/app/services/DATA';
-import { Validators, FormControl } from '@angular/forms';
+import { Validators, UntypedFormControl } from '@angular/forms';
 import { LessonService } from 'src/app/services/lesson.service';
 
 import { UserService } from 'src/app/services/user.service';
@@ -79,8 +79,8 @@ export class ResourcesComponent implements OnInit {
         this.warningMsg =  'Se estan subiendo los archivos, por favor espera y evita cerrar esta ventana.';
         this.deletedMsg= 'Se ha eliminado el grupo de recursos';
         
-        this.name = new FormControl('', Validators.required);
-        this.files = new FormControl('', Validators.required);
+        this.name = new UntypedFormControl('', Validators.required);
+        this.files = new UntypedFormControl('', Validators.required);
     }
 
     ngOnInit(): void {

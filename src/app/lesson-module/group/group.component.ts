@@ -4,7 +4,7 @@ import { LESSON_STATES } from 'src/app/services/DATA';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { LABEL_PROFILE } from 'src/app/profile-module/services/profileData';
 import { isRegExp } from 'util';
 
@@ -41,10 +41,10 @@ export class GroupComponent implements OnInit {
         this.errorMsg = 'Hubo un error agregando el grupo de desarrollo a la lección. Intentalo de nuevo más tarde.';
         this.successMsg = 'Se ha agregado el grupo de desarrallo de la lección correctamente.';
 
-        this.groupForm = new FormGroup({
-            expert: new FormControl(''),
-            leader: new FormControl(''),
-            members: new FormControl('')
+        this.groupForm = new UntypedFormGroup({
+            expert: new UntypedFormControl(''),
+            leader: new UntypedFormControl(''),
+            members: new UntypedFormControl('')
         });
     }
 

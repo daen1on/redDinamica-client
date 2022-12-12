@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { UserService } from 'src/app/services/user.service';
 import { User } from 'src/app/models/user.model';
 
@@ -12,13 +12,13 @@ import { User } from 'src/app/models/user.model';
 export class RecoverPasswordComponent implements OnInit {
     public title:string;
     public status:string;
-    public recoverPassForm: FormGroup;
+    public recoverPassForm: UntypedFormGroup;
     public submitted = false;
     
     
 
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _userService: UserService
     ) { 
         this.title = '¿Olvidaste tu contraseña?';       

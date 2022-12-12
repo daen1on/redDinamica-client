@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
-import { Validators, FormControl, FormGroup } from '@angular/forms';
+import { Validators, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { Resource } from 'src/app/models/resource.model';
 import { UserService } from 'src/app/services/user.service';
 import { ResourceService } from 'src/app/services/resource.service';
@@ -59,13 +59,13 @@ export class EditResourceComponent implements OnInit {
         this.errorMsg = 'Hubo un error al editar el recurso. Intentalo de nuevo más tarde.';
         this.successMsg = 'Se ha editado el recurso correctamente. También puedes editar nuevamente el recurso';
         this.warningMsg= 'Se estan subiendo los archivos, por favor evita cerrar la ventana. '; 
-        this.editForm = new FormGroup({
-            name: new FormControl('', Validators.required),
-            type: new FormControl('', Validators.required),
-            description: new FormControl('', Validators.required),
-            source: new FormControl('', Validators.required),
-            file: new FormControl(''),
-            url: new FormControl('', Validators.required)
+        this.editForm = new UntypedFormGroup({
+            name: new UntypedFormControl('', Validators.required),
+            type: new UntypedFormControl('', Validators.required),
+            description: new UntypedFormControl('', Validators.required),
+            source: new UntypedFormControl('', Validators.required),
+            file: new UntypedFormControl(''),
+            url: new UntypedFormControl('', Validators.required)
         });
 
         this.editForm.controls.type.disable();

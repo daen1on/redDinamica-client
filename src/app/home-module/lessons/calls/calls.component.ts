@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { BasicDataService } from 'src/app/services/basicData.service';
@@ -74,7 +74,7 @@ export class CallsComponent implements OnInit {
         this.token = this._userService.getToken();
         this.identity = this._userService.getIdentity();
 
-        this.filter = new FormControl('');
+        this.filter = new UntypedFormControl('');
     }
 
     ngDoCheck(): void {

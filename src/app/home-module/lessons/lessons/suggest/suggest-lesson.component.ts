@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FIELDS_SUGGEST_FORM } from '../lessonsData';
-import { Validators, FormControl, FormGroup } from '@angular/forms';
+import { Validators, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
 import { UserService } from 'src/app/services/user.service';
 
@@ -45,11 +45,11 @@ export class SuggestLessonComponent implements OnInit {
         this.errorMsg = 'Hubo un error al enviar la sugerencia para una lección. Intentalo de nuevo más tarde.';
         this.successMsg = 'Se ha enviado la sugerencia para la nueva lección correctamente. Gracias por tu sugerencia.';
 
-        this.addForm = new FormGroup({
-            title: new FormControl('', Validators.required),
-            resume: new FormControl('', Validators.required),
-            justification: new FormControl('', Validators.required),
-            references: new FormControl('', Validators.required),
+        this.addForm = new UntypedFormGroup({
+            title: new UntypedFormControl('', Validators.required),
+            resume: new UntypedFormControl('', Validators.required),
+            justification: new UntypedFormControl('', Validators.required),
+            references: new UntypedFormControl('', Validators.required),
             });
     }
 

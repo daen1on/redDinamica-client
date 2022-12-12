@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgSelectConfig } from '@ng-select/ng-select';
 
@@ -48,23 +48,23 @@ export class InstitutionsComponent {
     ) {
         this.title = 'Instituciones';
 
-        this.institutionForm = new FormGroup({
-            institutionName: new FormControl('', [Validators.required]),
-            institutionWebsite: new FormControl(),
-            institutionEmail: new FormControl(),
-            institutionCity: new FormControl(),
-            institutionTelephone: new FormControl()
+        this.institutionForm = new UntypedFormGroup({
+            institutionName: new UntypedFormControl('', [Validators.required]),
+            institutionWebsite: new UntypedFormControl(),
+            institutionEmail: new UntypedFormControl(),
+            institutionCity: new UntypedFormControl(),
+            institutionTelephone: new UntypedFormControl()
         });
 
-        this.editInstitutionForm = new FormGroup({
-            institutionName: new FormControl('', [Validators.required]),
-            institutionWebsite: new FormControl(),
-            institutionEmail: new FormControl(),
-            institutionCity: new FormControl(),
-            institutionTelephone: new FormControl()
+        this.editInstitutionForm = new UntypedFormGroup({
+            institutionName: new UntypedFormControl('', [Validators.required]),
+            institutionWebsite: new UntypedFormControl(),
+            institutionEmail: new UntypedFormControl(),
+            institutionCity: new UntypedFormControl(),
+            institutionTelephone: new UntypedFormControl()
         });
 
-        this.filter =  new FormControl();
+        this.filter =  new UntypedFormControl();
 
         // Set up of select
         this.config.addTagText = 'Agregar';

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { BasicDataService } from 'src/app/services/basicData.service';
@@ -42,19 +42,19 @@ export class CitiesComponent {
     ) {
         this.title = 'Ciudades';
 
-        this.cityForm = new FormGroup({
-            cityName: new FormControl('', [Validators.required]),
-            cityState: new FormControl('', [Validators.required]),
-            cityCountry: new FormControl('', [Validators.required])
+        this.cityForm = new UntypedFormGroup({
+            cityName: new UntypedFormControl('', [Validators.required]),
+            cityState: new UntypedFormControl('', [Validators.required]),
+            cityCountry: new UntypedFormControl('', [Validators.required])
         });
 
-        this.editCityForm = new FormGroup({
-            cityName: new FormControl('', [Validators.required]),
-            cityState: new FormControl('', [Validators.required]),
-            cityCountry: new FormControl('', [Validators.required])
+        this.editCityForm = new UntypedFormGroup({
+            cityName: new UntypedFormControl('', [Validators.required]),
+            cityState: new UntypedFormControl('', [Validators.required]),
+            cityCountry: new UntypedFormControl('', [Validators.required])
         });
 
-        this.filter =  new FormControl();        
+        this.filter =  new UntypedFormControl();        
     }
 
     ngOnInit(): void {        

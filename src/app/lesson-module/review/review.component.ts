@@ -4,7 +4,7 @@ import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { UploadService } from 'src/app/services/upload.service';
 import { GLOBAL } from 'src/app/services/global';
-import { Validators, FormControl } from '@angular/forms';
+import { Validators, UntypedFormControl } from '@angular/forms';
 import { LessonFile } from 'src/app/models/lesson-file.model';
 import { LessonMessage } from 'src/app/models/lesson-message.model';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
@@ -67,9 +67,9 @@ export class ReviewComponent implements OnInit {
         this.successMsg = 'Se ha creado la conversación del Facilitador correctamente.';
         this.warningMsg =   'Se estan subiendo los archivos, por favor espera y evita cerrar esta ventana.';
         
-        this.name = new FormControl('', Validators.required);
-        this.message = new FormControl('', Validators.required);
-        this.files = new FormControl('');
+        this.name = new UntypedFormControl('', Validators.required);
+        this.message = new UntypedFormControl('', Validators.required);
+        this.files = new UntypedFormControl('');
 
     }
 

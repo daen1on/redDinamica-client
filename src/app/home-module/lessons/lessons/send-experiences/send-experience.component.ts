@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { FIELDS_SEND_FORM } from '../lessonsData';
 
 import { UserService } from 'src/app/services/user.service';
@@ -56,13 +56,13 @@ export class SendExperienceComponent implements OnInit {
         this.errorMsg = 'Hubo un error al enviar la experiencia. Intentalo de nuevo más tarde.';
         this.successMsg = 'Se ha enviado la experiencia correctamente. Gracias por tu participación.';
 
-        this.sendForm = new FormGroup({
-            title: new FormControl('', Validators.required),
-            resume: new FormControl('', Validators.required),
-            references: new FormControl('', Validators.required),
-            level: new FormControl('', Validators.required),
-            type: new FormControl('', Validators.required),
-            areas: new FormControl('', Validators.required)
+        this.sendForm = new UntypedFormGroup({
+            title: new UntypedFormControl('', Validators.required),
+            resume: new UntypedFormControl('', Validators.required),
+            references: new UntypedFormControl('', Validators.required),
+            level: new UntypedFormControl('', Validators.required),
+            type: new UntypedFormControl('', Validators.required),
+            areas: new UntypedFormControl('', Validators.required)
         });
     }
 

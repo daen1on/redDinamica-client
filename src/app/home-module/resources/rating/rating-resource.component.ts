@@ -2,7 +2,7 @@ import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 import { ResourceService } from 'src/app/services/resource.service';
 
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { GLOBAL } from 'src/app/services/global';
 import { CommentService } from 'src/app/services/comment.service';
 import { Comment } from 'src/app/models/comment.model'
@@ -47,9 +47,9 @@ export class RatingResourceComponent implements OnInit {
         this.errorMsg = 'Hubo un error al guardar la calificación del recurso. Intentalo de nuevo más tarde.';
         this.successMsg = 'Se ha enviado la calificación correctamente. Muchas gracias por participar.';
 
-        this.ratingForm = new FormGroup({
-            rating: new FormControl('', Validators.required),
-            text: new FormControl('')
+        this.ratingForm = new UntypedFormGroup({
+            rating: new UntypedFormControl('', Validators.required),
+            text: new UntypedFormControl('')
         })
     }
 

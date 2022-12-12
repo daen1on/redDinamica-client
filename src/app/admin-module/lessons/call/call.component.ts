@@ -4,7 +4,7 @@ import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { GLOBAL } from 'src/app/services/global';
 import { User } from 'src/app/models/user.model';
-import { FormControl, Validators } from '@angular/forms';
+import { UntypedFormControl, Validators } from '@angular/forms';
 
 @Component({
     selector: 'call',
@@ -65,9 +65,9 @@ export class CallComponent implements OnInit {
         this.token = this._userService.getToken();
         this.url = GLOBAL.url;
 
-        this.leader = new FormControl('', Validators.required);
+        this.leader = new UntypedFormControl('', Validators.required);
         
-        this.expert = new FormControl('', Validators.required);
+        this.expert = new UntypedFormControl('', Validators.required);
 
         this.profile_label = LABEL_PROFILE;
         
@@ -94,8 +94,8 @@ export class CallComponent implements OnInit {
         this.status = null;
         this.submitted = false;
         this.assigned.emit();
-        this.leader = new FormControl('', Validators.required);
-        this.expert = new FormControl('', Validators.required);
+        this.leader = new UntypedFormControl('', Validators.required);
+        this.expert = new UntypedFormControl('', Validators.required);
     }
 
     getExpertUsers(){

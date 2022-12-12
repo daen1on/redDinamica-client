@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MessageService } from 'src/app/services/message.service';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 
 import { UserService } from 'src/app/services/user.service';
 
@@ -44,9 +44,9 @@ export class NewMessageComponent {
 
         this.categories = LABEL_ROLE;
         
-        this.messageForm = new FormGroup({
-            to: new FormControl('', Validators.required),
-            message: new FormControl('', Validators.required)
+        this.messageForm = new UntypedFormGroup({
+            to: new UntypedFormControl('', Validators.required),
+            message: new UntypedFormControl('', Validators.required)
         });
 
         this.getAllUsers();

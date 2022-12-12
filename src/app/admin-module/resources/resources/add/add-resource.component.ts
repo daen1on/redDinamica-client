@@ -1,6 +1,6 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 
-import { Validators, FormControl, FormGroup } from '@angular/forms';
+import { Validators, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { Resource } from 'src/app/models/resource.model';
 import { UserService } from 'src/app/services/user.service';
 import { ResourceService } from 'src/app/services/resource.service';
@@ -68,13 +68,13 @@ export class AddResourceComponent implements OnInit {
         this.warningMsg= 'Se estan subiendo los archivos, por favor evita cerrar la ventana. '; 
         this.successMsg = 'Se ha guardado el nuevo recurso correctamente. Si deseas, puedes enviar otro recurso';
         this.deletedMsg ="Se ha cancelado correctamente el recurso. Puedes volver a enviar un recurso";
-        this.addForm = new FormGroup({
-            name: new FormControl('', Validators.required),
-            type: new FormControl('', Validators.required),
-            description: new FormControl('', Validators.required),
-            source: new FormControl('', Validators.required),
-            file: new FormControl('', Validators.required),
-            url: new FormControl('', Validators.required)
+        this.addForm = new UntypedFormGroup({
+            name: new UntypedFormControl('', Validators.required),
+            type: new UntypedFormControl('', Validators.required),
+            description: new UntypedFormControl('', Validators.required),
+            source: new UntypedFormControl('', Validators.required),
+            file: new UntypedFormControl('', Validators.required),
+            url: new UntypedFormControl('', Validators.required)
         });
 
 

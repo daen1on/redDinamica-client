@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { GLOBAL } from 'src/app/services/global';
 import { LESSON_STATES, ACADEMIC_LEVEL } from 'src/app/services/DATA';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 
@@ -43,14 +43,14 @@ export class EditComponent implements OnInit {
         this.errorMsg = 'Hubo un error editando la lección. Intentalo de nuevo más tarde.';
         this.successMsg = 'Se editado la lección correctamente.';
 
-        this.lessonForm = new FormGroup({
-            title: new FormControl('', Validators.required),
-            resume: new FormControl('', Validators.required),
-            justification: new FormControl('', Validators.required),
-            references: new FormControl('', Validators.required),
-            state: new FormControl('', Validators.required),
-            areas: new FormControl(''),
-            level: new FormControl('')
+        this.lessonForm = new UntypedFormGroup({
+            title: new UntypedFormControl('', Validators.required),
+            resume: new UntypedFormControl('', Validators.required),
+            justification: new UntypedFormControl('', Validators.required),
+            references: new UntypedFormControl('', Validators.required),
+            state: new UntypedFormControl('', Validators.required),
+            areas: new UntypedFormControl(''),
+            level: new UntypedFormControl('')
         });
     }
 

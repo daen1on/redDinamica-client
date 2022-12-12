@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { BasicDataService } from 'src/app/services/basicData.service';
@@ -47,15 +47,15 @@ export class KnowledgeAreasComponent {
         private _router:Router,
     ) {
         this.title = 'Áreas de conocimiento';
-        this.areaForm = new FormGroup({
-            areaName: new FormControl('', [Validators.required])
+        this.areaForm = new UntypedFormGroup({
+            areaName: new UntypedFormControl('', [Validators.required])
         });
 
-        this.editAreaForm = new FormGroup({
-            areaName: new FormControl('', [Validators.required])            
+        this.editAreaForm = new UntypedFormGroup({
+            areaName: new UntypedFormControl('', [Validators.required])            
         });
 
-        this.filter =  new FormControl();
+        this.filter =  new UntypedFormControl();
 
     }
 

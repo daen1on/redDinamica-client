@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 import { ResourceService } from 'src/app/services/resource.service';
 
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GLOBAL } from 'src/app/services/global';
 import { TYPE_OF_RESOURCES } from './resourcesData';
@@ -25,7 +25,7 @@ export class ResourcesComponent implements OnInit {
     public resources = [];
     public iconResource = ICON_STYLE;
 
-    public visible = new FormControl();
+    public visible = new UntypedFormControl();
 
     // Pagination
     public page; // Actual page
@@ -59,8 +59,8 @@ export class ResourcesComponent implements OnInit {
 
         this.types = TYPE_OF_RESOURCES;        
 
-        this.orderControl = new FormControl('');
-        this.filter = new FormControl('');
+        this.orderControl = new UntypedFormControl('');
+        this.filter = new UntypedFormControl('');
     }
 
     ngOnInit(): void {

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { UserService } from 'src/app/services/user.service';
 import { User } from 'src/app/models/user.model';
 import { Router } from '@angular/router';
@@ -17,7 +17,7 @@ export class LoginComponent implements OnInit {
     public invalid: boolean;
     public emailFound: boolean;
     public submitted = false;
-    public loginForm: FormGroup;
+    public loginForm: UntypedFormGroup;
     public user;
     public identity;
     public token;
@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
     public loading;
 
     constructor(
-        private _formBuilder: FormBuilder,
+        private _formBuilder: UntypedFormBuilder,
         private _userService: UserService,
         private _bDService: BasicDataService,
         private _messageService: MessageService,

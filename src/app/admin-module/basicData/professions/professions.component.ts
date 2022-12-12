@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Profession } from 'src/app/models/profession.model';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -45,14 +45,14 @@ export class ProfessionsComponent implements OnInit {
         private _router:Router,
     ) {
         this.title = 'Profesiones';
-        this.professionForm = new FormGroup({
-            professionName: new FormControl('', [Validators.required])            
+        this.professionForm = new UntypedFormGroup({
+            professionName: new UntypedFormControl('', [Validators.required])            
         });
-        this.editProfessionForm = new FormGroup({
-            professionName: new FormControl('', [Validators.required])            
+        this.editProfessionForm = new UntypedFormGroup({
+            professionName: new UntypedFormControl('', [Validators.required])            
         });
         
-        this.filter =  new FormControl();
+        this.filter =  new UntypedFormControl();
            
     }
 

@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
-import { Validators, FormControl, FormGroup } from '@angular/forms';
+import { Validators, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
 import { UserService } from 'src/app/services/user.service';
 
@@ -57,10 +57,10 @@ export class AddCallComponent implements OnInit {
         this.errorMsg = 'Hubo un error creando la convocatoria. Intentalo de nuevo más tarde.';
         this.successMsg = 'Se ha creado la convocatoria correctamente.';
 
-        this.callForm = new FormGroup({
-            text: new FormControl('', Validators.required),
-            areas: new FormControl('', Validators.required),
-            level: new FormControl('', Validators.required),
+        this.callForm = new UntypedFormGroup({
+            text: new UntypedFormControl('', Validators.required),
+            areas: new UntypedFormControl('', Validators.required),
+            level: new UntypedFormControl('', Validators.required),
         });
 
 

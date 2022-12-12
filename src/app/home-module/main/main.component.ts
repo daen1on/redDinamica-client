@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { PublicationService } from 'src/app/services/publication.service';
@@ -66,17 +66,17 @@ export class MainComponent {
 
         this.filesToUpload = [];
 
-        this.postForm = new FormGroup({
-            textPost: new FormControl(''),
-            filePost: new FormControl('')
+        this.postForm = new UntypedFormGroup({
+            textPost: new UntypedFormControl(''),
+            filePost: new UntypedFormControl('')
         });
 
         this.page = 1;
 
         this.getPublications(this.page);
 
-        this.commentForm = new FormGroup({
-            text: new FormControl('', Validators.required)
+        this.commentForm = new UntypedFormGroup({
+            text: new UntypedFormControl('', Validators.required)
         });
 
     }

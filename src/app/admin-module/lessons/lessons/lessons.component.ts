@@ -4,7 +4,7 @@ import { UserService } from 'src/app/services/user.service';
 
 import { Router, ActivatedRoute } from '@angular/router';
 
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { GLOBAL } from 'src/app/services/global';
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { ACADEMIC_LEVEL, LESSON_STATES } from 'src/app/services/DATA';
@@ -30,7 +30,7 @@ export class LessonsComponent implements OnInit {
     public lesson_states = LESSON_STATES;
 
 
-    public visible = new FormControl();
+    public visible = new UntypedFormControl();
 
     // Pagination
     public page; // Actual page
@@ -109,8 +109,8 @@ export class LessonsComponent implements OnInit {
         this.identity = this._userService.getIdentity();
         this.areas;
 
-        this.orderControl = new FormControl('');
-        this.filter = new FormControl('');
+        this.orderControl = new UntypedFormControl('');
+        this.filter = new UntypedFormControl('');
 
     }
 

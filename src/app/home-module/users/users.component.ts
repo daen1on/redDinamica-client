@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators, FormBuilder } from '@angular/forms';
 
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -83,37 +83,37 @@ export class UsersComponent {
         this.categories = CATEGORIES;
         this.url = GLOBAL.url;
 
-        this.addForm = new FormGroup({
-            name: new FormControl('', Validators.required),
-            surname: new FormControl('', Validators.required),
-            email: new FormControl('', [Validators.required, Validators.email]),
-            profession: new FormControl(''),
-            institution: new FormControl(''),
-            city: new FormControl(''),
-            category: new FormControl('', Validators.required)
+        this.addForm = new UntypedFormGroup({
+            name: new UntypedFormControl('', Validators.required),
+            surname: new UntypedFormControl('', Validators.required),
+            email: new UntypedFormControl('', [Validators.required, Validators.email]),
+            profession: new UntypedFormControl(''),
+            institution: new UntypedFormControl(''),
+            city: new UntypedFormControl(''),
+            category: new UntypedFormControl('', Validators.required)
         });
 
-        this.editForm = new FormGroup({
-            name: new FormControl(''),
-            surname: new FormControl(''),
-            email: new FormControl(''),
-            profession: new FormControl(''),
-            institution: new FormControl(''),
-            about: new FormControl(''),
-            city: new FormControl(''),
-            category: new FormControl(''),
-            postgraduate: new FormControl('')
+        this.editForm = new UntypedFormGroup({
+            name: new UntypedFormControl(''),
+            surname: new UntypedFormControl(''),
+            email: new UntypedFormControl(''),
+            profession: new UntypedFormControl(''),
+            institution: new UntypedFormControl(''),
+            about: new UntypedFormControl(''),
+            city: new UntypedFormControl(''),
+            category: new UntypedFormControl(''),
+            postgraduate: new UntypedFormControl('')
         });
 
-        this.state = new FormControl('');
-        this.country = new FormControl('');
+        this.state = new UntypedFormControl('');
+        this.country = new UntypedFormControl('');
         this.items = {
             city: [],
             institution: [],
             profession: []
         };
 
-        this.filter = new FormControl();
+        this.filter = new UntypedFormControl();
 
     }
 
