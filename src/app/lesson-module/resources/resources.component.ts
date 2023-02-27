@@ -8,7 +8,7 @@ import { GLOBAL } from 'src/app/services/global';
 import { UploadService } from 'src/app/services/upload.service';
 import { LessonFile } from 'src/app/models/lesson-file.model';
 import { Router, ActivatedRoute } from '@angular/router';
-import { resolveNaptr } from 'dns';
+
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { HostListener } from '@angular/core';
 import { Observable } from 'rxjs/internal/Observable';

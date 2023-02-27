@@ -7,7 +7,7 @@ import { GLOBAL } from 'src/app/services/global';
 import { CommentService } from 'src/app/services/comment.service';
 import { Comment } from 'src/app/models/comment.model'
 import { LESSON_STATES } from 'src/app/services/DATA';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+
 
 @Component({
     selector: 'rating',
