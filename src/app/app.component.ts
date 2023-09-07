@@ -27,8 +27,8 @@ export class AppComponent {
                       
     }
     
-    ngDoCheck(): void {        
-        // this.token = this._userService.getToken();
+    ngDoCheck(): void {  
+        //this.token = this._userService.getToken();
         this.identity = this._userService.getIdentity();
         this.unviewMessages = localStorage.getItem('unviewedMessages');
     }

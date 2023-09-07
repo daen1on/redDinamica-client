@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { Routing, appRoutingProviders } from './app.routing';
@@ -7,6 +8,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MomentModule } from 'ngx-moment';
 import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 // Modules
 import { HomeModule } from './home-module/home.module';
@@ -37,7 +39,7 @@ import { CommentService } from './services/comment.service';
 import { ResourceService } from './services/resource.service';
 import { LessonService } from './services/lesson.service';
 import { LandingGuard } from './guards/landing.guard';
-
+import { AuthInterceptor } from './AuthInterceptor';
 @NgModule({
   declarations: [
     AppComponent,
@@ -48,11 +50,13 @@ import { LandingGuard } from './guards/landing.guard';
     FooterComponent,
     SearchComponent,    
     SecurityOptionsComponent,
-    FilterPipe
+    FilterPipe,
+  
 
   ],
   imports: [
     BrowserModule,
+    NgbModule,
     FormsModule,
     NgSelectModule,
     NgxLinkifyjsModule.forRoot(),
@@ -66,6 +70,7 @@ import { LandingGuard } from './guards/landing.guard';
     MomentModule,
     NgSelectModule,
     InfiniteScrollModule
+  
   ],
   providers: [
     appRoutingProviders,    
@@ -78,7 +83,8 @@ import { LandingGuard } from './guards/landing.guard';
     CommentService,
     ResourceService,
     LessonService,
-    LandingGuard
+    LandingGuard,
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]
 })

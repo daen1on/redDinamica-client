@@ -1,30 +1,47 @@
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import {
+  HttpInterceptor,
+  HttpRequest,
+  HttpHandler,
+  HttpEvent,
+  HttpClient,
+} from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { throwError } from 'rxjs';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Router } from '@angular/router';
+
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+  private isTokenExpiredPopupDisplayed = false;
 
-  constructor(private router: Router, private modalService: NgbModal) {}
+  constructor(
+    private _router: Router,
+    private _http: HttpClient
+  ) {}
 
-  intercept(req: HttpRequest<any>, next: HttpHandler) {
-    return next.handle(req).pipe(
-      catchError((error: HttpErrorResponse) => {
-        if (error.status === 401 && error.headers.get('WWW-Authenticate') === 'Bearer realm="Token has expired"') {
-          // Show a modal dialog asking the user to log in again
-          // ...
+  intercept(
+    request: HttpRequest<any>,
+    next: HttpHandler
+  ): Observable<HttpEvent<any>> {
+    return next.handle(request).pipe(
+      catchError((err) => {
+        if (err.status === 401 || err.status === 403) {
+          if (!this.isTokenExpiredPopupDisplayed) {
+            this.isTokenExpiredPopupDisplayed = true;
 
-          // Redirect the user to the login page
-          handleTokenExpiration() {
-            const modalRef = this.modalService.open(LoginModalComponent);
+            // Display a simple warning message using the browser's native alert
+            alert('La sesión ha expirado, por favor iniciar sesión de nuevo.');
+
+            sessionStorage.removeItem('token');
+            localStorage.clear();
+            this._router.navigate(['/login']);
+
+            this.isTokenExpiredPopupDisplayed = false;
           }
-          this.router.navigate(['/login']);
         }
+        const error = err.error.message || err.statusText;
         return throwError(error);
       })
     );
   }
 }
- 

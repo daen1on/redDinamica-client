@@ -63,7 +63,7 @@
                 <div *ngIf="identity._id == lesson.expert._id" class="nav-link"
                     [ngClass]="{'show active': lesson.expert_comments.length == 0}" id="addGroup-tab" data-toggle="pill" [ngClass]="{disable: submitted}"
                     href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
-                    (click)="restartValues()">
+                    (click)="restartValues(this)">
                     <i class="fas fa-plus"></i> Crear conversación
                 </div>
 

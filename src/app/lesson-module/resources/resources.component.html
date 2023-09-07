@@ -62,7 +62,7 @@
                 <div *ngIf="showResources()" class="nav-link" style="cursor: pointer;" 
                     [ngClass]="{'show active': lesson.files.length == 0}" id="addGroup-tab" data-toggle="pill"
                     [ngClass]="{disable: loading}" href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
-                    (click)="restartValues()">
+                    (click)="restartValues(this)">
                     <i class="fas fa-plus"></i> Agregar grupo de recursos
                 </div>
 
