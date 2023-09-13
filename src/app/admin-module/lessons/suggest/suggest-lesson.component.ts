@@ -41,7 +41,7 @@ export class SuggestLessonComponent implements OnInit {
         private _lessonService: LessonService,
         private _bDService: BasicDataService
     ) {
-        this.title = 'Agregar';
+        this.title = 'Agregar Lección';
         this.identity = this._userService.getIdentity();
         this.token = this._userService.getToken();
         this.url = GLOBAL.url;

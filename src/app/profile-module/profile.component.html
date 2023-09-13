@@ -65,17 +65,18 @@
                                 <span *ngIf="ownProfile.role && categories[ownProfile.role.toString()]"
                                     class="badge {{categories[ownProfile.role.toString()].class}}"
                                     style="position:relative; top: -15px; left: 10px">
-                                    {{categories[ownProfile.role].label}}
+                                    {{categories[ownProfile.role.toString()].label}}
                                 </span>
                             </h4>
+
                             <p *ngIf="ownProfile.profession" class="card-text mb-0">
-                                <small>{{ownProfile.profession.name }}</small>
+                                <small><i class="fas fa-briefcase"></i> Trabaja en {{ownProfile.profession.name }}</small>
                             </p>
                             <p *ngIf="ownProfile.institution" class="card-text mb-0">
-                                <small>{{ownProfile.institution.name}}</small>
+                                <small><i class="fas fa-university"></i> Institución educativa: {{ownProfile.institution.name}}</small>
                             </p>
                             <p *ngIf="ownProfile.city" class="card-text mb-0">
-                                <small>{{ownProfile.city.name}}, {{ownProfile.city.state}},
+                                <small><i class="fas fa-map-marker-alt"></i>   Vive en {{ownProfile.city.name}}, {{ownProfile.city.state}},
                                     {{ownProfile.city.country}}</small>
                             </p>
 
@@ -143,14 +144,17 @@
                     
                     
                 </div>
-                <div class="row bg-white" *ngIf="ownProfile.socialNetworks" id="div-social" >
-                    <i class="fas fa-link"></i>
-                    <td>
-                    <tr *ngFor = "let link of ownProfile.socialNetworks.split(',')" style="display:block" >
-                        <span innerHTML="{{link | linkify}}"></span>
-                    </tr> 
-                    </td>
-                </div>
+                <div class="row bg-white" *ngIf="ownProfile.socialNetworks" id="div-social">
+                    <ul class="social-links">Redes sociales:
+                     
+
+                      <li *ngFor="let link of ownProfile.socialNetworks.split(',')">
+                        <a [href]="link | linkify" target="_blank" [title]="'Visitar ' + link">
+                          <i class="fas fa-link"></i> {{ link }}
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
               
             </div>
               

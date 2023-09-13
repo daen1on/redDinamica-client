@@ -238,7 +238,7 @@ export class RegisterComponent implements OnInit {
             });
 
     }
-    private Contador = 1000 ;
+    Contador = 1000 ;
     //
     onKey(event){
         var element = event.target as HTMLInputElement ; //funciona

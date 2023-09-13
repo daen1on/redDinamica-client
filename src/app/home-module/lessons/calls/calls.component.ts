@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
@@ -61,6 +61,7 @@ export class CallsComponent implements OnInit {
     public areas;
 
     public loading = true;
+    @Input() isJoin: boolean; // You can adjust the data type as needed
 
     constructor(
         private _userService: UserService,

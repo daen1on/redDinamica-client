@@ -45,7 +45,7 @@
                 <div *ngIf="showResources()" class="nav-link" style="cursor: pointer;" 
                     [ngClass]="{'show active': lesson.conversations.length == 0}" id="addGroup-tab" data-toggle="pill" [ngClass]="{disable: submitted}"
                     href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
-                    (click)="restartValues()">
+                    (click)="restartValues(this)">
                     <i class="fas fa-plus"></i> Crear conversación
                 </div>
 
@@ -198,7 +198,7 @@
                                         <i class="fas fa-check-circle icon-message mr-2"></i>
                                         {{warningMsg}}
                                     </div>
-                                    <form>
+                                    <form >
                                         <div class="form-group">
                                             <label for="name"><strong>Título*</strong></label>
                                             <input type="text" class="form-control" id="name" [formControl]="name"
@@ -249,8 +249,10 @@
 
                                         <button type="submit" [disabled]="submitted" class="btn btn-success mb-2 float-right"
                                             (click)="onSubmit()">
-                                            <span *ngIf="loading && !addForm.invalid" class="spinner-border spinner-border-sm" role="status"
-                                            aria-hidden="true"></span>
+                                           <span *ngIf="loading && !name.invalid && !files.invalid 
+                                            && !message.invalid" class="spinner-border spinner-border-sm" 
+                                            role="status" aria-hidden="true"></span>
+
                                             <span class="sr-only">Guardar</span>
                                             Guardar
                                         </button>

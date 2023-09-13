@@ -43,6 +43,7 @@ export class ProfileComponent implements OnInit {
             following: 0, 
             followed: 0
         }
+        
         this.loadPage();
     }
 

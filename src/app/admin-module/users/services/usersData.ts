@@ -82,19 +82,25 @@ export const EDIT_FIELDS_FORM = [
         id: "city",
         label: "Ciudad",
         type: "text",
-        attr: "city"        
+        attr: "city",
+        autocomplete: true        
+      
     },
     {
         id: "profession",
         label: "Profesión",
         type: "text",
-        attr: "profession"        
+        attr: "profession",
+        autocomplete: true        
+       
     },
     {
         id: "institution",
         label: "Institución",
         type: "text",
-        attr: "institution"        
+        attr: "institution",
+        autocomplete: true        
+       
     },
     {
         id: "postgraduate",

@@ -1,3 +1,7 @@
+import { City } from "./city.model";
+import { Institution } from "./institution.model";
+import { Profession } from "./profession.model";
+
 export class User {
     
     public _id:String;
@@ -11,11 +15,11 @@ export class User {
     public postgraduate:String;
     public picture:String;
     public knowledge_area:String;
-    public profession:String;
-    public institution:String;
-    public city:String;
+    public profession:Profession;
+    public institution:Institution;
+    public city:City;
     public contactNumber:String;
-    public socialNetworks:[String];
+    public socialNetworks:String;
     public getToken:Boolean;
     public canAdvise;
 

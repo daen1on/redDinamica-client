@@ -38,31 +38,12 @@
                         <textarea *ngIf="field.type === 'textarea'" class="form-control" id="{{field.id}}" rows="3"
                             formControlName="{{field.id}}" [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}">
                             </textarea>
-
-                        <select *ngIf="field.type == 'select'" formControlName="{{field.id}}" class="form-control"
-                            id="{{field.id}}" [ngClass]="{'is-invalid': submitted && f[field.id].errors}"
-                            (input)="setDisabled()">
-                            <option *ngFor="let option of field.options" value="{{option.value}}">
-                                {{option.label}}</option>
-                        </select>
-
-                        <input *ngIf="field.type == 'file'" formControlName="{{field.id}}" type="file"
-                            class="form-control" name="file" id="{{field.id}}" (change)="fileChangeEvent($event)"
-                            [ngClass]="{'is-invalid': submitted && f[field.id].errors|| maxSizeError}">
-
                         <div *ngIf="submitted && f[field.id].errors" class="invalid-feedback">
                             <div *ngIf="f[field.id].errors.required">
                                 El campo {{field.label}} es obligatorio.
                             </div>
                         </div>
-                        <div *ngIf="maxSizeError && field.id == 'file'" class="invalid-feedback">
-                            <div *ngIf="maxSizeError">
-                                El archivo es demasiado grande, el tamaño maximo permitido es de
-                                {{MAX_FILE_SIZE}}MB.
-                            </div>
-                        </div>
-
-
+            
                     </div>
                 </div>
                 

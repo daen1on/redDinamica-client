@@ -49,6 +49,7 @@
                             formControlName="{{field.id}}" [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}">
                             </textarea>
 
+                        <!--
                         <select *ngIf="field.type == 'select'" formControlName="{{field.id}}" class="form-control"
                             id="{{field.id}}" [ngClass]="{'is-invalid': submitted && f[field.id].errors}"
                             (input)="setDisabled()">
@@ -60,11 +61,6 @@
                             class="form-control" name="file" id="{{field.id}}" (change)="fileChangeEvent($event)"
                             [ngClass]="{'is-invalid': submitted && f[field.id].errors|| maxSizeError}">
 
-                        <div *ngIf="submitted && f[field.id].errors" class="invalid-feedback">
-                            <div *ngIf="f[field.id].errors.required">
-                                El campo {{field.label}} es obligatorio.
-                            </div>
-                        </div>
                         <div *ngIf="maxSizeError && field.id == 'file'" class="invalid-feedback">
                             <div *ngIf="maxSizeError">
                                 El archivo es demasiado grande, el tamaño maximo permitido es de
@@ -72,6 +68,13 @@
                             </div>
                         </div>
 
+                    -->
+
+                    <div *ngIf="submitted && f[field.id].errors" class="invalid-feedback">
+                        <div *ngIf="f[field.id].errors.required">
+                            El campo {{field.label}} es obligatorio.
+                        </div>
+                    </div>
 
                     </div>
                 </div>

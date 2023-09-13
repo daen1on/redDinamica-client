@@ -38,13 +38,14 @@ export class ConversationComponent implements OnInit {
     readonly deletedMsg = 'Se ha eliminado la conversación';
     public selectedGroup;
     public parentUrl;
-
+   
     @Input() lesson;
     @Output() added = new EventEmitter();
 
     public MAX_FILE_SIZE = MAX_FILE_SIZE;
     public maxSize = MAX_FILE_SIZE * 1024 * 1024;
     public maxSizeError = false;
+    public loading = true;
 
     constructor(
         private _userService: UserService,
@@ -201,18 +202,17 @@ export class ConversationComponent implements OnInit {
         this.submitted = true;
         this.disableForm(this.submitted);
         tempMessage = new LessonMessage(this.message.value);
-
+         // Check if your form controls have validation errors
+        if (this.name.invalid || this.files.invalid || this.message.invalid || this.maxSizeError) {
+            // Handle validation errors, e.g., display error messages to the user
+             return;
+        }
         if(group){
             tempMessage.conversationTitle = group;
             this.name.setValue('dummy');
         }else{
             tempMessage.conversationTitle = this.name.value;            
-        }
-
-        if (this.name.invalid || this.files.invalid || this.message.invalid || this.maxSizeError) {
-            return;
-        }
-        
+        }        
 
         if (this.filesToUpload.length > 0) {
 
