@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Router, CanActivate, ActivatedRoute} from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
 
 @Injectable()
-export class ProfileGuard implements CanActivate{
+export class ProfileGuard {
     
     public id;
 

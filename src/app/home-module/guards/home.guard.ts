@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Router, CanActivate, Route} from '@angular/router';
+import { Router, Route } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
 
 @Injectable()
-export class HomeGuard implements CanActivate{
+export class HomeGuard {
     
     constructor(
            private _router: Router,
