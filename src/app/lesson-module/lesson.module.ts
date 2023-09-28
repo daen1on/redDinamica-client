@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { MomentModule } from 'ngx-moment';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 import { LessonComponent } from './lesson.component';
@@ -15,7 +14,7 @@ import { RouterModule } from '@angular/router';
 import { ReviewComponent } from './review/review.component';
 import { ConversationComponent } from './conversation/conversation.component';
 import { ResourcesComponent } from './resources/resources.component';
-import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
+import { LinkifyService } from '../services/linkify.service'; // Update the path
 
 
 
@@ -35,9 +34,7 @@ import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        NgxLinkifyjsModule,
         HttpClientModule,
-        MomentModule,
         RouterModule,
         NgSelectModule
     ],
@@ -45,6 +42,7 @@ import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
         LessonComponent
     ],
     providers: [
+        LinkifyService
 
     ],
 })

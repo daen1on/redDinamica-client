@@ -23,7 +23,6 @@ import { ProposedComponent } from './lessons/proposed/proposed.component';
 import { ResourcesComponent } from './resources/resources/resources.component';
 import { ProposedResourceComponent } from './resources/proposed/proposed-resource.component';
 import { AddResourceComponent } from './resources/resources/add/add-resource.component';
-import { MomentModule } from 'ngx-moment';
 import { DetailsResourceComponent } from './resources/details/details-resource.component';
 import { EditResourceComponent } from './resources/edit/edit-resource.component';
 import { DeleteResourceComponent } from './resources/delete/delete-resource.component';
@@ -33,6 +32,7 @@ import { LessonModule } from '../lesson-module/lesson.module';
 import { AddCallComponent } from './lessons/add-call/add-call.component';
 import { CallComponent } from './lessons/call/call.component';
 import { SuggestLessonComponent } from './lessons/suggest/suggest-lesson.component';
+import { LinkifyService } from '../services/linkify.service';
 
 @NgModule({
     declarations: [
@@ -66,7 +66,6 @@ import { SuggestLessonComponent } from './lessons/suggest/suggest-lesson.compone
         HttpClientModule,
         ReactiveFormsModule,
         NgSelectModule,
-        MomentModule,
         AdminRoutingModule,
         LessonModule
         
@@ -74,6 +73,6 @@ import { SuggestLessonComponent } from './lessons/suggest/suggest-lesson.compone
     exports: [
         AdminComponent
     ],
-    providers: [AdminGuard],
+    providers: [AdminGuard, LinkifyService],
 })
 export class AdminModule { }

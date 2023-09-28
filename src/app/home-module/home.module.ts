@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MomentModule } from 'ngx-moment';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 
@@ -22,7 +21,8 @@ import { RatingResourceComponent } from './resources/rating/rating-resource.comp
 import { DetailsCallComponent } from './lessons/details/details-call.component';
 import { LessonModule } from '../lesson-module/lesson.module';
 import { AdviseLessonComponent } from './lessons/advise-lesson/advise-lesson.component';
-import { NgxLinkifyjsModule } from 'ngx-linkifyjs';
+import { LinkifyService } from '../services/linkify.service'; // Update the path
+
 import { HomeGuard } from './guards/home.guard';
 
 
@@ -49,15 +49,13 @@ import { HomeGuard } from './guards/home.guard';
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        MomentModule,  
         NgSelectModule,
-        NgxLinkifyjsModule,
         LessonModule,    
         HomeRoutingModule
     ],
     exports: [
         HomeComponent
     ],
-    providers: [HomeGuard],
+    providers: [HomeGuard,LinkifyService],
 })
 export class HomeModule { }
