@@ -25,7 +25,7 @@
 
                 <div *ngFor="let group of groups, let ix = index" class="nav-link" [ngClass]="{'show active': ix == 0}"
                     id="{{removeSpaces(group)}}-tab" data-toggle="pill" attr.href="#{{removeSpaces(group)}}" role="tab"
-                    attr.aria-controls="{{removeSpaces(group)}}" attr.aria-selected="true"
+                    attr.aria-controls="{{removeSpaces(group)}}" aria-selected="true"
                     (click)="restartValues(group)" style="display: flex;" >
                     {{group}}
 

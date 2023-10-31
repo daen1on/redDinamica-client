@@ -91,8 +91,8 @@
 
                 <div *ngIf="identity.actived" class="card mt-2 rounded">
                     <button type="button" class="btn btn-block text-left d-flex justify-content-between btn-danger pl-3"
-                        data-toggle="collapse" attr.data-target="#resources" aria-expanded="true"
-                        attr.aria-controls="resources" [routerLink]="['/inicio/recursos']">
+                        data-toggle="collapse" data-target="#resources" aria-expanded="true"
+                        aria-controls="resources" [routerLink]="['/inicio/recursos']">
                         <div>
                             <i class="text-ligth fas fa-paperclip"></i>
                             <span class="ml-2">Repositorio</span>
@@ -103,7 +103,7 @@
                 <div class="card mt-2 rounded">
                     <button type="button"
                         class="btn btn-block text-left d-flex justify-content-between py-2 btn-success"
-                        data-toggle="collapse" attr.data-target="#user" aria-expanded="true" attr.aria-controls="user"
+                        data-toggle="collapse" data-target="#user" aria-expanded="true" aria-controls="user"
                         [routerLink]="['/inicio/usuarios']">
                         <div>
                             <i class="text-ligth fas fa-user-friends"></i>
