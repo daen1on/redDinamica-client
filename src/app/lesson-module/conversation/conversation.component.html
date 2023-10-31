@@ -93,7 +93,7 @@
                                                 </small>
                                             </h6>
 
-                                            <p class="card-text" innerHTML="{{message.text | linkify}}"></p>
+                                            <p class="card-text" innerHTML="{{message.text | linky}}"></p>
                                             <a *ngIf=" message.file" title="Descargar : {{message.file.fileName}}"
                                                 href="{{this.url + 'get-lesson/' + message.file.fileName}}"
                                                 target="_blank">

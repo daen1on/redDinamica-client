@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { MomentModule } from 'ngx-moment';
 
 import { LessonComponent } from './lesson.component';
 import { ActivityComponent } from './activity/activity.component';
@@ -14,7 +15,7 @@ import { RouterModule } from '@angular/router';
 import { ReviewComponent } from './review/review.component';
 import { ConversationComponent } from './conversation/conversation.component';
 import { ResourcesComponent } from './resources/resources.component';
-import { LinkifyService } from '../services/linkify.service'; // Update the path
+import { LinkyModule } from 'ngx-linky';
 
 
 
@@ -36,14 +37,14 @@ import { LinkifyService } from '../services/linkify.service'; // Update the path
         ReactiveFormsModule,
         HttpClientModule,
         RouterModule,
-        NgSelectModule
+        NgSelectModule,
+        MomentModule,
+        LinkyModule
     ],
     exports: [
         LessonComponent
     ],
     providers: [
-        LinkifyService
-
-    ],
+   ],
 })
 export class LessonModule { }

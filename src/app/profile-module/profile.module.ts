@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { ProfileRoutingModule } from './profile.routing';
-import * as moment from 'moment';
-import { ProfileComponent } from './profile.component';
+import { MomentModule } from 'ngx-moment';import { ProfileComponent } from './profile.component';
 import { EditInfoComponent } from './editInfo/editInfo.component';
 import { InfoComponent } from './info/info.component';
 import { LessonsComponent } from './lessons/lessons.component';
@@ -12,7 +11,7 @@ import { FollowsComponent } from './follows/follows.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ProfileGuard } from './guards/profile.guard';
 import { PublicationsComponent } from './publications/publications.component';
-import { LinkifyService } from '../services/linkify.service'; // Update the path
+import { LinkyModule } from 'ngx-linky';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
 @NgModule({
@@ -23,8 +22,6 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
         LessonsComponent,
         FollowsComponent,
         PublicationsComponent
-        
-        
     ],
     imports: [
         CommonModule,
@@ -33,14 +30,16 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
         HttpClientModule,
         ProfileRoutingModule,
         NgSelectModule,
-        InfiniteScrollModule      
+        InfiniteScrollModule,
+        MomentModule,
+        LinkyModule
         
     ],
     exports: [
         ProfileComponent
     ],
     providers: [
-        ProfileGuard, LinkifyService,{provide: 'moment', useValue: moment }     
+        ProfileGuard
     ],
 })
 export class ProfileModule { }

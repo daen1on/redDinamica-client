@@ -149,7 +149,7 @@
                      
 
                       <li *ngFor="let link of ownProfile.socialNetworks.split(',')">
-                        <a [href]="link | linkify" target="_blank" [title]="'Visitar ' + link">
+                        <a [href]="link | linky" target="_blank" [title]="'Visitar ' + link">
                           <i class="fas fa-link"></i> {{ link }}
                         </a>
                       </li>

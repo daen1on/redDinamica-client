@@ -10,7 +10,9 @@ import { SendedComponent } from './sended/sended.component';
 import { InfoComponent } from './info/info.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { MessageGuard } from './guards/message.guard';
-import { LinkifyService } from '../services/linkify.service';
+import { MomentModule } from 'ngx-moment';
+import { LinkyModule } from 'ngx-linky';
+
 
 
 
@@ -30,7 +32,9 @@ import { LinkifyService } from '../services/linkify.service';
         ReactiveFormsModule,
         HttpClientModule,
         MessageRoutingModule,
-        NgSelectModule
+        NgSelectModule,
+        MomentModule,
+        LinkyModule
         
     ],
     exports: [
@@ -38,7 +42,6 @@ import { LinkifyService } from '../services/linkify.service';
     ],
     providers: [
         MessageGuard,
-        LinkifyService
     ],
 })
 export class MessageModule { }

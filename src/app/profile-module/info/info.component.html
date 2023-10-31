@@ -30,7 +30,7 @@
                 </div>
                 <div *ngIf="identity[field.attr] && field.type == 'list'" id="{{field.id}}">
                 <p *ngFor="let text of identity[field.attr].split(',')">
-                        <span innerHTML="{{text | linkify}}"></span>
+                        <span innerHTML="{{text | linky}}"></span>
                     </p>
                 </div>
 

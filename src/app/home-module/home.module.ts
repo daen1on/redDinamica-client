@@ -2,13 +2,15 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-
+import { MomentModule } from 'ngx-moment';
+import { LinkyModule } from 'ngx-linky';
 
 import { HomeRoutingModule } from './home.routing';
 import { HomeComponent } from './home.component';
 import { MainComponent } from './main/main.component';
 import { UsersComponent } from './users/users.component';
 import { FilterPipe } from './pipes/filter.pipe';
+
 import { ResourcesComponent } from './resources/resources.component';
 import { LessonsComponent } from './lessons/lessons/lessons.component';
 import { SuggestComponent } from './resources/suggest/suggest.component';
@@ -21,7 +23,6 @@ import { RatingResourceComponent } from './resources/rating/rating-resource.comp
 import { DetailsCallComponent } from './lessons/details/details-call.component';
 import { LessonModule } from '../lesson-module/lesson.module';
 import { AdviseLessonComponent } from './lessons/advise-lesson/advise-lesson.component';
-import { LinkifyService } from '../services/linkify.service'; // Update the path
 
 import { HomeGuard } from './guards/home.guard';
 
@@ -44,6 +45,7 @@ import { HomeGuard } from './guards/home.guard';
         SuggestLessonComponent,        
         SendExperienceComponent,
         FilterPipe
+        
     ],
     imports: [
         CommonModule,
@@ -51,11 +53,13 @@ import { HomeGuard } from './guards/home.guard';
         ReactiveFormsModule,
         NgSelectModule,
         LessonModule,    
-        HomeRoutingModule
+        HomeRoutingModule,
+        MomentModule,
+        LinkyModule
     ],
     exports: [
         HomeComponent
     ],
-    providers: [HomeGuard,LinkifyService],
+    providers: [HomeGuard],
 })
 export class HomeModule { }

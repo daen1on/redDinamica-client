@@ -32,7 +32,6 @@ import { LessonModule } from '../lesson-module/lesson.module';
 import { AddCallComponent } from './lessons/add-call/add-call.component';
 import { CallComponent } from './lessons/call/call.component';
 import { SuggestLessonComponent } from './lessons/suggest/suggest-lesson.component';
-import { LinkifyService } from '../services/linkify.service';
 
 @NgModule({
     declarations: [
@@ -73,6 +72,6 @@ import { LinkifyService } from '../services/linkify.service';
     exports: [
         AdminComponent
     ],
-    providers: [AdminGuard, LinkifyService],
+    providers: [AdminGuard],
 })
 export class AdminModule { }

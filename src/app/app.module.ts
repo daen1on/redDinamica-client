@@ -5,7 +5,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { Routing, appRoutingProviders } from './app.routing';
 import { HttpClientModule } from '@angular/common/http';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
-import * as moment from 'moment';
+import { MomentModule } from 'ngx-moment';
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
@@ -25,13 +25,14 @@ import { RecoverPasswordComponent } from './components/recoverPassword/recoverPa
 import { SearchComponent } from './components/search/search.component';
 import { UserService } from './services/user.service';
 import { UploadService } from './services/upload.service';
-import { LinkifyService } from './services/linkify.service'; // Import your service if you created one
-
+import { LinkyModule } from 'ngx-linky';
 
 // Guards
 
 import { BasicDataService } from './services/basicData.service';
 import { SecurityOptionsComponent } from './components/securityOptions/securityOptions.component';
+
+
 import { FilterPipe } from './pipes/filter.pipe';
 import { FollowService } from './services/follow.service';
 import { PublicationService } from './services/publication.service';
@@ -51,9 +52,8 @@ import { AuthInterceptor } from './AuthInterceptor';
     FooterComponent,
     SearchComponent,    
     SecurityOptionsComponent,
-    FilterPipe,
-  
-
+    FilterPipe
+    
   ],
   imports: [
     BrowserModule,
@@ -67,9 +67,9 @@ import { AuthInterceptor } from './AuthInterceptor';
     ProfileModule,
     MessageModule,
     NgSelectModule,
-    InfiniteScrollModule
-
-  
+    InfiniteScrollModule,
+    MomentModule,
+    LinkyModule
   ],
   providers: [
     appRoutingProviders,    
@@ -82,12 +82,10 @@ import { AuthInterceptor } from './AuthInterceptor';
     CommentService,
     ResourceService,
     LessonService,
-    LandingGuard,LinkifyService,
+    LandingGuard,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true 
     },
-    {
-      provide: 'moment', useValue: moment
-    }
+   
   ],
   bootstrap: [AppComponent]
 })
