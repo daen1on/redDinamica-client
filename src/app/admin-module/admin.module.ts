@@ -32,6 +32,8 @@ import { LessonModule } from '../lesson-module/lesson.module';
 import { AddCallComponent } from './lessons/add-call/add-call.component';
 import { CallComponent } from './lessons/call/call.component';
 import { SuggestLessonComponent } from './lessons/suggest/suggest-lesson.component';
+import { MomentModule } from 'ngx-moment';
+
 
 @NgModule({
     declarations: [
@@ -66,7 +68,8 @@ import { SuggestLessonComponent } from './lessons/suggest/suggest-lesson.compone
         ReactiveFormsModule,
         NgSelectModule,
         AdminRoutingModule,
-        LessonModule
+        LessonModule,
+        MomentModule
         
     ],
     exports: [
