@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef,Renderer2, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef,Renderer2, ViewChild, OnDestroy } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 
 import { MustMatch } from '../../helpers/must-match.validator';
@@ -12,13 +12,16 @@ import { MessageService } from 'src/app/services/message.service';
 import { TYC_FILE } from 'src/app/services/DATA';
 import { GLOBAL } from 'src/app/services/global';
 
+import { firstValueFrom } from 'rxjs';
 
+import { takeUntil, tap, catchError } from 'rxjs/operators';
+import { Subject, throwError } from 'rxjs';
 
 @Component({
     selector: 'register',
     templateUrl: './register.component.html'
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, OnDestroy {
     @ViewChild('contador')
     contador: ElementRef;
     public title: string;
@@ -41,6 +44,7 @@ export class RegisterComponent implements OnInit {
     public token;
 
     public loading;
+    private unsubscribe$ = new Subject <void>();
 
     constructor(
         private _formBuilder: UntypedFormBuilder,
@@ -86,12 +90,16 @@ export class RegisterComponent implements OnInit {
             institution: ['', Validators.required],
             category: ['', Validators.required],
             experience: ['',[Validators.maxLength(1000)]], //revisar
-            tyc: [false, Validators.requiredTrue ] //problema aca con el validators del checkbox
+            tyc: [false, Validators.required ] //problema aca con el validators del checkbox
         },
             {
                 validators: MustMatch('password', 'confirmPassword')
             });
         
+    }
+    ngOnDestroy() {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
     }
 
 
@@ -167,77 +175,71 @@ export class RegisterComponent implements OnInit {
 
         }
 
-        let response = await this._userService.register(this.user).toPromise().catch((error) => {
-            this.status = "error";
-            console.log(<any>error);
-        });
-
-
-        if (response.user && response.user._id) {
-            this._userService.signup(this.user).subscribe(
-                response => {
-
-                    if (response.user && response.user._id) {
-
-                        localStorage.setItem('identity', JSON.stringify(response.user));
-
-                        this._userService.signup(this.user, true).subscribe(
-                            response => {
-
-                                this.token = response.token;
-
-                                if (this.token.length <= 0) {
+        try {
+            let response = await firstValueFrom(this._userService.register(this.user));
+            if (response.user && response.user._id) {
+                this._userService.signup(this.user).pipe(
+                    tap(response => {
+                        if (response.user && response.user._id) {
+                            localStorage.setItem('identity', JSON.stringify(response.user));
+                            this._userService.signup(this.user, true).pipe(
+                                tap(response => {
+                                    this.token = response.token;
+                                    if (this.token.length <= 0) {
+                                        this.status = 'error';
+                                    } else {
+                                        this.status = 'success';
+                                        localStorage.setItem('token', this.token);
+                                        this.getAllInstitutions();
+                                        this.getAllProfessions();
+                                        this.getAllAreas();
+                                        this.getCounters();
+                                        this.getUnviewMessages();
+                                        this._router.navigate(['/inicio']);
+                                    }
+                                }),
+                                catchError(error => {
+                                    console.log(<any>error);
                                     this.status = 'error';
-                                } else {
-                                    this.status = 'success';
-                                    localStorage.setItem('token', this.token);
-
-                                    this.getAllInstitutions();
-                                    this.getAllProfessions();
-                                    this.getAllAreas();
-                                    this.getCounters();
-                                    this.getUnviewMessages();
-
-                                    this._router.navigate(['/inicio']);
-
-                                }
-                            },
-                            error => {
-                                console.log(<any>error);
-                                this.status = 'error';
-                            }
-                        )
-
-                    } else {
+                                    return throwError(error);
+                                })
+                            ).subscribe();
+                        } else {
+                            this.status = 'error';
+                        }
+                    }),
+                    catchError(error => {
+                        console.log(<any>error);
                         this.status = 'error';
-                    }
-                },
-                error => {
-                    console.log(<any>error);
-                    this.status = 'error';
-                }
-            );
+                        return throwError(error);
+                    })
+                ).subscribe();
+            } else {
+                this.status = "error";
+                this.message = 'No ha sido posible realizar el registro, el correo electrónico ya se encuentra registrado.'
+            }
 
-        } else {
-            this.status = "error";
-            this.message = 'No ha sido posible realizar el registro, el correo electrónico ya se encuentra registrado.'
+        } catch (error) {
+            this.status = "error while running register";
+            console.log(<any>error);
         }
 
-    }
+       
 
+    }
     getAllProfessions() {
-        this._bDService.getAllProfessions().subscribe(
-            response => {
+        this._bDService.getAllProfessions().pipe(
+            tap(response => {
                 if (response.professions) {
                     this.allProfessions = response.professions;
                     this.items.profession = this.allProfessions;
                     localStorage.setItem('professions', JSON.stringify(this.allProfessions));
                 }
-            }, error => {
-                console.log(<any>error);
-            });
-
+            }),
+            takeUntil(this.unsubscribe$)
+        ).subscribe();
     }
+    
     Contador = 1000 ;
     //
     onKey(event){
@@ -255,58 +257,59 @@ export class RegisterComponent implements OnInit {
          
         }
 
-    getAllAreas() {
-
-        this._bDService.getAllKnowledgeAreas().subscribe(
-            response => {
-                if (response.areas) {
-                    this.allAreas = response.areas;
-                    localStorage.setItem('areas', JSON.stringify(this.allAreas));
-                }
-            }, error => {
-                console.log(<any>error);
-            });
-
-
-    }
+        getAllAreas() {
+            this._bDService.getAllKnowledgeAreas().pipe(
+                tap(response => {
+                    if (response.areas) {
+                        this.allAreas = response.areas;
+                        localStorage.setItem('areas', JSON.stringify(this.allAreas));
+                    }
+                }),
+                catchError(error => {
+                    console.log(<any>error);
+                    return throwError(error);
+                })
+            ).subscribe();
+        }
 
     getAllInstitutions() {
-        this._bDService.getAllInstitutions().subscribe(
-            response => {
+        this._bDService.getAllInstitutions().pipe(
+            tap(response => {
                 if (response.institutions) {
-
                     this.allInstitutions = response.institutions;
                     this.items.institution = this.allInstitutions;
                     localStorage.setItem('institutions', JSON.stringify(this.allInstitutions));
                 }
-            }, error => {
-                console.log(<any>error);
-            });
-
+            }),
+            takeUntil(this.unsubscribe$)
+        ).subscribe();
     }
 
     getCounters() {
-        this._userService.getCounters().subscribe(
-            response => {
+        this._userService.getCounters().pipe(
+            tap(response => {
                 if (response) {
                     localStorage.setItem('stats', JSON.stringify(response));
                 }
-            },
-            error => {
+            }),
+            catchError(error => {
                 console.log(<any>error);
-            });
+                return throwError(error);
+            })
+        ).subscribe();
     }
 
     getUnviewMessages() {
-        this._messageService.getUnviewMessages(this.token).subscribe(
-            response => {
+        this._messageService.getUnviewMessages(this.token).pipe(
+            tap(response => {
                 if (response.unviewed) {
                     localStorage.setItem('unviewedMessages', response.unviewed);
                 }
-            },
-            error => {
+            }),
+            catchError(error => {
                 console.log(<any>error);
-            }
-        )
+                return throwError(error);
+            })
+        ).subscribe();
     }
 }

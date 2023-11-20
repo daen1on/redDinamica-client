@@ -7,6 +7,12 @@ import { BasicDataService } from 'src/app/services/basicData.service';
 import { FIELDS_FORM } from './services/citiesData';
 import { City } from 'src/app/models/city.model';
 
+
+import { firstValueFrom } from 'rxjs';
+
+import { takeUntil, tap, catchError } from 'rxjs/operators';
+import { Subject, throwError } from 'rxjs';
+
 @Component({
     selector: 'cities',
     templateUrl: './cities.component.html'
@@ -28,13 +34,17 @@ export class CitiesComponent {
     public total; // Total of records
     public prevPage;
     public nextPage;
-        
+
+    public tempCity;
+    public tempCityId;
+ 
     // Filter
     public filter;
     public allCities = [];
 
     public loading = true;
-
+    private unsubscribe$ = new Subject <void>();
+    
     constructor(
         private _bDService: BasicDataService,
         private _route: ActivatedRoute,
@@ -61,6 +71,11 @@ export class CitiesComponent {
         this.actualPage();
         this.getAllCities();        
     }
+    ngOnDestroy() {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
+    }
+
 
     // Get controls form
     get f() { return this.cityForm.controls; }
@@ -84,61 +99,57 @@ export class CitiesComponent {
         this.city.state = this.cityForm.value.cityState;
         this.city.country = this.cityForm.value.cityCountry;
 
-        this._bDService.addCity(this.city).subscribe(
-            response => {
+        this._bDService.addCity(this.city).pipe(
+            tap(response => {
                 if (response.city && response.city._id) {
                     this.cityForm.reset();                    
                     this.status = 'success';
                     this.submitted = false;                    
                     this.getCities(this.page);
                     this.getAllCities();                
-
                 } else {
                     this.status = 'error';
-
                 }
-            },
-            error => {
+            }),
+            catchError(error => {
                 if (error != null) {
                     this.status = 'error';
                     console.log(<any>error);
                 }
-            }
-        );
+                return throwError(error);
+            })
+        ).subscribe();
     }
 
-    getAllCities(){  
-        this._bDService.getAllCities().subscribe(
-            response=>{       
-                if(response.cities){
-                    this.allCities = response.cities;
-                    localStorage.setItem('cities', JSON.stringify(this.allCities));
-                }
-            },error=>{
-                console.log(<any>error);
-            });        
-    }  
+    async getAllCities() {
+        try {
+          const response = await firstValueFrom(this._bDService.getAllCities());
+          if (response.cities) {
+            this.allCities = response.cities;
+            localStorage.setItem('cities', JSON.stringify(this.allCities));
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      async getCities(page) {
+        try {
+          const response = await firstValueFrom(this._bDService.getCities(page));
+          if (response.cities) {
+            this.cities = response.cities;
+            this.total = response.total;
+            this.pages = response.pages;
+            if (page > this.pages) {
+              this._router.navigate(['/admin/ciudades']);
+            }
+            this.loading = false;
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
     
-    getCities(page){  
-        this._bDService.getCities(page).subscribe(
-            response=>{                  
-                if(response.cities){
-                    this.cities = response.cities; 
-                    this.total = response.total; 
-                    this.pages = response.pages;
-                    if(page > this.pages){
-                        this._router.navigate(['/admin/ciudades']);
-                    }
-                    
-                    this.loading = false;
-                }
-            },error=>{
-                console.log(<any>error);
-            }
-        );
-    }
-
-    public tempCity;
+    
     setEditCity(city){
         this.status = null;
         this.tempCity = city;
@@ -149,80 +160,72 @@ export class CitiesComponent {
             cityCountry: this.tempCity.country
         });         
     }
-
-    onEditSubmit() {
+    async onEditSubmit() {
         this.status = null;
         this.submitted = true;
-        
+      
         if (this.editCityForm.invalid) {
-            return;
+          return;
         }
-        
+      
         this.city.name = this.editCityForm.value.cityName;
         this.city.state = this.editCityForm.value.cityState;
         this.city.country = this.editCityForm.value.cityCountry;
+      
+        try {
+          const response = await firstValueFrom(this._bDService.editCity(this.tempCity._id, this.city));
+          if (response.city && response.city._id) {
+            this.status = 'success';
+            this.submitted = false;
+            await this.getCities(this.page);
+            await this.getAllCities();
+          } else {
+            this.status = 'error';
+          }
+        } catch (error) {
+          if (error != null) {
+            this.status = 'error';
+            console.error(error);
+          }
+        }
+      }
 
-        this._bDService.editCity(this.tempCity._id, this.city).subscribe(
-            response => {
-                if (response.city && response.city._id) {
-                    this.status = 'success';
-                    this.submitted = false;
-                    this.getCities(this.page);
-                    this.getAllCities();
-                } else {
-                    this.status = 'error';
-                }
-            },
-            error => {
-                if (error != null) {
-                    this.status = 'error';
-                    console.log(<any>error);
-                }
-            }
-        );
-    }  
-
-    public tempCityId;
     setDeleteCity(cityId){
         this.tempCityId = cityId;
     }    
 
-    delete(){
-        this._bDService.deleteCity(this.tempCityId).subscribe(
-            response => {
-                
-                this.tempCityId = null;
-                this.getCities(this.page);
-                this.getAllCities();
-            },
-            error => {
-                console.log(<any>error);
+    async delete() {
+        try {
+          const response = await firstValueFrom(this._bDService.deleteCity(this.tempCityId));
+          this.tempCityId = null;
+          await this.getCities(this.page);
+          await this.getAllCities();
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      async actualPage() {
+        this._route.params.subscribe(async params => {
+          let page = +params['page'];
+      
+          this.page = page;
+      
+          if (!page) {
+            this.page = 1;
+            this.nextPage = this.page + 1;
+          } else {
+            this.nextPage = page + 1;
+            this.prevPage = page - 1;
+      
+            if (this.prevPage <= 0) {
+              this.prevPage = 1;
             }
-        )
-    }    
-
-    actualPage(){
-        this._route.params.subscribe(params => {
-           let page = +params['page'];
-
-           this.page = page;
-
-           if(!page){
-               this.page = 1;
-               this.nextPage = this.page + 1;
-           }else{
-               this.nextPage = page + 1;
-               this.prevPage = page - 1;
-
-               if(this.prevPage <= 0){
-                   this.prevPage = 1;
-               }
-           }
- 
-           this.getCities(this.page);
+          }
+      
+          await this.getCities(this.page);
         });
-    }
-
+      }
 
     onKeydown(e) {
         if (e.keyCode === 13) {

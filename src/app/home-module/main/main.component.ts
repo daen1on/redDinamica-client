@@ -94,21 +94,20 @@ export class MainComponent {
         });
     }
 
-    getPublications(page, add = false) {
-        let arrayA, arrayB;
-
+    getPublications(page: number, add = false): void {
+        let arrayA: any[], arrayB: any[];
+    
         this._publicationService.getPublications(this.token, page).subscribe(
-            response => {
-
+            (response: any) => {
                 if (response.publications) {
                     this.total = response.total;
                     this.pages = response.pages;
                     this.itemsPerPage = response.itemsPerPage;
-
+    
                     if (this.page >= this.pages) {
                         this.noMore = true;
                     }
-
+    
                     if (!add) {
                         this.publications = response.publications;
                     } else {
@@ -116,9 +115,9 @@ export class MainComponent {
                         arrayB = response.publications;
                         this.publications = arrayA.concat(arrayB);
                     }
-
+    
                     // $('html, body').animate({scrollTop: $('body').prop("scrollHeight")}, 500);
-
+    
                     if (page > this.pages && this.pages > 0) {
                         this._router.navigate(['/inicio/post', 1]);
                     }
@@ -126,13 +125,13 @@ export class MainComponent {
                     this.loading = false;
                 }
             },
-            error => {
+            (error: any) => {
                 this.loading = false;
-                console.log(<any>error);
+                console.error(error);
             }
         )
     }
-
+    
     setUpload() {
         this.status = null;
         this.submitted = false;

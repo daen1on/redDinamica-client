@@ -23,6 +23,17 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
+      // Obtén el token de autorización del almacenamiento local
+      const authToken = localStorage.getItem('authToken');
+
+      // Si el token de autorización existe, clona la solicitud y añade el token de autorización a las cabeceras
+      if (authToken) {
+        request = request.clone({
+          setHeaders: {
+            Authorization: `Bearer ${authToken}`
+          }
+        });
+
     return next.handle(request).pipe(
       catchError((err) => {
         if (err.status === 401 || err.status === 403) {
