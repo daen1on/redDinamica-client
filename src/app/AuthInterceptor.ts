@@ -33,6 +33,7 @@ export class AuthInterceptor implements HttpInterceptor {
             Authorization: `Bearer ${authToken}`
           }
         });
+      }
 
     return next.handle(request).pipe(
       catchError((err) => {
@@ -56,3 +57,4 @@ export class AuthInterceptor implements HttpInterceptor {
     );
   }
 }
+
