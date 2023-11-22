@@ -24,6 +24,7 @@
     ],
     "useDefineForClassFields": false
   },
+  "exclude": ["cypress"],
   "angularCompilerOptions": {
     "strictTemplates": true,
     "preserveWhitespaces": true,

@@ -26,7 +26,6 @@ import { SearchComponent } from './components/search/search.component';
 import { UserService } from './services/user.service';
 import { UploadService } from './services/upload.service';
 import { LinkyModule } from 'ngx-linky';
-
 // Guards
 
 import { BasicDataService } from './services/basicData.service';
@@ -69,7 +68,8 @@ import { AuthInterceptor } from './AuthInterceptor';
     NgSelectModule,
     InfiniteScrollModule,
     MomentModule,
-    LinkyModule
+    LinkyModule,
+    
   ],
   providers: [
     appRoutingProviders,    

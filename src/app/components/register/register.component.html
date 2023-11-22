@@ -255,8 +255,9 @@
                                 <label class="form-check-label  text-justify" for="tyc">
                                     <small class="text-muted">Aceptar términos y condiciones de
                                         RedDinámica.
-                                        Para conocer los términos y condiciones haz click.
-                                        <a href="{{this.url + 'get-resource/' + tyc_file}}" target="_blank">AQUÍ</a>
+                                        Para conocer los términos y condiciones haz click en: 
+                                        <a [href]="tyc_file" target="_blank">Términos y Condiciones</a>
+
                                     </small>
                                 </label>
                                 <div *ngIf="submitted && f.tyc.errors" class="invalid-feedback">
@@ -265,9 +266,11 @@
                                     </div>
 
                                 </div>
+                                
+
                             </div>
 
-
+                            
 
 
                             <div *ngIf="loading" class="card-body">

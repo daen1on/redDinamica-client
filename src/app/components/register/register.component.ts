@@ -28,8 +28,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     public registerForm: UntypedFormGroup;
     public submitted = false;
     public url;
-    public tyc_file;
-
+    public tyc_file ='assets/TyC_RedDinamica.pdf';
     public user: User;
     public message: String;
 
@@ -59,6 +58,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.user = new User();
         this.tyc_file = TYC_FILE;
         this.url = GLOBAL.url;
+        console.log(this.tyc_file);  // Aquí haces el console.log
+
 
 
         this.items = {
@@ -101,8 +102,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
     }
-
-
+    
+       
     get f() { return this.registerForm.controls; }
 
     async onSubmit() {

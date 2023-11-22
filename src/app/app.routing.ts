@@ -21,4 +21,9 @@ const routes: Routes = [
 ];
 
 export const appRoutingProviders: any[] = [];
-export const Routing: ModuleWithProviders<Route> = RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled', onSameUrlNavigation: 'reload'});
+export const Routing: ModuleWithProviders<Route> = RouterModule.forRoot(routes,
+     { scrollPositionRestoration: 'disabled', 
+     onSameUrlNavigation: 'reload',
+     paramsInheritanceStrategy: 'always',
+     urlUpdateStrategy: 'eager',
+    });
