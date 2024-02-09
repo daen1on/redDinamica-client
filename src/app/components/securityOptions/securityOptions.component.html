@@ -40,7 +40,7 @@
                                     placeholder="{{field.placeholder}}">
                                 <div *ngIf="submitted && f[field.id].errors" class="invalid-feedback">
                                     <div *ngIf="f[field.id].errors.required">
-                                        El campo {{field.label.toLowerCase()}} es obligatorio.
+                                        El campo {{field?.label?.toLowerCase() ?? ''}} es obligatorio.
                                     </div>                                    
                                     <div *ngIf="field.id == 'newPassword' && f[field.id].errors.minlength">
                                         La contraseña debe tener mínimo {{passwordMinLength}} caracteres.
