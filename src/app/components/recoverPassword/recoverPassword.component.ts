@@ -3,6 +3,7 @@ import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms
 import { UserService } from 'src/app/services/user.service';
 import { User } from 'src/app/models/user.model';
 
+import { Observer } from 'rxjs';
 
 
 @Component({
@@ -14,7 +15,24 @@ export class RecoverPasswordComponent implements OnInit {
     public status:string;
     public recoverPassForm: UntypedFormGroup;
     public submitted = false;
-    
+     // Define your observer
+    public observer: Observer<any> = {
+        next: (response) => {
+            if (response.user && response.user._id) {
+                this.status = 'success';
+            } else {
+                console.log("error entró x aca");
+                this.status = 'error';
+            }
+        },
+        error: (error) => {
+            this.status = 'error';
+            console.log(error);
+            },
+        complete: () => {
+  // This is optional
+        }
+    };
     
 
     constructor(
@@ -24,10 +42,11 @@ export class RecoverPasswordComponent implements OnInit {
         this.title = '¿Olvidaste tu contraseña?';       
     }
 
-    ngOnInit(){
+    ngOnInit(): void{
         this.recoverPassForm = this._formBuilder.group({
             email: ['', [Validators.required,Validators.email]]
         })
+       
     }
 
     get f() { return this.recoverPassForm.controls; }
@@ -43,23 +62,7 @@ export class RecoverPasswordComponent implements OnInit {
 
         user.email = this.recoverPassForm.value.email;
 
-        this._userService.recoverPass(user).subscribe(
-            response => {
-                if(response.user && response.user._id){
-                    this.status = 'success';
-
-                }else{
-                    console.log("error entró x aca");
-                    this.status = 'error';
-
-                }
-
-            },
-            error =>{
-                this.status = 'error';
-                console.log(<any>error);
-            }
-        )
+        this._userService.recoverPass(user).subscribe(this.observer)
         
     }    
 }

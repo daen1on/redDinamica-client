@@ -19,7 +19,14 @@ module.exports = {
     },
     "extends": [
         "plugin:@typescript-eslint/recommended",
+        "plugin:@angular-eslint/template/process-inline-templates",
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "eslint:recommended",
+        "plugin:import/errors",
+        "plugin:import/warnings",
+        "plugin:import/typescript",
+        "plugin:jsdoc/recommended",
+        "plugin:prefer-arrow/recommended",
         "prettier"
     ],
     "parser": "@typescript-eslint/parser",
