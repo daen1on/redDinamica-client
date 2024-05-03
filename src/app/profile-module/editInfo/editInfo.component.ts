@@ -15,12 +15,15 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { MAX_FILE_SIZE } from 'src/app/services/DATA';
 
+import {  OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
+
 @Component({
     selector: 'editInfo',
     templateUrl: './editInfo.component.html',
     styleUrls: ['./editInfo.component.css']
 })
-export class EditInfoComponent {
+export class EditInfoComponent implements OnDestroy {
     public title: string;
     public url: string;
     public token: string;
@@ -44,6 +47,8 @@ export class EditInfoComponent {
     public allProfessions;
     public allInstitutions;
     barWidth: string = "0%";
+    private subscriptions: Subscription = new Subscription();
+
 
     constructor(
         private _formBuilder: UntypedFormBuilder,
@@ -117,8 +122,8 @@ export class EditInfoComponent {
     }
 
     getUser(userId) {
-        this._userService.getUser(userId).subscribe(
-            response => {
+        this._userService.getUser(userId).subscribe({
+            next:(response) => {
                 if (response.user) {
                     this.identity = response.user;
                 } else {
@@ -128,12 +133,12 @@ export class EditInfoComponent {
                 }
 
             },
-            error => {
+            error:(error) => {
                 console.log(<any>error);
                 this.identity = this.identity;
                 
             }
-        );
+        });
     }
 
     public typeError = false;
@@ -321,6 +326,10 @@ export class EditInfoComponent {
         
     }
 
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
+    }
+    
     public filesToUpload = [];
     fileChangeEvent(fileInput: any) {
         this.filesToUpload = <Array<File>>fileInput.target.files;
@@ -328,63 +337,55 @@ export class EditInfoComponent {
 
     getAllCities() {
         this.allCities = JSON.parse(localStorage.getItem('cities'));
-
+    
         if (!this.allCities) {
-
-            this._bDService.getAllCities().subscribe(
-                response => {
-
+            this._bDService.getAllCities().subscribe({
+                next: (response) => {
                     if (response.cities) {
                         this.allCities = response.cities;
                         localStorage.setItem('cities', JSON.stringify(this.allCities));
                     }
-                }, error => {
-                    console.log(<any>error);
-                });
+                },
+                error: (error) => console.log(<any>error)
+            });
         }
-
+    
         this.items.city = this.allCities;
-
     }
-
-
+    // Load all professions
     getAllProfessions() {
         this.allProfessions = JSON.parse(localStorage.getItem('professions'));
         if (!this.allProfessions) {
-
-            this._bDService.getAllProfessions().subscribe(
-                response => {
+            this._bDService.getAllProfessions().subscribe({
+                next: (response) => {
                     if (response.professions) {
                         this.allProfessions = response.professions;
                         localStorage.setItem('professions', JSON.stringify(this.allProfessions));
                     }
-                }, error => {
-                    console.log(<any>error);
-                });
+                },
+                error: (error) => console.log(<any>error)
+            });
         }
-
-
+    
         this.items.profession = this.allProfessions;
     }
 
-
+  // Load all institutions
     getAllInstitutions() {
         this.allInstitutions = JSON.parse(localStorage.getItem('institutions'));
-
         if (!this.allInstitutions) {
-            this._bDService.getAllInstitutions().subscribe(
-                response => {
+            this._bDService.getAllInstitutions().subscribe({
+                next: (response) => {
                     if (response.institutions) {
                         this.allInstitutions = response.institutions;
                         localStorage.setItem('institutions', JSON.stringify(this.allInstitutions));
                     }
-                }, error => {
-                    console.log(<any>error);
-                });
+                },
+                error: (error) => console.log(<any>error)
+            });
         }
         this.items.institution = this.allInstitutions;
     }
-
     addCityData(e, controlName) {
         if (e && !e._id && controlName == "city") {
             this.addCity = true;

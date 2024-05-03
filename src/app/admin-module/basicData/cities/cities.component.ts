@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { BasicDataService } from 'src/app/services/basicData.service';
+import { BasicDataService } from '../../../services/basicData.service';
 
 import { FIELDS_FORM } from './services/citiesData';
-import { City } from 'src/app/models/city.model';
+import { City } from '../../../models/city.model';
 
 
 import { firstValueFrom } from 'rxjs';
@@ -227,14 +227,17 @@ export class CitiesComponent {
         });
       }
 
-    onKeydown(e) {
-        if (e.keyCode === 13) {
-            // Cancel the default action, if needed
-            e.preventDefault();
-            // Trigger the button element with a click
-            document.getElementById("save").click();
+      onKeydown(e: KeyboardEvent) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Cancel the default action, if needed
+            
+            const saveButton = document.getElementById("save");
+            if (saveButton !== null) { // Check if the element exists
+                saveButton.click(); // Trigger the button element with a click
+            }
         }
     }
+    
 
     onChanges(): void {
 

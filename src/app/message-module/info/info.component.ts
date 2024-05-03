@@ -21,40 +21,7 @@ export class InfoComponent {
         
     }    
 
-    // ngOnInit(): void {        
-    //     this.loadPage();      
-        
-    // }
-
-    // loadPage(){
-    //     this.identity = this._userService.getIdentity();                
-
-    //     this._route.parent.params.subscribe(params => {
-    //         let id = params['id'];
-            
-    //         this.getUser(id);
-    //     })
-    // }
-
-    // getUser(userId){
-    //     this._userService.getUser(userId).subscribe(
-    //         response => {
-    //             if(response.user){
-    //                 this.identity = response.user;
-    //             }else{
-                    
-    //                 this.identity = this.identity;              
-    //                 this._router.navigate(['/perfil/'+ this.identity._id]);
-    //             }
-
-    //         },
-    //         error => {
-    //             console.log(<any>error);  
-    //             this.identity = this.identity;              
-    //             this._router.navigate(['/perfil/'+ this.identity._id]);
-    //         }
-    //     );
-    // }
+//
 
 
 }

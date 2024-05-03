@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
+
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { PublicationService } from 'src/app/services/publication.service';
@@ -12,6 +14,10 @@ import { Publication } from 'src/app/models/publication.model';
 import { Comment } from 'src/app/models/comment.model';
 import { MAX_FILE_SIZE } from 'src/app/services/DATA';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
+import { Subject, of, throwError } from 'rxjs';
+import { takeUntil, catchError, switchMap, tap, finalize } from 'rxjs/operators';
+
+
 
 @Component({
     selector: 'main',
@@ -49,6 +55,8 @@ export class MainComponent {
     public commentForm;
     public comment;
     public loading = true;
+    private unsubscribe$ = new Subject<void>();
+
     barWidth: string =  "0%";
 
     constructor(
@@ -57,7 +65,8 @@ export class MainComponent {
         private _commentService: CommentService,
         private _uploadService: UploadService,
         private _route: ActivatedRoute,
-        private _router: Router
+        private _router: Router,
+        private fb: FormBuilder
     ) {
         this.title = 'Bienvenidos a';
         this.identity = this._userService.getIdentity();
@@ -66,71 +75,78 @@ export class MainComponent {
 
         this.filesToUpload = [];
 
-        this.postForm = new UntypedFormGroup({
-            textPost: new UntypedFormControl(''),
-            filePost: new UntypedFormControl('')
-        });
+        this.createForm();
+
 
         this.page = 1;
 
         this.getPublications(this.page);
 
-        this.commentForm = new UntypedFormGroup({
-            text: new UntypedFormControl('', Validators.required)
-        });
 
     }
 
     // Get controls form
     get f() { return this.postForm.controls; }
 
+    ngOnDestroy(): void {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
+    }
     onChanges(): void {
-
-        this.postForm.get('textPost').valueChanges.subscribe(val => {
+        this.postForm.get('textPost').valueChanges.pipe(
+            takeUntil(this.unsubscribe$) // Unsubscribe when unsubscribe$ emits
+        ).subscribe(val => {
             if (val) {
                 this.status = null;
                 this.submitted = false;
             }
         });
     }
-
-    getPublications(page: number, add = false): void {
-        let arrayA: any[], arrayB: any[];
     
-        this._publicationService.getPublications(this.token, page).subscribe(
-            (response: any) => {
-                if (response.publications) {
+
+    createForm() {
+        this.postForm = this.fb.group({
+            textPost: [''],
+            filePost: ['']
+        });
+    
+        this.commentForm = this.fb.group({
+            text: ['', Validators.required]
+        });
+    }
+    getPublications(page: number, add = false): void {
+        this._publicationService.getPublications(this.token, page).pipe(
+            catchError(error => {
+                console.error(error);
+                this.loading = false;
+                // Return an observable of null so the stream remains intact
+                return of(null);
+            }),
+            takeUntil(this.unsubscribe$)
+        ).subscribe({
+            next: (response: any) => {
+                if (response && response.publications) {
                     this.total = response.total;
                     this.pages = response.pages;
                     this.itemsPerPage = response.itemsPerPage;
-    
-                    if (this.page >= this.pages) {
-                        this.noMore = true;
-                    }
+                    this.noMore = this.page >= this.pages;
     
                     if (!add) {
                         this.publications = response.publications;
                     } else {
-                        arrayA = this.publications;
-                        arrayB = response.publications;
-                        this.publications = arrayA.concat(arrayB);
+                        this.publications = this.publications.concat(response.publications);
                     }
-    
-                    // $('html, body').animate({scrollTop: $('body').prop("scrollHeight")}, 500);
     
                     if (page > this.pages && this.pages > 0) {
                         this._router.navigate(['/inicio/post', 1]);
                     }
-                    
-                    this.loading = false;
                 }
-            },
-            (error: any) => {
                 this.loading = false;
-                console.error(error);
-            }
-        )
+            },
+            error: (error) => console.error(error)
+        });
     }
+
     
     setUpload() {
         this.status = null;
@@ -154,97 +170,83 @@ export class MainComponent {
         if (!this.postForm.value.textPost && this.filesToUpload.length <= 0) {
             this.formError = true;
             return;
-        } else {
-            this.formError = false;
-        }
+        } 
 
         if (this.filesToUpload[0]) {
             // Validate file type
-            if (['image/jpeg', 'image/gif', 'image/png'].includes(this.filesToUpload[0].type)) {
-                this.typeError = false;
-            } else {
+            if (!['image/jpeg', 'image/gif', 'image/png'].includes(this.filesToUpload[0].type)) {
                 this.typeError = true;
                 return;
-            }
+            } 
 
             // Validate file size
-            if (this.maxSize < this.filesToUpload[0].size) {
+            if (this.filesToUpload[0].size > this.maxSize ) {
                 this.maxSizeError = true;
                 return;
-            } else {
-                this.maxSizeError = false;
             }
         }
+         // Resetting error states for subsequent submissions
+        this.formError = false;
+        this.typeError = false;
+        this.maxSizeError = false;
 
-
-
-        this.publication = new Publication(
+        const publication = new Publication(
             this.postForm.value.textPost,
             this.identity._id
         );
-
-        this._publicationService.addPost(this.token, this.publication).subscribe(
-            response => {
-                if (response.publication) {
-
-                    if (this.filesToUpload.length > 0) {
-
-                        // Upload post image
-                        this._uploadService.makeFileRequest(
-                            this.url + 'upload-file-post/' + response.publication._id,
-                            [],
-                            this.filesToUpload,
-                            this.token,
-                            'image'
-                        ).subscribe((event: HttpEvent<any>) => { // client call
-                            switch(event.type) { //checks events
-                            case HttpEventType.UploadProgress: // If upload is in progress
-                            this.status = 'warning';
-                            this.barWidth = Math.round(event.loaded / event.total * 100).toString()+'%'; // get upload percentage
-                            break;
-                            case HttpEventType.Response: // give final response
-                            console.log('User successfully added!', event.body);
-                            this.submitted = false;
-                            this.postForm.reset();
-                            this.status ='success';
-                            this.barWidth ='0%';
-                            this.getPublications(this.page);
-                            }
-                        }, error=>{
-
-                             
-                            this.status = 'error';
-                            this.barWidth ='0%';
-                            this.submitted = false;
-                            
-                            console.log(<any>error);
-
-                        });
-                    } else {
-                        this.status = 'success';
-                        this.submitted = false;
-                        this.postForm.reset();
-                        this.getPublications(this.page);
-                    }
-
-                } else {
-                    this.status = 'error';
-                    this.submitted = false;
-                    this.getPublications(this.page);
+        this._publicationService.addPost(this.token, publication).pipe(
+            switchMap(response => {
+                if (!response.publication) {
+                    throw new Error('Publication failed');
                 }
+                this.status = 'success';
+                // Only attempt to upload the file if there is one and the publication was successful
+                if (this.filesToUpload.length > 0) {
+                    return this._uploadService.makeFileRequest(
+                        `${this.url}upload-file-post/${response.publication._id}`,
+                        [],
+                        this.filesToUpload,
+                        this.token,
+                        'image'
+                    ).pipe(
+                        tap((event: HttpEvent<any>) => {
+                            switch (event.type) {
+                                case HttpEventType.UploadProgress:
+                                    this.status = 'warning';
+                                    this.barWidth = `${Math.round(100 * event.loaded / event.total)}%`;
+                                    break;
+                                case HttpEventType.Response:
+                                    console.log('File successfully uploaded!', event.body);
+                                    this.barWidth = '0%';
+                                    this.status = 'success';
 
-//                this.submitted = false;
-  //              this.postForm.reset();
-    //            this.getPublications(this.page);
-
-                setInterval(() => { this.status = null; }, 5000);
-            },
-            error => {
-                console.log(<any>error);
+                                    break;
+                            }
+                        }),
+                        catchError(error => {
+                            console.error(error);
+                            this.status = 'error';
+                            this.barWidth = '0%';
+                            return throwError(() => new Error('File upload failed'));
+                        })
+                    );
+                }
+                return of(response); // If no file to upload, just return the response
+            }),
+            catchError(error => {
+                console.error(error);
                 this.status = 'error';
+                return throwError(() => new Error('Publication or file upload failed'));
+            }),
+            finalize(() => {
                 this.submitted = false;
-            }
-        )
+                this.postForm.reset();
+                this.getPublications(this.page);
+                setTimeout(() => this.status = null, 5000);
+            })
+        ).subscribe();
+        
+        
     }
 
     public tempPublicationId;
@@ -252,38 +254,82 @@ export class MainComponent {
         this.tempPublicationId = publicationId;
 
     }
+    public errorMessage: string = '';
+    public errorMessageTimeout: any = null;
 
     deletePost() {
-        this._publicationService.removePost(this.token, this.tempPublicationId).subscribe(
-            response => {
-                if (response.publication) {
-                    this.tempPublicationId = null;
-                    this.getPublications(this.page);
+        this._publicationService.removePost(this.token, this.tempPublicationId).pipe(
+            takeUntil(this.unsubscribe$),
+            tap(response => {
+                if (!response.publication) {
+                    throw new Error('Failed to delete the publication');
                 }
-            },
-            error => {
-                console.log(<any>error);
+                this.tempPublicationId = null;
+                this.getPublications(this.page);
+                this.clearErrorMessage(); // Clear any existing error message immediately on success
+            }),
+            catchError(error => {
+                console.error(error);
+                this.setErrorMessage('Failed to delete the publication. Please try again.');
+                return throwError(() => new Error('Failed to delete the publication'));
+            })
+        ).subscribe({
+            error: (error) => {
+                console.error('Deletion failed', error);
+                // Error is already handled in catchError, no need to set errorMessage here.
             }
-        );
+        });
     }
-
+    setErrorMessage(message: string) {
+        // Clear any existing timeout to prevent it from clearing the message prematurely
+        if (this.errorMessageTimeout) {
+            clearTimeout(this.errorMessageTimeout);
+        }
+        this.errorMessage = message;
+        // Set a new timeout to clear the message after 5 seconds
+        this.errorMessageTimeout = setTimeout(() => {
+            this.errorMessage = '';
+            this.errorMessageTimeout = null; // Reset the timeout reference
+        }, 5000);
+    }
+    clearErrorMessage() {
+        this.errorMessage = '';
+        if (this.errorMessageTimeout) {
+            clearTimeout(this.errorMessageTimeout);
+            this.errorMessageTimeout = null; // Reset the timeout reference
+        }
+    }
     public tempCommentId;
     setDeleteComment(commentId) {
         this.tempCommentId = commentId;
     }
 
     deleteComment() {
-        this._commentService.removeComment(this.token, this.tempCommentId).subscribe(
-            response => {
-                if (response.comment) {
-                    this.tempCommentId = null;
-                    this.getPublications(this.page);
+        this._commentService.removeComment(this.token, this.tempCommentId).pipe(
+            takeUntil(this.unsubscribe$), // Unsubscribe automatically to prevent memory leaks
+            tap(response => {
+                if (!response.comment) {
+                    throw new Error('Failed to delete the comment');
                 }
+                // Reset the tempCommentId and refresh publications if deletion is successful
+                this.tempCommentId = null;
+                this.getPublications(this.page);
+            }),
+            catchError(error => {
+                console.error(error);
+                this.setErrorMessage('Failed to delete the comment. Please try again.');
+                // Handle error, optionally return a more specific observable error if needed
+                return throwError(() => new Error('Failed to delete the comment'));
+            })
+        ).subscribe({
+            next: () => {
+                console.log('Comment deleted successfully');
             },
-            error => {
-                console.log(<any>error);
+            error: (error) => {
+                // Error handling logic has already been applied in catchError
+                console.error('Deletion of comment failed', error);
             }
-        );
+        });
     }
 
     viewMore() {
@@ -302,37 +348,40 @@ export class MainComponent {
         this.focusPublication = publicationId;
     }
 
-
     onCommentSubmit(publicationId) {
-
-        this.comment = new Comment(
-            this.commentForm.value.text,
-            this.identity._id
-        );
-
-        this._commentService.addComment(this.token, this.comment).subscribe(
-            response => {
-                if (response.comment && response.comment._id) {
-                    this._publicationService.updatePublicationComments(this.token, publicationId, response.comment).subscribe(
-                        response => {
-                            if (response.publication && response.publication._id) {
-                                this.getPublications(this.page);
-                                this.commentForm.reset();
-                            }
-                        },
-                        error => { console.log(<any>error) }
-                    );
+        const commentToAdd = new Comment(this.commentForm.value.text, this.identity._id);
+    
+        this._commentService.addComment(this.token, commentToAdd).pipe(
+            switchMap(response => {
+                // Verify if the response of adding a comment is successful before proceeding
+                if (!response.comment || !response.comment._id) {
+                    throw new Error('Failed to add the comment');
                 }
-            },
-            error => {
-                console.log(<any>error);
-            }
-
-        )
-
-
+                // If successful, proceed to update the publication's comments
+                return this._publicationService.updatePublicationComments(this.token, publicationId, response.comment);
+            }),
+            takeUntil(this.unsubscribe$), // Ensure unsubscribing to prevent memory leaks
+            tap(updatedResponse => {
+                // Ensure the publication update was successful
+                if (!updatedResponse.publication || !updatedResponse.publication._id) {
+                    throw new Error('Failed to update publication with the new comment');
+                }
+                // If everything was successful, reset the form and refresh publications
+                this.getPublications(this.page);
+                this.commentForm.reset();
+            }),
+            catchError(error => {
+                console.error(error);
+                this.setErrorMessage('Failed to submit the comment. Please try again.');
+                // Return an observable that errors out to trigger the subscription's error callback
+                return throwError(() => new Error('Failed to submit the comment'));
+            })
+        ).subscribe({
+            next: () => console.log('Comment submitted successfully'),
+            error: (error) => console.error('Comment submission failed', error)
+        });
     }
-
+   
     newLines(text) {
         let innerHtml = '';
 

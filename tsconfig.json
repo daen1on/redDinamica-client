@@ -6,7 +6,7 @@
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "module": "commonjs",
+    "module": "es2020",
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "importHelpers": true,
@@ -27,7 +27,7 @@
   "exclude": ["cypress"],
   "angularCompilerOptions": {
     "strictTemplates": true,
-    "preserveWhitespaces": true,
+    "preserveWhitespaces": false,
     // ...
   }
 }

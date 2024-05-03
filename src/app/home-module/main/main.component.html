@@ -21,7 +21,7 @@
 <div id="new-post" class="card mb-2">
     <form [formGroup]="postForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
         <div class="card-header">
-            <label class="card-title m-0" style="font-size: 1.5em" for="">
+            <label class="card-title m-0" style="font-size: 1.5em" for="textPost">
                 <strong>Crear publicación: </strong>
             </label>
         </div>
@@ -38,7 +38,7 @@
                     </a>
                 </div>
                 <div class="col-10 pl-0">
-                    <textarea class="bg-light text-justify" formControlName="textPost" class="form-control" rows="3"
+                    <textarea class="bg-light text-justify" formControlName="textPost" class="form-control" id="textPost" rows="3"
                         (input)="onChanges()"
                         [ngClass]="{ 'is-invalid': submitted && (formError || typeError || maxSizeError)}"></textarea>
                     <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
@@ -86,11 +86,12 @@
 
                     </div>
                     <div class="col-1 bg-transparent">
-                        <label class="m-0" style="font-size: 2.2em" title="Cargar imagen">
+                        <label class="m-0" style="font-size: 2.2em" title="Cargar imagen" for="filePost">
                             <i class="fas fa-image text-success" style="cursor:pointer"></i>
-                            <input formControlName="filePost" style="display:none" type="file" class="form-control"
-                                name="image" (change)="fileChangeEvent($event)" (click)="setUpload()">
+                            <input formControlName="filePost" style="display:none" type="file" id="filePost" class="form-control"
+                                   name="image" (change)="fileChangeEvent($event)" (click)="setUpload()">
                         </label>
+                        
 
                     </div>
                     <div class="col bg-transparent">
@@ -155,6 +156,10 @@
                         data-target="#delete" (click)="setDelete(publication._id)" title="Eliminar publicación">
                         <i class="fas fa-trash"></i>
                     </button>
+                    <!-- Error Alert -->
+                    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+                        {{ errorMessage }}
+                    </div>
                 </div>
             </div>
 

@@ -15,6 +15,8 @@ import { Profession } from 'src/app/models/profession.model';
 import { Institution } from 'src/app/models/institution.model';
 import { GLOBAL } from 'src/app/services/global';
 
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 @Component({
     selector: 'users',
     templateUrl: './users.component.html',
@@ -68,6 +70,7 @@ export class UsersComponent {
     public allInstitutions;
 
     public loading = true;
+    private unsubscribe$ = new Subject<void>();
 
     constructor(
         private _bDService: BasicDataService,
@@ -124,132 +127,148 @@ export class UsersComponent {
         this.getAllProfessions();
         this.actualPage();
     }
+    
+    ngOnDestroy(): void {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
+    }
 
     // Get controls form
     get f() { return this.addForm.controls; }
     get f2() { return this.editForm.controls; }
 
     getAllCities() {
-
-        this.allCities = JSON.parse(localStorage.getItem('cities'));
-        if (!this.allCities) {
-            this._bDService.getAllCities().subscribe(
-                response => {
-                    if (response.cities) {
-                        this.allCities = response.cities;
-                        localStorage.setItem('cities', JSON.stringify(this.allCities));
-                    }
-                }, error => {
-                    console.log(<any>error);
-                });
-        }
+        this._bDService.getAllCities().pipe(
+            takeUntil(this.unsubscribe$)
+        ).subscribe({
+            next: (response) => {
+                if (response.cities) {
+                    this.allCities = response.cities;
+                    localStorage.setItem('cities', JSON.stringify(this.allCities));
+                }
+            },
+            error: (error) => {
+                console.error('Error fetching cities:', error);
+            }
+        });
     }
-
+    
 
     getAllProfessions() {
         this.allProfessions = JSON.parse(localStorage.getItem('professions'));
         if (!this.allProfessions) {
-
-            this._bDService.getAllProfessions().subscribe(
-                response => {
+            this._bDService.getAllProfessions().pipe(
+                takeUntil(this.unsubscribe$)
+            ).subscribe({
+                next: (response) => {
                     if (response.professions) {
                         this.allProfessions = response.professions;
                         localStorage.setItem('professions', JSON.stringify(this.allProfessions));
                     }
-                }, error => {
-                    console.log(<any>error);
-                });
+                },
+                error: (error) => {
+                    console.error('Error fetching professions:', error);
+                }
+            });
         }
     }
+    
+   
 
 
     getAllInstitutions() {
         this.allInstitutions = JSON.parse(localStorage.getItem('institutions'));
-
         if (!this.allInstitutions) {
-            this._bDService.getAllInstitutions().subscribe(
-                response => {
+            this._bDService.getAllInstitutions().pipe(
+                takeUntil(this.unsubscribe$)
+            ).subscribe({
+                next: (response) => {
                     if (response.institutions) {
                         this.allInstitutions = response.institutions;
                         localStorage.setItem('institutions', JSON.stringify(this.allInstitutions));
                     }
-                }, error => {
-                    console.log(<any>error);
-                });
+                },
+                error: (error) => {
+                    console.error('Error fetching institutions:', error);
+                }
+            });
         }
     }
-
     actualPage() {
-        this._route.params.subscribe(params => {
-            let page = +params['page'];
 
-            this.page = page;
-
-            if (!page) {
-                this.page = 1;
-                this.nextPage = this.page + 1;
-            } else {
+        // Handling route parameters
+        this._route.params.pipe(
+            takeUntil(this.unsubscribe$)
+            ).subscribe(params => {
+                let page = +params['page'] || 1;
+                this.page = page;
                 this.nextPage = page + 1;
-                this.prevPage = page - 1;
-
+                this.prevPage = page - 1;   
                 if (this.prevPage <= 0) {
                     this.prevPage = 1;
                 }
-            }
-
-            this.getUsers(this.page);
-
-        });
+                this.getUsers(this.page);
+            });
     }
 
     getUsers(page) {
-        this._userService.getUsers(page).subscribe(
-            response => {
+        this.loading = true;  // Ensure loading is true when the function starts
+        this._userService.getUsers(page).pipe(
+            takeUntil(this.unsubscribe$)
+        ).subscribe({
+            next: (response) => {
                 if (response.users) {
+                  //  console.log("Full API Response:", response);
+
                     this.users = response.users;
-                    this.total = response.total;
-                    this.pages = response.pages;
+                    this.total = response.totalItems;
+                    this.pages = response.totalPages;
                     this.followers = response.followers;
                     this.following = response.following;
                     if (page > this.pages) {
                         this._router.navigate(['/inicio/usuarios']);
                     }
-
                     this.loading = false;
-                    
+                } else {
+                    // Handle case when there are no users
+                    this.loading = false;
+                    console.log('No users found');
                 }
-            }, error => {
+            },
+            error: (error) => {
                 this.loading = false;
-                console.log(<any>error);
+                console.error('Error fetching users:', error);
             }
-        );
+        });
     }
-
+    
     getAllUsers() {
         let filteredUsers = [];
-        this._userService.getAllUsers().subscribe(
-            response => {
+        this._userService.getAllUsers().pipe(
+            takeUntil(this.unsubscribe$)
+        ).subscribe({
+            next: (response) => {
                 if (response.users) {
-                    
                     this.allUsers = response.users;
                     this.followers = response.followers;
                     this.following = response.following;
-
+    
                     if (this.selectedCategory.length > 0) {
                         this.selectedCategory.forEach((category) => {
-                            filteredUsers = filteredUsers.concat(this.allUsers.filter((user) => {
-                                return user.role == category;
-                            }));
+                            filteredUsers = filteredUsers.concat(this.allUsers.filter((user) => user.role === category));
                         });
-
                         this.allUsers = filteredUsers;
                     }
                 }
-            }, error => {
-                console.log(<any>error);
-            });
+            },
+            error: (error) => {
+                console.error('Error fetching all users:', error);
+            }
+        });
     }
-
+     
+    
+   
     setCategory(category) {
         if (this.selectedCategory.indexOf(category) >= 0) {
             if(category == 'delegated_admin'){
@@ -277,25 +296,24 @@ export class UsersComponent {
         this.followUserOver = 0;        
     }
 
-    followUser(userId){
+    followUser(userId) {
         let follow = new Follow();
         follow.user = this.identity._id;
         follow.followed = userId;
-
-        this._followService.addFollow(this.token, follow).subscribe(
-            response => {
-                                
-                if(response){
-                    this.following.push(response.followed);
+    
+        this._followService.addFollow(this.token, follow).subscribe({
+            next: (response) => {
+                if (response.follow) {  // Assume the response is structured correctly
+                    this.following.push(response.follow.followed);
                 }
-                
             },
-            error => {
-                console.log(<any>error);
+            error: (error) => {
+                console.error('Failed to follow user:', error);
             }
-        )
+        });
     }
-
+    
+    
     public TempU;
     
     getU(userId){
@@ -308,20 +326,18 @@ export class UsersComponent {
         this.TempU="";
      
     }
-    unfollowUser(userId){
-        let index;
-        this._followService.removeFollow(this.token, userId).subscribe(
-            response => {
-                index = this.following.indexOf(response.followed);
-                
-                if(index != -1){
-                    this.following.splice(index,1);
+    unfollowUser(userId) {
+        this._followService.removeFollow(this.token, userId).subscribe({
+            next: (response) => {
+                const index = this.following.indexOf(userId); // Make sure the index is found correctly
+                if (index !== -1) {
+                    this.following.splice(index, 1);
                 }
-                
             },
-            error => {
-                console.log(<any>error);
+            error: (error) => {
+                console.error('Failed to unfollow user:', error);
             }
-        )
+        });
     }
+    
 }

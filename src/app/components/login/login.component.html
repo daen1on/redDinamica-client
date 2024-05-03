@@ -16,6 +16,12 @@
                                 Recuperar contraseña.
                             </a>
                         </div>
+                        <!-- Dynamic Error Message Display -->
+                        <div *ngIf="errorMessage" class="mx-4 alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-times-circle icon-message mr-2"></i>
+                            {{errorMessage}}
+                            <!-- Optionally, add actions like retry or recover password based on the error -->
+                        </div>
 
                         <ng-template #noEmail>
                             <div *ngIf="invalid" class="mx-4 alert alert-danger alert-dismissible fade show">

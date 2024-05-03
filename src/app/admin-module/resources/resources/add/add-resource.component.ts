@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ViewChild,ElementRef } from '@angular/core';
 
 import { Validators, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { Resource } from 'src/app/models/resource.model';
@@ -11,15 +11,17 @@ import { CachedSource } from 'webpack-sources';
 import { MAX_FILE_SIZE } from 'src/app/services/DATA';
 import { HttpErrorResponse, HttpEvent, HttpEventType } from '@angular/common/http';
 import { Subscription } from 'rxjs/internal/Subscription';
+import { concatMap, catchError } from 'rxjs/operators';
+import { finalize, switchMap } from 'rxjs/operators';
 
+import { of } from 'rxjs';
 @Component({
     selector: 'add-resource',
     templateUrl: './add-resource.component.html'
 
 })
-export class AddResourceComponent implements OnInit {
-    public closeBtn; 
 
+export class AddResourceComponent implements OnInit {
     public title;
     public identity;
     public token;
@@ -49,7 +51,8 @@ export class AddResourceComponent implements OnInit {
     public barWidth = '0%';
     
     private resourceId = '';
-    
+    @ViewChild('closeBtn', { static: false }) closeBtn: ElementRef;
+
     @Output() added = new EventEmitter();
 
     constructor(
@@ -82,7 +85,7 @@ export class AddResourceComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.closeBtn = document.getElementById('closeBtn'); //test wtf
+        this.closeBtn.nativeElement.click();
 
     }
 
@@ -102,7 +105,7 @@ export class AddResourceComponent implements OnInit {
         this.barWidth = '0%';
         if (this.loading ==false || this.loading == null){
             console.log(this.closeBtn);
-            this.closeBtn.click();
+            this.closeBtn.nativeElement.click();
             //data-dismiss="modal";
         }
     }
@@ -113,43 +116,47 @@ export class AddResourceComponent implements OnInit {
     setResId(resourceId){
         this.resourceId = resourceId;
     }
-
-    async cancelResource(){
-        console.log("entró");
-        this.warningMsg = 'Se esta cancelando el recurso';
-        this.status='warning';
-        await this.subscriptionFile$.unsubscribe();
-            console.log("subscrip", this.subscriptionFile$);
-        await this.subscriptionResource$.unsubscribe();
-            
-            console.log("subscripReso", this.subscriptionResource$);
-
-        await this._resourceService.deleteResource(this.token, this.getValue()).subscribe(
-                response => {
-                    if(response && response.resource){
-                        //let the user know it was quite deleted
-                       //useless for now  this.deleted.emit();          
-                        console.log("deleted?", response);    //log
-                        this.status='deleted';
-                        this.warningMsg = 'Se estan subiendo los archivos, por favor evita cerrar la ventana. ';
-                        this.errorMsg = 'Hubo un error al enviar el recurso. Intentalo de nuevo más tarde.';
-                        this.loading =false;
-                        
-                    }
-                },
-                error =>{
-                    //TODO let the user know there's an error 
-                    console.log(<any>error);
-                    this.errorMsg="hubo un Error, por favor comunicate con el Administrador";
-                    this.status='error';
-                    this.loading =false;
-                    
-                }
-            );
-            
+    ngOnDestroy() {
+        if (this.subscriptionResource$) {
+            this.subscriptionResource$.unsubscribe();
         }
+        if (this.subscriptionFile$) {
+            this.subscriptionFile$.unsubscribe();
+        }
+    }
+    cancelResource() {
+        console.log("Cancelling resource...");
+        this.warningMsg = 'Se está cancelando el recurso';
+        this.status = 'warning';
+        
+        of(this.subscriptionFile$, this.subscriptionResource$) // Wrap subscriptions in an observable
+            .pipe(
+                concatMap(subscription => {
+                    // Ensure previous subscriptions are cancelled before proceeding
+                    if (subscription) subscription.unsubscribe();
+                    return this._resourceService.deleteResource(this.token, this.getValue());
+                }),
+                catchError((error: any) => {
+                    // Handle errors here
+                    console.error(error);
+                    this.errorMsg = "Hubo un error, por favor comunícate con el Administrador";
+                    this.status = 'error';
+                    this.loading = false;
+                    return of(error); // Return an observable with the error to keep the chain alive
+                })
+            )
+            .subscribe(response => {
+                if (response && response.resource) {
+                    console.log("Resource deleted:", response);
+                    this.status = 'deleted';
+                    this.warningMsg = 'Recurso cancelado con éxito.';
+                    this.errorMsg = 'Hubo un error al enviar el recurso. Inténtalo de nuevo más tarde.';
+                    this.loading = false;
+                }
+            });
+    }
 
-    
+
 
     disableForm(command:Boolean):void{
         if(command == true){
@@ -201,7 +208,6 @@ export class AddResourceComponent implements OnInit {
         this.maxSizeError = false;
 
     }
-
     onSubmit() {
         this.submitted = true;
         this.loading = true;
@@ -209,102 +215,60 @@ export class AddResourceComponent implements OnInit {
             this.loading = false;
             return;
         }
-
+    
         this.resource = new Resource(
             this.addForm.value.name,
             this.addForm.value.type,
             this.addForm.value.source,
             this.addForm.value.description,
             this.identity._id);
-
+    
         if (this.addForm.value.url) {
             this.resource.url = this.addForm.value.url;
         }
-
+    
         this.resource.accepted = true;
-
-
-        this.subscriptionResource$=this._resourceService.addResource(this.token, this.resource).subscribe(
-            response => {
-
-                if (response.resource && response.resource._id) {
-                    
+    
+        this._resourceService.addResource(this.token, this.resource)
+            .pipe(
+                switchMap(response => {
+                    if (!response.resource || !response.resource._id) {
+                        throw new Error('Failed to create resource');
+                    }
                     this.setResId(response.resource._id);
-                    if (!this.filesToUpload){
-                        this.addForm.reset();
-                        this.status = 'success';
-                        this.loading = false;
+                    if (!this.filesToUpload || this.filesToUpload.length === 0) {
+                        return of(response); // Immediately complete if no files to upload
                     }
-                    else{
-
-                        if (this.filesToUpload.length > 0) {
-
-
-                            // Upload post image
-                            this.disableForm(true);
-                            this.subscriptionFile$= this._uploadService.makeFileRequest(
-                                this.url + 'upload-resource/' + response.resource._id,
-                                [],
-                                this.filesToUpload,
-                                this.token,
-                                'file'
-                            ).subscribe((event: HttpEvent<any>) => { // client call
-                                switch(event.type) { //checks events
-                                case HttpEventType.UploadProgress: // If upload is in progress
-                                this.status = 'warning';
-                                this.barWidth = Math.round(event.loaded / event.total * 100).toString()+'%'; // get upload percentage
-                                
-                                break;
-                                case HttpEventType.Response: // give final response
-                                
-                                //console.log("enter here edit Document");
-                                this.added.emit();
-                                this.addForm.reset();                    
-                                this.disableForm(false);
-                                //console.log("respuesta: ", event.body.resource);
-                                this.barWidth ='0%';
-                                this.loading = false;
-                                this.status ='success';
-                                                                                    
-
-                                }
-                            }, error=>{
-
-                                
-                                this.status = 'error';
-                                this.barWidth ='0%';
-                                this.loading = false;
-                                console.log(<any>error);
-
-                            });
-
-                        this.added.emit();                       
-
-                     } else {
-                        this.status = 'error';
-                        this.barWidth ='0%';
-                        this.loading = false;
-                        }
-                    }
-
-                } else {
-                    this.status = 'error';
-                    this.barWidth ='0%';
+                    return this._uploadService.makeFileRequest(
+                        this.url + 'upload-resource/' + response.resource._id,
+                        [],
+                        this.filesToUpload,
+                        this.token,
+                        'file'
+                    );
+                }),
+                finalize(() => {
                     this.loading = false;
+                    this.submitted = false;
+                    this.addForm.reset();
+                    this.status = 'success';
+                }),
+                catchError((error: any) => {
+                    console.error(error);
+                    this.status = 'error';
+                    return of(error); // Handle error and continue
+                })
+            )
+            .subscribe(event => {
+                if (event.type === HttpEventType.UploadProgress) {
+                    this.status = 'warning';
+                    this.barWidth = Math.round(event.loaded / event.total * 100).toString() + '%';
+                } else if (event.type === HttpEventType.Response) {
+                    this.added.emit();
                 }
-            },
-            error => {
-                this.status = 'error';
-                this.barWidth ='0%';
-                this.loading = false;
-                console.log(<any>error);
-            }
-        );
-        
-        document.querySelector('.modal-body').scrollTop = 0;
-        this.submitted = false;
-        this.added.emit();
+            });
     }
+    
 
     onChanges(): void {
         if (this.loading ==false){
