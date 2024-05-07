@@ -60,22 +60,24 @@ export class NewUsersComponent {
           .pipe(takeUntil(this.unsubscribe$))
           .subscribe({
             next: (response) => {
-              if (response.users) {
-                this.users = response.users;
-                this.total = response.total;
-                this.pages = response.pages;
-                if (page > this.pages) {
-                  this._router.navigate(['/admin/usuarios-nuevos']);
-                }
-                this.loading = false;
+              
+              this.users = response.users || []; // Ensure users is always an array
+              this.total = response.total;
+              this.pages = response.pages;
+              this.loading = false; 
+              // Navigate if the current page is greater than total pages
+              if (page > this.pages) {
+                this._router.navigate(['/admin/usuarios-nuevos']);
               }
             },
             error: (error) => {
-              console.error(error);
+              console.error("error nuevos usuarios: "+error);
+              this.loading = false; // Ensure loading is set to false even on error
             }
           });
-      }
-      activeUser(user: any) {
+    }
+    
+    activeUser(user: any) {
         user['actived'] = true;
         this._UserService.updateUser(user)
           .pipe(takeUntil(this.unsubscribe$))
