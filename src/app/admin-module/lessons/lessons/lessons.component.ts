@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { LessonService } from 'src/app/services/lesson.service';
 import { UserService } from 'src/app/services/user.service';
+import { Subject, takeUntil } from 'rxjs';
 
 import { Router, ActivatedRoute } from '@angular/router';
 
-import { UntypedFormControl } from '@angular/forms';
+import { FormControl, UntypedFormControl } from '@angular/forms';
 import { GLOBAL } from 'src/app/services/global';
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { ACADEMIC_LEVEL, LESSON_STATES } from 'src/app/services/DATA';
@@ -15,321 +16,227 @@ import { ACADEMIC_LEVEL, LESSON_STATES } from 'src/app/services/DATA';
 
 })
 export class LessonsComponent implements OnInit {
-    public title: string;
-    public identity;
-    public token;
-    public url;
+    title = 'Lecciones';
+    url = GLOBAL.url;
+    identity: any; // Adjust type as needed
+    token: string; // Adjust type as needed
+    lessons = [];
+    loading = true;
 
-    public allLessons = [];
-    public lessons = [];
-
-    public level = { basic: "Básico", medium: "Medio", advanced: "Avanzado" };
-    public type = { consideration: "Consideración", development: "Desarrollo" };
-    public academic_level = ACADEMIC_LEVEL;
-    
-    public lesson_states = LESSON_STATES;
+    filter = new FormControl('');
+    orderControl = new FormControl('');
+    unsubscribe$ = new Subject<void>();
+    allLessons = [];
+    level = { basic: "Básico", medium: "Medio", advanced: "Avanzado" };
+    type = { consideration: "Consideración", development: "Desarrollo" };
+    academic_level = ACADEMIC_LEVEL;
+    lesson_states = LESSON_STATES;
 
 
     public visible = new UntypedFormControl();
 
+    
     // Pagination
-    public page; // Actual page
-    public pages; // Number of pages
-    public total; // Total of records
-    public prevPage;
-    public nextPage;
-
-    // Filter
-    public filter;
-    public selectedStates = [];
-    public selectedAreas = [];
-    public selectedLevels = [];
-    public orderControl;
-
-    public states = [
-        {
-            label: "Propuesta",
-            value: "proposed",
-            class: "secondary"
-        },
-        {
-            label: "Asignada",
-            value: "assigned",
-            class: "warning"
-        },
-        {
-            label: "Desarrollo",
-            value: "development",
-            class: "info"
-        },
-        {
-            label: "Prueba",
-            value: "test",
-            class: "primary"
-        },
-        {
-            label: "Terminada",
-            value: "completed",
-            class: "success"
-        }
+    page: number;// Actual page
+    pages: number;// Number of pages
+    total: number;// Total of records
+    prevPage: number;
+    nextPage: number;
+   
+    // Filters
+    selectedStates = [];
+    selectedAreas = [];
+    selectedLevels = [];
+    states = [
+        { label: "Propuesta", value: "proposed", class: "secondary" },
+        { label: "Asignada", value: "assigned", class: "warning" },
+        { label: "Desarrollo", value: "development", class: "info" },
+        { label: "Prueba", value: "test", class: "primary" },
+        { label: "Terminada", value: "completed", class: "success" }
     ];
-
-    public areas;
-    public levels = [
-        {
-            label: "Preescolar",
-            value: "garden",
-        },
-        {
-            label: "Primaria",
-            value: "school"
-        },
-        {
-            label: "Secundaria",
-            value: "highschool"
-        },
-        {
-            label: "Universitario",
-            value: "university"
-        }
+    areas: any[];
+    levels = [
+        { label: "Preescolar", value: "garden" },
+        { label: "Primaria", value: "school" },
+        { label: "Secundaria", value: "highschool" },
+        { label: "Universitario", value: "university" }
     ];
-
-    public loading = true;
 
     constructor(
-        private _userService: UserService,
-        private _lessonService: LessonService,
-        private _bDService: BasicDataService,
-        private _router: Router,
-        private _route: ActivatedRoute
-    ) {
-        this.title = 'Lecciones';
-        this.url = GLOBAL.url;
-        this.token = this._userService.getToken();
-        this.identity = this._userService.getIdentity();
-        this.areas;
+        private userService: UserService,
+        private lessonService: LessonService,
+        private basicDataService: BasicDataService,
+        private router: Router,
+        private route: ActivatedRoute,
+        private cdr: ChangeDetectorRef  // ChangeDetectorRef added here
 
-        this.orderControl = new UntypedFormControl('');
-        this.filter = new UntypedFormControl('');
+    ) {
+        this.token = this.userService.getToken();
+        this.identity = this.userService.getIdentity();
 
     }
 
     ngOnInit(): void {
-        this.getAllLessons();        
-        this.getAllAreas();
-        this.actualPage();
+        this.loadInitialData();
+     
     }
-
-    ngDoCheck(): void {
-        if (this.needReloadData) {
-            this.actualPage();
-            this.getAllLessons();
-            this.needReloadData = false;
-        }
+    ngOnDestroy(): void {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
     }
-
-
-    setOrder() {
-
-        if (this.orderControl) {
-            if (this.orderControl.value == 'views') {
-                return 'views';
-            } else if (this.orderControl.value == 'score') {
-                return 'score';
-            }
-        }
-        return '';
+    loadInitialData(): void {
+        this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe(params => {
+            this.page = +params['page'] || 1;
+            this.fetchLessons(this.page);
+        });
+    
+        this.basicDataService.getAllKnowledgeAreas().pipe(takeUntil(this.unsubscribe$)).subscribe({
+            next: response => {
+                try {
+                    this.areas = response.areas || JSON.parse(localStorage.getItem('areas') || '[]');
+                    localStorage.setItem('areas', JSON.stringify(this.areas));
+                } catch (error) {
+                    console.error('Error parsing areas from localStorage:', error);
+                    this.areas = response.areas || [];
+                }
+            },
+            error: error => console.error('Error fetching areas:', error)
+        });
+    
+        this.fetchAllLessons();
     }
+    
+    public needReloadData;
+
+    setNeedReload(eventData: any): void {
+        // Handle the event data appropriately
+        console.log(eventData);
+        this.actualPage(); // Refresh data
+        this.fetchAllLessons();
+        this.cdr.detectChanges(); // Force update the view
+    }
+    
 
 
-    setState(selectedState) {
-        if (this.selectedStates.indexOf(selectedState) >= 0) {
-            this.selectedStates.splice(this.selectedStates.indexOf(selectedState), 1);
-
+    setState(selectedState: string): void {
+        const index = this.selectedStates.indexOf(selectedState);
+        if (index > -1) {
+            this.selectedStates.splice(index, 1);
         } else {
             this.selectedStates.push(selectedState);
-
         }
-
-        this.getAllLessons();
+        this.fetchAllLessons(); // Refetch and reapply filters whenever states change
     }
 
-    setArea(selectedArea) {
-        if (this.selectedAreas.indexOf(selectedArea) >= 0) {
-            this.selectedAreas.splice(this.selectedAreas.indexOf(selectedArea), 1);
-
+    
+    setArea(selectedArea: string): void {
+        const index = this.selectedAreas.indexOf(selectedArea);
+        if (index > -1) {
+            this.selectedAreas.splice(index, 1);
         } else {
             this.selectedAreas.push(selectedArea);
-
         }
-
-        this.getAllLessons();
+        this.fetchAllLessons(); // Refetch and reapply filters whenever areas change
     }
+    
 
-    setLevel(selectedLevel) {
-
-        if (this.selectedLevels.indexOf(selectedLevel) >= 0) {
-            this.selectedLevels.splice(this.selectedLevels.indexOf(selectedLevel), 1);
+    setLevel(selectedLevel: string): void {
+        const index = this.selectedLevels.indexOf(selectedLevel);
+        if (index > -1) {
+            this.selectedLevels.splice(index, 1);
         } else {
             this.selectedLevels.push(selectedLevel);
         }
-
-        this.getAllLessons();
+        this.fetchAllLessons(); // Refetch and reapply filters whenever levels change
+    }
+    setOrder(orderCriteria: string): void {
+        this.orderControl.setValue(orderCriteria);
+        this.fetchAllLessons(); // Refetch all lessons when order changes
     }
 
-    getAllAreas() {
-        this.areas = JSON.parse(localStorage.getItem('areas'));
+    navigateToPage(page: number): void {
+        this.router.navigate(['/admin/lecciones', page]);
+        this.fetchLessons(page);
+    }
 
-
-        if (!this.areas) {
-
-            this._bDService.getAllKnowledgeAreas().subscribe(
-                response => {
-                    if (response.areas) {
-                        this.areas = response.areas;
-
-                        localStorage.setItem('areas', JSON.stringify(this.areas));
-                    }
-                }, error => {
-                    console.log(<any>error);
-                });
+    fetchAllLessons(): void {
+        let orderBy = this.orderControl.value || 'created_at';
+        this.lessonService.getAllLessons(this.token, orderBy).pipe(takeUntil(this.unsubscribe$)).subscribe({
+            next: response => this.applyFilters(response.lessons),
+            error: error => console.error('Error fetching all lessons:', error)
+        });
+    }
+    applyFilters(lessons: any[]): void {
+        let filteredLessons = lessons;
+        if (this.selectedStates.length) {
+            filteredLessons = filteredLessons.filter(lesson => this.selectedStates.includes(lesson.state));
         }
+        if (this.selectedAreas.length) {
+            filteredLessons = filteredLessons.filter(lesson => 
+                lesson.knowledge_area.some(area => this.selectedAreas.includes(area.name)));
+        }
+        if (this.selectedLevels.length) {
+            filteredLessons = filteredLessons.filter(lesson => this.selectedLevels.includes(lesson.level));
+        }
+        this.allLessons = filteredLessons;
     }
 
-    getAllLessons() {
-        let filteredLessons = [];
-        let res;
-        let orderBy = this.setOrder();
 
-        this._lessonService.getAllLessons(this.token, orderBy).subscribe(
-            response => {
-                if (response.lessons) {
-                    this.allLessons = response.lessons;
-                    
-                    // Filter by state
-                    if (this.selectedStates.length > 0) {
-                        this.selectedStates.forEach((state) => {
-                            filteredLessons = filteredLessons.concat(this.allLessons.filter((lesson) => {
-                                return lesson.state == state;
-                            }));
-                        });
-
-                        this.allLessons = filteredLessons;
-                        filteredLessons = [];
-                    }
-
-                    // Filter by area
-                    if (this.selectedAreas.length > 0) {
-                        this.selectedAreas.forEach((area) => {
-                            filteredLessons = filteredLessons.concat(this.allLessons.filter((lesson) => {
-                                res = false;
-
-                                lesson.knowledge_area.some(function (knowledge_area) {
-                                    res = knowledge_area.name == area;
-                                    if(res){
-                                        return true;
-                                    }
-                                });
-                                
-                                return res;
-                            }));
-                        });
-
-                        this.allLessons = filteredLessons;
-                        filteredLessons = [];
-                    }
-
-                    // Filter by level
-                    if (this.selectedLevels.length > 0) {
-                        this.selectedLevels.forEach((level) => {
-                            filteredLessons = filteredLessons.concat(this.allLessons.filter((lesson) => {
-                                return lesson.level == level;
-                            }));
-                        });
-
-                        this.allLessons = filteredLessons;
-                        filteredLessons = [];
-                    }
-
-                }
-            }, error => {
-                console.log(<any>error);
-            });
-    }
-
-    getLessons(page = 1) {
-
-        this._lessonService.getLessons(this.token, page).subscribe(
-            response => {
-                if (response.lessons) {
-                    this.lessons = response.lessons;
-                    this.total = response.total;
-                    this.pages = response.pages;   
-                                 
-                    if (page > this.pages) {
-                        this._router.navigate(['/admin/lecciones']);
-                    }
-
-                    this.loading = false;
-                }
-            }, error => {
-                console.log(<any>error);
+    fetchLessons(page: number): void {
+        this.lessonService.getLessons(this.token, page).pipe(takeUntil(this.unsubscribe$)).subscribe({
+            next: response => {
+                this.lessons = response.lessons;
+                this.total = response.total;
+                this.pages = response.pages;
+                this.loading = false;
+            },
+            error: error => {
+                console.error('Error fetching lessons:', error);
+                this.loading = false;
             }
-        );
+        });
     }
-
     actualPage() {
-
-        this._route.params.subscribe(params => {
+        this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe(params => {
             let page = +params['page'];
-
+    
             this.page = page;
-
+    
             if (!page) {
                 this.page = 1;
                 this.nextPage = this.page + 1;
             } else {
                 this.nextPage = page + 1;
-                this.prevPage = page - 1;
-
+                this.prevPage = this.page - 1;
+    
                 if (this.prevPage <= 0) {
                     this.prevPage = 1;
                 }
             }
-
-            this.getLessons(this.page);
+    
+            this.fetchLessons(this.page);
         });
     }
 
     reloadLessons() {
-        this.getAllLessons();
+        this.fetchAllLessons();
     }
 
-    editLesson(lesson, setVisibility = null) {
-
-        if (setVisibility) {
-            if (lesson.visible) {
-                lesson.visible = false;
-            } else {
-                lesson.visible = true;
-            }
+    // Additional utility functions
+    editLesson(lesson: any, visibilityChange: boolean = false): void {
+        if (visibilityChange) {
+            lesson.visible = !lesson.visible;
         }
-
-        this._lessonService.editLesson(this.token, lesson).subscribe(
-            response => {
-
-                if (response && response.lesson._id) {
-                    this.getLessons(this.page);
-                }
+        this.lessonService.editLesson(this.token, lesson).pipe(takeUntil(this.unsubscribe$)).subscribe({
+            next: response => {
+                this.fetchLessons(this.page); // Refresh the current page to reflect changes
             },
-            error => {
-                console.log(<any>error);
-            }
-        )
+            error: error => console.error('Error updating lesson:', error)
+        });
     }
-
+    
     public deleteLessonId;
-    setDeleteLesson(lessonId){
+    setDeleteLesson(lessonId: string): void {
         this.deleteLessonId = lessonId;
     }
 
@@ -345,27 +252,14 @@ export class LessonsComponent implements OnInit {
         this.nextVersion = nextVersion;
     }
 
-    public needReloadData;
-    setNeedReload(event){
-        this.needReloadData = true;
-    }
-
     public showAreas = false; 
-    setShowAreas(){
-        if(this.showAreas){
-            this.showAreas = false;
-        }else{
-            this.showAreas = true;
-        }
+    setShowAreas(show: boolean): void {
+        this.showAreas = show;
     }
 
     public showLevels = false; 
-    setShowLevels(){
-        if(this.showLevels){
-            this.showLevels = false;
-        }else{
-            this.showLevels = true;
-        }
+    setShowLevels(show: boolean): void {
+        this.showLevels = show;
     }
 }
 

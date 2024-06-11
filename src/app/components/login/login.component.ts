@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { UserService } from 'src/app/services/user.service';
 import { User } from 'src/app/models/user.model';
@@ -8,28 +8,26 @@ import { MessageService } from 'src/app/services/message.service';
 import { catchError, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { EMPTY, Subject } from 'rxjs';
 
-
-
 @Component({
     selector: 'login',
     templateUrl: './login.component.html'
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
     public title: string;
     public invalid: boolean;
     public emailFound: boolean;
     public submitted = false;
     public loginForm: UntypedFormGroup;
-    public user;
-    public identity;
-    public token;
+    public user: User;
+    public identity: any;
+    public token: string;
 
     public allProfessions = [];
     public allInstitutions = [];
     public allAreas = [];
     private unsubscribe$: Subject<void> = new Subject();
 
-    public loading;
+    public loading: boolean;
     public errorMessage: string = '';
 
     constructor(
@@ -41,41 +39,43 @@ export class LoginComponent implements OnInit {
     ) {
         this.user = new User();
         this.title = 'Iniciar sesión';
-
     }
+
     ngOnDestroy(): void {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
     }
+
     ngOnInit() {
         this.loginForm = this._formBuilder.group({
             email: ['', [Validators.required, Validators.email]],
             password: ['', Validators.required],
-        })
+        });
 
+        this.onChanges();
     }
+
     onChanges(): void {
         this.loginForm.valueChanges.pipe(
             takeUntil(this.unsubscribe$)
-        ).subscribe(val => {
-            this.errorMessage = ''; // Reset the error message on form changes
-            this.invalid = false; // Consider setting to false or an empty string depending on your logic
+        ).subscribe(() => {
+            this.errorMessage = '';
+            this.invalid = false;
         });
     }
-   
 
     // Get controls form
     get f() { return this.loginForm.controls; }
+
     onSubmit() {
         this.submitted = true;
-        this.loading = true; // Ensure you set loading true at the beginning of the submission
-    
+        this.loading = true;
+
         if (this.loginForm.invalid) {
             this.loading = false;
             return;
         }
-    
-        // Simplify by directly using the form value
+
         this._userService.signup(this.loginForm.value).pipe(
             takeUntil(this.unsubscribe$),
             switchMap(response => {
@@ -85,20 +85,27 @@ export class LoginComponent implements OnInit {
                 localStorage.setItem('identity', JSON.stringify(response.user));
                 return this._userService.signup(this.loginForm.value, true);
             }),
-            tap(tokenResponse => {
-                if (!tokenResponse.token) {
-                    throw new Error('Token not found');
+            tap({
+                next: tokenResponse => {
+                    if (!tokenResponse.token) {
+                        throw new Error('Token not found');
+                    }
+                    localStorage.setItem('token', tokenResponse.token);
+                    this.token = tokenResponse.token; // Set the token for further requests
+                },
+                error: error => {
+                    this.errorMessage = 'Ha ocurrido un error. Por favor intenta de nuevo.';
+                    console.error(error);
+                    this.invalid = true;
+                    this.loading = false;
                 }
-                localStorage.setItem('token', tokenResponse.token);
-                // Proceed with fetching all necessary data
             }),
             catchError(error => {
                 this.errorMessage = 'Ha ocurrido un error. Por favor intenta de nuevo.';
                 console.error(error);
                 this.invalid = true;
                 this.loading = false;
-                // Optionally, set an error message for the UI
-                return EMPTY; // Import EMPTY from 'rxjs'
+                return EMPTY;
             })
         ).subscribe(() => {
             this.getAllInstitutions();
@@ -109,130 +116,143 @@ export class LoginComponent implements OnInit {
             this._router.navigate(['/inicio']);
         });
     }
-   
 
     getAllAreas() {
-        // Check if areas are already stored in localStorage to avoid unnecessary API calls
         const storedAreas = localStorage.getItem('areas');
         if (storedAreas) {
             this.allAreas = JSON.parse(storedAreas);
-            return; // Exit the method if areas are already available
+            return;
         }
-    
-        // Proceed to fetch areas if not found in localStorage
+
         this._bDService.getAllKnowledgeAreas().pipe(
-            takeUntil(this.unsubscribe$), // Ensure unsubscription to prevent memory leaks
-            tap(response => {
-                if (response.areas) {
-                    this.allAreas = response.areas;
-                    localStorage.setItem('areas', JSON.stringify(this.allAreas));
-                } else {
-                    // Handle case where the response might not have the expected data
-                    throw new Error('No areas found');
+            takeUntil(this.unsubscribe$),
+            tap({
+                next: response => {
+                    if (response.areas) {
+                        this.allAreas = response.areas;
+                        localStorage.setItem('areas', JSON.stringify(this.allAreas));
+                    } else {
+                        throw new Error('No areas found');
+                    }
+                },
+                error: error => {
+                    console.error(error);
                 }
             }),
             catchError(error => {
                 console.error(error);
-                return EMPTY; // Prevents the Observable from breaking on error, import EMPTY from 'rxjs'
+                return EMPTY;
             })
         ).subscribe();
     }
 
     getAllProfessions() {
-        // Attempt to retrieve professions from local storage to minimize unnecessary API calls
         const storedProfessions = localStorage.getItem('professions');
         if (storedProfessions) {
             this.allProfessions = JSON.parse(storedProfessions);
-            return; // Exit if professions are found in local storage
+            return;
         }
-    
-        // Fetch professions from the server if not found in local storage
+
         this._bDService.getAllProfessions().pipe(
-            takeUntil(this.unsubscribe$), // Ensures clean unsubscription
-            tap(response => {
-                if (response.professions) {
-                    this.allProfessions = response.professions;
-                    localStorage.setItem('professions', JSON.stringify(this.allProfessions));
-                } else {
-                    // Consider adding more robust handling for when the expected data isn't present
-                    throw new Error('No professions found');
+            takeUntil(this.unsubscribe$),
+            tap({
+                next: response => {
+                    if (response.professions) {
+                        this.allProfessions = response.professions;
+                        localStorage.setItem('professions', JSON.stringify(this.allProfessions));
+                    } else {
+                        throw new Error('No professions found');
+                    }
+                },
+                error: error => {
+                    console.error(error);
+                    this.errorMessage = 'No se pueden traer las profesiones. Por favor intenta de nuevo mas tarde.';
                 }
             }),
             catchError(error => {
                 console.error(error);
-                // Optionally, update the UI to inform the user that an error occurred
                 this.errorMessage = 'No se pueden traer las profesiones. Por favor intenta de nuevo mas tarde.';
-                return EMPTY; // Keeps the observable chain alive, import EMPTY from 'rxjs'
+                return EMPTY;
             })
         ).subscribe();
     }
 
-
     getAllInstitutions() {
-        // Attempt to retrieve institutions from local storage to avoid unnecessary API calls
         const storedInstitutions = localStorage.getItem('institutions');
         if (storedInstitutions) {
             this.allInstitutions = JSON.parse(storedInstitutions);
-            return; // Exit the method if institutions are already loaded
+            return;
         }
-    
-        // Fetch institutions from the server if not found in local storage
+
         this._bDService.getAllInstitutions().pipe(
-            takeUntil(this.unsubscribe$), // Unsubscribe when the component is destroyed
-            tap(response => {
-                if (response.institutions) {
-                    this.allInstitutions = response.institutions;
-                    localStorage.setItem('institutions', JSON.stringify(this.allInstitutions));
-                } else {
-                    // Handle the scenario where the expected data structure isn't returned
-                    throw new Error('No institutions found');
+            takeUntil(this.unsubscribe$),
+            tap({
+                next: response => {
+                    if (response.institutions) {
+                        this.allInstitutions = response.institutions;
+                        localStorage.setItem('institutions', JSON.stringify(this.allInstitutions));
+                    } else {
+                        throw new Error('No institutions found');
+                    }
+                },
+                error: error => {
+                    console.error(error);
+                    this.errorMessage = 'Error intentando traer las instituciones. Intenta de nuevo más tarde';
                 }
             }),
             catchError(error => {
                 console.error(error);
-                this.errorMessage = 'Error intentando traer las profesiones. Intenta de nuevo más tarde';
-                return EMPTY; // Import EMPTY from 'rxjs'; prevents the Observable from breaking
+                this.errorMessage = 'Error intentando traer las instituciones. Intenta de nuevo más tarde';
+                return EMPTY;
             })
         ).subscribe();
     }
 
     getCounters() {
         this._userService.getCounters().pipe(
-            takeUntil(this.unsubscribe$), // Automatically manage unsubscription
-            tap(response => {
-                if (response) {
-                    localStorage.setItem('stats', JSON.stringify(response));
-                } else {
-                    throw new Error('Failed to fetch counters');
+            takeUntil(this.unsubscribe$),
+            tap({
+                next: response => {
+                    if (response) {
+                        localStorage.setItem('stats', JSON.stringify(response));
+                    } else {
+                        throw new Error('Failed to fetch counters');
+                    }
+                },
+                error: error => {
+                    console.error(error);
+                    this.errorMessage = 'Failed to load user counters.';
                 }
             }),
             catchError(error => {
                 console.error(error);
-                // Optionally, we can set an error message to inform the user
                 this.errorMessage = 'Failed to load user counters.';
-                return EMPTY; // Ensures the stream is kept alive in case of an error
+                return EMPTY;
             })
         ).subscribe();
     }
+
     getUnviewMessages() {
         this._messageService.getUnviewMessages(this.token).pipe(
-            takeUntil(this.unsubscribe$), // Ensures unsubscription to prevent memory leaks
-            tap(response => {
-                if (response) {
-                    localStorage.setItem('unviewedMessages', JSON.stringify(response.unviewed));
-                } else {
-                    // Handle the case where the response might not be in the expected format
-                    throw new Error('Failed to fetch unviewed messages');
+            takeUntil(this.unsubscribe$),
+            tap({
+                next: response => {
+                    if (response) {
+                        localStorage.setItem('unviewedMessages', JSON.stringify(response.unviewed));
+                    } else {
+                        throw new Error('Failed to fetch unviewed messages');
+                    }
+                },
+                error: error => {
+                    console.error(error);
+                    this.errorMessage = 'Unable to load new messages.';
                 }
             }),
             catchError(error => {
                 console.error(error);
-                // Optionally, UI to display an error message to the user.
                 this.errorMessage = 'Unable to load new messages.';
-                return EMPTY; // Keeps the observable chain alive in case of an error, ensuring future subscriptions are not affected.
+                return EMPTY;
             })
         ).subscribe();
     }
-    
-    
 }

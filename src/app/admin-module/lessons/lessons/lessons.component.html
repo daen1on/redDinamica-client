@@ -47,7 +47,7 @@
         </div>
         <!-- /checkbox filter -->
 
-        <!-- checkbox filter -->
+        <!-- checbox filter -->
         <div class="row">
             <div class="col">
                 <div class="form-group">
@@ -55,7 +55,7 @@
                         <div class="col">
                             <h6 class="text-primary font-weight-bold mb-0">
                                 Área de conocimiento
-                                <button class="btn btn-link" (click)="setShowAreas()">
+                                <button class="btn btn-link" (click)="setShowAreas(true)">
                                     <ng-container *ngIf="showAreas; else showOptions">
                                         Ocultar opciones
                                     </ng-container>
@@ -87,7 +87,7 @@
                     <div class="row">
                         <div class="col">
                             <h6 class="text-primary font-weight-bold mb-0">Nivel académico
-                                <button class="btn btn-link" (click)="setShowLevels()">
+                                <button class="btn btn-link" (click)="setShowLevels(true)">
                                     <ng-container *ngIf="showLevels; else showOptions">
                                         Ocultar opciones
                                     </ng-container>
@@ -194,7 +194,7 @@
                                                 <strong>{{lesson.title}}</strong>
                                             </h5>
                                             <small class=" text-muted">
-                                                {{ (lesson.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LL' }}
+                                                {{ lesson.created_at | amFromUnix | amLocale:'es' | amDateFormat:'LLL' }}
                                             </small>
 
                                             <h5>
@@ -347,12 +347,12 @@
                                                                 <a [routerLink]="['/perfil', lesson.author._id]"
                                                                     class="text-primary">
                                                                     <strong>
-                                                                        {{lesson.author.name}} {{lesson.author.surname}}
+                                                                        <strong>{{lesson.author?.name}} {{lesson.author?.surname}}</strong>
                                                                     </strong>
                                                                 </a>
                                                                 <br>
                                                                 <small
-                                                                    class=" text-muted">{{ (lesson.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL' }}</small>
+                                                                    class=" text-muted">{{ lesson.created_at | amFromUnix | amLocale:'es' | amDateFormat:'LLL' }}</small>
                                                             </h6>
 
                                                         </div>
@@ -460,7 +460,7 @@
                                                 <strong>{{lesson.title}}</strong>
                                             </h5>
                                             <small class=" text-muted">
-                                                {{ (lesson.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LL' }}
+                                                {{ lesson.created_at | amFromUnix | amLocale:'es' | amDateFormat:'LLL' }}
                                             </small>
 
                                             <h5>
@@ -612,13 +612,15 @@
                                                             <h6 class="mb-1">
                                                                 <a [routerLink]="['/perfil', lesson.author._id]"
                                                                     class="text-primary">
-                                                                    <strong>
-                                                                        {{lesson.author.name}} {{lesson.author.surname}}
-                                                                    </strong>
+                                                                    
+                                                                <strong>{{lesson.author?.name}} {{lesson.author?.surname}}</strong>
                                                                 </a>
                                                                 <br>
                                                                 <small
-                                                                    class=" text-muted">{{ (lesson.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL' }}</small>
+                                                                    class=" text-muted">
+                                                                    {{ lesson.created_at | amFromUnix | amLocale:'es' | amDateFormat:'LLL' }}
+
+                                                                </small>
                                                             </h6>
 
                                                         </div>

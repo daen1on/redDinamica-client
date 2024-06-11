@@ -75,6 +75,7 @@ export class LessonComponent implements OnInit {
                 });
         }
     }
+    
 
     loadLesson(){
         this._route.params.subscribe(params => {

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 
 import { GLOBAL } from './global';
 import { UserService } from './user.service';
@@ -56,14 +56,18 @@ export class MessageService {
         return this._http.delete(this.url + 'message/' + messageId, {headers:headers});
     }
 
-    getUnviewMessages(token):Observable<any>{
+    getUnviewMessages(token: string): Observable<any> {
         let headers = new HttpHeaders({
-            'Content-Type':'application/json', 
+            'Content-Type': 'application/json',
             'Authorization': token
         });
-
-        return this._http.get(this.url + 'unviewed-messages', {headers:headers});
-    }
+        return this._http.get(this.url + 'unviewed-messages', { headers: headers }).pipe(
+            catchError(error => {
+                console.error('Error in getUnviewMessages:', error);
+                return throwError(()=>error);
+            })
+        );
+     }
 
     setViewedMessage(token):Observable<any>{
         const httpOptions = {
