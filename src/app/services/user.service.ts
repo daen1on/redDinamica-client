@@ -86,6 +86,13 @@ export class UserService {
 
         return this._http.post(this.url + 'recover-password', params, {headers:headers});
     }
+    resetPassword(token: string, newPassword: string): Observable<any> {
+        let params = JSON.stringify({ token, newPassword });
+        let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+        return this._http.post(this.url + 'reset-password', params, { headers: headers });
+    }
+
 
     getUsers(page = null):Observable<any>{
         let headers = new HttpHeaders({

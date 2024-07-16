@@ -39,6 +39,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     ) {
         this.user = new User();
         this.title = 'Iniciar sesión';
+        this.emailFound = true; // Inicializar la propiedad
     }
 
     ngOnDestroy(): void {
@@ -61,6 +62,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         ).subscribe(() => {
             this.errorMessage = '';
             this.invalid = false;
+            this.emailFound = true; // Resetear emailFound en cada cambio
         });
     }
 
@@ -92,6 +94,7 @@ export class LoginComponent implements OnInit, OnDestroy {
                     }
                     localStorage.setItem('token', tokenResponse.token);
                     this.token = tokenResponse.token; // Set the token for further requests
+                    this.emailFound = true; // El email fue encontrado
                 },
                 error: error => {
                     this.errorMessage = 'Ha ocurrido un error. Por favor intenta de nuevo.';
@@ -105,6 +108,7 @@ export class LoginComponent implements OnInit, OnDestroy {
                 console.error(error);
                 this.invalid = true;
                 this.loading = false;
+                this.emailFound = false;
                 return EMPTY;
             })
         ).subscribe(() => {
