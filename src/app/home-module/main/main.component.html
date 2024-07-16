@@ -263,58 +263,54 @@
     <button *ngIf="!noMore" class="btn btn-primary" (click)="viewMore()">Ver más publicaciones</button>
 </div>
 
-
-<!-- Modal warning  delete-->
-<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="delete" aria-hidden="true">
+<!-- Modal warning delete -->
+<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="deletePublicationTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteTitle">Eliminar publicación</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-
-            <div class="modal-body">
-                <div class="alert alert-warning mb-0" role="alert">
-                    <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
-                    ¿Esta seguro que desea eliminar la publicación?
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-danger" data-dismiss="modal" (click)="deletePost()">Sí</button>
-                <button class="btn btn-primary text-white" data-dismiss="modal">No</button>
-            </div>
-
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteTitle">Eliminar publicación</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
+        <div class="modal-body">
+          <div class="alert alert-warning mb-0" role="alert">
+            <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
+            ¿Está seguro que desea eliminar la publicación?
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-danger" (click)="deletePost()" data-dismiss="modal">Sí</button>
+          <button class="btn btn-secondary" data-dismiss="modal">No</button>
+        </div>
+      </div>
     </div>
-</div>
-<!-- /Modal warning delete-->
-
-<!-- Modal warning  delet commente-->
-<div class="modal fade" id="deleteComment" tabindex="-1" role="dialog" aria-labelledby="deleteComment"
-    aria-hidden="true">
+  </div>
+  <!-- /Modal warning delete -->
+  
+<!-- Modal warning delete comment -->
+<div class="modal fade" id="deleteComment" tabindex="-1" role="dialog" aria-labelledby="deleteCommentTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteCommentTitle">Eliminar comentario</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-
-            <div class="modal-body">
-                <div class="alert alert-warning mb-0" role="alert">
-                    <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
-                    ¿Esta seguro que desea eliminar el comentario?
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-danger" data-dismiss="modal" (click)="deleteComment()">Sí</button>
-                <button class="btn btn-primary text-white" data-dismiss="modal">No</button>
-            </div>
-
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteCommentTitle">Eliminar comentario</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
+        <div class="modal-body">
+          <div class="alert alert-warning mb-0" role="alert">
+            <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
+            ¿Está seguro que desea eliminar el comentario?
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-danger" data-dismiss="modal" (click)="deleteComment()">Sí</button>
+          <button class="btn btn-secondary" data-dismiss="modal">No</button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+  <!-- /Modal warning delete comment -->
+  
 <!-- /Modal warning delete comment -->
