@@ -14,18 +14,7 @@
 
         <div class="collapse navbar-collapse" id="navbarColor01">
             <ul class="navbar-nav ml-auto">
-                <!-- <li class="nav-item">
-                <a  class="nav-link" href="#main">Inicio</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#section-1">Acerca de</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#section-2">Sección</a>
-            </li>
-            <li class="nav-item mr-2">
-                <a class="nav-link" href="#section-3">Sección</a>
-            </li> -->
+                
                 <li class="nav-item">
                     <a [routerLink]="['/login']" class="btn btn-secondary btn-block my-2 my-sm-2" href="#"
                         role="button">Iniciar sesión</a>
@@ -43,64 +32,36 @@
 </nav>
 
 <!-- /Header -->
-
-
-<!-- Header user logged -->
-
-<nav *ngIf="identity" id="header-home"
-    class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top fixed-top py-0">
-    <div class="container bg-primary ">
-
-        <a [routerLink]="['/inicio']" class="navbar-brand mr-2 pb-2" >            
+ <!-- Header user logged -->
+<nav *ngIf="identity" id="header-home" class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top fixed-top py-0">
+    <div class="container bg-primary">
+        <a [routerLink]="['/inicio']" class="navbar-brand mr-2 pb-2">
             <img class="mr-2 d-inline" src="assets/images/RDLogo.png" alt="Logo RedDinámica">
             <h4 class="d-inline align-middle rd font-weight-bolder">RedDinámica</h4>
         </a>
-
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01"
             aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="navbarColor01">
-            <!-- <form class="form-inline my-2 my-lg-0">
-                <input id="searchBar" class="form-control form-control-sm mr-sm-2" width="300px" type="search"
-                    placeholder="Buscar" aria-label="Search">
-                <button class="btn btn-outline-success btn-sm my-2 my-sm-0 px-4" type="submit"><i
-                        class="fas fa-search"></i></button>
-            </form> -->
-            <ul class="navbar-nav ml-auto ">
-                <!-- <li class="nav-item">
-                <a  class="nav-link" href="#main">Inicio</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#section-1">Acerca de</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#section-2">Sección</a>
-            </li>
-            <li class="nav-item mr-2">
-                <a class="nav-link" href="#section-3">Sección</a>
-            </li> -->
-                <li [routerLink]="['/perfil', identity._id]" class="nav-item " style="cursor: pointer">
+            <ul class="navbar-nav ml-auto">
+                <li [routerLink]="['/perfil', identity._id]" class="nav-item" style="cursor: pointer">
                     <a class="nav-link d-flex align-items-center">
-                        <div class="rounded-circle border-1 overflow-hidden mr-2"
-                            style="width: 30px; height:30px;">
-                            <img *ngIf="!identity.picture" class="img-fluid" src="assets/images/user-default.png"> 
-                            <img *ngIf="identity.picture" class="img-fluid" src="{{this.url+'get-image-user/'+ identity.picture}}"> 
+                        <div class="rounded-circle border-1 overflow-hidden mr-2" style="width: 30px; height:30px;">
+                            <img *ngIf="!identity.picture" class="img-fluid" src="assets/images/user-default.png">
+                            <img *ngIf="identity.picture" class="img-fluid" src="{{this.url+'get-image-user/'+ identity.picture}}">
                         </div>
-                        <span>
-                            {{identity.name}}
-                        </span>
+                        <span>{{identity.name}}</span>
                     </a>
                 </li>
                 <li class="nav-item d-flex align-items-center">
-                    <a [routerLink]="['/inicio']"  class="nav-link d-flex align-items-center">
+                    <a [routerLink]="['/inicio']" class="nav-link d-flex align-items-center">
                         <i class="fas fa-home" style="font-size:1.5em"></i>
-                        <span class="mx-1">Inicio</span>                        
+                        <span class="mx-1">Inicio</span>
                     </a>
                 </li>
                 <li class="nav-item d-flex align-items-center">
-                    <a [routerLink]="['/mensajes']" class="nav-link btn btn-primary d-flex align-items-center">  
+                    <a [routerLink]="['/mensajes']" class="nav-link btn btn-primary d-flex align-items-center">
                         <i class="fas fa-envelope" style="font-size:1.5em"></i>
                         <span class="mx-1">Mensajes</span>
                         <span *ngIf="unviewMessages > 0" class="badge badge-pill badge-info">{{unviewMessages}}</span>
@@ -108,36 +69,39 @@
                 </li>
                 <li *ngIf="['admin', 'delegated_admin'].includes(identity.role)" class="nav-item d-flex align-items-center">
                     <a [routerLink]="['/admin']" class="nav-link btn btn-primary d-flex align-items-center">
-                        <i class="fas fa-user-cog
-                        " style="font-size:1.5em"></i>
-                        <span class="mx-1">Panel de administración</span>                        
+                        <i class="fas fa-user-cog" style="font-size:1.5em"></i>
+                        <span class="mx-1">Panel de administración</span>
                     </a>
                 </li>
-                
                 <li class="nav-item d-flex align-items-center">
-                    <a [routerLink]="" (click)="openP()" class="nav-link btn btn-primary d-flex align-items-center" >  
-                        <i class="fas fa-envelope" style="font-size:1.5em; cursor: pointer"></i> 
-                        <span class="mx-1">Reportar un problema</span>
-                       </a>
+                    <a class="nav-link d-flex align-items-center" href="#" id="notificationDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-bell" style="font-size:1.5em"></i>
+                        <span *ngIf="unreadCount > 0" class="badge badge-pill badge-danger">{{unreadCount}}</span>
+                    </a>
+                    <app-notifications></app-notifications>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      
+                    <a class="nav-link" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-bars" style="font-size:1.5em"></i>
                     </a>
                     <div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdown">
-                      <a class="dropdown-item" [routerLink]="['/seguridad']">Opciones de seguridad</a>
-                      <div class="dropdown-divider"></div>
-                      <a class="dropdown-item" [routerLink]="['/']" (click)="logout()">Cerrar sesión</a>
+                        <a class="dropdown-item" [routerLink]="['/seguridad']">
+                            <i class="fas fa-shield-alt mr-2"></i> Opciones de seguridad
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" [routerLink]="['/error/report-error']">
+                            <i class="fas fa-exclamation-circle mr-2"></i> Reportar un problema
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" [routerLink]="['/']" (click)="logout()">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Cerrar sesión
+                        </a>
                     </div>
-                  </li>
+                </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<!-- /Header user logged -->
 <router-outlet></router-outlet>
-
 <footer_rd *ngIf="!identity"></footer_rd>
-
-

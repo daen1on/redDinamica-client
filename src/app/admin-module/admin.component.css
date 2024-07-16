@@ -1,0 +1,32 @@
+.container {
+    padding: 20px;
+  }
+  
+  .navbar-toggler {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    .accordion {
+      width: 100%;
+      position: relative;
+    }
+  
+    .navbar-toggler {
+      display: block;
+      margin-bottom: 15px;
+    }
+  
+    .col-md-9 {
+      padding-left: 15px !important;
+    }
+  }
+  
+  .card-header {
+    cursor: pointer;
+  }
+  
+  .card-header i {
+    float: right;
+  }
+  

@@ -1,0 +1,30 @@
+.container {
+  padding: 20px;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-check {
+    margin-bottom: 0.5rem;
+  }
+}

@@ -1,0 +1,85 @@
+<div class="container">
+  <h2>Lista de Errores y Sugerencias</h2>
+  <div class="mb-3">
+    <div class="accordion" id="filterAccordion">
+      <div class="card">
+        <div class="card-header" id="headingType">
+          <h2 class="mb-0">
+            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseType" aria-expanded="true" aria-controls="collapseType">
+              Filtrar por tipo
+            </button>
+          </h2>
+        </div>
+
+        <div id="collapseType" class="collapse" aria-labelledby="headingType" data-parent="#filterAccordion">
+          <div class="card-body">
+            <div class="form-group">
+              <div *ngFor="let type of errorTypes" class="form-check">
+                <input type="checkbox" class="form-check-input" [id]="type" (change)="toggleFilterType(type)" [checked]="filterType.includes(type)">
+                <label class="form-check-label" [for]="type">{{ type }}</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" id="headingModule">
+          <h2 class="mb-0">
+            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseModule" aria-expanded="false" aria-controls="collapseModule">
+              Filtrar por módulo
+            </button>
+          </h2>
+        </div>
+        <div id="collapseModule" class="collapse" aria-labelledby="headingModule" data-parent="#filterAccordion">
+          <div class="card-body">
+            <div class="form-group">
+              <div *ngFor="let module of modules" class="form-check">
+                <input type="checkbox" class="form-check-input" [id]="module" (change)="toggleFilterModule(module)" [checked]="filterModule.includes(module)">
+                <label class="form-check-label" [for]="module">{{ module }}</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="loading">Cargando reportes de errores...</div>
+  <div *ngIf="!loading && errorReports.length === 0">No hay reportes de errores.</div>
+  <div *ngIf="!loading && errorReports.length > 0">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Módulo</th>
+          <th>Descripción</th>
+          <th>Pasos</th>
+          <th>Archivo Adjunto</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let report of errorReports">
+          <td>{{ report.type }}</td>
+          <td>{{ report.module }}</td>
+          <td>{{ report.description }}</td>
+          <td>{{ report.steps }}</td>
+          <td>
+            <ng-container *ngIf="report.attachment && report.attachment.length > 0; else noAttachment">
+              <a (click)="getFile(report.attachment[0].fileName)" style="cursor: pointer; color: blue;">{{ report.attachment[0].originalName }}</a>
+            </ng-container>
+            <ng-template #noAttachment>No hay adjunto</ng-template>
+          </td>
+          <td>
+            <button class="btn btn-info btn-sm mr-2" (click)="openEditModal(report)">Editar</button>
+            <button class="btn btn-danger btn-sm" (click)="confirmDeleteReport(report)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="pagination-controls">
+      <button class="btn btn-secondary mr-2" (click)="previousPage()" [disabled]="currentPage === 1">Anterior</button>
+      <button class="btn btn-secondary" (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
+    </div>
+  </div>
+</div>

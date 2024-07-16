@@ -1,29 +1,30 @@
-import { ModuleWithProviders } from '@angular/core';
-import { Route, Routes, RouterModule} from '@angular/router';
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 
-import { LandingComponent } from './components/landing/landing.component';
-import { LoginComponent } from './components/login/login.component';
-import { RegisterComponent } from './components/register/register.component';
-import { RecoverPasswordComponent } from './components/recoverPassword/recoverPassword.component';
-import { SearchComponent } from './components/search/search.component';
-import { SecurityOptionsComponent } from './components/securityOptions/securityOptions.component';
-import { LandingGuard } from './guards/landing.guard';
-
+import { landingGuard } from './guards/landing.guard';
+import { homeGuard } from './home-module/guards/home.guard';
 
 const routes: Routes = [
-    { path: '', component: LandingComponent, canActivate: [LandingGuard]},        
-    { path: 'login', component: LoginComponent,canActivate: [LandingGuard]},
-    { path: 'registro', component: RegisterComponent,canActivate: [LandingGuard]},
-    { path: 'recuperar-pass', component: RecoverPasswordComponent,canActivate: [LandingGuard]},
-    { path: 'buscar', component: SearchComponent,canActivate: [LandingGuard]},
-    { path: 'seguridad', component: SecurityOptionsComponent},
-    { path: '**', component: LandingComponent, canActivate: [LandingGuard]}
+  { path: '', loadChildren: () => import('./components/landing/landing.module').then(m => m.LandingModule), canActivate: [landingGuard] },
+  { path: 'login', loadChildren: () => import('./components/login/login.module').then(m => m.LoginModule), canActivate: [landingGuard] },
+  { path: 'registro', loadChildren: () => import('./components/register/register.module').then(m => m.RegisterModule), canActivate: [landingGuard] },
+  { path: 'recuperar-pass', loadChildren: () => import('./components/recoverPassword/recover-password.module').then(m => m.RecoverPasswordModule), canActivate: [landingGuard] },
+  { path: 'buscar', loadChildren: () => import('./components/search/search.module').then(m => m.SearchModule), canActivate: [landingGuard] },
+  { path: 'seguridad', loadChildren: () => import('./components/securityOptions/security-options.module').then(m => m.SecurityOptionsModule) },
+  { path: 'reset-password/:token', loadChildren: () => import('./components/resetPassword/reset-password.module').then(m => m.ResetPasswordModule) },
+  { path: 'inicio', loadChildren: () => import('./home-module/home.module').then(m => m.HomeModule), canActivate: [homeGuard] },
+  { path: 'error', loadChildren: () => import('./error/error.module').then(m => m.ErrorModule), canActivate: [homeGuard]  },
+  { path: 'notificaciones', loadChildren: () => import('./notifications-module/notifications-module.module').then(m => m.NotificationsModule), canActivate: [homeGuard] },
+  { path: '**', loadChildren: () => import('./components/landing/landing.module').then(m => m.LandingModule), canActivate: [landingGuard] }
 ];
 
-export const appRoutingProviders: any[] = [];
-export const Routing: ModuleWithProviders<Route> = RouterModule.forRoot(routes,
-     { scrollPositionRestoration: 'disabled', 
-     onSameUrlNavigation: 'reload',
-     paramsInheritanceStrategy: 'always',
-     urlUpdateStrategy: 'eager',
-    });
+@NgModule({
+  imports: [RouterModule.forRoot(routes, {
+    scrollPositionRestoration: 'top',
+    onSameUrlNavigation: 'reload',
+    paramsInheritanceStrategy: 'always',
+    urlUpdateStrategy: 'eager'
+  })],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }

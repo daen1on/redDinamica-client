@@ -75,5 +75,17 @@ export const ADMIN_MENU = [
             }
         ]
     },
+    {
+        "id": "errors",
+        "buttonClass": "btn-primary",
+        "iconClass": "fa-exclamation-triangle",
+        "spanContent": "Errores y Sugerencias",
+        "subOptions": [
+            {
+                "text": "Ver Errores y Sugerencias",
+                "routerLink": "/admin/view-errors"
+            }
+        ]
+    }
 
 ];

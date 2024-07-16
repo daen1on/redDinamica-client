@@ -1,0 +1,62 @@
+<div class="container">
+  <form [formGroup]="reportErrorForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="type">Tipo de No Conformidad</label>
+      <select formControlName="type" class="form-control" [ngClass]="{'is-invalid': submitted && f.type.errors}">
+        <option value="">Seleccione</option>
+        <option value="Fallo / Bug">Fallo / Bug</option>
+        <option value="Característica deseada">Característica deseada</option>
+        <option value="Mejora">Mejora</option>
+      </select>
+      <div *ngIf="submitted && f.type.errors" class="invalid-feedback">
+        <div *ngIf="f.type.errors.required">El campo es obligatorio.</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="module">Módulo o Componente</label>
+      <select formControlName="module" class="form-control" [ngClass]="{'is-invalid': submitted && f.module.errors}">
+        <option value="">Seleccione</option>
+        <option value="Modulo Inicio">Modulo Inicio</option>
+        <option value="Modulo Lecciones">Modulo Lecciones</option>
+        <option value="Repositorio">Repositorio</option>
+        <option value="Publicaciones">Publicaciones</option>
+        <option value="Perfil">Perfil</option>
+        <option value="Mensajes">Mensajes</option>
+      </select>
+      <div *ngIf="submitted && f.module.errors" class="invalid-feedback">
+        <div *ngIf="f.module.errors.required">El campo es obligatorio.</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Descripción</label>
+      <textarea formControlName="description" class="form-control" rows="5" [ngClass]="{'is-invalid': submitted && f.description.errors}"></textarea>
+      <div *ngIf="submitted && f.description.errors" class="invalid-feedback">
+        <div *ngIf="f.description.errors.required">El campo es obligatorio.</div>
+        <div *ngIf="f.description.errors.maxlength">Máximo 2000 caracteres.</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="steps">Pasos para Reproducir</label>
+      <textarea formControlName="steps" class="form-control" rows="5" [ngClass]="{'is-invalid': submitted && f.steps.errors}"></textarea>
+      <div *ngIf="submitted && f.steps.errors" class="invalid-feedback">
+        <div *ngIf="f.steps.errors.required">El campo es obligatorio.</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="file">Adjuntar Archivo</label>
+      <input type="file" formControlName="file" class="form-control-file" (change)="onFileChange($event)">
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="loading">Enviar</button>
+    <div *ngIf="loading" class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+    <div *ngIf="successMessage" class="alert alert-success mt-3">
+      {{ successMessage }}
+    </div>
+  </form>
+</div>

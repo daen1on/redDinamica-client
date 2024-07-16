@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AdminRoutingModule } from './admin.routing';
 
@@ -33,6 +34,9 @@ import { AddCallComponent } from './lessons/add-call/add-call.component';
 import { CallComponent } from './lessons/call/call.component';
 import { SuggestLessonComponent } from './lessons/suggest/suggest-lesson.component';
 import { MomentModule } from 'ngx-moment';
+import { ViewErrorsComponent } from './view-errors/view-errors.component';
+import { EditErrorComponent } from './edit-error/edit-error.component';
+
 
 
 @NgModule({
@@ -58,6 +62,8 @@ import { MomentModule } from 'ngx-moment';
         KnowledgeAreasComponent,
         ProfessionsComponent,
         UsersComponent,
+        ViewErrorsComponent,
+        EditErrorComponent,
         FilterPipe
         
     ],
@@ -69,7 +75,8 @@ import { MomentModule } from 'ngx-moment';
         NgSelectModule,
         AdminRoutingModule,
         LessonModule,
-        MomentModule
+        MomentModule,
+        NgbModule
         
     ],
     exports: [
