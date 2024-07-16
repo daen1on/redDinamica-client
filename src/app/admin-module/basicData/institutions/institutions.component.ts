@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
-import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgSelectConfig } from '@ng-select/ng-select';
+import { Subscription, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { BasicDataService } from 'src/app/services/basicData.service';
 
@@ -12,26 +14,26 @@ import { Institution } from 'src/app/models/institution.model';
     selector: 'institutions',
     templateUrl: './institutions.component.html'
 })
-export class InstitutionsComponent {
+export class InstitutionsComponent implements OnInit, OnDestroy {
     public title: string;
     public fieldsForm = FIELDS_FORM;
-    
+
     public submitted = false;
-    public status;
-    public institutionForm;
-    public editInstitutionForm;
+    public status: string;
+    public institutionForm: FormGroup;
+    public editInstitutionForm: FormGroup;
     public institution = new Institution();
     public institutions = [];
 
     // Pagination
-    public page; // Actual page
-    public pages; // Number of pages
-    public total; // Total of records
-    public prevPage;
-    public nextPage;
+    public page: number; // Actual page
+    public pages: number; // Number of pages
+    public total: number; // Total of records
+    public prevPage: number;
+    public nextPage: number;
 
     // Filter
-    public filter;
+    public filter: FormControl;
     public allInstitutions;
 
     // Select data
@@ -39,65 +41,86 @@ export class InstitutionsComponent {
     public allCities = [];
 
     public loading = true;
+    private subscriptions: Subscription = new Subscription();
 
     constructor(
         private _bDService: BasicDataService,
         private config: NgSelectConfig,
         private _route: ActivatedRoute,
-        private _router:Router,        
+        private _router: Router,
     ) {
         this.title = 'Instituciones';
 
-        this.institutionForm = new UntypedFormGroup({
-            institutionName: new UntypedFormControl('', [Validators.required]),
-            institutionWebsite: new UntypedFormControl(),
-            institutionEmail: new UntypedFormControl(),
-            institutionCity: new UntypedFormControl(),
-            institutionTelephone: new UntypedFormControl()
+        this.institutionForm = new FormGroup({
+            institutionName: new FormControl('', [Validators.required]),
+            institutionWebsite: new FormControl(),
+            institutionEmail: new FormControl(),
+            institutionCity: new FormControl(),
+            institutionTelephone: new FormControl()
         });
 
-        this.editInstitutionForm = new UntypedFormGroup({
-            institutionName: new UntypedFormControl('', [Validators.required]),
-            institutionWebsite: new UntypedFormControl(),
-            institutionEmail: new UntypedFormControl(),
-            institutionCity: new UntypedFormControl(),
-            institutionTelephone: new UntypedFormControl()
+        this.editInstitutionForm = new FormGroup({
+            institutionName: new FormControl('', [Validators.required]),
+            institutionWebsite: new FormControl(),
+            institutionEmail: new FormControl(),
+            institutionCity: new FormControl(),
+            institutionTelephone: new FormControl()
         });
 
-        this.filter =  new UntypedFormControl();
+        this.filter = new FormControl();
 
         // Set up of select
         this.config.addTagText = 'Agregar';
-        this.config.notFoundText = 'No se encontro'; 
-        
-        this.items = { institutionCity: ''};
-        
+        this.config.notFoundText = 'No se encontro';
+
+        this.items = { institutionCity: '' };
     }
 
-    ngOnInit(): void {      
+    ngOnInit(): void {
         this.allCities = JSON.parse(localStorage.getItem('cities'));
-        if(!this.allCities){
+        if (!this.allCities) {
             this.getAllCities();
-            
         }
 
         this.actualPage();
         this.getAllInstitutions();
+        this.onChanges();
 
+        this.subscriptions.add(
+            this.institutionForm.valueChanges.subscribe(val => {
+                if (val) {
+                    this.status = null;
+                    this.submitted = false;
+                }
+            })
+        );
+
+        this.subscriptions.add(
+            this.editInstitutionForm.valueChanges.subscribe(val => {
+                if (val) {
+                    this.status = null;
+                    this.submitted = false;
+                }
+            })
+        );
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
     }
 
     // Get controls form
     get f() { return this.institutionForm.controls; }
 
-    get f2() { return this.editInstitutionForm.controls; } 
+    get f2() { return this.editInstitutionForm.controls; }
 
-    setAdd(){
+    setAdd() {
         this.status = null;
         this.submitted = false;
-        this.items = { institutionCity: this.allCities};
+        this.items = { institutionCity: this.allCities };
     }
 
-    onSubmit() {        
+    onSubmit() {
         this.submitted = true;
 
         if (this.institutionForm.invalid) {
@@ -114,66 +137,74 @@ export class InstitutionsComponent {
         this.institution.website = this.institutionForm.value.institutionWebsite;
         this.institution.telephone = this.institutionForm.value.institutionTelephone;
 
-
-        this._bDService.addInstitution(this.institution).subscribe(
-            response => {
-
+        this._bDService.addInstitution(this.institution).subscribe({
+            next: (response) => {
                 if (response.institution && response.institution._id) {
                     this.institutionForm.reset();
                     this.status = 'success';
                     this.submitted = false;
                     this.getInstitutions(this.page);
                     this.getAllInstitutions();
-
                 } else {
                     this.status = 'error';
-
                 }
             },
-            error => {
+            error: (error) => {
                 if (error != null) {
                     this.status = 'error';
-                    console.log(<any>error);
+                    console.log(error);
                 }
             }
-        );
+        });
     }
 
-    getAllInstitutions(){  
-        this._bDService.getAllInstitutions().subscribe(
-            response=>{       
-                if(response.institutions){
+    getAllInstitutions() {
+        this._bDService.getAllInstitutions().pipe(
+            catchError(error => {
+                console.log('Error fetching institutions:', error);
+                return of([]);
+            })
+        ).subscribe({
+            next: (response) => {
+                if (response.institutions) {
                     this.allInstitutions = response.institutions;
                     localStorage.setItem('institutions', JSON.stringify(this.allInstitutions));
                 }
-            },error=>{
-                console.log(<any>error);
-            });        
+            },
+            error: (error) => {
+                console.log(error);
+            }
+        });
     }
 
-    getInstitutions(page){  
-        this._bDService.getInstitutions(page).subscribe(
-            response=>{                  
-                if(response.institutions){
-                    this.institutions = response.institutions; 
-                    this.total = response.total; 
+    getInstitutions(page) {
+        this._bDService.getInstitutions(page).pipe(
+            catchError(error => {
+                console.log('Error fetching institutions:', error);
+                return of([]);
+            })
+        ).subscribe({
+            next: (response) => {
+                if (response.institutions) {
+                    this.institutions = response.institutions;
+                    this.total = response.total;
                     this.pages = response.pages;
-                    if(page > this.pages){
+                    if (page > this.pages) {
                         this._router.navigate(['/admin/instituciones']);
                     }
-
                     this.loading = false;
                 }
-            },error=>{
-                console.log(<any>error);
+            },
+            error: (error) => {
+                console.log(error);
             }
-        );
+        });
     }
 
     public tempInstitution;
-    setEditInstitution(institution){
+    setEditInstitution(institution) {
         this.status = null;
-        this.items = { institutionCity: this.allCities};
+        this.items = { institutionCity: this.allCities };
         this.tempInstitution = institution;
         this.editInstitutionForm.patchValue({
             institutionName: this.tempInstitution.name,
@@ -181,26 +212,25 @@ export class InstitutionsComponent {
             institutionEmail: this.tempInstitution.email,
             institutionCity: this.tempInstitution.city,
             institutionTelephone: this.tempInstitution.telephone
-        });         
+        });
     }
 
     onEditSubmit() {
         this.status = null;
         this.submitted = true;
-        
+
         if (this.editInstitutionForm.invalid) {
             return;
         }
-        
+
         this.institution.name = this.editInstitutionForm.value.institutionName;
         this.institution.email = this.editInstitutionForm.value.institutionEmail;
         this.institution.city = this.editInstitutionForm.value.institutionCity;
         this.institution.website = this.editInstitutionForm.value.institutionWebsite;
         this.institution.telephone = this.editInstitutionForm.value.institutionTelephone;
 
-        this._bDService.editInstitution(this.tempInstitution._id, this.institution).subscribe(
-            response => {
-
+        this._bDService.editInstitution(this.tempInstitution._id, this.institution).subscribe({
+            next: (response) => {
                 if (response.institution && response.institution._id) {
                     this.status = 'success';
                     this.submitted = false;
@@ -210,69 +240,74 @@ export class InstitutionsComponent {
                     this.status = 'error';
                 }
             },
-            error => {
+            error: (error) => {
                 if (error != null) {
                     this.status = 'error';
-                    console.log(<any>error);
+                    console.log(error);
                 }
             }
-        );
-    }  
+        });
+    }
 
     public tempInstitutionId;
-    setDeleteInstitution(institutionId){
+    setDeleteInstitution(institutionId) {
         this.tempInstitutionId = institutionId;
-    }    
+    }
 
-    delete(){
-        this._bDService.deleteInstitution(this.tempInstitutionId).subscribe(
-            response => {
-                
+    delete() {
+        this._bDService.deleteInstitution(this.tempInstitutionId).subscribe({
+            next: (response) => {
                 this.tempInstitutionId = null;
                 this.getInstitutions(this.page);
                 this.getAllInstitutions();
             },
-            error => {
-                console.log(<any>error);
+            error: (error) => {
+                console.log(error);
             }
-        )
-    }    
-
-    actualPage(){
-        this._route.params.subscribe(params => {
-           let page = +params['page'];
-
-           this.page = page;
-
-           if(!page){
-               this.page = 1;
-               this.nextPage = this.page + 1;
-           }else{
-               this.nextPage = page + 1;
-               this.prevPage = page - 1;
-
-               if(this.prevPage <= 0){
-                   this.prevPage = 1;
-               }
-           }
- 
-           this.getInstitutions(this.page);
         });
     }
 
-    getAllCities(){  
-        this._bDService.getAllCities().subscribe(
-            response=>{       
-                if(response.cities){
+    actualPage() {
+        this._route.params.subscribe(params => {
+            let page = +params['page'];
+
+            this.page = page;
+
+            if (!page) {
+                this.page = 1;
+                this.nextPage = this.page + 1;
+            } else {
+                this.nextPage = page + 1;
+                this.prevPage = page - 1;
+
+                if (this.prevPage <= 0) {
+                    this.prevPage = 1;
+                }
+            }
+
+            this.getInstitutions(this.page);
+        });
+    }
+
+    getAllCities() {
+        this._bDService.getAllCities().pipe(
+            catchError(error => {
+                console.log('Error fetching cities:', error);
+                return of([]);
+            })
+        ).subscribe({
+            next: (response) => {
+                if (response.cities) {
                     this.allCities = response.cities;
                     localStorage.setItem('cities', JSON.stringify(this.allCities));
                     this.items.institutionCity = this.allCities;
                 }
-            },error=>{
-                console.log(<any>error);
-            });        
+            },
+            error: (error) => {
+                console.log(error);
+            }
+        });
     }
-
 
     onKeydown(e) {
         if (e.keyCode === 13) {
@@ -284,19 +319,22 @@ export class InstitutionsComponent {
     }
 
     onChanges(): void {
+        this.subscriptions.add(
+            this.institutionForm.valueChanges.subscribe(val => {
+                if (val) {
+                    this.status = null;
+                    this.submitted = false;
+                }
+            })
+        );
 
-        this.institutionForm.valueChanges.subscribe(val => {
-            if (val) {
-                this.status = null;
-                this.submitted = false;
-            }
-        });
-
-        this.editInstitutionForm.valueChanges.subscribe(val => {
-            if (val) {
-                this.status = null;
-                this.submitted = false;
-            }
-        });
+        this.subscriptions.add(
+            this.editInstitutionForm.valueChanges.subscribe(val => {
+                if (val) {
+                    this.status = null;
+                    this.submitted = false;
+                }
+            })
+        );
     }
 }
