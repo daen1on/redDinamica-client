@@ -1,26 +1,19 @@
-import { Injectable } from '@angular/core';
-import { Router, Route } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
+import { CanActivateFn } from '@angular/router';
 
-@Injectable()
-export class LandingGuard {
-    
-    constructor(
-           private _router: Router,
-           private _userService: UserService
+export const landingGuard: CanActivateFn = (route, state) => {
+  const router = inject(Router);
+  const userService = inject(UserService);
 
-    ){}
+  let identity = userService.getIdentity();
+  let token = userService.getToken();
 
-    canActivate(){        
-        let identity = this._userService.getIdentity();
-        let token = this._userService.getToken();
-
-        if(identity && token){
-            this._router.navigate(['/inicio']);
-            return false;
-        }else{
-            return true;
-        }
-
-    }
-}
+  if (identity && token) {
+    router.navigate(['/inicio']);
+    return false;
+  } else {
+    return true;
+  }
+};
