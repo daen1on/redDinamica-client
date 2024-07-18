@@ -24,6 +24,7 @@
                                     <label for="name">Nombres*</label>
                                     <input type="text" class="form-control" id="name" placeholder="Nombres"
                                         formControlName="name" class="form-control"
+                                        (input)="onInputChange($event)"
                                         [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
                                     <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
                                         <div *ngIf="f.name.errors.required">
@@ -35,6 +36,7 @@
                                     <label for="surname">Apellidos*</label>
                                     <input type="text" class="form-control" id="surname" placeholder="Apellidos"
                                         formControlName="surname" class="form-control"
+                                        (input)="onInputChange($event)"
                                         [ngClass]="{ 'is-invalid': submitted && f.surname.errors }">
                                     <div *ngIf="submitted && f.surname.errors" class="invalid-feedback">
                                         <div *ngIf="f.surname.errors.required">
@@ -47,6 +49,7 @@
                                     <label for="email">Correo electrónico*</label>
                                     <input type="email" class="form-control" id="email" placeholder="Correo eletrónico"
                                         formControlName="email" class="form-control"
+                                        (input)="onInputChange($event)"
                                         [ngClass]="{ 'is-invalid': submitted && f.email.errors }">
                                     <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
                                         <div *ngIf="f.email.errors.required">El campo correo electrónico es obligatorio.

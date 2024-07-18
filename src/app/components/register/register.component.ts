@@ -1,6 +1,5 @@
-import { Component, OnInit, ElementRef,Renderer2, ViewChild, OnDestroy } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-
+import { Component, OnInit, ElementRef, Renderer2, ViewChild, OnDestroy } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MustMatch } from '../../helpers/must-match.validator';
 import { User } from 'src/app/models/user.model';
 import { UserService } from 'src/app/services/user.service';
@@ -12,25 +11,22 @@ import { MessageService } from 'src/app/services/message.service';
 import { TYC_FILE } from 'src/app/services/DATA';
 import { GLOBAL } from 'src/app/services/global';
 
-import { firstValueFrom } from 'rxjs';
-
+import { firstValueFrom, Subject, throwError } from 'rxjs';
 import { takeUntil, tap, catchError } from 'rxjs/operators';
-import { Subject, throwError } from 'rxjs';
 
 @Component({
     selector: 'register',
     templateUrl: './register.component.html'
 })
 export class RegisterComponent implements OnInit, OnDestroy {
-    @ViewChild('contador')
-    contador: ElementRef;
+    @ViewChild('contador') contador: ElementRef;
     public title: string;
-    public registerForm: UntypedFormGroup;
+    public registerForm: FormGroup;
     public submitted = false;
     public url;
-    public tyc_file ='assets/TyC_RedDinamica.pdf';
+    public tyc_file = 'assets/TyC_RedDinamica.pdf';
     public user: User;
-    public message: String;
+    public message: string;
 
     // Select data
     public items;
@@ -43,10 +39,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
     public token;
 
     public loading;
-    private unsubscribe$ = new Subject <void>();
+    private unsubscribe$ = new Subject<void>();
 
     constructor(
-        private _formBuilder: UntypedFormBuilder,
+        private _formBuilder: FormBuilder,
         private _userService: UserService,
         private _bDService: BasicDataService,
         private _messageService: MessageService,
@@ -58,30 +54,18 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.user = new User();
         this.tyc_file = TYC_FILE;
         this.url = GLOBAL.url;
-        console.log(this.tyc_file);  // Aquí haces el console.log
-
-
 
         this.items = {
             institution: [],
             profession: []
         };
-
-        
-
-
-    }
-
-    ngDoCheck(): void {
     }
 
     ngOnInit() {
         this.getAllInstitutions();
         this.getAllProfessions();
 
-        //aca iba antes formBuilder
-        
-            this.registerForm = this._formBuilder.group({
+        this.registerForm = this._formBuilder.group({
             name: ['', Validators.required],
             surname: ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
@@ -90,20 +74,18 @@ export class RegisterComponent implements OnInit, OnDestroy {
             profession: ['', Validators.required],
             institution: ['', Validators.required],
             category: ['', Validators.required],
-            experience: ['',[Validators.maxLength(1000)]], //revisar
-            tyc: [false, Validators.required ] //problema aca con el validators del checkbox
-        },
-            {
-                validators: MustMatch('password', 'confirmPassword')
-            });
-        
+            experience: ['', [Validators.maxLength(1000)]],
+            tyc: [false, Validators.requiredTrue] // Ensures checkbox is true
+        }, {
+            validators: MustMatch('password', 'confirmPassword')
+        });
     }
+
     ngOnDestroy() {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
     }
-    
-       
+
     get f() { return this.registerForm.controls; }
 
     async onSubmit() {
@@ -112,71 +94,61 @@ export class RegisterComponent implements OnInit, OnDestroy {
             this.loading = false;
             return;
         }
-
+    
         this.user.name = this.registerForm.value.name;
         this.user.surname = this.registerForm.value.surname;
         this.user.email = this.registerForm.value.email;
         this.user.password = this.registerForm.value.password;
         this.user.role = this.registerForm.value.category;
         this.user.about = this.registerForm.value.experience;
-
+    
         if (this.registerForm.value.profession) {
-            this.user.profession = this.registerForm.value.profession._id;
+            this.user.profession = this.registerForm.value.profession._id || this.registerForm.value.profession;
         }
-
+    
         if (this.registerForm.value.institution) {
-            this.user.institution = this.registerForm.value.institution._id;
+            this.user.institution = this.registerForm.value.institution._id || this.registerForm.value.institution;
         }
-
+    
         if (['student', 'guest'].includes(this.f.category.value)) {
             this.user.about = '';
         }
-
-        if (!this.user.profession && this.registerForm.value.profession) {
-
-            if (this.registerForm.value.profession.name) {
-                this.profession.name = this.registerForm.value.profession.name;
-            } else {
-                this.profession.name = this.registerForm.value.profession;
-            }
-
-            // this.profession.used = true;
-
-            let responseAddProfession = await this._bDService.addProfession(this.profession).toPromise().catch(error => console.log(<any>error));
-
-            if (responseAddProfession.profession && responseAddProfession.profession._id) {
-                this.user.profession = responseAddProfession.profession._id;
-                localStorage.removeItem('professions');
-                this.getAllProfessions();
-            } else {
-                console.log(<any>responseAddProfession);
-            }
-
-        }
-
-
-        if (!this.user.institution && this.registerForm.value.institution) {
-
-            if (this.registerForm.value.institution.name) {
-                this.institution.name = this.registerForm.value.institution.name;
-            } else {
-                this.institution.name = this.registerForm.value.institution;
-            }
-
-            // this.institution.used = true;
-
-            let responseAddinstitution = await this._bDService.addInstitution(this.institution).toPromise();
-            if (responseAddinstitution.institution && responseAddinstitution.institution._id) {
-                this.user.institution = responseAddinstitution.institution._id;
-                localStorage.removeItem('institutions');
-                this.getAllInstitutions();
-            } else {
-                console.log(<any>responseAddinstitution);
-            }
-
-        }
-
+    
         try {
+            if (!this.user.profession && this.registerForm.value.profession) {
+                if (this.registerForm.value.profession.name) {
+                    this.profession.name = this.registerForm.value.profession.name;
+                } else {
+                    this.profession.name = this.registerForm.value.profession;
+                }
+    
+                let responseAddProfession = await firstValueFrom(this._bDService.addProfession(this.profession));
+                if (responseAddProfession.profession && responseAddProfession.profession._id) {
+                    this.user.profession = responseAddProfession.profession._id;
+                    localStorage.removeItem('professions');
+                    this.getAllProfessions();
+                } else {
+                    console.log(<any>responseAddProfession);
+                }
+            }
+    
+            if (!this.user.institution && this.registerForm.value.institution) {
+                if (this.registerForm.value.institution.name) {
+                    this.institution.name = this.registerForm.value.institution.name;
+                } else {
+                    this.institution.name = this.registerForm.value.institution;
+                }
+    
+                let responseAddInstitution = await firstValueFrom(this._bDService.addInstitution(this.institution));
+                if (responseAddInstitution.institution && responseAddInstitution.institution._id) {
+                    this.user.institution = responseAddInstitution.institution._id;
+                    localStorage.removeItem('institutions');
+                    this.getAllInstitutions();
+                } else {
+                    console.log(<any>responseAddInstitution);
+                }
+            }
+    
             let response = await firstValueFrom(this._userService.register(this.user));
             if (response.user && response.user._id) {
                 this._userService.signup(this.user).pipe(
@@ -200,9 +172,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
                                     }
                                 }),
                                 catchError(error => {
-                                    console.log(<any>error);
+                                    console.log('Error during signup with token:', error);
                                     this.status = 'error';
-                                    return throwError(error);
+                                    return throwError(() => error);
                                 })
                             ).subscribe();
                         } else {
@@ -210,24 +182,32 @@ export class RegisterComponent implements OnInit, OnDestroy {
                         }
                     }),
                     catchError(error => {
-                        console.log(<any>error);
+                        console.log('Error during signup:', error);
                         this.status = 'error';
-                        return throwError(error);
+                        return throwError(() => error);
                     })
                 ).subscribe();
             } else {
                 this.status = "error";
-                this.message = 'No ha sido posible realizar el registro, el correo electrónico ya se encuentra registrado.'
+                this.message = 'No ha sido posible realizar el registro, el correo electrónico ya se encuentra registrado.';
             }
-
+    
         } catch (error) {
             this.status = "error while running register";
-            console.log(<any>error);
+            console.log('Error during registration:', error);
         }
-
-       
-
     }
+    onInputChange(event: Event) {
+        const inputElement = event.target as HTMLInputElement;
+        const value = inputElement.value;
+    
+        // If value is not a string, set it to an empty string
+        if (typeof value !== 'string') {
+            inputElement.value = '';
+            console.warn('Input value is not a string:', value);
+        }
+    }
+
     getAllProfessions() {
         this._bDService.getAllProfessions().pipe(
             tap(response => {
@@ -240,38 +220,34 @@ export class RegisterComponent implements OnInit, OnDestroy {
             takeUntil(this.unsubscribe$)
         ).subscribe();
     }
-    
-    Contador = 1000 ;
-    //
-    onKey(event){
-        var element = event.target as HTMLInputElement ; //funciona
 
-        this.Contador = 1000-element.value.length;
-        
-        if(this.Contador<0){
-            this.renderer.setStyle(this.contador.nativeElement,'color','red'); //over 1000char, so it turns red
-        }
-        else{
-            this.renderer.setStyle(this.contador.nativeElement,'color','black');
-            
-        }
-         
-        }
+    Contador = 1000;
 
-        getAllAreas() {
-            this._bDService.getAllKnowledgeAreas().pipe(
-                tap(response => {
-                    if (response.areas) {
-                        this.allAreas = response.areas;
-                        localStorage.setItem('areas', JSON.stringify(this.allAreas));
-                    }
-                }),
-                catchError(error => {
-                    console.log(<any>error);
-                    return throwError(error);
-                })
-            ).subscribe();
+    onKey(event) {
+        var element = event.target as HTMLInputElement;
+        this.Contador = 1000 - element.value.length;
+
+        if (this.Contador < 0) {
+            this.renderer.setStyle(this.contador.nativeElement, 'color', 'red');
+        } else {
+            this.renderer.setStyle(this.contador.nativeElement, 'color', 'black');
         }
+    }
+
+    getAllAreas() {
+        this._bDService.getAllKnowledgeAreas().pipe(
+            tap(response => {
+                if (response.areas) {
+                    this.allAreas = response.areas;
+                    localStorage.setItem('areas', JSON.stringify(this.allAreas));
+                }
+            }),
+            catchError(error => {
+                console.log('Error fetching areas:', error);
+                return throwError(() => error);
+            })
+        ).subscribe();
+    }
 
     getAllInstitutions() {
         this._bDService.getAllInstitutions().pipe(
@@ -294,8 +270,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
                 }
             }),
             catchError(error => {
-                console.log(<any>error);
-                return throwError(error);
+                console.log('Error fetching counters:', error);
+                return throwError(() => error);
             })
         ).subscribe();
     }
@@ -308,8 +284,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
                 }
             }),
             catchError(error => {
-                console.log(<any>error);
-                return throwError(error);
+                console.log('Error fetching unviewed messages:', error);
+                return throwError(() => error);
             })
         ).subscribe();
     }
