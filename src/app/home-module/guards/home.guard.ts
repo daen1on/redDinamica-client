@@ -1,26 +1,16 @@
-import { Injectable } from '@angular/core';
-import { Router, Route } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, CanActivateFn, UrlTree } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
 
-@Injectable()
-export class HomeGuard {
-    
-    constructor(
-           private _router: Router,
-           private _userService: UserService
+export const homeGuard: CanActivateFn = () => {
+  const router = inject(Router);
+  const userService = inject(UserService);
 
-    ){}
-
-
-    canActivate(){        
-        let identity = this._userService.getIdentity();
-        let token = this._userService.getToken();
-
-        if(identity && token){
-            return true;
-        }else{
-            this._router.navigate(['/']);
-            return false;
-        }
-    }
-}
+  let identity = userService.getIdentity();
+  let token = userService.getToken();
+  if (identity && token) {
+    return true;
+  } else {
+    return router.parseUrl('/');
+  }
+};

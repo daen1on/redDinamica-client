@@ -1,6 +1,7 @@
 export class KnowledgeArea {
-    public used;
     constructor(
-        public name:String     
-    ){}
+        public _id: string,
+        public name: string,
+        public used: boolean
+    ) {}
 }

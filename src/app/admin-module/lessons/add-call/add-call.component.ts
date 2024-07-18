@@ -151,34 +151,31 @@ export class AddCallComponent implements OnInit {
 
 
     }
-
     editLesson(lesson) {
-        this._lessonService.editLesson(this.token, lesson).subscribe(
-            response => {
+        this._lessonService.editLesson(this.token, lesson).subscribe({
+            next: response => {
                 if (response.lesson._id) {
                     this.status = 'success';
                     this.added.emit();
-
-
                 } else {
                     this.status = 'error';
                 }
             },
-            error => {
+            error: error => {
                 this.status = 'error';
                 console.log(<any>error);
             }
-        );
-
+        });
+    
         this.submitted = false;
     }
-
+    
     saveLesson(lesson, call) {
-        this._lessonService.addLesson(this.token, lesson).subscribe(
-            response => {
+        this._lessonService.addLesson(this.token, lesson).subscribe({
+            next: response => {
                 if (response.lesson._id) {
                     this.status = 'success';
-
+    
                     this.lesson.son_lesson = response.lesson._id;
                     this.editLesson(this.lesson);
                     
@@ -189,18 +186,17 @@ export class AddCallComponent implements OnInit {
                     this.newLesson.father_lesson = this.lesson._id;
                     this.editLesson(this.newLesson);
                     this.added.emit();
-
-
                 } else {
                     this.status = 'error';
                 }
             },
-            error => {
+            error: error => {
                 this.status = 'error';
                 console.log(<any>error);
             }
-        );
-
+        });
+    
         this.submitted = false;
     }
-}
+    
+   }

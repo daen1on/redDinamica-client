@@ -81,8 +81,15 @@ small.badge{
 .ng-select.is-invalid .ng-clear-wrapper{
     color: #E74C3C;
  
+}.modal-backdrop {
+  z-index: 1040 !important;
 }
 
+.modal-content {
+  z-index: 1100 !important;
+}
+
+  
 .invalid-feedback-select{
     font-size: 80%;
     color: #E74C3C;    

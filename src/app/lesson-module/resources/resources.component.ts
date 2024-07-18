@@ -263,100 +263,86 @@ export class ResourcesComponent implements OnInit {
     }
     
     editLesson(lesson, statusE = null, group=null) {
-
-        
-        
-        if(statusE =='deleted') {this.status = 'warningD';} //case when deleting group
-        if (statusE == 'success'){this.status='warning';} //case when uploading a resource
-        this._lessonService.editLesson(this.token, lesson).subscribe(
-            response => {
-                
+        if (statusE === 'deleted') {
+            this.status = 'warningD'; //case when deleting group
+        }
+        if (statusE === 'success') {
+            this.status = 'warning'; //case when uploading a resource
+        }
+    
+        this._lessonService.editLesson(this.token, lesson).subscribe({
+            next: (response) => {
                 if (response.lesson && response.lesson._id) {
                     this.lesson = response.lesson;
-                    //todo: checkear qué hace esto.
                     if (!this.editMode) { //prevents page from getting outside the group edited once saved.
-                        this.name.reset();   
-                        
+                        this.name.reset();
                     }
-
+    
                     if (this.filesToUpload.length > 0) {
-                        //Upload profile imaage
+                        //Upload profile image
                         this._uploadService.makeFileRequest(
                             this.url + 'upload-lesson/' + this.lesson._id,
                             [],
                             this.filesToUpload,
                             this.token,
                             'files'
-                        ).subscribe((event: HttpEvent<any>) => { // client call
-                            switch(event.type) { //checks events
-                            case HttpEventType.UploadProgress: // If upload is in progress
-                            //this.status = 'warning';
-                            this.barWidth = Math.round(event.loaded / event.total * 100).toString()+'%'; // get upload percentage
-                            break;
-                            case HttpEventType.Response: // give final response
-                            console.log('User successfully added!', event.body);
-                            
-                            this.submitted = false;
-                            
-                            //this.disableForm(false); is it not being used?
-                            //this.name.reset();
-                            //this.files.reset();
-                            //this.message.reset();
-                            //this.getGroups();
-                            this.status = statusE;
-                            this.barWidth ='0%';
-                            
-                            this.files.reset();
-                            this.loading = false;
-                            
-                          
+                        ).subscribe({
+                            next: (event: HttpEvent<any>) => { // client call
+                                switch (event.type) { //checks events
+                                    case HttpEventType.UploadProgress: // If upload is in progress
+                                        this.barWidth = Math.round(event.loaded / event.total * 100).toString() + '%'; // get upload percentage
+                                        break;
+                                    case HttpEventType.Response: // give final response
+                                        console.log('User successfully added!', event.body);
+                                        this.submitted = false;
+                                        this.status = statusE;
+                                        this.barWidth = '0%';
+                                        this.files.reset();
+                                        this.loading = false;
+                                        break;
+                                }
+                            },
+                            error: (error) => {
+                                this.status = 'error';
+                                this.barWidth = '0%';
+                                this.submitted = false;
+                                console.log(<any>error);
                             }
-                        }, error=>{
-
-                             
-                            this.status = 'error';
-                            this.barWidth ='0%';
-                            this.submitted = false;
-                            console.log(<any>error);
-
                         });
                     }
-
+    
                     this.files.reset();
-                    //this.status = 'success';
                     this.submitted = false;
                     this.getGroups();
-                    if (this.editMode == true){
+    
+                    if (this.editMode === true) {
                         this.editMode = false;
                         this.status = 'successE';
                         this.selectedGroup = group; //revisar qué pasa cuando se quiere guardar archivos, necesitamos que se vea la barra de carga.
                         this.loading = false;
                     }
-                    if (statusE=='deleted'){
+    
+                    if (statusE === 'deleted') {
                         this.status = 'deletedD';
                         this.loading = false;
-                            
                     }
-
                 } else {
                     this.status = 'error';
                     this.loading = false;
-
-
                 }
             },
-            error => {
+            error: (error) => {
                 if (error != null) {
                     this.status = 'error';
                     this.loading = false;
                     console.log(<any>error);
                 }
             }
-        );
-        
+        });
+    
         this.submitted = false;
-
     }
+    
     
     @HostListener('window:beforeunload')
     canDeactivate(): Observable<boolean> | boolean {

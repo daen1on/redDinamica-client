@@ -1,29 +1,29 @@
-import { Component } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators, FormBuilder } from '@angular/forms';
-import { User } from 'src/app/models/user.model';
-
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UserService } from 'src/app/services/user.service';
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ADD_FIELDS_FORM, CATEGORIES_ADMIN, CATEGORIES, LABEL_PROFILE, EDIT_FIELDS_FORM } from '../services/usersData';
-import { UserService } from 'src/app/services/user.service';
-
+import { User } from 'src/app/models/user.model';
 import { City } from 'src/app/models/city.model';
 import { Profession } from 'src/app/models/profession.model';
 import { Institution } from 'src/app/models/institution.model';
 import { GLOBAL } from 'src/app/services/global';
+import { lastValueFrom } from 'rxjs';
+
 
 @Component({
     selector: 'users',
     templateUrl: './users.component.html',
     styleUrls: ['./users.component.css']
 })
-export class UsersComponent {
+export class UsersComponent implements OnInit {
+    public labelProfile = LABEL_PROFILE;
     public title: string;
     public url;
     public addFieldsForm = ADD_FIELDS_FORM;
     public editFieldsForm = EDIT_FIELDS_FORM;
     public categories;
-    public labelProfile = LABEL_PROFILE;
     public identity;
     public addCity = false;
     public openItem;
@@ -32,13 +32,13 @@ export class UsersComponent {
     public editSubmitted = false;
     public status;
     public editStatus;
-    public addForm;
+    public addForm: FormGroup;
     public city = new City();
     public profession = new Profession('');
     public institution = new Institution();
     public state;
     public country;
-    public editForm;
+    public editForm: FormGroup;
     public user = new User();
     public users = [];
 
@@ -64,11 +64,11 @@ export class UsersComponent {
 
     constructor(
         private _bDService: BasicDataService,
-        private _userService: UserService,        
+        private _userService: UserService,
         private _route: ActivatedRoute,
-        private _router: Router,        
+        private _router: Router,
+        private fb: FormBuilder,
     ) {
-
         this.title = 'Usuarios';
         this.identity = _userService.getIdentity();
         this.categories = CATEGORIES;
@@ -78,40 +78,39 @@ export class UsersComponent {
             this.categories = CATEGORIES_ADMIN;
         }
 
-        this.addForm = new UntypedFormGroup({
-            name: new UntypedFormControl('', Validators.required),
-            surname: new UntypedFormControl('', Validators.required),
-            email: new UntypedFormControl('', [Validators.required, Validators.email]),
-            profession: new UntypedFormControl('', Validators.required),
-            institution: new UntypedFormControl('', Validators.required),
-            city: new UntypedFormControl('', Validators.required),
-            category: new UntypedFormControl('', Validators.required),
-            canAdvise: new UntypedFormControl('false'),
+        this.addForm = this.fb.group({
+            name: ['', Validators.required],
+            surname: ['', Validators.required],
+            email: ['', [Validators.required, Validators.email]],
+            profession: ['', Validators.required],
+            institution: ['', Validators.required],
+            city: ['', Validators.required],
+            category: ['', Validators.required],
+            canAdvise: ['false'],
         });
 
-        this.editForm = new UntypedFormGroup({
-            name: new UntypedFormControl(''),
-            surname: new UntypedFormControl(''),
-            email: new UntypedFormControl(''),
-            profession: new UntypedFormControl(''),
-            institution: new UntypedFormControl(''),
-            about: new UntypedFormControl(''),
-            city: new UntypedFormControl(''),
-            category: new UntypedFormControl(''),
-            canAdvise: new UntypedFormControl(),
-            postgraduate: new UntypedFormControl('')
+        this.editForm = this.fb.group({
+            name: [''],
+            surname: [''],
+            email: [''],
+            profession: [''],
+            institution: [''],
+            about: [''],
+            city: [''],
+            category: [''],
+            canAdvise: [''],
+            postgraduate: ['']
         });
 
-        this.state = new UntypedFormControl('');
-        this.country = new UntypedFormControl('');
+        this.state = this.fb.control('');
+        this.country = this.fb.control('');
         this.items = {
             city: [],
             institution: [],
             profession: []
         };
 
-        this.filter = new UntypedFormControl();
-
+        this.filter = this.fb.control('');
     }
 
     ngOnInit(): void {
@@ -126,53 +125,56 @@ export class UsersComponent {
     get f() { return this.addForm.controls; }
     get f2() { return this.editForm.controls; }
 
+  
     getAllCities() {
-
         this.allCities = JSON.parse(localStorage.getItem('cities'));
         if (!this.allCities) {
-            this._bDService.getAllCities().subscribe(
-                response => {
+            this._bDService.getAllCities().subscribe({
+                next: (response) => {
                     if (response.cities) {
                         this.allCities = response.cities;
                         localStorage.setItem('cities', JSON.stringify(this.allCities));
                     }
-                }, error => {
+                },
+                error: (error) => {
                     console.log(<any>error);
-                });
+                }
+            });
         }
     }
-
 
     getAllProfessions() {
         this.allProfessions = JSON.parse(localStorage.getItem('professions'));
         if (!this.allProfessions) {
-
-            this._bDService.getAllProfessions().subscribe(
-                response => {
+            this._bDService.getAllProfessions().subscribe({
+                next: (response) => {
                     if (response.professions) {
                         this.allProfessions = response.professions;
                         localStorage.setItem('professions', JSON.stringify(this.allProfessions));
                     }
-                }, error => {
+                },
+                error: (error) => {
                     console.log(<any>error);
-                });
+                }
+            });
         }
     }
-
 
     getAllInstitutions() {
         this.allInstitutions = JSON.parse(localStorage.getItem('institutions'));
 
         if (!this.allInstitutions) {
-            this._bDService.getAllInstitutions().subscribe(
-                response => {
+            this._bDService.getAllInstitutions().subscribe({
+                next: (response) => {
                     if (response.institutions) {
                         this.allInstitutions = response.institutions;
                         localStorage.setItem('institutions', JSON.stringify(this.allInstitutions));
                     }
-                }, error => {
+                },
+                error: (error) => {
                     console.log(<any>error);
-                });
+                }
+            });
         }
     }
 
@@ -188,181 +190,99 @@ export class UsersComponent {
 
     async onSubmit() {
         this.submitted = true;
-
+    
         if (this.addForm.invalid) {
             return;
         }
-
+    
         this.user.name = this.addForm.value.name;
         this.user.surname = this.addForm.value.surname;
         this.user.email = this.addForm.value.email;
-
+    
         if (this.addForm.value.city) {
             this.user.city = this.addForm.value.city._id;
         }
-
+    
         if (this.addForm.value.profession) {
             this.user.profession = this.addForm.value.profession._id;
         }
-
+    
         if (this.addForm.value.institution) {
             this.user.institution = this.addForm.value.institution._id;
         }
-
+    
         this.user.role = this.addForm.value.category;        
         this.user.canAdvise = this.addForm.value.canAdvise == 'true' ? true : false;
-
-        if (!this.user.city && this.addForm.value.city) {
-
-            this.city.name = this.addForm.value.city.name;
-            this.city.state = this.state.value;
-            this.city.country = this.country.value;
-
-
-            let responseAddCity = await this._bDService.addCity(this.city).toPromise();
-
-            if (responseAddCity.city && responseAddCity.city._id) {
-                this.user.city = responseAddCity.city._id;
-                this.state.reset();
-                this.country.reset();
-
-                localStorage.removeItem('cities');
-                this.getAllCities();
-
-            } else {
-                console.log(<any>responseAddCity);
-            }
-            
-        }
-
-        if (!this.user.profession && this.addForm.value.profession) {
-
-            this.profession.name = this.addForm.value.profession.name;
-
-            let responseAddProfession = await this._bDService.addProfession(this.profession).toPromise();
-
-            if (responseAddProfession.profession && responseAddProfession.profession._id) {
-                this.user.profession = responseAddProfession.profession._id;
-
-                localStorage.removeItem('professions');
-                this.getAllProfessions();
-            } else {
-                console.log(<any>responseAddProfession);
-            }
-
-        }
-
-        if (!this.user.institution && this.addForm.value.institution) {
-
-            this.institution.name = this.addForm.value.institution.name;
-
-            let responseAddinstitution = await this._bDService.addInstitution(this.institution).toPromise();
-            if (responseAddinstitution.institution && responseAddinstitution.institution._id) {
-                this.user.institution = responseAddinstitution.institution._id;
-                
-                localStorage.removeItem('institutions');
-                this.getAllInstitutions();
-            } else {
-                console.log(<any>responseAddinstitution);
-            }
-        }
-
-        let responseAddUser = await this._userService.registerByAdmin(this.user).toPromise().catch((error) => {
-            this.status = "error";
-            console.log(<any>error);
-        });
-
-        if (responseAddUser.user && responseAddUser.user._id) {
-            this.addForm.reset();
-            this.status = "success";
-            this.submitted = false;
-        } else {
-            this.status = "error";
-        }
-
-        this.getUsers(this.page);
-        this.getAllUsers();
-        this.setAdd();
-
-        document.querySelector('.modal-body').scrollTop = 0;
-
-    }
-
-    public tempUser;
-    setEdit(user) {
-        let city;
-        let profession;
-        let institution;
-
-        this.editStatus = null;
-        this.editSubmitted = false;
-
-        this.tempUser = user;
-        this.user = null;
-
-        if (this.tempUser.city) {
-            city = `${this.tempUser.city.name}, ${this.tempUser.city.state}, ${this.tempUser.city.country}`;
-        }
-
-        if (this.tempUser.profession) {
-            profession = this.tempUser.profession.name;
-        }
-
-        if (this.tempUser.institution) {
-            institution = this.tempUser.institution.name;
-        }
-
-        this.editForm.patchValue({
-            name: this.tempUser.name,
-            surname: this.tempUser.surname,
-            about: this.tempUser.about,
-            email: this.tempUser.email,
-            city: city,
-            profession: profession,
-            institution: institution,
-            category: this.tempUser.role,
-            canAdvise: this.tempUser.canAdvise.toString()
-        });
-
-
-    }
-
-    onEditSubmit() {
-        this.submitted = true;
-
-        if (this.editForm.invalid) {
-            return;
-        }
-
-
-        this.user = this.tempUser;
-        if(this.tempUser.city){
-            this.user.city = this.tempUser.city._id;
-        }
-        this.user.institution = this.tempUser.institution._id;
-        this.user.profession = this.tempUser.profession._id;
-        this.user.role = this.editForm.value.category;
-        this.user.canAdvise = this.editForm.value.canAdvise == 'true' ? true : false;
-
-        this._userService.updateUser(this.user).subscribe(
-            response => {
-                if (response.user && response.user._id) {
-                    this.editStatus = 'success';
-                    this.getUsers(this.page);
-                    this.getAllUsers();
-
+    
+        try {
+            if (!this.user.city && this.addForm.value.city) {
+                this.city.name = this.addForm.value.city.name;
+                this.city.state = this.state.value;
+                this.city.country = this.country.value;
+    
+                const responseAddCity = await lastValueFrom(this._bDService.addCity(this.city));
+    
+                if (responseAddCity.city && responseAddCity.city._id) {
+                    this.user.city = responseAddCity.city._id;
+                    this.state.reset();
+                    this.country.reset();
+    
+                    localStorage.removeItem('cities');
+                    this.getAllCities();
                 } else {
-                    this.editStatus = 'error';
+                    console.log(responseAddCity);
                 }
-            },
-            error => {
-                this.editStatus = 'error';
-                console.log(<any>error);
             }
-        );
-
-        document.querySelector('div#modal-body').scrollTop = 0;
-
+    
+            if (!this.user.profession && this.addForm.value.profession) {
+                this.profession.name = this.addForm.value.profession.name;
+    
+                const responseAddProfession = await lastValueFrom(this._bDService.addProfession(this.profession));
+    
+                if (responseAddProfession.profession && responseAddProfession.profession._id) {
+                    this.user.profession = responseAddProfession.profession._id;
+    
+                    localStorage.removeItem('professions');
+                    this.getAllProfessions();
+                } else {
+                    console.log(responseAddProfession);
+                }
+            }
+    
+            if (!this.user.institution && this.addForm.value.institution) {
+                this.institution.name = this.addForm.value.institution.name;
+    
+                const responseAddInstitution = await lastValueFrom(this._bDService.addInstitution(this.institution));
+    
+                if (responseAddInstitution.institution && responseAddInstitution.institution._id) {
+                    this.user.institution = responseAddInstitution.institution._id;
+    
+                    localStorage.removeItem('institutions');
+                    this.getAllInstitutions();
+                } else {
+                    console.log(responseAddInstitution);
+                }
+            }
+    
+            const responseAddUser = await lastValueFrom(this._userService.registerByAdmin(this.user));
+    
+            if (responseAddUser.user && responseAddUser.user._id) {
+                this.addForm.reset();
+                this.status = "success";
+                this.submitted = false;
+            } else {
+                this.status = "error";
+            }
+    
+            this.getUsers(this.page);
+            this.getAllUsers();
+            this.setAdd();
+    
+            document.querySelector('.modal-body').scrollTop = 0;
+        } catch (error) {
+            this.status = "error";
+            console.log(error);
+        }
     }
 
     actualPage() {
@@ -384,57 +304,54 @@ export class UsersComponent {
             }
 
             this.getUsers(this.page);
-
         });
     }
 
     getUsers(page) {
-        this._userService.getUsers(page).subscribe(
-            response => {
+        this._userService.getUsers(page).subscribe({
+            next: (response) => {
                 if (response.users) {
                     this.users = response.users;
-
+    
                     this.total = response.total;
                     this.pages = response.pages;
                     if (page > this.pages) {
                         this._router.navigate(['/admin/usuarios']);
                     }
-
+    
                     this.loading = false;
                 }
-            }, error => {
+            },
+            error: (error) => {
                 console.log(<any>error);
             }
-        );
+        });
     }
-
+    
     getAllUsers() {
         let filteredUsers = [];
-        this._userService.getAllUsers().subscribe(
-            response => {
+        this._userService.getAllUsers().subscribe({
+            next: (response) => {
                 if (response.users) {
                     this.allUsers = response.users;
-
+    
                     if (this.selectedCategory.length > 0) {
                         this.selectedCategory.forEach((category) => {
                             filteredUsers = filteredUsers.concat(this.allUsers.filter((user) => {
                                 return user.role == category;
                             }));
                         });
-
+    
                         this.allUsers = filteredUsers;
-
                     }
                 }
-
-
-
-            }, error => {
+            },
+            error: (error) => {
                 console.log(<any>error);
-            });
+            }
+        });
     }
-
-
+    
     onKeydown(e) {
         if (e.keyCode === 13) {
             // Cancel the default action, if needed
@@ -443,10 +360,10 @@ export class UsersComponent {
             document.getElementById("save").click();
         }
     }
-
+    
     removeUser(userId) {
-        this._userService.deleteUser(userId).subscribe(
-            response => {
+        this._userService.deleteUser(userId).subscribe({
+            next: (response) => {
                 if (response.user) {
                     this.users = this.users.filter((item) => {
                         return item._id != response.user._id;
@@ -454,14 +371,12 @@ export class UsersComponent {
                     this.getUsers(this.page);
                     this.getAllUsers();
                 }
-
-            }, error => {
+            },
+            error: (error) => {
                 console.log(<any>error);
             }
-        );
+        });
     }
-
-
     addToOpenItem(userId) {
         this.openItem = userId;
     }
@@ -490,7 +405,6 @@ export class UsersComponent {
     }
 
     onChanges(): void {
-
         this.addForm.valueChanges.subscribe(val => {
             if (val) {
                 this.status = null;

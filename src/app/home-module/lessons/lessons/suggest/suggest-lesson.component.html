@@ -26,14 +26,9 @@
                 </div>
 
                 <div class="mb-2">
-                    <p>Está opción le permite solicitar o dar sugerencia de un tema sobre cual considera que se debe
-                        desarrollar una lección en la red.</p>
-                    <p>El administrador se encargará de enviar una convocatoria pública para formar el grupo de
-                        desarrollo
-                        de la lección.</p>
+                    <p>Esta opción le permite solicitar o dar sugerencia de un tema sobre el cual considera que se debe desarrollar una lección en la red.</p>
+                    <p>El administrador se encargará de enviar una convocatoria pública para formar el grupo de desarrollo de la lección.</p>
                 </div>
-
-
 
                 <div *ngFor="let field of fields" class="form-group row">
                     <label for="{{field.id}}" class="col-3 col-form-label">
@@ -45,41 +40,51 @@
                             autocomplete="off" formControlName="{{field.id}}"
                             [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}">
 
-                        <textarea *ngIf="field.type === 'textarea'" class="form-control" id="experience" rows="3"
+                        <textarea *ngIf="field.type === 'textarea'" class="form-control" id="{{field.id}}" rows="3"
                             formControlName="{{field.id}}" [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}">
-                            </textarea>
+                        </textarea>
 
-                        <!--
-                        <select *ngIf="field.type == 'select'" formControlName="{{field.id}}" class="form-control"
-                            id="{{field.id}}" [ngClass]="{'is-invalid': submitted && f[field.id].errors}"
-                            (input)="setDisabled()">
-                            <option *ngFor="let option of field.options" value="{{option.value}}">
-                                {{option.label}}</option>
-                        </select>
-
-                        <input *ngIf="field.type == 'file'" formControlName="{{field.id}}" type="file"
-                            class="form-control" name="file" id="{{field.id}}" (change)="fileChangeEvent($event)"
-                            [ngClass]="{'is-invalid': submitted && f[field.id].errors|| maxSizeError}">
-
-                        <div *ngIf="maxSizeError && field.id == 'file'" class="invalid-feedback">
-                            <div *ngIf="maxSizeError">
-                                El archivo es demasiado grande, el tamaño maximo permitido es de
-                                {{MAX_FILE_SIZE}}MB.
+                        <div *ngIf="submitted && f[field.id].errors" class="invalid-feedback">
+                            <div *ngIf="f[field.id].errors.required">
+                                El campo {{field.label}} es obligatorio.
                             </div>
                         </div>
-
-                    -->
-
-                    <div *ngIf="submitted && f[field.id].errors" class="invalid-feedback">
-                        <div *ngIf="f[field.id].errors.required">
-                            El campo {{field.label}} es obligatorio.
-                        </div>
-                    </div>
-
                     </div>
                 </div>
 
+                <div class="form-group row">
+                    <label for="knowledge_area" class="col-3 col-form-label">
+                        <strong>Área de Conocimiento<span *ngIf="true">*</span></strong>
+                    </label>
+                    <div class="col-9">
+                        <select formControlName="knowledge_area" class="form-control" id="knowledge_area"
+                            [ngClass]="{'is-invalid': submitted && f['knowledge_area'].errors}">
+                            <option *ngFor="let area of knowledgeAreas" [value]="area._id">{{area.name}}</option>
+                        </select>
+                        <div *ngIf="submitted && f['knowledge_area'].errors" class="invalid-feedback">
+                            <div *ngIf="f['knowledge_area'].errors.required">
+                                El campo Área de Conocimiento es obligatorio.
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="form-group row">
+                    <label for="level" class="col-3 col-form-label">
+                        <strong>Nivel Académico<span *ngIf="true">*</span></strong>
+                    </label>
+                    <div class="col-9">
+                        <select formControlName="level" class="form-control" id="level"
+                            [ngClass]="{'is-invalid': submitted && f['level'].errors}">
+                            <option *ngFor="let level of academicLevels" [value]="level">{{level}}</option>
+                        </select>
+                        <div *ngIf="submitted && f['level'].errors" class="invalid-feedback">
+                            <div *ngIf="f['level'].errors.required">
+                                El campo Nivel Académico es obligatorio.
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- /modal-body -->
 
@@ -94,7 +99,6 @@
                 </button>
             </div>
             <!-- /modal-footer -->
-
         </form>
     </div>
 </div>

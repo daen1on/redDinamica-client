@@ -91,7 +91,7 @@ export class LessonsComponent implements OnInit {
         });
     
         this.basicDataService.getAllKnowledgeAreas().pipe(takeUntil(this.unsubscribe$)).subscribe({
-            next: response => {
+            next: (response) => {
                 try {
                     this.areas = response.areas || JSON.parse(localStorage.getItem('areas') || '[]');
                     localStorage.setItem('areas', JSON.stringify(this.areas));
@@ -100,7 +100,7 @@ export class LessonsComponent implements OnInit {
                     this.areas = response.areas || [];
                 }
             },
-            error: error => console.error('Error fetching areas:', error)
+            error: (error) => console.error('Error fetching areas:', error)
         });
     
         this.fetchAllLessons();

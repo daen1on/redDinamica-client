@@ -1,0 +1,16 @@
+.ng-select {
+    width: 100%;
+}
+.ng-select .ng-select-container {
+    min-height: 38px;
+}
+.ng-select .ng-select-container .ng-value-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.ng-select .ng-select-container .ng-placeholder {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

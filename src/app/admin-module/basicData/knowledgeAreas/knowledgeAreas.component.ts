@@ -1,243 +1,146 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-
 import { BasicDataService } from 'src/app/services/basicData.service';
-
 import { KnowledgeArea } from 'src/app/models/knowledge-area.model';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
-    selector: 'knowledgeAreas',
+    selector: 'knowledge-areas',
     templateUrl: './knowledgeAreas.component.html'
 })
-export class KnowledgeAreasComponent {
+export class KnowledgeAreasComponent implements OnInit {
     public title: string;
-    public fieldsForm = [
-        {
-            id: "areaName",
-            label: "Área de conocimiento",
-            attr: "name",
-            required: true
+    public knowledgeAreas: KnowledgeArea[] = [];
+    public loading: boolean = true;
+    public status: string | null = null;
+    public submitted: boolean = false;
+
+    public addForm: UntypedFormGroup;
+    public editForm: UntypedFormGroup;
+    public tempArea: KnowledgeArea;
+
+    constructor(private _bDService: BasicDataService) {
+        this.title = 'Áreas de Conocimiento';
+
+        this.addForm = new UntypedFormGroup({
+            areaName: new UntypedFormControl('', Validators.required)
+        });
+
+        this.editForm = new UntypedFormGroup({
+            areaName: new UntypedFormControl('', Validators.required)
+        });
+    }
+
+    ngOnInit(): void {
+        this.getAllAreas();
+    }
+
+    async getAllAreas() {
+        try {
+            const response = await firstValueFrom(this._bDService.getAllKnowledgeAreas());
+            this.knowledgeAreas = response.areas;
+            this.loading = false;
+        } catch (error) {
+            console.error(error);
+            this.loading = false;
         }
-    ];
-
-    public submitted = false;
-    public status;
-    public areaForm;
-    public editAreaForm;
-    public knowledgeArea = new KnowledgeArea('');
-    public areas = [];
-
-    // Pagination
-    public page; // Actual page
-    public pages; // Number of pages
-    public total; // Total of records
-    public prevPage;
-    public nextPage;
-
-    // Filter
-    public filter;
-    public allAreas = [];
-
-    public loading = true;
-
-    constructor(
-        private _bDService:BasicDataService,
-        private _route: ActivatedRoute,
-        private _router:Router,
-    ) {
-        this.title = 'Áreas de conocimiento';
-        this.areaForm = new UntypedFormGroup({
-            areaName: new UntypedFormControl('', [Validators.required])
-        });
-
-        this.editAreaForm = new UntypedFormGroup({
-            areaName: new UntypedFormControl('', [Validators.required])            
-        });
-
-        this.filter =  new UntypedFormControl();
-
     }
 
-    ngOnInit(): void {        
-        this.actualPage();
-        this.getAllAreas();        
-    }
+    get f() { return this.addForm.controls; }
+    get f2() { return this.editForm.controls; }
 
-    // Get controls form
-    get f() { return this.areaForm.controls; }
-
-    get f2() { return this.editAreaForm.controls; }  
-
-    setAdd(){
+    setAdd() {
         this.status = null;
         this.submitted = false;
     }
-    
-    onSubmit() {
+
+    async onSubmit() {
+        this.status = null;
         this.submitted = true;
 
-        if (this.areaForm.invalid) {
+        if (this.addForm.invalid) {
             return;
         }
 
-        this.knowledgeArea.name = this.areaForm.value.areaName;
+        const newArea: KnowledgeArea = { _id: '', name: this.addForm.value.areaName, used: false };
 
-        this._bDService.addKnowledgeArea(this.knowledgeArea).subscribe(
-            response => {
-                
-                if (response.area && response.area._id) {
-                    this.status = 'success';
-                    this.areaForm.reset();
-                    this.submitted = false;
-                    this.getAreas(this.page);
-                    this.getAllAreas();
-                } else {
-                    this.status = 'error';
-                }
-            },
-            error => {
-                if (error != null) {
-                    this.status = 'error';
-                    console.log(<any>error);
-                }
-            }
-        );
-    }
-
-    getAllAreas(){  
-        this._bDService.getAllKnowledgeAreas().subscribe(
-            response=>{       
-                if(response.areas){
-                    this.allAreas = response.areas;
-                    localStorage.setItem('areas', JSON.stringify(this.allAreas));
-                }
-            },error=>{
-                console.log(<any>error);
-            });        
-    }
-
-    getAreas(page){  
-        this._bDService.getKnowledgeAreas(page).subscribe(
-            response=>{                  
-                if(response.areas){
-                    this.areas = response.areas; 
-                    this.total = response.total; 
-                    this.pages = response.pages;
-                    if(page > this.pages){
-                        this._router.navigate(['/admin/areas']);
-                    }
-
-                    this.loading = false;
-                }
-            },error=>{
-                console.log(<any>error);
-            });
-    }
-
-    public tempArea;
-    setEditArea(area){
-        this.status = null;
-        this.submitted = false;
-        this.tempArea = area;
-        this.editAreaForm.patchValue({areaName:this.tempArea.name}); 
-    }
-
-    onEditSubmit() {
-        this.status = null;
-        this.submitted = true;
-        
-        if (this.editAreaForm.invalid) {
-            return;
-        }
-        
-        this.knowledgeArea.name = this.editAreaForm.value.areaName;
-
-        this._bDService.editKnowledgeArea(this.tempArea._id, this.knowledgeArea).subscribe(
-            response => {
-
-                if (response.area && response.area._id) {
-                    this.status = 'success';
-                    this.submitted = false;
-                    this.getAreas(this.page);
-                    this.getAllAreas();
-                } else {
-                    this.status = 'error';
-                }
-            },
-            error => {
-                if (error != null) {
-                    this.status = 'error';
-                    console.log(<any>error);
-                }
-            }
-        );
-    }    
-
-    public tempAreaId;
-    setDeleteArea(areaId){
-        this.tempAreaId = areaId;
-    }
-
-    delete(){
-        this._bDService.deleteKnowledgeArea(this.tempAreaId).subscribe(
-            response => {
-                
-                this.tempAreaId = null;
-                this.getAreas(this.page);
+        try {
+            const response = await firstValueFrom(this._bDService.addKnowledgeArea(newArea));
+            if (response.area && response.area._id) {
+                this.addForm.reset();
+                this.status = 'success';
+                this.submitted = false;
                 this.getAllAreas();
-            },
-            error => {
-                console.log(<any>error);
+            } else {
+                this.status = 'error';
             }
-        )
-    }    
+        } catch (error) {
+            this.status = 'error';
+            console.error(error);
+        }
+    }
 
-    actualPage(){
-        this._route.params.subscribe(params => {
-           let page = +params['page'];
-           
-           this.page = page;
-
-           if(!page){
-               this.page = 1;
-               this.nextPage = this.page + 1;
-           }else{
-               this.nextPage = page + 1;
-               this.prevPage = page - 1;
-
-               if(this.prevPage <= 0){
-                   this.prevPage = 1;
-               }
-           }
- 
-           this.getAreas(this.page);
+    setEditArea(area: KnowledgeArea) {
+        this.status = null;
+        this.tempArea = area;
+        this.editForm.patchValue({
+            areaName: area.name
         });
     }
 
-    onKeydown(e) {
-        if (e.keyCode === 13) {
-            // Cancel the default action, if needed
-            e.preventDefault();
-            // Trigger the button element with a click
-            document.getElementById("save").click();
+    async onEditSubmit() {
+        this.status = null;
+        this.submitted = true;
+
+        if (this.editForm.invalid) {
+            return;
+        }
+
+        this.tempArea.name = this.editForm.value.areaName;
+
+        try {
+            const response = await firstValueFrom(this._bDService.editKnowledgeArea(this.tempArea._id, this.tempArea));
+            if (response.area && response.area._id) {
+                this.status = 'success';
+                this.submitted = false;
+                this.getAllAreas();
+            } else {
+                this.status = 'error';
+            }
+        } catch (error) {
+            this.status = 'error';
+            console.error(error);
+        }
+    }
+
+    async setDeleteArea(areaId: string) {
+        try {
+            const response = await firstValueFrom(this._bDService.deleteKnowledgeArea(areaId));
+            this.getAllAreas();
+        } catch (error) {
+            console.error(error);
         }
     }
 
     onChanges(): void {
-
-        this.areaForm.get('areaName').valueChanges.subscribe(val => {
-            if (val) {
-                this.status = null;
-                this.submitted = false;
-            }
+        this.addForm.valueChanges.subscribe(() => {
+            this.status = null;
+            this.submitted = false;
         });
 
-        this.editAreaForm.get('areaName').valueChanges.subscribe(val => {
-            if (val) {
-                this.status = null;
-                this.submitted = false;
-            }
+        this.editForm.valueChanges.subscribe(() => {
+            this.status = null;
+            this.submitted = false;
         });
+    }
+
+    onKeydown(e: KeyboardEvent) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const saveButton = document.getElementById("save");
+            if (saveButton) {
+                saveButton.click();
+            }
+        }
     }
 }

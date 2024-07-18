@@ -1,15 +1,11 @@
 <!-- Knowledge Areas -->
 <div class="card">
     <div class="card-header">
-        <h3 class="m-0 text-primary font-weight-bolder float-left">{{title}}</h3>
-
-        <!-- Button trigger modal add-->
-        <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#addArea"
-            (click)="setAdd()">
+        <h3 class="m-0 text-primary font-weight-bolder float-left">{{ title }}</h3>
+        <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#addArea" (click)="setAdd()">
             <i class="fas fa-plus"></i>
             <span class="ml-2">Agregar</span>
         </button>
-
     </div>
 
     <div *ngIf="loading" class="card-body">
@@ -20,30 +16,11 @@
         </div>
     </div>
 
-    <div *ngIf="areas.length == 0 && !loading" class="card-body">
-        <h4 class="text-muted">
-            No se han registrado áreas de conocimiento.
-        </h4>
+    <div *ngIf="!loading && knowledgeAreas.length === 0" class="card-body">
+        <h4 class="text-muted">No se han registrado áreas de conocimiento.</h4>
     </div>
 
-    <div *ngIf="areas.length != 0" class="card-body">
-
-        <div class="form-group row">
-            <div class="col">
-                <form>
-                    <div class="input-group mb-2">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">Filtrar:</div>
-                        </div>
-                        <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Filtro"
-                            [formControl]="filter">
-                    </div>
-                </form>
-            </div>
-
-
-        </div>
-
+    <div *ngIf="!loading && knowledgeAreas.length > 0" class="card-body">
         <table class="table table-sm table-hover table-bordered text-center">
             <thead class="thead-dark">
                 <tr>
@@ -51,108 +28,55 @@
                     <th scope="col">Opciones</th>
                 </tr>
             </thead>
-            <tbody *ngIf="!filter.value">
-                <tr *ngFor="let area of areas">
-                    <td>{{area.name}}</td>
+            <tbody>
+                <tr *ngFor="let area of knowledgeAreas">
+                    <td>{{ area.name }}</td>
                     <td>
-                        <button type="button" class="btn btn-warning btn-sm mx-1" data-toggle="modal"
-                            data-target="#editArea" (click)="setEditArea(area)">
+                        <button type="button" class="btn btn-warning btn-sm mx-1" data-toggle="modal" data-target="#editArea" (click)="setEditArea(area)">
                             <i class="fas fa-pen-square"></i>
                             <span class="ml-2"><small>Editar</small></span>
                         </button>
-                        <button type="button" class="btn btn-danger btn-sm mx-1" data-toggle="modal"
-                            data-target="#deleteArea" (click)="setDeleteArea(area._id)">
-                            <i class="fas fa-trash"></i>
-                            <span class="ml-2"><small>Eliminar</small></span>
-                        </button>
-                    </td>
-                </tr>
-
-            </tbody>
-            <tbody *ngIf="filter.value">
-
-                <tr *ngFor="let area of allAreas | filter: filter.value">
-                    <td>{{area.name}}</td>
-                    <td>
-                        <button type="button" class="btn btn-warning btn-sm mx-1" data-toggle="modal"
-                            data-target="#editArea" (click)="setEditArea(area)">
-                            <i class="fas fa-pen-square"></i>
-                            <span class="ml-2"><small>Editar</small></span>
-                        </button>
-                        <button type="button" class="btn btn-danger btn-sm mx-1" data-toggle="modal"
-                            data-target="#deleteArea" (click)="setDeleteArea(area._id)">
+                        <button type="button" class="btn btn-danger btn-sm mx-1" (click)="setDeleteArea(area._id)">
                             <i class="fas fa-trash"></i>
                             <span class="ml-2"><small>Eliminar</small></span>
                         </button>
                     </td>
                 </tr>
             </tbody>
-
         </table>
-
-        <nav *ngIf="!filter.value" aria-label="Page navigation">
-            <ul class="pagination justify-content-end">
-                <li *ngIf="page > 1" class="page-item">
-                    <a class="page-link bg-primary" [routerLink]="['/admin/areas', prevPage]">Anterior</a>
-                </li>
-                <li *ngIf="page < pages" class="page-item">
-                    <a class="page-link bg-info" [routerLink]="['/admin/areas', nextPage]">Siguiente</a>
-                </li>
-            </ul>
-        </nav>
-
     </div>
 </div>
-<!-- /Knowledge Areas -->
 
-<!-- Modal addn-->
+<!-- Modal add -->
 <div class="modal fade" id="addArea" tabindex="-1" role="dialog" aria-labelledby="addArea" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <form [formGroup]="areaForm" (ngSubmit)="onSubmit()" (input)="onChanges()">
+            <form [formGroup]="addForm" (ngSubmit)="onSubmit()" (input)="onChanges()">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addAreaTitle">Agregar una área de conocimiento</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-
                 <div class="modal-body">
-
-                    <div *ngIf="status === 'error'; successMessage" class="alert alert-danger fade show text-center"
-                        role="alert">
+                    <div *ngIf="status === 'error'" class="alert alert-danger fade show text-center" role="alert">
                         <i class="fas fa-times-circle icon-message mr-2"></i>
                         El área de conocimiento no fue agregada correctamente. Intentalo de nuevo.
                     </div>
-
-                    <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center"
-                        role="alert">
+                    <div *ngIf="status === 'success'" class="alert alert-success fade show text-center" role="alert">
                         <i class="fas fa-check-circle icon-message mr-2"></i>
                         El área de conocimiento fue agregada correctamente.
                     </div>
-
-                    <div *ngFor="let field of fieldsForm" class="form-group row">
-                        <label for="{{field.id}}" class="col-5 col-form-label">
-                            <strong>{{field.label}}*</strong>
-                        </label>
-
+                    <div class="form-group row">
+                        <label for="areaName" class="col-5 col-form-label"><strong>Área de conocimiento*</strong></label>
                         <div class="col-7">
-                            <input type="text" class="form-control" id="{{field.id}}" formControlName="{{field.id}}"
-                                placeholder="{{field.label}}" autocomplete="off"
-                                [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}"
-                                (keydown)="onKeydown($event)">
-
-
-                            <div *ngIf="submitted && f[field.id].errors" class="invalid-feedback">
-                                <div *ngIf="f[field.id].errors.required">
-                                    El campo {{field.label}} es obligatorio.
-                                </div>
+                            <input type="text" class="form-control" id="areaName" formControlName="areaName" placeholder="Área de conocimiento" autocomplete="off" [ngClass]="{ 'is-invalid': submitted && f.areaName.errors }" (keydown)="onKeydown($event)">
+                            <div *ngIf="submitted && f.areaName.errors" class="invalid-feedback">
+                                <div *ngIf="f.areaName.errors.required">El campo Área de conocimiento es obligatorio.</div>
                             </div>
                         </div>
                     </div>
-
                 </div>
-
                 <div class="modal-footer">
                     <button class="btn btn-danger" data-dismiss="modal">Cancelar</button>
                     <button id="save" type="submit" class="btn btn-success">Guardar</button>
@@ -161,91 +85,42 @@
         </div>
     </div>
 </div>
-<!-- /Modal add-->
 
-<!-- Modal edit-->
+<!-- Modal edit -->
 <div class="modal fade" id="editArea" tabindex="-1" role="dialog" aria-labelledby="editArea" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <form [formGroup]="editAreaForm" (ngSubmit)="onEditSubmit()" (input)="onChanges()">
+            <form [formGroup]="editForm" (ngSubmit)="onEditSubmit()" (input)="onChanges()">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editAreaTitle">Editar área de conocimiento</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-
                 <div class="modal-body">
-                    <div *ngIf="status === 'error'; successMessage" class="alert alert-danger fade show text-center"
-                        role="alert">
+                    <div *ngIf="status === 'error'" class="alert alert-danger fade show text-center" role="alert">
                         <i class="fas fa-times-circle icon-message mr-2"></i>
                         El área de conocimiento no fue editada correctamente. Intentalo de nuevo.
                     </div>
-
-                    <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center"
-                        role="alert">
+                    <div *ngIf="status === 'success'" class="alert alert-success fade show text-center" role="alert">
                         <i class="fas fa-check-circle icon-message mr-2"></i>
                         Se ha editado correctamente el área de conocimiento.
                     </div>
-
-                    <div *ngFor="let field of fieldsForm" class="form-group row">
-                        <label for="{{field.id}}" class="col-5 col-form-label">
-                            <strong>{{field.label}}*</strong>
-                        </label>
-
+                    <div class="form-group row">
+                        <label for="editAreaName" class="col-5 col-form-label"><strong>Área de conocimiento*</strong></label>
                         <div class="col-7">
-                            <input type="text" class="form-control" id="{{field.id}}" formControlName="{{field.id}}"
-                                placeholder="{{field.label}}" autocomplete="off"
-                                [ngClass]="{ 'is-invalid': submitted && f2[field.id].errors}"
-                                (keydown)="onKeydown($event)">
-
-
-                            <div *ngIf="submitted && f2[field.id].errors" class="invalid-feedback">
-                                <div *ngIf="f2[field.id].errors.required">
-                                    El campo {{field.label}} es obligatorio.
-                                </div>
+                            <input type="text" class="form-control" id="editAreaName" formControlName="areaName" placeholder="Área de conocimiento" autocomplete="off" [ngClass]="{ 'is-invalid': submitted && f2.areaName.errors }" (keydown)="onKeydown($event)">
+                            <div *ngIf="submitted && f2.areaName.errors" class="invalid-feedback">
+                                <div *ngIf="f2.areaName.errors.required">El campo Área de conocimiento es obligatorio.</div>
                             </div>
                         </div>
-
                     </div>
-
-
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-danger" data-dismiss="modal">Cancelar</button>
-                    <button id="save" type="submit" class=" btn btn-warning">Editar</button>
+                    <button id="save" type="submit" class="btn btn-warning">Editar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-<!-- /Modal edit-->
-
-<!-- Modal warning -->
-<div class="modal fade" id="deleteArea" tabindex="-1" role="dialog" aria-labelledby="deleteArea" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteAreaTitle">Eliminar área de conocimiento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-
-            <div class="modal-body">
-
-                <div class="alert alert-warning mb-0" role="alert">
-                    <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
-                    ¿Esta seguro que desea eliminar este registro?
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button class=" btn btn-danger" data-dismiss="modal" (click)="delete()">Sí</button>
-                <button class="btn btn-primary text-white" data-dismiss="modal">No</button>
-            </div>
-
-        </div>
-    </div>
-</div>
-<!-- /Modal warning-->

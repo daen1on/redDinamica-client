@@ -1,12 +1,11 @@
-import { join } from 'path';
-import { config } from 'karma';
-import jasmine from 'karma-jasmine';
-import chromeLauncher from 'karma-chrome-launcher';
-import jasmineHtmlReporter from 'karma-jasmine-html-reporter';
-import coverageIstanbulReporter from 'karma-coverage-istanbul-reporter';
-import angularPlugins from '@angular-devkit/build-angular/plugins/karma';
+const { join } = require('path');
+const jasmine = require('karma-jasmine');
+const chromeLauncher = require('karma-chrome-launcher');
+const jasmineHtmlReporter = require('karma-jasmine-html-reporter');
+const coverageIstanbulReporter = require('karma-coverage-istanbul-reporter');
+const angularPlugins = require('@angular-devkit/build-angular/plugins/karma');
 
-export default function (config) {
+module.exports = function (config) {
   config.set({
     basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],

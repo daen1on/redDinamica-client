@@ -24,10 +24,6 @@ import { DetailsCallComponent } from './lessons/details/details-call.component';
 import { LessonModule } from '../lesson-module/lesson.module';
 import { AdviseLessonComponent } from './lessons/advise-lesson/advise-lesson.component';
 
-import { HomeGuard } from './guards/home.guard';
-
-
-
 @NgModule({
     declarations: [
         HomeComponent,
@@ -44,8 +40,7 @@ import { HomeGuard } from './guards/home.guard';
         DetailsCallComponent,
         SuggestLessonComponent,        
         SendExperienceComponent,
-        FilterPipe
-        
+        FilterPipe,
     ],
     imports: [
         CommonModule,
@@ -59,7 +54,6 @@ import { HomeGuard } from './guards/home.guard';
     ],
     exports: [
         HomeComponent
-    ],
-    providers: [HomeGuard],
+    ]
 })
 export class HomeModule { }

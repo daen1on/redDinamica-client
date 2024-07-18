@@ -1,0 +1,8 @@
+<div class="dropdown-menu dropdown-menu-right" aria-labelledby="notificationDropdown">
+    <h6 class="dropdown-header">Notificaciones</h6>
+    <div *ngIf="notifications.length === 0" class="dropdown-item">No tienes notificaciones</div>
+    <div *ngFor="let notification of notifications" class="dropdown-item" [class.font-weight-bold]="!notification.read" (click)="markAsRead(notification)">
+      <a [routerLink]="notification.link">{{ notification.content }}</a>
+    </div>
+  </div>
+  

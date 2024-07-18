@@ -7,24 +7,26 @@ import { GLOBAL } from 'src/app/services/global';
 @Component({
     selector: 'proposed',
     templateUrl: './proposed.component.html'
-
 })
 export class ProposedComponent implements OnInit {
-    public title;
-    public url;
-    public token;
-    public identity;
+    public title: string;
+    public url: string;
+    public token: string;
+    public identity: any;
 
-    public lessons = [];
+    public lessons: any[] = [];
     
     // Pagination
-    public page; // Actual page
-    public pages; // Number of pages
-    public total; // Total of records
-    public prevPage;
-    public nextPage;
+    public page: number; // Actual page
+    public pages: number; // Number of pages
+    public total: number; // Total of records
+    public prevPage: number;
+    public nextPage: number;
 
-    public loading = true;
+    public loading: boolean = true;
+    public detailsLessonItem: any;
+    public deleteLessonId: string;
+    public needReloadData: boolean;
 
     constructor(
         private _userService: UserService,
@@ -36,7 +38,6 @@ export class ProposedComponent implements OnInit {
         this.url = GLOBAL.url;
         this.token = this._userService.getToken();
         this.identity = this._userService.getIdentity();
-        
     }
 
     ngOnInit(): void {
@@ -44,17 +45,15 @@ export class ProposedComponent implements OnInit {
     }
 
     ngDoCheck(): void {
-        if(this.needReloadData){
+        if (this.needReloadData) {
             this.actualPage();
             this.needReloadData = false;
         }
     }
     
-    getLessons(page = 1) {        
-
+    getLessons(page = 1): void {        
         this._lessonService.getSuggestedLesson(this.token, page).subscribe(
             response => {               
-                
                 if (response.lessons) {
                     this.lessons = response.lessons;
                     this.total = response.total;
@@ -67,16 +66,14 @@ export class ProposedComponent implements OnInit {
                     this.loading = false;
                 }
             }, error => {
-                console.log(<any>error);
+                console.log(error);
             }
         );
     }
 
-    actualPage() {
-
+    actualPage(): void {
         this._route.params.subscribe(params => {
             let page = +params['page'];
-
             this.page = page;
 
             if (!page) {
@@ -95,36 +92,35 @@ export class ProposedComponent implements OnInit {
         });
     }
 
-    editLesson(lesson){
+    editLesson(lesson: any): void {
         lesson.accepted = true;
         lesson.state = 'proposed';
-
-        this._lessonService.editLesson(this.token, lesson).subscribe(
-            response =>{                
-                if(response && response.lesson._id){        
+    
+        console.log("Attempting to update lesson", lesson);
+    
+        this._lessonService.editLesson(this.token, lesson).subscribe({
+            next: (response) => {                
+                if (response && response.lesson._id) {        
+                    console.log("Lesson updated successfully", response.lesson);
                     this.getLessons(this.page);
-                    
                 }
-             },
-             error => {
-                 console.log(<any>error);
-             }
-        )
+            },
+            error: (error) => {
+                console.error("Error updating lesson", error);
+            }
+        });
     }
+    
 
-    public detailsLessonItem;
-    setDetailLesson(lesson){
+    setDetailLesson(lesson: any): void {
         this.detailsLessonItem = lesson;
     }
 
-    public deleteLessonId;
-    setDeleteLesson(lessonId){
+    setDeleteLesson(lessonId: string): void {
         this.deleteLessonId = lessonId;
     }
 
-    public needReloadData;
-    setNeedReload(event){
+    setNeedReload(event: any): void {
         this.needReloadData = true;
     }
-
 }
