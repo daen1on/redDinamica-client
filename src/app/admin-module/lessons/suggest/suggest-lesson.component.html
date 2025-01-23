@@ -43,10 +43,11 @@
                         <strong>Áreas de conocimiento<span>*</span></strong>
                     </label>
                     <div class="col-9">
-                        <ng-select [items]="knowledgeAreas"
+                        <ng-select #ngSelect [items]="knowledgeAreas"
                                    bindLabel="name"
                                    bindValue="_id"
                                    formControlName="knowledge_area"
+                                   [compareWith]="compareKnowledgeAreas"
                                    [multiple]="true"
                                    [clearable]="true"
                                    [addTag]="true"
