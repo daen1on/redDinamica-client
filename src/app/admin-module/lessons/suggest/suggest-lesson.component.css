@@ -2,7 +2,7 @@
     width: 100%;
 }
 .ng-select .ng-select-container {
-    min-height: 38px;
+    min-height: 40px;
 }
 .ng-select .ng-select-container .ng-value-container {
     display: flex;

@@ -1,7 +1,8 @@
 <!-- suggest lesson -->
 <div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="add" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
-        <form [formGroup]="addForm" (ngSubmit)="onSubmit()" class="modal-content" enctype="multipart/form-data" (input)="onChanges()">
+        <form [formGroup]="addForm" (ngSubmit)="onSubmit()" class="modal-content" enctype="multipart/form-data"
+            (input)="onChanges()">
             <!-- modal-header -->
             <div class="modal-header">
                 <h5 class="modal-title" id="addTitle">{{title}}</h5>
@@ -13,12 +14,14 @@
 
             <!-- modal-body -->
             <div class="modal-body">
-                <div *ngIf="status === 'error'; successMessage" class="alert alert-danger fade show text-center" role="alert">
+                <div *ngIf="status === 'error'; successMessage" class="alert alert-danger fade show text-center"
+                    role="alert">
                     <i class="fas fa-times-circle icon-message mr-2"></i>
                     {{errorMsg}}
                 </div>
 
-                <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center" role="alert">
+                <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center"
+                    role="alert">
                     <i class="fas fa-check-circle icon-message mr-2"></i>
                     {{successMsg}}
                 </div>
@@ -28,9 +31,11 @@
                         <strong>{{field.label}}<span *ngIf="field.required">*</span></strong>
                     </label>
                     <div class="col-9">
-                        <input *ngIf="field.type == 'text'" type="text" class="form-control" id="{{field.id}}" autocomplete="off" formControlName="{{field.id}}"
+                        <input *ngIf="field.type == 'text'" type="text" class="form-control" id="{{field.id}}"
+                            autocomplete="off" formControlName="{{field.id}}"
                             [ngClass]="{ 'is-invalid': submitted && f[field.id].errors }">
-                        <textarea *ngIf="field.type === 'textarea'" class="form-control" id="{{field.id}}" rows="3" formControlName="{{field.id}}"
+                        <textarea *ngIf="field.type === 'textarea'" class="form-control" id="{{field.id}}" rows="3"
+                            formControlName="{{field.id}}"
                             [ngClass]="{ 'is-invalid': submitted && f[field.id].errors }"></textarea>
                         <div *ngIf="submitted && f[field.id].errors" class="invalid-feedback">
                             <div *ngIf="f[field.id].errors.required">El campo {{field.label}} es obligatorio.</div>
@@ -43,17 +48,11 @@
                         <strong>Áreas de conocimiento<span>*</span></strong>
                     </label>
                     <div class="col-9">
-                        <ng-select #ngSelect [items]="knowledgeAreas"
-                                   bindLabel="name"
-                                   bindValue="_id"
-                                   formControlName="knowledge_area"
-                                   [compareWith]="compareKnowledgeAreas"
-                                   [multiple]="true"
-                                   [clearable]="true"
-                                   [addTag]="true"
-                                   placeholder="Seleccione o agregue nuevas áreas"
-                                   (add)="addNewKnowledgeArea($event)"
-                                   class="custom-ng-select">
+                        <ng-select #ngSelect [items]="knowledgeAreas" bindLabel="name" bindValue="_id"
+                            formControlName="knowledge_area" [compareWith]="compareKnowledgeAreas" [multiple]="true"
+                            [clearable]="true" [addTag]="true"
+                            placeholder="Selecciona o escribe al menos una área de conocimiento (e.g. Matemáticas)"
+                            (add)="addNewKnowledgeArea($event)" class="custom-ng-select">
                         </ng-select>
                         <div *ngIf="submitted && f.knowledge_area.errors" class="invalid-feedback">
                             <div *ngIf="f.knowledge_area.errors.required">
@@ -62,17 +61,19 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="form-group row">
                     <label for="level" class="col-3 col-form-label">
                         <strong>Nivel de desarrollo<span>*</span></strong>
                     </label>
                     <div class="col-9">
-                        <select class="form-control" formControlName="level">
-                            <option *ngFor="let level of academicLevels" [value]="level">{{level}}</option>
-                        </select>
+                        <ng-select [items]="academicLevels" bindLabel="valueOf" bindValue="valueOf"
+                            formControlName="level" [multiple]="true" placeholder="Selecciona o escribe al menos un nivel de desarrollo"
+                            class="custom-ng-select">
+                        </ng-select>
                         <div *ngIf="submitted && f.level.errors" class="invalid-feedback">
-                            <div *ngIf="f.level.errors.required">Seleccionar un nivel de desarrollo es obligatorio.</div>
+                            <div *ngIf="f.level.errors.required">Seleccionar al menos un nivel de desarrollo es
+                                obligatorio.</div>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import { Component, OnInit, Output, EventEmitter, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { Validators, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { Validators, UntypedFormGroup, FormBuilder } from '@angular/forms';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { BasicDataService } from 'src/app/services/basicData.service';
@@ -34,6 +34,8 @@ export class SuggestLessonComponent implements OnInit {
 
   public knowledgeAreas: KnowledgeArea[] = [];
   public academicLevels = Object.values(ACADEMIC_LEVEL);
+  public selectedAcademicLevels: string[] = [];
+
 
   @Output() added = new EventEmitter();
   @ViewChild(NgSelectComponent) ngSelectComponent: NgSelectComponent;
@@ -42,7 +44,9 @@ export class SuggestLessonComponent implements OnInit {
     private _userService: UserService,
     private _lessonService: LessonService,
     private _bDService: BasicDataService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private fb: FormBuilder
+
   ) {
     this.title = 'Agregar lección';
     this.identity = this._userService.getIdentity();
@@ -59,13 +63,13 @@ export class SuggestLessonComponent implements OnInit {
     this.errorMsg = 'Hubo un error al agregar el tema para una lección. Inténtalo de nuevo más tarde.';
     this.successMsg = 'Se ha agregado el tema para la nueva lección correctamente.';
 
-    this.addForm = new UntypedFormGroup({
-      title: new UntypedFormControl('', Validators.required),
-      resume: new UntypedFormControl('', Validators.required),
-      justification: new UntypedFormControl('', Validators.required),
-      references: new UntypedFormControl(''),
-      knowledge_area: new UntypedFormControl([], Validators.required),
-      level: new UntypedFormControl('', Validators.required)
+    this.addForm = this.fb.group({
+      title: ['', Validators.required],
+      resume: ['', Validators.required],
+      justification: ['', Validators.required],
+      references: [''],
+      knowledge_area: [[], Validators.required],
+      level: [[], Validators.required] // Initialize as an empty array
     });
   }
 
@@ -122,7 +126,7 @@ export class SuggestLessonComponent implements OnInit {
           this.addForm.reset();
           // Reset specific form controls
           this.addForm.get('knowledge_area').setValue([]);
-          this.addForm.get('level').setValue('');
+          this.addForm.get('level').setValue([]);
 
           // Clear ng-select
           if (this.ngSelectComponent) {
