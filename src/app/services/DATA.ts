@@ -30,11 +30,16 @@ export const LESSON_STATES = {
     }
 };
 
-export const ACADEMIC_LEVEL = { 
-    school: "Primaria", 
-    garden: "Preescolar", 
-    highschool: "Secundaria", 
-    university: "Universitario" 
+// DATA.ts
+export const ACADEMIC_LEVEL = {
+    PRESCHOOL: "Preescolar",
+    PRIMARY_SCHOOL: "Primaria",
+    MIDDLE_SCHOOL: "Secundaria (Grados 6-9)", // More specific
+    HIGH_SCHOOL: "Secundaria (Grados 10-11)", // More specific
+    UNIVERSITY: "Universitario",
+    GRADUATE: "Posgrado",      // Added level
+    PROFESSIONAL: "Profesional",  // Added level
+    OTHER: "Otro"             // Added level
 };
 
 
