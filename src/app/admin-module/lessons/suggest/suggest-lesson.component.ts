@@ -34,7 +34,6 @@ export class SuggestLessonComponent implements OnInit {
 
   public knowledgeAreas: KnowledgeArea[] = [];
   public academicLevels = Object.values(ACADEMIC_LEVEL);
-  public selectedAcademicLevels: string[] = [];
 
 
   @Output() added = new EventEmitter();
@@ -82,6 +81,7 @@ export class SuggestLessonComponent implements OnInit {
       next: (response) => {
         if (response && Array.isArray(response.areas)) {
           this.knowledgeAreas = response.areas;
+          console.log("Áreas de conocimiento cargadas:", this.knowledgeAreas[0]);
         } else {
           this.knowledgeAreas = [];
           console.error('La respuesta de áreas de conocimiento no es un array:', response);
@@ -118,7 +118,11 @@ export class SuggestLessonComponent implements OnInit {
     this.lesson.accepted = true;
     this.lesson.author = this.identity._id;
     this.lesson.knowledge_area = this.addForm.value.knowledge_area;
-    this.lesson.level = this.addForm.value.level;
+    const selectedValues = this.addForm.value.level;
+    this.lesson.level = Object.entries(ACADEMIC_LEVEL)
+        .filter(([key, value]) => selectedValues.includes(value))
+        .map(([key, value]) => key);
+    console.log("Niveles seleccionados:", this.lesson.level);
     this.lesson.state = 'proposed';
     this._lessonService.addLesson(this.token, this.lesson).subscribe({
       next: (response) => {

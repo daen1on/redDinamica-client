@@ -12,10 +12,12 @@ import { ACADEMIC_LEVEL, LESSON_STATES } from 'src/app/services/DATA';
 
 @Component({
     selector: 'lessons',
-    templateUrl: './lessons.component.html'
+    templateUrl: './lessons.component.html',
+    styleUrls: ['./lessons.component.css']
 
 })
-export class LessonsComponent implements OnInit {
+export class LessonsComponent implements OnInit, OnDestroy {
+
     title = 'Lecciones';
     url = GLOBAL.url;
     identity: any; // Adjust type as needed
@@ -26,8 +28,10 @@ export class LessonsComponent implements OnInit {
     filter = new FormControl('');
     orderControl = new FormControl('');
     unsubscribe$ = new Subject<void>();
-    allLessons = [];
-    level = { basic: "Básico", medium: "Medio", advanced: "Avanzado" };
+    allLessons: any =[];
+    filteredLessons: any =[]; // Initialize as empty array
+
+    //level = { basic: "Básico", medium: "Medio", advanced: "Avanzado" };
     type = { consideration: "Consideración", development: "Desarrollo" };
     academic_level = ACADEMIC_LEVEL;
     lesson_states = LESSON_STATES;
@@ -55,12 +59,12 @@ export class LessonsComponent implements OnInit {
         { label: "Terminada", value: "completed", class: "success" }
     ];
     areas: any[];
-    levels = [
+    /*levels = [
         { label: "Preescolar", value: "garden" },
         { label: "Primaria", value: "school" },
         { label: "Secundaria", value: "highschool" },
         { label: "Universitario", value: "university" }
-    ];
+    ];*/
 
     constructor(
         private userService: UserService,
@@ -78,6 +82,9 @@ export class LessonsComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadInitialData();
+        this.filter.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
+            this.applyFilters(this.allLessons); // Use allLessons for filtering
+        });
      
     }
     ngOnDestroy(): void {
@@ -85,6 +92,7 @@ export class LessonsComponent implements OnInit {
         this.unsubscribe$.complete();
     }
     loadInitialData(): void {
+        // Fetch areas
         this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe(params => {
             this.page = +params['page'] || 1;
             this.fetchLessons(this.page);
@@ -102,7 +110,7 @@ export class LessonsComponent implements OnInit {
             },
             error: (error) => console.error('Error fetching areas:', error)
         });
-    
+        
         this.fetchAllLessons();
     }
     
@@ -115,7 +123,11 @@ export class LessonsComponent implements OnInit {
         this.fetchAllLessons();
         this.cdr.detectChanges(); // Force update the view
     }
-    
+    getAcademicLevels(levels: string[]): string {
+        return levels.join(', '); // Join the levels with commas
+      }
+
+      
 
 
     setState(selectedState: string): void {
@@ -156,36 +168,61 @@ export class LessonsComponent implements OnInit {
 
     navigateToPage(page: number): void {
         this.router.navigate(['/admin/lecciones', page]);
-        this.fetchLessons(page);
     }
 
     fetchAllLessons(): void {
         let orderBy = this.orderControl.value || 'created_at';
         this.lessonService.getAllLessons(this.token, orderBy).pipe(takeUntil(this.unsubscribe$)).subscribe({
-            next: response => this.applyFilters(response.lessons),
-            error: error => console.error('Error fetching all lessons:', error)
+          next: response => {
+            this.allLessons = response.lessons; // Store ALL lessons
+            console.log("All Lessons: ", this.allLessons[0]);
+          //  this.applyFilters(this.allLessons); // Apply filters after fetching all lessons
+          //  this.total = response.total;
+          // this.pages = response.pages;
+            this.loading = false;
+            
+          },
+          error: error => console.error('Error fetching all lessons:', error)
         });
-    }
-    applyFilters(lessons: any[]): void {
-        let filteredLessons = lessons;
-        if (this.selectedStates.length) {
-            filteredLessons = filteredLessons.filter(lesson => this.selectedStates.includes(lesson.state));
+      }
+    
+      applyFilters(lessons: any): void {
+        let filteredLessons = [...lessons]; // Create a copy to avoid modifying the original
+    
+        if (this.filter.value) {
+          const filterValue = this.filter.value.toLowerCase();
+          console.log("Filter value: ", filterValue);
+          
+          filteredLessons = filteredLessons.filter(lesson =>
+            
+            lesson.title.toLowerCase().includes(filterValue) // Filter by title;
+          );
         }
-        if (this.selectedAreas.length) {
-            filteredLessons = filteredLessons.filter(lesson => 
-                lesson.knowledge_area.some(area => this.selectedAreas.includes(area.name)));
+    
+        if (this.selectedStates.length > 0) {
+          filteredLessons = filteredLessons.filter(lesson => this.selectedStates.includes(lesson.state));
         }
-        if (this.selectedLevels.length) {
-            filteredLessons = filteredLessons.filter(lesson => this.selectedLevels.includes(lesson.level));
+    
+        if (this.selectedAreas.length > 0) {
+          filteredLessons = filteredLessons.filter(lesson =>
+            lesson.knowledge_area.some(area => this.selectedAreas.includes(area.name))
+          );
         }
-        this.allLessons = filteredLessons;
-    }
+    
+        if (this.selectedLevels.length > 0) {
+          filteredLessons = filteredLessons.filter(lesson => this.selectedLevels.includes(lesson.level));
+        }
+    
+        this.filteredLessons = filteredLessons; // Update filteredLessons
+        this.allLessons = this.filteredLessons; // Update lessons for the current page
+        console.log("Filtered Lessons: ", this.filteredLessons);
+        console.log("Lessons for current page: ", this.allLessons);
+      }
 
-
-    fetchLessons(page: number): void {
+      fetchLessons(page: number): void {
         this.lessonService.getLessons(this.token, page).pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: response => {
-                this.lessons = response.lessons;
+                this.allLessons = response.lessons;
                 this.total = response.total;
                 this.pages = response.pages;
                 this.loading = false;
@@ -195,7 +232,7 @@ export class LessonsComponent implements OnInit {
                 this.loading = false;
             }
         });
-    }
+    } 
     actualPage() {
         this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe(params => {
             let page = +params['page'];
@@ -214,8 +251,7 @@ export class LessonsComponent implements OnInit {
                 }
             }
     
-            this.fetchLessons(this.page);
-        });
+            });
     }
 
     reloadLessons() {
@@ -229,8 +265,8 @@ export class LessonsComponent implements OnInit {
         }
         this.lessonService.editLesson(this.token, lesson).pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: response => {
-                this.fetchLessons(this.page); // Refresh the current page to reflect changes
-            },
+                console.log('Lesson updated:', response);
+                this.fetchAllLessons();},
             error: error => console.error('Error updating lesson:', error)
         });
     }
@@ -254,12 +290,23 @@ export class LessonsComponent implements OnInit {
 
     public showAreas = false; 
     setShowAreas(show: boolean): void {
-        this.showAreas = show;
+        if (this.showAreas) {
+            this.showAreas = false;
+        }
+        else {
+            this.showAreas = show;
+        }
+        
     }
 
     public showLevels = false; 
     setShowLevels(show: boolean): void {
-        this.showLevels = show;
+        if (this.showLevels) {
+            this.showLevels = false;
+        }
+        else {
+            this.showLevels = show;
+        }
     }
 }
 

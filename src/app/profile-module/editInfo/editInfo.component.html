@@ -1,110 +1,126 @@
 <div class="card">
     <div class="card-header">
-        <h3 class="m-0 text-primary font-weight-bolder">{{title}}</h3>
+      <h3 class="m-0 text-primary font-weight-bolder">{{title}}</h3>
     </div>
     <div class="card-body">
-        <div *ngIf="status === 'warning'" class="alert alert-warning alert-dismissible fade show text-center"
-        role="alert">
+      <div *ngIf="errorMessages.length > 0" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <ul>
+        <li *ngFor="let message of errorMessages">{{ message }}</li>
+      </ul>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true">&times;</span>
+       </button>
+     
+         <form [formGroup]="editForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">   
+     
+           </form>
+         </div>
+
+
+      <div *ngIf="status === 'warning'" class="alert alert-warning alert-dismissible fade show text-center" role="alert">
         <i class="fas fa-check-circle icon-message mr-2"></i>
-        Se estan subiendo la foto, por favor evita cerrar la página.
+        Se está subiendo la foto, por favor evita cerrar la página.
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+          <span aria-hidden="true">&times;</span>
         </button>
+      </div>
+      <div *ngIf="status === 'success'" class="alert alert-success alert-dismissible fade show text-center" role="alert">
+        <i class="fas fa-check-circle icon-message mr-2"></i>
+        Los datos se han actualizado correctamente.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div *ngIf="typeError" class="alert alert-danger alert-dismissible fade show text-center">
+        Archivo inválido, solo se permite cargar imágenes con extensión jpg, png o gif.
+      </div>
+      <div *ngIf="status === 'error'" class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+        <i class="fas fa-times-circle icon-message mr-2"></i>
+        Los datos no pudieron ser actualizados. Inténtalo de nuevo.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div *ngIf="maxSizeError" class="alert alert-danger alert-dismissible fade show text-center">
+        El tamaño de la imagen es demasiado grande. El tamaño máximo permitido es {{MAX_FILE_SIZE}} MB.
+      </div>
+  
+      <form [formGroup]="editForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
+        <div class="form-group row align-items-end">
+          <label for="profileImage" class="col-3 col-form-label">
+            <strong>Foto de perfil</strong>
+          </label>
+          <div class="col">
+            <input type="file" class="form-control" name="image" id="profileImage" formControlName="profileImage"
+              enctype="multipart/form-data" (change)="fileChangeEvent($event); onChanges()">
+          </div>
         </div>
-        <div *ngIf="status === 'success'" class="alert alert-success alert-dismissible fade show text-center"
-            role="alert">
-            <i class="fas fa-check-circle icon-message mr-2"></i>
-            Los datos se han actualizado correctamente.
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+        <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
+          <div #progress class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+            [style.width]="barWidth" aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
+        </div>
+        <div *ngFor="let field of fieldsForm" class="form-group row">
+          <label for="{{field.id}}" class="col-3 col-form-label">
+            <strong>{{field.label}}</strong>
+          </label>
+          <div class="col-9">
+            <div *ngIf="field.type === 'text'">
+              <input type="text" class="form-control" id="{{field.id}}" formControlName="{{field.id}}"
+                (change)="onChanges()"
+                [ngClass]="{ 'is-invalid': editForm.get(field.id).touched && editForm.get(field.id).invalid}">
+              <div class="invalid-feedback-select"
+                *ngIf="editForm.get(field.id).touched && editForm.get(field.id).invalid">
+                <div *ngIf="editForm.get(field.id).hasError('required')">Campo requerido</div>
+                <div *ngIf="editForm.get(field.id).hasError('maxlength')">Debe tener menos de {{ editForm.get(field.id).errors?.['maxlength']?.['requiredLength'] }} caracteres</div>
+              </div>
+            </div>
+            <div *ngIf="field.type=== 'textarea'">
+              <textarea class="form-control" id="{{field.id}}" rows="3" formControlName="{{field.id}}"
+                placeholder="{{field.placeholder}}" (change)="onChanges()"
+                [ngClass]="{ 'is-invalid': editForm.get(field.id).touched && editForm.get(field.id).invalid}">
+            </textarea>
+              <div class="invalid-feedback-select"
+                *ngIf="editForm.get(field.id).touched && editForm.get(field.id).invalid">
+                <div *ngIf="editForm.get(field.id).hasError('required')">Campo requerido</div>
+                <div *ngIf="editForm.get(field.id).hasError('maxlength')">Debe tener menos de {{ editForm.get(field.id).errors?.['maxlength']?.['requiredLength'] }} caracteres</div>
+              </div>
+            </div>
+            <div *ngIf="field.type == 'select' && field.autocomplete && field.id != 'city'">
+              <ng-select [items]="items[field.id]" bindLabel="name" [addTag]="true" addTagText="Agregar {{field.label}}"
+                formControlName="{{field.id}}" placeholder="{{field.label}}" (change)="onChanges()"
+                [ngClass]="{ 'is-invalid': editForm.get(field.id).touched && editForm.get(field.id).invalid}">
+              </ng-select>
+              <div class="invalid-feedback-select"
+                *ngIf="editForm.get(field.id).touched && editForm.get(field.id).invalid">
+                Campo requerido
+              </div>
+            </div>
+            <div *ngIf="field.type == 'select' && field.autocomplete && field.id == 'city'">
+              <ng-select [items]="items[field.id]" bindLabel="name" [addTag]="true" addTagText="Agregar {{field.label}}"
+                formControlName="{{field.id}}" placeholder="{{field.label}}"
+                (change)="addCityData($event, field.id); onChanges()">
+                <ng-template ng-option-tmp let-item="item">
+                  {{item.name}}, {{item.state}}, {{item.country}}
+                </ng-template>
+              </ng-select>
+            </div>
+            <div *ngIf="field.id == 'city' && addCity">
+              <input type="text" class="form-control" id="state" [formControl]="state"
+                placeholder="Departamento/Estado/Provincia" autocomplete="off">
+              <input *ngIf="field.id == 'city' && addCity" type="text" class="form-control" id="country"
+                [formControl]="country" placeholder="País" autocomplete="off">
+            </div>
+          </div>
+        </div>
+  
+        <div class="form-group row mb-5">
+          <div class="col-3 offset-9 text-right">
+            <button type="submit" class="btn btn-warning">
+              Guardar cambios
             </button>
+          </div>
         </div>
-        <div *ngIf="typeError"  class="alert alert-danger alert-dismissible fade show text-center">
-            Archivo inválido, solo se permite cargar imágenes con extensión jpg, png o gif.
-        </div>
-        <div *ngIf="status === 'error'" class="alert alert-danger alert-dismissible fade show text-center" role="alert">
-            <i class="fas fa-times-circle icon-message mr-2"></i>
-            Los datos no pudieron ser actualizados. Intentalo de nuevo.
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-
-        <form [formGroup]="editForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
-            <div class="form-group row align-items-end">
-                <label for="profileImage" class="col-3 col-form-label">
-                    <strong>Foto de perfil</strong>
-                </label>
-                <div class="col">
-                    <input type="file" class="form-control" name="image" id="profileImage"
-                        formControlName="profileImage" enctype="multipart/form-data" (change)="fileChangeEvent($event); onChanges()" >
-                </div>
-                
-            </div>
-            <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
-                <div #progress  class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width]="barWidth"
-                 aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
-        </div>
-            <div *ngFor="let field of fieldsForm" class="form-group row">
-                <label for="{{field.id}}" class="col-3 col-form-label">
-                    <strong>{{field.label}}</strong>
-                </label>
-                <div class="col-9">
-                    <div *ngIf="field.type === 'text' ">
-                        <input  type="text" class="form-control" id="{{field.id}}"
-                        formControlName="{{field.id}}" (change)="onChanges() "  [ngClass]="{ 'is-invalid': editForm.get(field.id).touched && editForm.get(field.id).invalid}">
-                        <div class="invalid-feedback-select" *ngIf="editForm.get(field.id).touched && 
-                        editForm.get(field.id).invalid">Campo requerido</div>
-
-                    </div>                                                               
-                    <div *ngIf="field.type=== 'textarea' ">
-                        <textarea  class="form-control" id="{{field.id}}" rows="3"
-                            formControlName="{{field.id}}" placeholder="{{field.placeholder}}" (change)="onChanges()" [ngClass]="{ 'is-invalid': editForm.get(field.id).touched && editForm.get(field.id).invalid}">
-                        </textarea>
-                        <div class="invalid-feedback-select" *ngIf="editForm.get(field.id).touched && 
-                        editForm.get(field.id).invalid">Campo requerido - Debe tener menos de 1000 caracteres</div>
-
-                    </div>
-                        
-                    <div *ngIf="field.type == 'select' && field.autocomplete && field.id != 'city'" >
-                        <ng-select [items]="items[field.id]" bindLabel="name" [addTag]="true" addTagText="Agregar {{field.label}}" formControlName="{{field.id}}" placeholder="{{field.label}}" (change)="onChanges()" [ngClass]="{ 'is-invalid': editForm.get(field.id).touched && editForm.get(field.id).invalid}">                        
-                        </ng-select>
-                        <div class="invalid-feedback-select" *ngIf="editForm.get(field.id).touched && 
-                        editForm.get(field.id).invalid">Campo requerido</div>
-
-                    </div>
-                    <div *ngIf="field.type == 'select' && field.autocomplete && field.id == 'city'" >
-                        <ng-select  [items]="items[field.id]"
-                        bindLabel="name" [addTag]="true" addTagText="Agregar {{field.label}}"
-                        formControlName="{{field.id}}" placeholder="{{field.label}}"
-                        (change)="addCityData($event, field.id); onChanges()">
-                        <ng-template ng-option-tmp let-item="item">
-                            {{item.name}}, {{item.state}}, {{item.country}}
-                        </ng-template>
-                        
-                    </ng-select>
-
-                    </div>
-                    <div *ngIf="field.id == 'city' && addCity">
-                        <input  type="text" class="form-control" id="state"
-                        [formControl]="state" placeholder="Departamento/Estado/Provincia" autocomplete="off">
-                        <input *ngIf="field.id == 'city' && addCity" type="text" class="form-control" id="country"
-                        [formControl]="country" placeholder="Pais" autocomplete="off" >
-
-                    </div>
-                    
-                </div>
-            </div>
-
-            <div class="form-group row mb-5">
-                <div class="col-3 offset-9 text-right">
-                    <button type="submit" class="btn btn-warning" >
-                        Guardar cambios
-                    </button>
-                </div>
-            </div>
-
-        </form>
-        <div style="height: 115px;"></div>
+      </form>
+      <div style="height: 115px;"></div>
     </div>
-</div>
+  </div>

@@ -1,0 +1,87 @@
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+}
+
+.knowledge-area-scrollable {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.custom-control-input {
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+}
+
+.custom-control-label {
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  padding-left: 25px; /* Add padding for the checkbox */
+  cursor: pointer; /* Change cursor to pointer */
+}
+
+.custom-control-label::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 2px;
+}
+
+.custom-control-input:checked + .custom-control-label::before {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.custom-control-input:checked + .custom-control-label::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+}
+
+.knowledge-area-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 3px;
+}
+
+.custom-control-label::after {
+  content: attr(title);
+  position: absolute;
+  background-color: #1813a7;
+  border: 1px solid #ededed;
+  padding: 8px 12px;
+  z-index: 10;
+  white-space: normal;
+  min-width: 250px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 0; /* Initially hidden */
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  top: 110%;
+  left: 0;
+}
+
+.custom-control-label:hover::after {
+  opacity: 1;
+  visibility: visible;
+}

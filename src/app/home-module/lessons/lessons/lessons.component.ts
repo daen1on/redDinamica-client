@@ -119,7 +119,7 @@ export class LessonsComponent implements OnInit {
     ngOnInit(): void {
         this.getAllLessons();        
         this.getAllAreas();
-        this.actualPage();
+      //  this.actualPage();
     }
 
     setArea(selectedArea) {
@@ -151,16 +151,17 @@ export class LessonsComponent implements OnInit {
 
         if (!this.areas) {
 
-            this._bDService.getAllKnowledgeAreas().subscribe(
-                response => {
+            this._bDService.getAllKnowledgeAreas().subscribe({
+
+                next: (response) => {
                     if (response.areas) {
                         this.areas = response.areas;
 
                         localStorage.setItem('areas', JSON.stringify(this.areas));
                     }
-                }, error => {
+                }, error: (error) => {
                     console.log(<any>error);
-                });
+                }});
         }
     }
 
@@ -169,8 +170,8 @@ export class LessonsComponent implements OnInit {
         let filteredLessons = [];
         let res;
 
-        this._lessonService.getAllLessons(this.token, this.orderBy, true).subscribe(
-            response => {
+        this._lessonService.getAllLessons(this.token, this.orderBy, true).subscribe({
+            next: (response) => {
                 if (response.lessons) {
                     this.allLessons = response.lessons;
 
@@ -179,10 +180,10 @@ export class LessonsComponent implements OnInit {
                         this.selectedAreas.forEach((area) => {
                             filteredLessons = filteredLessons.concat(this.allLessons.filter((lesson) => {
                                 res = false;
-                                
+
                                 lesson.knowledge_area.some(function (knowledge_area) {
                                     res = knowledge_area.name == area;
-                                    if(res){
+                                    if (res) {
                                         return true;
                                     }
                                 });
@@ -191,7 +192,7 @@ export class LessonsComponent implements OnInit {
                             }));
                         });
 
-                        this.allLessons = Array.from(new Set(filteredLessons));                        
+                        this.allLessons = Array.from(new Set(filteredLessons));
                         filteredLessons = [];
                     }
 
@@ -208,15 +209,17 @@ export class LessonsComponent implements OnInit {
                     }
 
                 }
-            }, error => {
-                console.log(<any>error);
-            });
+            },
+            error: (error) => {
+                console.log(error);
+            }
+        });
     }
 
     getLessons(page = 1) {
 
-        this._lessonService.getLessons(this.token, page, true).subscribe(
-            response => {
+        this._lessonService.getLessons(this.token, page, true).subscribe({
+            next: (response) => {
                 if (response.lessons) {
                     this.lessons = response.lessons;
                     this.total = response.total;
@@ -228,11 +231,11 @@ export class LessonsComponent implements OnInit {
 
                     this.loading = false;
                 }
-            }, error => {
+            }, error: (error) => {
                 this.loading = false;
                 console.log(<any>error);
             }
-        );
+    });
     }
 
     actualPage() {
@@ -294,15 +297,15 @@ export class LessonsComponent implements OnInit {
     increaseViews(lesson){
         lesson.views += 1;
 
-        this._lessonService.editLesson(this.token, lesson).subscribe(
-            response =>{                
+        this._lessonService.editLesson(this.token, lesson).subscribe({
+            next: (response) =>{                
                 if(response && response.lesson._id){
                     this.getLessons(this.page);
                 }
              },
-             error => {
+             error: (error) => {
                  console.log(<any>error);
              }
-        )
+    })
     }
 }

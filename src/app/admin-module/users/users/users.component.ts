@@ -285,6 +285,82 @@ export class UsersComponent implements OnInit {
         }
     }
 
+    public tempUser;
+    setEdit(user) {
+        let city;
+        let profession;
+        let institution;
+
+        this.editStatus = null;
+        this.editSubmitted = false;
+
+        this.tempUser = user;
+        this.user = null;
+
+        if (this.tempUser.city) {
+            city = `${this.tempUser.city.name}, ${this.tempUser.city.state}, ${this.tempUser.city.country}`;
+        }
+
+        if (this.tempUser.profession) {
+            profession = this.tempUser.profession.name;
+        }
+
+        if (this.tempUser.institution) {
+            institution = this.tempUser.institution.name;
+        }
+
+        this.editForm.patchValue({
+            name: this.tempUser.name,
+            surname: this.tempUser.surname,
+            about: this.tempUser.about,
+            email: this.tempUser.email,
+            city: city,
+            profession: profession,
+            institution: institution,
+            category: this.tempUser.role,
+            canAdvise: this.tempUser.canAdvise.toString()
+        });
+
+
+    }
+    onEditSubmit() {
+        this.submitted = true;
+
+        if (this.editForm.invalid) {
+            return;
+        }
+
+
+        this.user = this.tempUser;
+        if(this.tempUser.city){
+            this.user.city = this.tempUser.city._id;
+        }
+        this.user.institution = this.tempUser.institution._id;
+        this.user.profession = this.tempUser.profession._id;
+        this.user.role = this.editForm.value.category;
+        this.user.canAdvise = this.editForm.value.canAdvise == 'true' ? true : false;
+
+        this._userService.updateUser(this.user).subscribe(
+            response => {
+                if (response.user && response.user._id) {
+                    this.editStatus = 'success';
+                    this.getUsers(this.page);
+                    this.getAllUsers();
+
+                } else {
+                    this.editStatus = 'error';
+                }
+            },
+            error => {
+                this.editStatus = 'error';
+                console.log(<any>error);
+            }
+        );
+
+        document.querySelector('div#modal-body').scrollTop = 0;
+
+    }
+
     actualPage() {
         this._route.params.subscribe(params => {
             let page = +params['page'];

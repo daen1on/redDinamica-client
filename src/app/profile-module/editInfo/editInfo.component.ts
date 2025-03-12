@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 
 import { FIELDS_FORM } from '../services/profileData';
@@ -15,8 +15,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { MAX_FILE_SIZE } from 'src/app/services/DATA';
 
-import {  OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'editInfo',
@@ -47,6 +46,8 @@ export class EditInfoComponent implements OnDestroy {
     public allProfessions;
     public allInstitutions;
     barWidth: string = "0%";
+    public errorMessages: string[] = []; // Array para almacenar los mensajes de error
+
     private subscriptions: Subscription = new Subscription();
 
 
@@ -143,14 +144,30 @@ export class EditInfoComponent implements OnDestroy {
 
     public typeError = false;
     async onSubmit() {
+        this.errorMessages = []; // Limpiar mensajes de error anteriores
+
+        console.log("submitting");
      
-          // stop here if form is invalid
-          if (this.editForm.invalid) {
-            document.scrollingElement.scrollTop = 0;
-            this.status = "error";
-            return;
-        }
-        if (this.filesToUpload[0]) {
+    // Identificar campos requeridos vacíos
+    const emptyRequiredFields = [];
+    for (const controlName in this.editForm.controls) {
+      const control = this.editForm.get(controlName);
+      if (control.hasValidator(Validators.required) && (control.value === '' || control.value === null)) {
+        const field = FIELDS_FORM.find(f => f.id === controlName); // Buscar el campo en FIELDS_FORM
+        if (field){
+            emptyRequiredFields.push(controlName);
+            this.errorMessages.push(`El campo ${field.label} es requerido.`); // Usar el label del campo en el mensaje de error
+           
+        } 
+      }
+    }
+    if (this.editForm.invalid) {
+      document.scrollingElement.scrollTop = 0;
+      this.status = "error";
+      return;
+    }
+   
+   if (this.filesToUpload[0]) {
             // Validate file type
             if (['image/jpeg', 'image/gif', 'image/png'].includes(this.filesToUpload[0].type)) {
                 this.typeError = false;
@@ -160,25 +177,28 @@ export class EditInfoComponent implements OnDestroy {
                     left: 0, 
                     behavior: 'smooth' 
                  });
+                 console.log("submitting2ndinvalid");
+
                 this.typeError = true;
                 return;
-            }
+    }
 
             // Validate file size
-            if (this.maxSize < this.filesToUpload[0].size) {
+    if (this.maxSize < this.filesToUpload[0].size) {
                 window.scroll({ 
                     top: 0, 
                     left: 0, 
                     behavior: 'smooth' 
                  });
+                 console.log("submitting3rdinvalid");
+
                 this.typeError = true;
                 this.maxSizeError = true;
                 return;
             } else {
                 this.maxSizeError = false;
             }
-        } 
-
+    } 
         this.user.name = this.editForm.value.name;
         this.user.surname = this.editForm.value.surname;
         this.user.about = this.editForm.value.about;
@@ -210,7 +230,7 @@ export class EditInfoComponent implements OnDestroy {
             this.city.country = this.country.value;
             // this.city.used = true;
 
-            let responseAddCity = await this._bDService.addCity(this.city).toPromise();
+            let responseAddCity = await firstValueFrom(this._bDService.addCity(this.city)); 
 
             if (responseAddCity.city && responseAddCity.city._id) {
                 this.user.city = responseAddCity.city._id;
@@ -234,7 +254,8 @@ export class EditInfoComponent implements OnDestroy {
                 this.profession.name = this.editForm.value.profession;
             }
 
-            let responseAddProfession = await this._bDService.addProfession(this.profession).toPromise();
+            let responseAddProfession = await firstValueFrom(this._bDService.addProfession(this.profession));
+
 
             if (responseAddProfession.profession && responseAddProfession.profession._id) {
                 this.user.profession = responseAddProfession.profession._id;
@@ -256,7 +277,7 @@ export class EditInfoComponent implements OnDestroy {
 
             // this.institution.used = true;
 
-            let responseAddinstitution = await this._bDService.addInstitution(this.institution).toPromise();
+            let responseAddinstitution = await firstValueFrom(this._bDService.addInstitution(this.institution));
             if (responseAddinstitution.institution && responseAddinstitution.institution._id) {
                 this.user.institution = responseAddinstitution.institution._id;
             } else {
@@ -267,10 +288,10 @@ export class EditInfoComponent implements OnDestroy {
         }
 
 
-        let response = await this._userService.updateUser(this.user).toPromise().catch((error) => {
+        let response = await firstValueFrom(this._userService.updateUser(this.user)).catch((error) => {
             this.status = "error";
             console.log(<any>error);
-        });
+          });      
 
         if (response.user && response.user._id) {
             document.scrollingElement.scrollTop = 0;
@@ -287,30 +308,26 @@ export class EditInfoComponent implements OnDestroy {
                     this.filesToUpload,
                     this.token,
                     'image'
-                ).subscribe((event: HttpEvent<any>) => { // client call
-                    switch(event.type) { //checks events
-                    case HttpEventType.UploadProgress: // If upload is in progress
-                    this.status = 'warning';
-                    this.barWidth = Math.round(event.loaded / event.total * 100).toString()+'%'; // get upload percentage
-                    break;
-                    case HttpEventType.Response: // give final response
-                    console.log('User successfully added!', event.body);
-                    //this.submitted = false;
-                    
-                    this.status ='success';
-                    this.barWidth ='0%';
-                    
+                  ).subscribe({
+                    next: (event: HttpEvent<any>) => { 
+                      switch (event.type) {
+                        case HttpEventType.UploadProgress:
+                          this.status = 'warning';
+                          this.barWidth = Math.round(event.loaded / event.total * 100).toString() + '%';
+                          break;
+                        case HttpEventType.Response:
+                          console.log('User successfully added!', event.body);
+                          this.status = 'success';
+                          this.barWidth = '0%';
+                          break;
+                      }
+                    },
+                    error: (error) => {
+                      this.status = 'error';
+                      this.barWidth = '0%';
+                      console.log(<any>error);
                     }
-                }, error=>{
-
-                     
-                    this.status = 'error';
-                    this.barWidth ='0%';
-                    
-                    
-                    console.log(<any>error);
-
-                });
+                  });
             
             }
             

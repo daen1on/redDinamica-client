@@ -41,21 +41,47 @@ export class LessonService {
     }
 
     getLessons(token: string, page: number = 1, visibleOnes: boolean = false): Observable<any> {
+        console.log("entered get lesson");
+
         let headers = new HttpHeaders({
             'Content-Type': 'application/json',
             'Authorization': token
         });
 
-        return this._http.get(`${this.url}lessons/${visibleOnes}/${page}`, { headers: headers });
+        //return this._http.get(`${this.url}lessons/${visibleOnes}/${page}`, { headers: headers });
+        return this._http.get(`${this.url}lessons/${visibleOnes}/${page}`, { headers: headers })
+        .pipe(
+            map(response => {
+                console.log('API Response:', response);
+                return response;
+            }),
+            catchError(error => {
+                console.log('Error en getLessons:', error);
+                throw error;
+            })
+        );
     }
 
-    getAllLessons(token: string, orderBy: string = '', visibleOnes: boolean = false): Observable<any> {
+    getAllLessons(token: string, orderBy: string = '', visibleOnes: boolean = true): Observable<any> {
+        console.log("entered all lesson");
         let headers = new HttpHeaders({
             'Content-Type': 'application/json',
             'Authorization': token
         });
 
-        return this._http.get(`${this.url}all-lessons/${visibleOnes}/${orderBy}`, { headers: headers });
+        //return this._http.get(`${this.url}all-lessons/${visibleOnes}/${orderBy}`, { headers: headers });
+
+        return this._http.get(`${this.url}all-lessons/${visibleOnes}/${orderBy}`, { headers: headers })
+        .pipe(
+            map(response => {
+                console.log('API Responseall:', response);
+                return response;
+            }),
+            catchError(error => {
+                console.log('Error en getLessons:', error);
+                throw error;
+            })
+        );
     }
 
     getMyLessons(token: string, page: number = 1): Observable<any> {
