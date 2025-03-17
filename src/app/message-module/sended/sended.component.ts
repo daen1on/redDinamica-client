@@ -9,7 +9,8 @@ import { LABEL_ROLE } from '../services/messageData';
 
 @Component({
     selector: 'sended',
-    templateUrl: './sended.component.html'
+    templateUrl: './sended.component.html',
+    standalone: false
 })
 export class SendedComponent implements OnInit{
     public title: string;

@@ -6,7 +6,8 @@ import { GLOBAL } from 'src/app/services/global';
 
 @Component({
     selector: 'proposed',
-    templateUrl: './proposed.component.html'
+    templateUrl: './proposed.component.html',
+    standalone: false
 })
 export class ProposedComponent implements OnInit {
     public title: string;

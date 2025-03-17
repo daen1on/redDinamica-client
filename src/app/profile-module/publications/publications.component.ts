@@ -19,7 +19,8 @@ import { takeUntil } from 'rxjs/operators'
 
 @Component({
     selector: 'publications',
-    templateUrl: './publications.component.html'
+    templateUrl: './publications.component.html',
+    standalone: false
 })
 export class PublicationsComponent {
     public title: string;

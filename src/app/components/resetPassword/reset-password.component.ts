@@ -5,8 +5,9 @@ import { UserService } from 'src/app/services/user.service';
 import { MustMatch } from 'src/app/helpers/must-match.validator'; // Asegúrate de tener el archivo en el lugar correcto
 
 @Component({
-  selector: 'reset-password',
-  templateUrl: './reset-password.component.html'
+    selector: 'reset-password',
+    templateUrl: './reset-password.component.html',
+    standalone: false
 })
 export class ResetPasswordComponent implements OnInit {
   public resetPasswordForm!: UntypedFormGroup;

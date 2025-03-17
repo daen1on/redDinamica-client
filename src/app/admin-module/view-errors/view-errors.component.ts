@@ -4,9 +4,10 @@ import { GLOBAL } from '../../services/global'; // Ajusta la ruta según tu estr
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EditErrorComponent } from '../edit-error/edit-error.component';
 @Component({
-  selector: 'app-view-errors',
-  templateUrl: './view-errors.component.html',
-  styleUrls: ['./view-errors.component.css']
+    selector: 'app-view-errors',
+    templateUrl: './view-errors.component.html',
+    styleUrls: ['./view-errors.component.css'],
+    standalone: false
 })
 export class ViewErrorsComponent implements OnInit {
   public errorReports: any[] = [];

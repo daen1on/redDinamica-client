@@ -16,7 +16,8 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
     selector: 'newUsers',
     templateUrl: './newUsers.component.html',
-    styleUrls: ['./newUsers.component.css']  
+    styleUrls: ['./newUsers.component.css'],
+    standalone: false
 })
 export class NewUsersComponent {
     public title:string;    

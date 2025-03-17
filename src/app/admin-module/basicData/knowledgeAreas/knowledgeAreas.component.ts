@@ -6,7 +6,8 @@ import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'knowledge-areas',
-    templateUrl: './knowledgeAreas.component.html'
+    templateUrl: './knowledgeAreas.component.html',
+    standalone: false
 })
 export class KnowledgeAreasComponent implements OnInit {
     public title: string;

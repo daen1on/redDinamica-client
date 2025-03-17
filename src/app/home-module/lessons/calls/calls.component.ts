@@ -8,8 +8,8 @@ import { GLOBAL } from 'src/app/services/global';
 
 @Component({
     selector: 'calls',
-    templateUrl: './calls.component.html'
-
+    templateUrl: './calls.component.html',
+    standalone: false
 })
 export class CallsComponent implements OnInit {
     public title: string;

@@ -22,8 +22,8 @@ import { takeUntil, catchError, switchMap, tap, finalize } from 'rxjs/operators'
 @Component({
     selector: 'main',
     templateUrl: './main.component.html',
-    styleUrls: ['./main.component.css']
-
+    styleUrls: ['./main.component.css'],
+    standalone: false
 })
 export class MainComponent {
     public title: string;

@@ -15,8 +15,8 @@ import { Observable } from 'rxjs/internal/Observable';
 @Component({
     selector: 'resources',
     templateUrl: './resources.component.html',
-    styleUrls: ['./resources.component.css']
-
+    styleUrls: ['./resources.component.css'],
+    standalone: false
 })
 export class ResourcesComponent implements OnInit {
 

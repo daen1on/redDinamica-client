@@ -5,8 +5,8 @@ import { UserService } from 'src/app/services/user.service';
 
 @Component({
     selector: 'lesson-details',
-    templateUrl: './lesson-details.component.html'
-    
+    templateUrl: './lesson-details.component.html',
+    standalone: false
 })
 export class LessonDetailsComponent {
     public url;

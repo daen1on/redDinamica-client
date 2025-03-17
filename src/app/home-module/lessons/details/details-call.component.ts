@@ -6,7 +6,8 @@ import { LessonService } from 'src/app/services/lesson.service';
 
 @Component({
     selector: 'details-call',
-    templateUrl: './details-call.component.html'
+    templateUrl: './details-call.component.html',
+    standalone: false
 })
 export class DetailsCallComponent {
     public title;

@@ -8,8 +8,8 @@ import { LessonService } from 'src/app/services/lesson.service';
 
 @Component({
     selector: 'edit',
-    templateUrl: './edit.component.html'
-
+    templateUrl: './edit.component.html',
+    standalone: false
 })
 export class EditComponent implements OnInit {
     public title: string;

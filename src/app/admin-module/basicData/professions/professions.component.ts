@@ -6,7 +6,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
     selector: 'professions',
-    templateUrl: './professions.component.html'
+    templateUrl: './professions.component.html',
+    standalone: false
 })
 export class ProfessionsComponent implements OnInit {
     public title: string;   

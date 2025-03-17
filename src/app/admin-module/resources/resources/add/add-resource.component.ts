@@ -17,8 +17,8 @@ import { finalize, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 @Component({
     selector: 'add-resource',
-    templateUrl: './add-resource.component.html'
-
+    templateUrl: './add-resource.component.html',
+    standalone: false
 })
 
 export class AddResourceComponent implements OnInit {

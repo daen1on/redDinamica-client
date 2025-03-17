@@ -10,7 +10,8 @@ import { Follow } from 'src/app/models/follow.model';
 
 @Component({
     selector: 'follows',
-    templateUrl: './follows.component.html'
+    templateUrl: './follows.component.html',
+    standalone: false
 })
 export class FollowsComponent {
     public title: string;

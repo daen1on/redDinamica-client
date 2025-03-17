@@ -10,8 +10,8 @@ import { ICON_STYLE } from 'src/app/services/DATA';
 
 @Component({
     selector: 'resources',
-    templateUrl: './resources.component.html'
-  
+    templateUrl: './resources.component.html',
+    standalone: false
 })
 export class ResourcesComponent implements OnInit {
     public title: string;

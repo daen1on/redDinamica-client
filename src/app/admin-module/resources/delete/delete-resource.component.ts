@@ -12,8 +12,8 @@ import { FIELDS_FORM } from '../resources/resourcesData';
 
 @Component({
     selector: 'delete-resource',
-    templateUrl: './delete-resource.component.html'
-
+    templateUrl: './delete-resource.component.html',
+    standalone: false
 })
 export class DeleteResourceComponent implements OnInit {
     public title;

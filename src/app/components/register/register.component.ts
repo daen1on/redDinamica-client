@@ -16,7 +16,8 @@ import { takeUntil, tap, catchError } from 'rxjs/operators';
 
 @Component({
     selector: 'register',
-    templateUrl: './register.component.html'
+    templateUrl: './register.component.html',
+    standalone: false
 })
 export class RegisterComponent implements OnInit, OnDestroy {
     @ViewChild('contador') contador: ElementRef;

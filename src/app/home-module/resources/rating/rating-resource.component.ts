@@ -9,7 +9,8 @@ import { Comment } from 'src/app/models/comment.model';
 @Component({
     selector: 'rating-resource',
     templateUrl: './rating-resource.component.html',
-    styleUrls: ['./rating-resource.component.css']
+    styleUrls: ['./rating-resource.component.css'],
+    standalone: false
 })
 export class RatingResourceComponent implements OnInit {
     public title: string;

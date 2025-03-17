@@ -13,8 +13,8 @@ import { HttpEvent, HttpEventType } from '@angular/common/http';
 @Component({
     selector: 'conversation',
     templateUrl: './conversation.component.html',
-    styleUrls: ['./conversation.component.css']
-
+    styleUrls: ['./conversation.component.css'],
+    standalone: false
 })
 export class ConversationComponent implements OnInit {
     public title: string;

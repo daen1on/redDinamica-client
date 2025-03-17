@@ -9,8 +9,8 @@ import { GLOBAL } from 'src/app/services/global';
 
 @Component({
     selector: 'advise-lesson',
-    templateUrl: './advise-lesson.component.html'
-
+    templateUrl: './advise-lesson.component.html',
+    standalone: false
 })
 export class AdviseLessonComponent implements OnInit {
     public title: string;

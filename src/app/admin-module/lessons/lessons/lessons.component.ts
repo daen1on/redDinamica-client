@@ -13,8 +13,8 @@ import { ACADEMIC_LEVEL, LESSON_STATES } from 'src/app/services/DATA';
 @Component({
     selector: 'lessons',
     templateUrl: './lessons.component.html',
-    styleUrls: ['./lessons.component.css']
-
+    styleUrls: ['./lessons.component.css'],
+    standalone: false
 })
 export class LessonsComponent implements OnInit, OnDestroy {
 

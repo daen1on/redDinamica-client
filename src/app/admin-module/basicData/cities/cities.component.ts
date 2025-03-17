@@ -15,7 +15,8 @@ import { Subject, throwError } from 'rxjs';
 
 @Component({
     selector: 'cities',
-    templateUrl: './cities.component.html'
+    templateUrl: './cities.component.html',
+    standalone: false
 })
 export class CitiesComponent {
     public title: string;

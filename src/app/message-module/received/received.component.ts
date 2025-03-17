@@ -9,7 +9,8 @@ import { LABEL_ROLE } from '../services/messageData';
 
 @Component({
     selector: 'received',
-    templateUrl: './received.component.html'
+    templateUrl: './received.component.html',
+    standalone: false
 })
 export class ReceivedComponent {
     public title: string;

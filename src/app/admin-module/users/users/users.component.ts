@@ -15,7 +15,8 @@ import { lastValueFrom } from 'rxjs';
 @Component({
     selector: 'users',
     templateUrl: './users.component.html',
-    styleUrls: ['./users.component.css']
+    styleUrls: ['./users.component.css'],
+    standalone: false
 })
 export class UsersComponent implements OnInit {
     public labelProfile = LABEL_PROFILE;

@@ -6,7 +6,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
     selector: 'info',
-    templateUrl: './info.component.html'
+    templateUrl: './info.component.html',
+    standalone: false
 })
 export class InfoComponent {
     public title: string;

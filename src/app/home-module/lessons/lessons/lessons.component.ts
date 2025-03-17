@@ -11,8 +11,8 @@ import { ACADEMIC_LEVEL, LESSON_STATES } from 'src/app/services/DATA';
 
 @Component({
     selector: 'lessons',
-    templateUrl: './lessons.component.html'
-  
+    templateUrl: './lessons.component.html',
+    standalone: false
 })
 export class LessonsComponent implements OnInit {
     public title: string;

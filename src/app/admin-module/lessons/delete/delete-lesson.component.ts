@@ -9,8 +9,8 @@ import { GLOBAL } from 'src/app/services/global';
 
 @Component({
     selector: 'delete-lesson',
-    templateUrl: './delete-lesson.component.html'
-
+    templateUrl: './delete-lesson.component.html',
+    standalone: false
 })
 export class DeleteLessonComponent implements OnInit {
     public title;

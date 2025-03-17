@@ -16,8 +16,8 @@ import { Lesson } from 'src/app/models/lesson.model';
 
 @Component({
     selector: 'add-call',
-    templateUrl: './add-call.component.html'
-
+    templateUrl: './add-call.component.html',
+    standalone: false
 })
 export class AddCallComponent implements OnInit {
     public title;

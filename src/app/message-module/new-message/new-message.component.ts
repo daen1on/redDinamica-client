@@ -13,7 +13,8 @@ import { Message } from 'src/app/models/message.model';
 
 @Component({
     selector: 'newMessage',
-    templateUrl: './new-message.component.html'
+    templateUrl: './new-message.component.html',
+    standalone: false
 })
 export class NewMessageComponent {
     public title: string;

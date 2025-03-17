@@ -11,8 +11,8 @@ import { Location } from '@angular/common';
 
 @Component({
     selector: 'securityOptions',
-    templateUrl: './securityOptions.component.html'
-
+    templateUrl: './securityOptions.component.html',
+    standalone: false
 })
 export class SecurityOptionsComponent {
     public title: string;

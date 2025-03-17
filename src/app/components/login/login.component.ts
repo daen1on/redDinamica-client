@@ -10,7 +10,8 @@ import { EMPTY, Subject } from 'rxjs';
 
 @Component({
     selector: 'login',
-    templateUrl: './login.component.html'
+    templateUrl: './login.component.html',
+    standalone: false
 })
 export class LoginComponent implements OnInit, OnDestroy {
     public title: string;

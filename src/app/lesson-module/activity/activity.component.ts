@@ -4,8 +4,8 @@ import { Lesson } from 'src/app/models/lesson.model';
 
 @Component({
     selector: 'activity',
-    templateUrl: './activity.component.html'
-    
+    templateUrl: './activity.component.html',
+    standalone: false
 })
 export class ActivityComponent implements OnInit {
     public title: string;

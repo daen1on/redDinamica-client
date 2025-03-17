@@ -10,7 +10,8 @@ import { BasicDataService } from '../services/basicData.service';
 @Component({
     selector: 'lesson',
     templateUrl: './lesson.component.html',
-    styleUrls: ['./lesson.component.css']
+    styleUrls: ['./lesson.component.css'],
+    standalone: false
 })
 export class LessonComponent implements OnInit {
     public title: string;

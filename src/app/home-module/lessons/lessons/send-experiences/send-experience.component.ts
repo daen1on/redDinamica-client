@@ -14,8 +14,8 @@ import { KnowledgeArea } from 'src/app/models/knowledge-area.model';
 
 @Component({
     selector: 'send-experience',
-    templateUrl: './send-experience.component.html'
-
+    templateUrl: './send-experience.component.html',
+    standalone: false
 })
 export class SendExperienceComponent implements OnInit {
     public title;

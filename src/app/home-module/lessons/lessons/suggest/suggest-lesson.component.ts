@@ -12,7 +12,8 @@ import { KnowledgeArea } from 'src/app/models/knowledge-area.model';
 
 @Component({
     selector: 'suggest-lesson',
-    templateUrl: './suggest-lesson.component.html'
+    templateUrl: './suggest-lesson.component.html',
+    standalone: false
 })
 export class SuggestLessonComponent implements OnInit {
     public title: string;

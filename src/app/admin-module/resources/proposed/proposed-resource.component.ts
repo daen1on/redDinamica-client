@@ -8,8 +8,8 @@ import { ICON_STYLE } from 'src/app/services/DATA';
 
 @Component({
     selector: 'proposed-resource',
-    templateUrl: './proposed-resource.component.html'
-  
+    templateUrl: './proposed-resource.component.html',
+    standalone: false
 })
 export class ProposedResourceComponent implements OnInit {
     public title: string;

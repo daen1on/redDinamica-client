@@ -7,8 +7,8 @@ import { GLOBAL } from 'src/app/services/global';
 
 @Component({
     selector: 'details-lesson',
-    templateUrl: './details-lesson.component.html'
-
+    templateUrl: './details-lesson.component.html',
+    standalone: false
 })
 export class DetailsLessonComponent {
     public title;

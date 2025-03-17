@@ -13,8 +13,8 @@ import { HttpEvent, HttpEventType } from '@angular/common/http';
 
 @Component({
     selector: 'edit-resource',
-    templateUrl: './edit-resource.component.html'
-
+    templateUrl: './edit-resource.component.html',
+    standalone: false
 })
 export class EditResourceComponent implements OnInit {
     

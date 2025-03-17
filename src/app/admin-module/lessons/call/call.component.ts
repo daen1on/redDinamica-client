@@ -8,8 +8,8 @@ import { UntypedFormControl, Validators } from '@angular/forms';
 
 @Component({
     selector: 'call',
-    templateUrl: './call.component.html'
-  
+    templateUrl: './call.component.html',
+    standalone: false
 })
 export class CallComponent implements OnInit {
     public title:string;

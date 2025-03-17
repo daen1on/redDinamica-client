@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ADMIN_MENU } from './services/adminMenu';
 
 @Component({
-  selector: 'admin',
-  templateUrl: './admin.component.html',
-  styleUrls: ['./admin.component.css']
+    selector: 'admin',
+    templateUrl: './admin.component.html',
+    styleUrls: ['./admin.component.css'],
+    standalone: false
 })
 export class AdminComponent implements OnInit {
   public title: String = 'Administración';

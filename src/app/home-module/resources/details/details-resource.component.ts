@@ -8,7 +8,8 @@ import { ICON_STYLE } from 'src/app/services/DATA';
 
 @Component({
     selector: 'details-resource',
-    templateUrl: './details-resource.component.html'
+    templateUrl: './details-resource.component.html',
+    standalone: false
 })
 export class DetailsResourceComponent {
     public title;

@@ -3,8 +3,9 @@ import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms
 import { UserService } from 'src/app/services/user.service';
 
 @Component({
-  selector: 'recoverPassword',
-  templateUrl: './recoverPassword.component.html'
+    selector: 'recoverPassword',
+    templateUrl: './recoverPassword.component.html',
+    standalone: false
 })
 export class RecoverPasswordComponent implements OnInit {
   public title: string;

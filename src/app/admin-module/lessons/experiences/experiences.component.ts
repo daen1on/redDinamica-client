@@ -6,8 +6,8 @@ import { GLOBAL } from 'src/app/services/global';
 
 @Component({
     selector: 'experiences',
-    templateUrl: './experiences.component.html'
-  
+    templateUrl: './experiences.component.html',
+    standalone: false
 })
 export class ExperiencesComponent implements OnInit {
     public title;

@@ -12,8 +12,8 @@ import { LESSON_STATES } from 'src/app/services/DATA';
 @Component({
     selector: 'rating',
     templateUrl: './rating.component.html',
-    styleUrls: ['./rating.component.css']
-    
+    styleUrls: ['./rating.component.css'],
+    standalone: false
 })
 export class RatingComponent implements OnInit {
     public title: string;

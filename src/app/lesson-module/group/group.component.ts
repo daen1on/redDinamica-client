@@ -10,8 +10,8 @@ import { LABEL_PROFILE } from 'src/app/profile-module/services/profileData';
 
 @Component({
     selector: 'group',
-    templateUrl: './group.component.html'
-
+    templateUrl: './group.component.html',
+    standalone: false
 })
 export class GroupComponent implements OnInit {
     public title: string;

@@ -20,7 +20,8 @@ import { Subscription, firstValueFrom } from 'rxjs';
 @Component({
     selector: 'editInfo',
     templateUrl: './editInfo.component.html',
-    styleUrls: ['./editInfo.component.css']
+    styleUrls: ['./editInfo.component.css'],
+    standalone: false
 })
 export class EditInfoComponent implements OnDestroy {
     public title: string;

@@ -3,9 +3,10 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ErrorService } from '../../services/error.service'; // Asegúrate de ajustar la ruta según tu estructura
 
 @Component({
-  selector: 'app-report-error',
-  templateUrl: './report-error.component.html',
-  styleUrls: ['./report-error.component.css']
+    selector: 'app-report-error',
+    templateUrl: './report-error.component.html',
+    styleUrls: ['./report-error.component.css'],
+    standalone: false
 })
 export class ReportErrorComponent implements OnInit {
   reportErrorForm: FormGroup;

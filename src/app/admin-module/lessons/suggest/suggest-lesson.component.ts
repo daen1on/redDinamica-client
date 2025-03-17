@@ -10,9 +10,10 @@ import { KnowledgeArea } from 'src/app/models/knowledge-area.model';
 import { NgSelectComponent } from '@ng-select/ng-select';
 
 @Component({
-  selector: 'suggest-lesson',
-  templateUrl: './suggest-lesson.component.html',
-  styleUrls: ['./suggest-lesson.component.css']
+    selector: 'suggest-lesson',
+    templateUrl: './suggest-lesson.component.html',
+    styleUrls: ['./suggest-lesson.component.css'],
+    standalone: false
 })
 export class SuggestLessonComponent implements OnInit {
   public title: string;

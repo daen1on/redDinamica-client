@@ -12,7 +12,8 @@ import { Follow } from '../models/follow.model';
 @Component({
     selector: 'message',
     templateUrl: './message.component.html',
-    styleUrls: ['./message.component.css']
+    styleUrls: ['./message.component.css'],
+    standalone: false
 })
 export class MessageComponent implements OnInit {
     public title: string = 'Mensajes';

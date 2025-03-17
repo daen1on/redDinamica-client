@@ -20,7 +20,8 @@ import { Subject } from 'rxjs';
 @Component({
     selector: 'users',
     templateUrl: './users.component.html',
-    styleUrls: ['./users.component.css']
+    styleUrls: ['./users.component.css'],
+    standalone: false
 })
 export class UsersComponent {
     public title: string;

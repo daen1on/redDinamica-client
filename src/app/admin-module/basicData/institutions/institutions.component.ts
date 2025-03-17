@@ -12,7 +12,8 @@ import { Institution } from 'src/app/models/institution.model';
 
 @Component({
     selector: 'institutions',
-    templateUrl: './institutions.component.html'
+    templateUrl: './institutions.component.html',
+    standalone: false
 })
 export class InstitutionsComponent implements OnInit, OnDestroy {
     public title: string;

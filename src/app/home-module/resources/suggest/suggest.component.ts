@@ -14,8 +14,8 @@ import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'suggest',
-    templateUrl: './suggest.component.html'
-
+    templateUrl: './suggest.component.html',
+    standalone: false
 })
 export class SuggestComponent implements OnInit {
     

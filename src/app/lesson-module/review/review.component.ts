@@ -14,8 +14,8 @@ import { ActivatedRoute } from '@angular/router';
 @Component({
     selector: 'review',
     templateUrl: './review.component.html',
-    styleUrls: ['./review.component.css']
-
+    styleUrls: ['./review.component.css'],
+    standalone: false
 })
 export class ReviewComponent implements OnInit {
     public title: string;

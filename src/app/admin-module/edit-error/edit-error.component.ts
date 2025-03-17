@@ -4,9 +4,10 @@ import { ErrorService } from '../../services/error.service'; // Ajusta la ruta s
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'app-edit-error',
-  templateUrl: './edit-error.component.html',
-  styleUrls: ['./edit-error.component.css']
+    selector: 'app-edit-error',
+    templateUrl: './edit-error.component.html',
+    styleUrls: ['./edit-error.component.css'],
+    standalone: false
 })
 export class EditErrorComponent implements OnInit {
   @Input() errorReport: any;

@@ -14,7 +14,8 @@ import { NewUsersComponent } from '../admin-module/users/newUsers/newUsers.compo
 @Component({
     selector: 'profile',
     templateUrl: './profile.component.html',
-    styleUrls: ['./profile.component.css']
+    styleUrls: ['./profile.component.css'],
+    standalone: false
 })
 export class ProfileComponent implements OnInit {
     public title: string = 'Perfil';
