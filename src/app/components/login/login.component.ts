@@ -85,7 +85,8 @@ export class LoginComponent implements OnInit, OnDestroy {
                 if (!response.user || !response.user._id) {
                     throw new Error('Invalid login');
                 }
-                localStorage.setItem('identity', JSON.stringify(response.user));
+                // Usar el método setIdentity del UserService para emitir el evento
+                this._userService.setIdentity(response.user);
                 return this._userService.signup(this.loginForm.value, true);
             }),
             tap({
@@ -93,7 +94,8 @@ export class LoginComponent implements OnInit, OnDestroy {
                     if (!tokenResponse.token) {
                         throw new Error('Token not found');
                     }
-                    localStorage.setItem('token', tokenResponse.token);
+                    // Usar el método setToken del UserService
+                    this._userService.setToken(tokenResponse.token);
                     this.token = tokenResponse.token; // Set the token for further requests
                     this.emailFound = true; // El email fue encontrado
                 },

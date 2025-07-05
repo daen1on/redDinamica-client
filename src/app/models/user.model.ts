@@ -12,6 +12,7 @@ export class User {
     public about:String;
     public state:String;
     public role:String;
+    public actived:Boolean; // Propiedad para indicar si el usuario está activado
     public postgraduate:String;
     public picture:String;
     public knowledge_area:String;

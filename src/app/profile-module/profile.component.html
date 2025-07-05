@@ -170,7 +170,7 @@
                         </div>
                         <div class="card-body">
                             <div class="profile-about-content" [class.expanded]="aboutExpanded">
-                                <p *ngFor="let text of (aboutExpanded ? ownProfile.about : about).split('\n')" 
+                                <p *ngFor="let text of (aboutExpanded ? (ownProfile?.about || '') : (about || '')).split('\n')" 
                                    class="text-break mb-1 lh-sm" 
                                    [class.mb-0]="text === ''">
                                     <span>{{text}}</span>                        

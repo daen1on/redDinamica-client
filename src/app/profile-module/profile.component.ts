@@ -30,7 +30,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     public following;
     public follower;
     public counters;
-    public about: string;
+    public about: string = ''; // Inicializar con string vacío para evitar errores
     public profilePicVersion: number; // Para cache-busting de la imagen de perfil
     public aboutExpanded: boolean = false; // Para controlar la expansión del "Acerca de"
     

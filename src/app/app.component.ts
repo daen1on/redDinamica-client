@@ -41,7 +41,8 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
         this.token = this._userService.getToken();
         this.identity = this._userService.getIdentity(); // Get initial identity
 
-        if (this.identity) {
+        // Solo cargar notificaciones si tanto identity como token existen
+        if (this.identity && this.token) {
             this.loadNotifications();
             this.startNotificationPolling();
         }
@@ -50,9 +51,14 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
         this.identitySubscription = this._userService.identityChanged.subscribe(
             (newIdentity) => {
                 this.identity = newIdentity;
-                if (this.identity) {
-                    this.loadNotifications();
-                    this.startNotificationPolling();
+                this.token = this._userService.getToken(); // Actualizar token también
+                
+                if (this.identity && this.token) {
+                    // Agregar un pequeño delay para asegurar que todo esté sincronizado
+                    setTimeout(() => {
+                        this.loadNotifications();
+                        this.startNotificationPolling();
+                    }, 100);
                 } else {
                     this.unreadCount = 0;
                     this.stopNotificationPolling();
@@ -77,12 +83,23 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
     }
     
     loadNotifications(): void {
-        if (!this.identity) return;
+        // Verificar que tanto identity como token existan
+        if (!this.identity) {
+            console.log('No hay identity disponible para cargar notificaciones');
+            this.unreadCount = 0;
+            return;
+        }
         
-        // Verificar también que el token exista
         const token = this._userService.getToken();
         if (!token) {
             console.log('No hay token disponible para cargar notificaciones');
+            this.unreadCount = 0;
+            return;
+        }
+        
+        // Verificar que el usuario esté activado
+        if (!this.identity.actived) {
+            console.log('Usuario no activado, no se cargan notificaciones');
             this.unreadCount = 0;
             return;
         }

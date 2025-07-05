@@ -24,8 +24,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.loadNotifications();
-    this.loadUnreadCount();
+    // Usar setTimeout para asegurar que el componente esté completamente inicializado
+    setTimeout(() => {
+      this.loadNotifications();
+      this.loadUnreadCount();
+    }, 100);
   }
 
   ngOnDestroy(): void {
@@ -34,8 +37,39 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   loadNotifications(): void {
-    if (!this.userService.getToken()) {
+    const token = this.userService.getToken();
+    const identity = this.userService.getIdentity();
+    
+    if (!token) {
+      console.log('No hay token disponible para cargar notificaciones');
       this.error = 'Usuario no autenticado';
+      // Intentar recargar después de un breve delay
+      setTimeout(() => {
+        const retryToken = this.userService.getToken();
+        if (retryToken) {
+          this.loadNotifications();
+        }
+      }, 500);
+      return;
+    }
+    
+    if (!identity) {
+      console.log('No hay identity disponible para cargar notificaciones');
+      this.error = 'Usuario no autenticado';
+      // Intentar recargar después de un breve delay
+      setTimeout(() => {
+        const retryIdentity = this.userService.getIdentity();
+        if (retryIdentity) {
+          this.loadNotifications();
+        }
+      }, 500);
+      return;
+    }
+    
+    // Verificar que el usuario esté activado
+    if (!identity.actived) {
+      console.log('Usuario no activado, no se cargan notificaciones');
+      this.error = 'Usuario no activado';
       return;
     }
 
@@ -60,7 +94,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   loadUnreadCount(): void {
-    if (!this.userService.getToken()) return;
+    const token = this.userService.getToken();
+    const identity = this.userService.getIdentity();
+    
+    if (!token || !identity || !identity.actived) {
+      return;
+    }
 
     this.notificationService.getUnreadCount()
       .pipe(takeUntil(this.destroy$))
