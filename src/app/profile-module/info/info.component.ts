@@ -7,6 +7,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 @Component({
     selector: 'info',
     templateUrl: './info.component.html',
+    styleUrls: ['./info.component.css'],
     standalone: false
 })
 export class InfoComponent {
@@ -59,5 +60,31 @@ export class InfoComponent {
         );
     }
 
+    // Método para separar las redes sociales por punto y coma
+    getSocialLinks(socialNetworks: string | String): string[] {
+        if (!socialNetworks) return [];
+        
+        // Convertir a string primitivo si es necesario
+        const networksStr = socialNetworks.toString();
+        
+        return networksStr.split(';')
+            .map(link => link.trim())
+            .filter(link => link.length > 0);
+    }
+
+    // Método para formatear los enlaces y asegurar que tengan protocolo
+    formatLink(link: string): string {
+        if (!link) return '';
+        
+        const trimmedLink = link.trim();
+        
+        // Si ya tiene protocolo, devolverlo tal como está
+        if (trimmedLink.startsWith('http://') || trimmedLink.startsWith('https://')) {
+            return trimmedLink;
+        }
+        
+        // Si no tiene protocolo, agregar https://
+        return 'https://' + trimmedLink;
+    }
 
 }

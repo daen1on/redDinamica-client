@@ -137,9 +137,7 @@
                                             <h5 class="modal-title" id="exampleModalCenterTitle">
                                                 Tipos de usuarios RedDinámica
                                             </h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
 
@@ -196,7 +194,7 @@
 
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                 Cerrar
                                             </button>
                                         </div>
@@ -207,7 +205,7 @@
                             <div class="form-group">
                                 <label for="category">
                                     Perfil de usuario*
-                                    <a data-toggle="modal" data-target="#help" style="cursor: pointer" title="Ayuda">
+                                    <a data-bs-toggle="modal" data-bs-target="#help" style="cursor: pointer" title="Ayuda">
                                         <i class="fas fa-question-circle"></i>
                                     </a>
                                 </label>
@@ -284,7 +282,7 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-success btn-block btn-lg" (click)="loading = true">
+                            <button type="submit" class="btn btn-success w-100 btn-lg" (click)="loading = true">
                                 Crear mi cuenta
                             </button>
 

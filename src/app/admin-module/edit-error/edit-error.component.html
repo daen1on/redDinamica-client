@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h5 class="modal-title" id="editErrorModalLabel">Editar Error</h5>
-  <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss()">
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
@@ -28,7 +28,7 @@
     </div>
     <div class="form-group">
       <label for="attachment">Archivo Adjunto</label>
-      <input type="file" class="form-control-file" (change)="onFileChange($event)">
+              <input type="file" class="form-control" (change)="onFileChange($event)">
     </div>
     <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
     <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>

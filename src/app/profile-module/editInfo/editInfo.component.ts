@@ -51,6 +51,15 @@ export class EditInfoComponent implements OnDestroy {
 
     private subscriptions: Subscription = new Subscription();
 
+    // Validador personalizado para limitar líneas
+    maxLinesValidator(maxLines: number) {
+        return (control: any) => {
+            if (!control.value) return null;
+            const lines = control.value.split('\n').length;
+            return lines > maxLines ? { maxLines: { actualLines: lines, maxLines: maxLines } } : null;
+        };
+    }
+
 
     constructor(
         private _formBuilder: UntypedFormBuilder,
@@ -89,7 +98,7 @@ export class EditInfoComponent implements OnDestroy {
         this.editForm = this._formBuilder.group({
             name: [this.identity.name,[Validators.required,Validators.maxLength(80)]],
             surname: [this.identity.surname, [Validators.required,Validators.maxLength(80)]],
-            about: [this.identity.about,[Validators.required, Validators.maxLength(1000)]],
+            about: [this.identity.about,[Validators.required, Validators.maxLength(1000), this.maxLinesValidator(15)]],
             city: [this.identity.city],
             profession: [this.identity.profession,Validators.required,],
             institution: [this.identity.institution,Validators.required],
@@ -128,17 +137,29 @@ export class EditInfoComponent implements OnDestroy {
             next:(response) => {
                 if (response.user) {
                     this.identity = response.user;
-                } else {
-
-                    this.identity = this.identity;
                     
+                    // Reinicializar el formulario con los datos actualizados
+                    if (this.editForm) {
+                        this.editForm.patchValue({
+                            name: this.identity.name,
+                            surname: this.identity.surname,
+                            about: this.identity.about,
+                            city: this.identity.city,
+                            profession: this.identity.profession,
+                            institution: this.identity.institution,
+                            postgraduate: this.identity.postgraduate,
+                            contactNumber: this.identity.contactNumber,
+                            socialNetworks: this.identity.socialNetworks
+                        });
+                    }
+                    
+                } else {
+                    this.identity = this.identity;
                 }
-
             },
             error:(error) => {
                 console.log(<any>error);
                 this.identity = this.identity;
-                
             }
         });
     }
@@ -296,9 +317,31 @@ export class EditInfoComponent implements OnDestroy {
 
         if (response.user && response.user._id) {
             document.scrollingElement.scrollTop = 0;
+            
+            // Preservar los datos originales de objetos complejos antes de actualizar
+            const originalCity = this.identity.city;
+            const originalProfession = this.identity.profession;
+            const originalInstitution = this.identity.institution;
+            
+            // Actualizar la identidad con la respuesta del servidor
             this.identity = response.user;
+            
+            // Restaurar los objetos completos si existen
+            if (originalCity && typeof originalCity === 'object' && originalCity.name) {
+                this.identity.city = originalCity;
+            }
+            if (originalProfession && typeof originalProfession === 'object' && originalProfession.name) {
+                this.identity.profession = originalProfession;
+            }
+            if (originalInstitution && typeof originalInstitution === 'object' && originalInstitution.name) {
+                this.identity.institution = originalInstitution;
+            }
+            
             this.status = 'success';
             localStorage.setItem('identity', JSON.stringify(this.identity));
+            
+            // Actualizar también el UserService con los datos correctos
+            this._userService.setIdentity(this.identity);
 
             if (this.filesToUpload.length > 0) {
 
@@ -320,6 +363,25 @@ export class EditInfoComponent implements OnDestroy {
                           console.log('User successfully added!', event.body);
                           this.status = 'success';
                           this.barWidth = '0%';
+                          
+                          // Solo actualizar la imagen en la identidad, no sobrescribir toda la identidad
+                          if (event.body && event.body.user && event.body.user.picture) {
+                            // Actualizar solo el campo picture en la identidad actual
+                            this.identity.picture = event.body.user.picture;
+                            localStorage.setItem('identity', JSON.stringify(this.identity));
+                            
+                            // Actualizar también el UserService con los datos correctos
+                            this._userService.setIdentity(this.identity);
+                            
+                            // Emitir evento para actualizar la imagen en otros componentes
+                            this._userService.profilePictureUpdated.emit();
+                            console.log('Profile picture updated event emitted from EditInfo');
+                            
+                            // Redireccionar al perfil después de un breve delay para mostrar el éxito
+                            setTimeout(() => {
+                              this._router.navigate(['/perfil', this.identity._id]);
+                            }, 1500);
+                          }
                           break;
                       }
                     },

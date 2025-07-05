@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HOME_MENU } from './services/homeMenu';
 import { GLOBAL } from '../services/global';
 import { UserService } from '../services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'home',
@@ -16,7 +17,8 @@ export class HomeComponent implements OnInit {
     public url;
 
     constructor(
-        private _userService: UserService
+        private _userService: UserService,
+        private _router: Router
     ) {
         this.title = 'Home';
         this.identity = this._userService.getIdentity();
@@ -24,13 +26,26 @@ export class HomeComponent implements OnInit {
     }
 
     ngOnInit(): void {
-
+        // Verificar si el usuario está realmente autenticado
+        if (!this.identity) {
+            console.log('Usuario no autenticado, redirigiendo al login');
+            this._router.navigate(['/login']);
+            return;
+        }
     }
 
     ngDoCheck(): void {
-        this.identity = this._userService.getIdentity();
+        const currentIdentity = this._userService.getIdentity();
+        if (currentIdentity !== this.identity) {
+            this.identity = currentIdentity;
+            
+            // Si la identidad se pierde, redirigir al login
+            if (!this.identity) {
+                console.log('Identidad perdida, redirigiendo al login');
+                this._router.navigate(['/login']);
+            }
+        }
     }
-
 }
 
 

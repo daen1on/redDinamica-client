@@ -2,9 +2,9 @@
 <div class="card">
     <div class="card-header">
         <h3 class="m-0 text-primary font-weight-bolder float-left">{{ title }}</h3>
-        <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#addArea" (click)="setAdd()">
+        <button type="button" class="btn btn-primary float-right" data-bs-toggle="modal" data-bs-target="#addArea" (click)="setAdd()">
             <i class="fas fa-plus"></i>
-            <span class="ml-2">Agregar</span>
+            <span class="ms-2">Agregar</span>
         </button>
     </div>
 
@@ -32,13 +32,13 @@
                 <tr *ngFor="let area of knowledgeAreas">
                     <td>{{ area.name }}</td>
                     <td>
-                        <button type="button" class="btn btn-warning btn-sm mx-1" data-toggle="modal" data-target="#editArea" (click)="setEditArea(area)">
+                        <button type="button" class="btn btn-warning btn-sm mx-1" data-bs-toggle="modal" data-bs-target="#editArea" (click)="setEditArea(area)">
                             <i class="fas fa-pen-square"></i>
-                            <span class="ml-2"><small>Editar</small></span>
+                            <span class="ms-2"><small>Editar</small></span>
                         </button>
                         <button type="button" class="btn btn-danger btn-sm mx-1" (click)="setDeleteArea(area._id)">
                             <i class="fas fa-trash"></i>
-                            <span class="ml-2"><small>Eliminar</small></span>
+                            <span class="ms-2"><small>Eliminar</small></span>
                         </button>
                     </td>
                 </tr>
@@ -54,17 +54,15 @@
             <form [formGroup]="addForm" (ngSubmit)="onSubmit()" (input)="onChanges()">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addAreaTitle">Agregar una área de conocimiento</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div *ngIf="status === 'error'" class="alert alert-danger fade show text-center" role="alert">
-                        <i class="fas fa-times-circle icon-message mr-2"></i>
+                        <i class="fas fa-times-circle icon-message me-2"></i>
                         El área de conocimiento no fue agregada correctamente. Intentalo de nuevo.
                     </div>
                     <div *ngIf="status === 'success'" class="alert alert-success fade show text-center" role="alert">
-                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                        <i class="fas fa-check-circle icon-message me-2"></i>
                         El área de conocimiento fue agregada correctamente.
                     </div>
                     <div class="form-group row">
@@ -78,7 +76,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
                     <button id="save" type="submit" class="btn btn-success">Guardar</button>
                 </div>
             </form>
@@ -93,17 +91,15 @@
             <form [formGroup]="editForm" (ngSubmit)="onEditSubmit()" (input)="onChanges()">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editAreaTitle">Editar área de conocimiento</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div *ngIf="status === 'error'" class="alert alert-danger fade show text-center" role="alert">
-                        <i class="fas fa-times-circle icon-message mr-2"></i>
+                        <i class="fas fa-times-circle icon-message me-2"></i>
                         El área de conocimiento no fue editada correctamente. Intentalo de nuevo.
                     </div>
                     <div *ngIf="status === 'success'" class="alert alert-success fade show text-center" role="alert">
-                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                        <i class="fas fa-check-circle icon-message me-2"></i>
                         Se ha editado correctamente el área de conocimiento.
                     </div>
                     <div class="form-group row">
@@ -117,7 +113,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
                     <button id="save" type="submit" class="btn btn-warning">Editar</button>
                 </div>
             </form>

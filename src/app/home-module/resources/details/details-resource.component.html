@@ -5,9 +5,7 @@
             <!-- modal-header -->
             <div class="modal-header">
                 <h5 class="modal-title" id="detailsTitle">Detalles del recurso</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <!-- /modal-header -->
 
@@ -76,7 +74,7 @@
 
                 <div *ngFor="let comment of resource.comments" class="row mt-2">
                     <div *ngIf="comment.user != undefined" class="col-auto">
-                        <a class="text-primary" [routerLink]="[ '/perfil', comment.user._id]" data-dismiss="modal">
+                        <a class="text-primary" [routerLink]="[ '/perfil', comment.user._id]" data-bs-dismiss="modal">
                             <div class="flex-shrink-0 rounded-circle border-1 overflow-hidden"
                                 style="width: 40px; height:40px;">
                                 <img *ngIf="!comment.user.picture" class="img-fluid"
@@ -88,7 +86,7 @@
                     </div>
                     <div *ngIf="comment.user != undefined" class="col bg-light rounded-left p-2">
                         <h6 class="mb-1">
-                            <a class="text-primary" [routerLink]="[ '/perfil', comment.user._id]" data-dismiss="modal">
+                            <a class="text-primary" [routerLink]="[ '/perfil', comment.user._id]" data-bs-dismiss="modal">
                                 <strong>
                                     {{comment.user.name}} {{comment.user.surname}}
                                 </strong>
@@ -101,9 +99,9 @@
                             {{comment.text}}
                         </p>
                     </div>
-                    <div *ngIf="comment.user != undefined" class="col-auto bg-light rounded-right p-2 mr-3 align-items-center">
+                    <div *ngIf="comment.user != undefined" class="col-auto bg-light rounded-right p-2 me-3 align-items-center">
 
-                        <button class="btn btn-warning py-0 ml-1">
+                        <button class="btn btn-warning py-0 ms-1">
                             <i class="fas fa-star"></i> {{comment.score}}
                         </button>
 
@@ -115,7 +113,7 @@
 
             <!-- modal-footer -->
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
             <!-- /modal-footer -->
 

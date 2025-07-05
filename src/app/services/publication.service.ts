@@ -63,4 +63,23 @@ export class PublicationService {
         return this._http.put(this.url + 'publication-comment/' + publicationId, comment,{headers:headers});
     }
 
+    // Métodos para likes en publicaciones
+    toggleLikePublication(token, publicationId):Observable<any>{
+        let headers = new HttpHeaders({
+            'Content-Type':'application/json', 
+            'Authorization': token
+        });
+
+        return this._http.post(this.url + 'publication-like/' + publicationId, {}, {headers:headers});
+    }
+
+    getPublicationLikes(token, publicationId):Observable<any>{
+        let headers = new HttpHeaders({
+            'Content-Type':'application/json', 
+            'Authorization': token
+        });
+
+        return this._http.get(this.url + 'publication-likes/' + publicationId, {headers:headers});
+    }
+
 }

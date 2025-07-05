@@ -19,7 +19,7 @@ export class User {
     public institution:Institution;
     public city:City;
     public contactNumber:String;
-    public socialNetworks:String;
+    public socialNetworks:string;
     public getToken:Boolean;
     public canAdvise;
 

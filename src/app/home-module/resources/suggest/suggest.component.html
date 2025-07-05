@@ -6,8 +6,8 @@
             <!-- modal-header -->
             <div class="modal-header">
                 <h5 class="modal-title" id="addTitle">Sugerir un recurso para el repositorio</h5>
-                <button type="button" class="buttonClose" id="closeBtn" data-dismiss="modal" style="display: none;"> Close</button>
-                <button  type="button" class="close" data-toggle="modal" data-target="#cancelModal" aria-label="Close" >
+                <button type="button" class="buttonClose" id="closeBtn" data-bs-dismiss="modal" style="display: none;"> Close</button>
+                <button  type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#cancelModal" aria-label="Close" >
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -18,24 +18,24 @@
 
                 <div *ngIf="status === 'error'; successMessage" class="alert alert-danger fade show text-center"
                     role="alert">
-                    <i class="fas fa-times-circle icon-message mr-2"></i>
+                    <i class="fas fa-times-circle icon-message me-2"></i>
                     {{errorMsg}}
                 </div>
 
                 <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center"
                     role="alert">
-                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    <i class="fas fa-check-circle icon-message me-2"></i>
                     {{successMsg}}
                 </div>  
 
                 <div *ngIf="status === 'warning'; successMessage" class="alert alert-warning fade show text-center"
                     role="alert">
-                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    <i class="fas fa-check-circle icon-message me-2"></i>
                     {{warningMsg}}
                 </div>
                 <div *ngIf="status === 'deleted'; successMessage" class="alert alert-info fade show text-center"
                     role="alert">
-                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    <i class="fas fa-check-circle icon-message me-2"></i>
                     {{deletedMsg}}
                 </div>  
                 
@@ -92,7 +92,7 @@
 
             <!-- modal-footer -->
             <div class="modal-footer">
-                <div data-toggle="modal" data-target="#cancelModal" >
+                <div data-bs-toggle="modal" data-bs-target="#cancelModal" >
                 <button type="button" class="btn btn-danger"   >Cancelar</button>
                 </div>
                 <button type="submit" [disabled]="loading" class="btn btn-success">
@@ -115,20 +115,18 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="cancelUpload">Cancelar sugerencia de recurso para el Repositorio</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <div class="modal-body">
                 <div class="alert alert-warning mb-0" role="alert">
-                    <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
+                    <i class="fas fa-exclamation-triangle icon-message me-2"></i>
                     ¿Estas seguro que quieres cancelar la carga del recurso? Si continuas se eliminará la sugerencia  
                 </div>
             </div>
             <div class="modal-footer">
-                <button class=" btn btn-danger" data-dismiss="modal" (click)="restartValues()">Sí</button>
-                <button class="btn btn-primary text-white" data-dismiss="modal">No</button>
+                <button class=" btn btn-danger" data-bs-dismiss="modal" (click)="restartValues()">Sí</button>
+                <button class="btn btn-primary text-white" data-bs-dismiss="modal">No</button>
             </div>
 
         </div>

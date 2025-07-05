@@ -1,6 +1,6 @@
 <!-- Profile -->
-<div class="container">
-    <section id="profile ">
+<div class="container" *ngIf="identity && ownProfile">
+    <section id="profile">
 
         <div class="container-fluid card my-3 rounded overflow-hidden bg-white" style="min-height: 250px;">
 
@@ -8,185 +8,236 @@
 
                 <div class="col">
 
-                    <div class="row ">
+                    <div class="row">
 
                         <div class="card border-0 text-center">
-                            <div class="card-body " style="position: absolute; z-index: 5;">
-                                <div class="row px-4">
-                                    <div class="picture rounded-circle border-4 overflow-hidden">
-                                        <img *ngIf="!ownProfile.picture" class="img-fluid"
-                                            src="assets/images/user-default.png">
-                                        <img *ngIf="ownProfile.picture" class="img-fluid"
-                                            src="{{this.url+'get-image-user/'+ ownProfile.picture}}">
+                             <div class="card-body" style="position: absolute; z-index: 5;">
+                                <div class="row profile-picture-row">
+                                    <div class="profile-picture-large-container">
+                                        <img *ngIf="!ownProfile?.picture" 
+                                             class="profile-picture-large"
+                                             src="assets/images/user-default.png"
+                                             alt="Imagen por defecto">
+                                        <img *ngIf="ownProfile?.picture" 
+                                             class="profile-picture-large"
+                                             [src]="url + 'get-image-user/' + ownProfile.picture + '?v=' + profilePicVersion"
+                                             alt="Foto de perfil">
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    <button *ngIf="identity._id == ownProfile._id" class="btn btn-danger"
-                                        [routerLink]="['/perfil/', ownProfile._id, 'editar']"> Editar perfil
+                                    <button *ngIf="identity?._id == ownProfile?._id" 
+                                            class="btn btn-danger btn-profile-action"
+                                            [routerLink]="['/perfil/', ownProfile._id, 'editar']"> 
+                                        <i class="fas fa-edit me-2"></i>Editar perfil
                                     </button>
 
-                                    <button *ngIf="!following && identity._id != ownProfile._id"
-                                        class="btn btn-outline-primary" (click)="followUser(ownProfile._id)">
-                                        <i class="fas fa-plus-square mr-2"></i>
-                                        Seguir
+                                    <button *ngIf="identity?._id != ownProfile?._id && !following" 
+                                            class="btn btn-follow-primary btn-profile-action" 
+                                            (click)="followUser(ownProfile._id.toString())">
+                                        <i class="fas fa-user-plus me-2"></i>Seguir
                                     </button>
-                                    <button *ngIf="following" type="button" class="btn btn-primary"
-                                        (mouseenter)="mouseEnter(ownProfile._id)" (mouseleave)="mouseLeave()"
-                                        [class.btn-danger]="ownProfile._id == followUserOver"
-                                        (click)="getus(ownProfile._id)" data-toggle="modal" data-target="#unfollowus">
-                                        <span *ngIf="ownProfile._id == followUserOver; else following">
-                                            <i class="fas fa-minus-square mr-2"></i>
-                                            Dejar de seguir
+
+                                    <button *ngIf="identity?._id != ownProfile?._id && following" 
+                                            type="button" 
+                                            class="btn btn-following btn-profile-action"
+                                            (mouseenter)="mouseEnter(ownProfile._id.toString())" 
+                                            (mouseleave)="mouseLeave()"
+                                            [class.btn-unfollow]="ownProfile._id == followUserOver"
+                                            (click)="getus(ownProfile._id.toString())" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#unfollowus">
+                                        <span *ngIf="ownProfile._id == followUserOver; else followingTemplate">
+                                            <i class="fas fa-user-minus me-2"></i>Dejar de seguir
                                         </span>
-                                        <ng-template #following>
+                                        <ng-template #followingTemplate>
                                             <span>
-                                                <i class="fas fa-check-square mr-2"></i>
-                                                Siguiendo
+                                                <i class="fas fa-user-check me-2"></i>Siguiendo
                                             </span>
                                         </ng-template>
-
                                     </button>
 
+                                </div>
+                            </div>
 
+                            <div class="card-body bg-primary"
+                                style="position: relative; z-index: 1; margin-top: 6rem; border-radius: 0;">
 
+                                <div class="mt-3 profile-header">
+                                    <h2 class="text-white text-capitalize">
+                                        <strong>{{ownProfile?.name}} {{ownProfile?.surname}}</strong>
+                                    </h2>
+                                    <span *ngIf="ownProfile?.role && hasRoleCategory(ownProfile.role.toString())" 
+                                          [class]="'badge ' + getRoleClass(ownProfile.role.toString())">
+                                          {{getRoleLabel(ownProfile.role.toString())}}
+                                    </span>
+                                </div>
+
+                                <!-- Información profesional -->
+                                <div class="mt-3 text-white profile-professional-info">
+                                    <p *ngIf="ownProfile?.profession" class="mb-1">
+                                        <small><i class="fas fa-briefcase me-2"></i>Profesión: {{ownProfile.profession.name}}</small>
+                                    </p>
+                                    <p *ngIf="ownProfile?.institution" class="mb-1">
+                                        <small><i class="fas fa-university me-2"></i>Institución educativa: {{ownProfile.institution.name}}</small> 
+                                    </p>
+                                    <p *ngIf="ownProfile?.city" class="mb-1">
+                                        <small><i class="fas fa-map-marker-alt me-2"></i>Vive en {{ownProfile.city.name}}, {{ownProfile.city.state}}, {{ownProfile.city.country}}</small>
+                                    </p>
+                                </div>
+
+                                <!-- Contadores clickeables -->
+                                <div class="row text-white mt-3">
+
+                                    <div class="col-md-4 text-center counter-clickable" 
+                                         (click)="goToPublications()"
+                                         title="Ver publicaciones">
+                                        <h5 class="counter-number">{{counters?.publications || 0}}</h5>
+                                        <span class="counter-label">Publicaciones</span>
+                                    </div>
+
+                                    <div class="col-md-4 text-center counter-clickable" 
+                                         (click)="showFollowers()"
+                                         title="Ver seguidores">
+                                        <h5 class="counter-number">{{counters?.followed || 0}}</h5>
+                                        <span class="counter-label">Seguidores</span>
+                                    </div>
+                                    
+                                    <div class="col-md-4 text-center counter-clickable" 
+                                         (click)="showFollowing()"
+                                         title="Ver siguiendo">
+                                        <h5 class="counter-number">{{counters?.following || 0}}</h5>
+                                        <span class="counter-label">Siguiendo</span>
+                                    </div>
 
                                 </div>
 
                             </div>
-                        </div>
 
-                        <div class="col-auto">
-                            <div class="px-3" style="width:10rem; height: 10rem;"></div>
-                        </div>
-
-                        <div class="col pt-5 text-white">
-                            <h4 class="mb-0">
-                                <div class='text-capitalize' style="margin: 6px;"><strong>{{ownProfile.name  }} {{ownProfile.surname }}</strong></div>
-                                <span *ngIf="ownProfile.role && categories[ownProfile.role.toString()]"
-                                    class="badge {{categories[ownProfile.role.toString()].class}}"
-                                    style="position:relative; top: -15px; left: 10px">
-                                    {{categories[ownProfile.role.toString()].label}}
-                                </span>
-                            </h4>
-
-                            <p *ngIf="ownProfile.profession" class="card-text mb-0">
-                                <small><i class="fas fa-briefcase"></i> Trabaja en {{ownProfile.profession.name }}</small>
-                            </p>
-                            <p *ngIf="ownProfile.institution" class="card-text mb-0">
-                                <small><i class="fas fa-university"></i> Institución educativa: {{ownProfile.institution.name}}</small>
-                            </p>
-                            <p *ngIf="ownProfile.city" class="card-text mb-0">
-                                <small><i class="fas fa-map-marker-alt"></i>   Vive en {{ownProfile.city.name}}, {{ownProfile.city.state}},
-                                    {{ownProfile.city.country}}</small>
-                            </p>
-
-                        </div>
-
-                        <div id="red" class="col-3 card border-0 bg-transparent p-4"
-                            [routerLink]="['/perfil/', ownProfile._id, 'red']">
-                            <div class="row my-auto px-4">
-                                <div class="col-6 p-1">
-                                    <div class="text-center bg-white rounded-lg">
-                                        <div class="px-1 py-3">
-                                            <h4 class="mb-0">{{counters.followed}}</h4>
-                                            <small *ngIf="counters.followed == 1; else pluralFollowers">
-                                                Seguidor
-                                            </small>
-                                            <ng-template #pluralFollowers>
-                                                <small>Seguidores</small>
-                                            </ng-template>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                                <div class="col-6 p-1">
-                                    <div class="text-center bg-white rounded-lg">
-                                        <div class="px-1 py-3">
-                                            <h4 class="mb-0">{{counters.following}}</h4>
-                                            <small *ngIf="counters.following == 1; else pluralFollowing">
-                                                Seguido
-                                            </small>
-                                            <ng-template #pluralFollowing>
-                                                <small>Seguidos</small>
-                                            </ng-template>
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                            </div>
                         </div>
 
                     </div>
 
-
                 </div>
+
             </div>
 
-            <div class="row bg-white">
-                <div class="col-auto">
-                    <div class="px-3" style="width:10rem"></div>
-                </div>
-                <div  class="col py-3" id="div-container"  >
-                    <div  *ngIf="ownProfile.about && about!=null"  id="div-aboutP" >
-                        <p  *ngFor="let text of about.split('\n')" class="text-break mb-0">
-                            <span>{{text}}</span>                        
-                        </p>
-                        <div *ngIf="ownProfile.about.length>218" id="showMore" [routerLink]="['/perfil/', ownProfile._id, 'info']" >
-                            <div  role="button" style="float:right;" >
-                                Mostrar más
-                            </div>
-                        
-                        </div>    
-                    </div>
-                    
-                    
-                </div>
-                <div class="row bg-white" *ngIf="ownProfile.socialNetworks" id="div-social">
-                    <ul class="social-links">Redes sociales:
-                     
+        </div>
 
-                      <li *ngFor="let link of ownProfile.socialNetworks.split(',')">
-                        <a [href]="link | linky" target="_blank" [title]="'Visitar ' + link">
-                          <i class="fas fa-link"></i> {{ link }}
+    </section>
+
+    <section id="menu">
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-white rounded" style="border: 1px solid #dee2e6;">
+
+            <div class="container-fluid">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 w-100 justify-content-around">
+
+                    <li class="nav-item" *ngFor="let menu of menuOptions">
+                        <a class="nav-link" [routerLink]="['/perfil/', ownProfile?._id, menu.value]"
+                            routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+                            <i class="{{menu.icon}} me-2"></i>{{menu.name}}
                         </a>
-                      </li>
-                    </ul>
-                  </div>
-              
-            </div>
-              
+                    </li>
 
-        </div>
-
-        <div class="float-left" id="profileMenu" style="display: inline-block">
-            <div class="card rounded bg-light border-0">
-                <button *ngFor="let option of menuOptions, let ix = index" type="button"
-                    class="btn btn-block text-left py-2 {{option.buttonClass}}"
-                    [routerLink]="[option.routerLink.replace('*id*', ownProfile._id)]">
-                    <i class="text-ligth fas {{option.iconClass}}"></i>
-                    <span class="ml-2"> {{option.spanContent}} </span>
+                </ul>
+                
+                <!-- Botón flotante para volver a publicaciones -->
+                <button *ngIf="!isOnPublications()" 
+                        class="btn btn-primary position-fixed rounded-circle shadow-lg"
+                        style="right: 20px; bottom: 20px; width: 60px; height: 60px; z-index: 1000;"
+                        [routerLink]="['/perfil/', ownProfile?._id, 'publicaciones']"
+                        title="Volver a publicaciones">
+                    <i class="fas fa-newspaper fa-lg"></i>
                 </button>
-
             </div>
 
-        </div>
+        </nav>
 
+    </section>
 
-
+    <!-- Layout de dos columnas -->
+    <section id="content" class="mt-3">
         <div class="row">
+            <!-- Columna izquierda: Información fija del perfil -->
+            <div class="col-lg-4 col-md-5">
+                <div class="profile-sidebar">
+                    <!-- Acerca de -->
+                    <div class="card mb-3" *ngIf="ownProfile?.about">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-user-circle me-2"></i>Acerca de
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="profile-about-content" [class.expanded]="aboutExpanded">
+                                <p *ngFor="let text of (aboutExpanded ? ownProfile.about : about).split('\n')" 
+                                   class="text-break mb-1 lh-sm" 
+                                   [class.mb-0]="text === ''">
+                                    <span>{{text}}</span>                        
+                                </p>
+                            </div>
+                            <div class="mt-2 d-flex justify-content-between">
+                                <button *ngIf="ownProfile.about && ownProfile.about.length > 200" 
+                                        class="btn btn-sm btn-outline-primary"
+                                        (click)="toggleAbout()">
+                                    <i class="fas" [class.fa-expand-alt]="!aboutExpanded" [class.fa-compress-alt]="aboutExpanded" class="me-1"></i>
+                                    {{aboutExpanded ? 'Mostrar menos' : 'Mostrar más'}}
+                                </button>
+                                <button class="btn btn-sm btn-info"
+                                        [routerLink]="['/perfil/', ownProfile._id, 'info']"
+                                        title="Ver información completa del perfil">
+                                    <i class="fas fa-info-circle me-1"></i>Información completa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
+                    <!-- Redes sociales -->
+                    <div class="card mb-3" *ngIf="ownProfile?.socialNetworks">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-share-alt me-2"></i>Redes sociales
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="social-link-item mb-2" *ngFor="let link of getSocialLinks(ownProfile.socialNetworks)">
+                                <a [href]="formatLink(link)" 
+                                   target="_blank" 
+                                   [title]="'Visitar ' + link.trim()" 
+                                   class="text-decoration-none text-primary d-flex align-items-center p-2 border rounded bg-light">
+                                    <i class="fas fa-external-link-alt me-2"></i>
+                                    <span class="text-truncate">{{ link.trim() }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <div class="col-12 rounded overflow-hidden pr-0">
-                <router-outlet></router-outlet>
+            <!-- Columna derecha: Contenido dinámico -->
+            <div class="col-lg-8 col-md-7">
+                <div class="profile-content">
+                    <router-outlet></router-outlet>
+                </div>
             </div>
         </div>
     </section>
+
 </div>
 
-<!-- /Profile -->
+<!-- Loading o error state -->
+<div class="container" *ngIf="!identity || !ownProfile">
+    <div class="text-center mt-5">
+        <div class="spinner-border text-primary" role="status" *ngIf="!status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <div *ngIf="status === 'error'" class="alert alert-danger mt-3">
+            <h4>Error al cargar el perfil</h4>
+            <p>No se pudo cargar la información del usuario. Por favor, inténtalo de nuevo.</p>
+            <button class="btn btn-primary" (click)="loadPage()">Reintentar</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal warning left group -->
 <div class="modal fade" id="unfollowus" tabindex="-1" role="dialog" aria-labelledby="unfollowUsuario" aria-hidden="true">
@@ -194,20 +245,18 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="unfollowUsr">Dejar de seguir a esta persona</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <div class="modal-body">
                 <div class="alert alert-warning mb-0" role="alert">
-                    <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
+                    <i class="fas fa-exclamation-triangle icon-message me-2"></i>
                     No verás sus publicaciones ni su actividad en el inicio de Reddinámica, ¿deseas continuar?
                 </div>
             </div>
             <div class="modal-footer">
-                <button class=" btn btn-danger" data-dismiss="modal" (click)="unfollow()">Sí</button>
-                <button class="btn btn-primary text-white" data-dismiss="modal">No</button>
+                <button class="btn btn-danger" data-bs-dismiss="modal" (click)="unfollow()">Sí</button>
+                <button class="btn btn-primary text-white" data-bs-dismiss="modal">No</button>
             </div>
 
         </div>

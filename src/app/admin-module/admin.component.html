@@ -19,12 +19,12 @@
           <div class="collapse" [ngClass]="{'show': isMenuCollapsed}" id="adminMenu">
             <div *ngFor="let option of menuOptions, let ix = index" class="card mt-2 rounded">
               <button type="button"
-                class="btn btn-block text-left d-flex justify-content-between py-2 {{option.buttonClass}}"
-                data-toggle="collapse" attr.data-target="#{{option.id}}" aria-expanded="true"
+                class="btn w-100 text-start d-flex justify-content-between py-2 {{option.buttonClass}}"
+                data-bs-toggle="collapse" attr.data-bs-target="#{{option.id}}" aria-expanded="true"
                 attr.aria-controls="{{option.id}}">
                 <div>
                   <i class="text-light fas {{option.iconClass}}"></i>
-                  <span class="ml-2"> {{option.spanContent}} </span>
+                  <span class="ms-2"> {{option.spanContent}} </span>
                 </div>
                 <span><i class="text-light fas fa-sort-down"></i></span>
               </button>
@@ -33,7 +33,7 @@
                 <div class="card-body py-2 px-0">
                   <ul class="nav flex-column">
                     <li *ngFor="let subOption of option.subOptions" class="nav-item">
-                      <a class="nav-link dropdown-item text-left" [routerLink]="[subOption.routerLink]"
+                      <a class="nav-link dropdown-item text-start" [routerLink]="[subOption.routerLink]"
                         routerLinkActive="active">{{subOption.text}}</a>
                     </li>
                   </ul>
@@ -45,7 +45,7 @@
       </div>
       <!-- /admin-menu -->
   
-      <div class="col-12 col-md-9 pl-0">
+      <div class="col-12 col-md-9 ps-0">
         <router-outlet></router-outlet>
       </div>
     </div>

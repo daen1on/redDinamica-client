@@ -7,12 +7,14 @@ import { LessonsComponent } from './lessons/lessons.component';
 import { FollowsComponent } from './follows/follows.component';
 import { ProfileGuard } from './guards/profile.guard';
 import { PublicationsComponent } from './publications/publications.component';
+import { authGuard } from '../guards/auth.guard';
 
 
 const profileRoutes: Routes = [
     {
         path: 'perfil/:id',
         component: ProfileComponent,
+        canActivate: [authGuard], // Proteger toda la ruta del perfil
         children: [
             { path: '', component: PublicationsComponent},
             { path: 'editar', component: EditInfoComponent, canActivate: [ProfileGuard]},

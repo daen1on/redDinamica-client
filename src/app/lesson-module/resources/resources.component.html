@@ -13,22 +13,22 @@
             </div>
             <div *ngIf="status === 'deletedD'" class="alert alert-primary fade show text-center"
                 role="alert">
-                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    <i class="fas fa-check-circle icon-message me-2"></i>
                     {{deletedMsg}}
             </div>
             <div *ngIf="status === 'warningD'" class="alert alert-info fade show text-center"
             role="alert">
-                <i class="fas fa-check-circle icon-message mr-2"></i>
+                <i class="fas fa-check-circle icon-message me-2"></i>
                 {{warningMsgF}}
             </div>
             <div *ngIf="status === 'successE'" class="alert alert-success fade show text-center"
             role="alert">
-                <i class="fas fa-check-circle icon-message mr-2"></i>
+                <i class="fas fa-check-circle icon-message me-2"></i>
                 {{successMsgEdit}}
             </div>
             <div *ngIf="status === 'success'" class="alert alert-success fade show text-center"
             role="alert">
-                <i class="fas fa-check-circle icon-message mr-2"></i>
+                <i class="fas fa-check-circle icon-message me-2"></i>
                 {{successMsg}}
             </div>
             
@@ -45,22 +45,22 @@
                 aria-orientation="vertical">
 
                 <div *ngFor="let group of groups, let ix = index" class="nav-link" [ngClass]="{'active': ix == 0}"
-                    id="{{removeSpaces(group)}}-tab" data-toggle="pill" attr.href="#{{removeSpaces(group)}}" role="tab"
+                    id="{{removeSpaces(group)}}-tab" data-bs-toggle="pill" attr.href="#{{removeSpaces(group)}}" role="tab"
                     attr.aria-controls="{{removeSpaces(group)}}" aria-selected="true"
                     [ngClass]="{disable: loading}"
                     (click)="restartValues(group)">
                     {{group}}
                     <section *ngIf="selectedGroup == group && showResources()" class="float-right">
-                        <a class="resource-edit mr-1" title="Editar grupo"><i class="fas fa-edit"
+                        <a class="resource-edit me-1" title="Editar grupo"><i class="fas fa-edit"
                                 (click)="initEditGroup($event, group)"></i></a>
-                        <a class="resource-delete ml-1" title="Eliminar grupo"><i class="fas fa-trash"
+                        <a class="resource-delete ms-1" title="Eliminar grupo"><i class="fas fa-trash"
                                 (click)="deleteGroup(group)"></i></a>
                     </section>
                 </div>
 
 
                 <div *ngIf="showResources()" class="nav-link" style="cursor: pointer;" 
-                    [ngClass]="{'show active': lesson.files.length == 0}" id="addGroup-tab" data-toggle="pill"
+                    [ngClass]="{'show active': lesson.files.length == 0}" id="addGroup-tab" data-bs-toggle="pill"
                     [ngClass]="{disable: loading}" href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
                     (click)="restartValues(this)">
                     <i class="fas fa-plus"></i> Agregar grupo de recursos
@@ -84,24 +84,24 @@
                                 <div class="card-body">
                                     <div *ngIf="status === 'deletedF'; successMessage" class="alert alert-primary fade show text-center"
                                     role="alert">
-                                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                                        <i class="fas fa-check-circle icon-message me-2"></i>
                                         {{deletedMsgF}}
                                     </div>
                                     <section *ngIf="editMode && showResources()">
                                         <div *ngIf="status === 'error'; successMessage"
                                             class="alert alert-danger fade show text-center" role="alert">
-                                            <i class="fas fa-times-circle icon-message mr-2"></i>
+                                            <i class="fas fa-times-circle icon-message me-2"></i>
                                             {{errorMsgEdit}}
                                         </div>
 
                                         <div *ngIf="status === 'success'; successMessage"
                                             class="alert alert-success fade show text-center" role="alert">
-                                            <i class="fas fa-check-circle icon-message mr-2"></i>
+                                            <i class="fas fa-check-circle icon-message me-2"></i>
                                             {{successMsgEdit}}
                                         </div>
                                         <div *ngIf="status === 'warning'"
                                         class="alert alert-warning fade show text-center" role="alert">
-                                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                                        <i class="fas fa-check-circle icon-message me-2"></i>
                                         {{warningMsg}}
                                         </div>
 
@@ -177,23 +177,23 @@
 
                                     <div *ngIf="status === 'error'; successMessage"
                                         class="alert alert-danger fade show text-center" role="alert">
-                                        <i class="fas fa-times-circle icon-message mr-2"></i>
+                                        <i class="fas fa-times-circle icon-message me-2"></i>
                                         {{errorMsg}}
                                     </div>
 
                                     <div *ngIf="status === 'deleted'; successMessage" class="alert alert-primary fade show text-center"
                                     role="alert">
-                                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                                        <i class="fas fa-check-circle icon-message me-2"></i>
                                         {{deletedMsg}}
                                     </div>
                                     <div *ngIf="status === 'success'; successMessage"
                                         class="alert alert-success fade show text-center" role="alert">
-                                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                                        <i class="fas fa-check-circle icon-message me-2"></i>
                                         {{successMsg}}
                                     </div>
                                     <div *ngIf="status === 'warning'; successMessage"
                                         class="alert alert-warning fade show text-center" role="alert">
-                                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                                        <i class="fas fa-check-circle icon-message me-2"></i>
                                         {{warningMsg}}
                                     </div>
                                     <form>
@@ -253,7 +253,7 @@
     <div *ngIf="lesson.files.length <= 0 && !showResources()" class="row">
         <div class="col">
             <div class="card">
-                <div class="card-body text-left">
+                <div class="card-body text-start">
                     <h4 class="text-muted">
                         No se han agregado recursos a esta lección.
                     </h4>

@@ -1,6 +1,6 @@
 <div class="card">
     <div class="card-header">
-        <h3 class="m-0 text-primary font-weight-bolder">{{title}}</h3>
+        <h3 class="card-header bg-info text-white">{{title}}</h3>
     </div>
     <div class="card-body">
 
@@ -29,9 +29,18 @@
                     </p>
                 </div>
                 <div *ngIf="identity[field.attr] && field.type == 'list'" id="{{field.id}}">
-                <p *ngFor="let text of identity[field.attr].split(',')">
-                        <span innerHTML="{{text | linky}}"></span>
-                    </p>
+                    <div class="social-links-container">
+                        <div *ngFor="let link of getSocialLinks(identity[field.attr]); let i = index" 
+                             class="social-link-item mb-2">
+                            <a [href]="formatLink(link)" 
+                               target="_blank" 
+                               [title]="'Visitar ' + link.trim()" 
+                               class="btn btn-outline-primary btn-sm d-flex align-items-center">
+                                <i class="fas fa-external-link-alt me-2"></i>
+                                <span class="text-truncate">{{ link.trim() }}</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
             </div>

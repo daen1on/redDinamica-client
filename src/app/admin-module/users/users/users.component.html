@@ -2,8 +2,8 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3 class="m-0 text-primary font-weight-bolder">{{ title }}</h3>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add" (click)="setAdd()">
-            <i class="fas fa-plus"></i> <span class="ml-2">Agregar</span>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add" (click)="setAdd()">
+            <i class="fas fa-plus"></i> <span class="ms-2">Agregar</span>
         </button>
     </div>
     <div class="card-body">
@@ -33,7 +33,7 @@
                         <img *ngIf="!user.picture" class="img-fluid" src="assets/images/user-default.png">
                         <img *ngIf="user.picture" class="img-fluid" [src]="url+'get-image-user/'+ user.picture">
                     </div>
-                    <div class="flex-grow-1 ml-3">
+                    <div class="flex-grow-1 ms-3">
                         <a class="text-primary" [routerLink]="['/perfil', user._id]">
                             <h5>{{ user.name }} {{ user.surname }}</h5>
                         </a>
@@ -42,11 +42,11 @@
                         </ng-container>
                     </div>
                     <div class="text-center">
-                        <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-warning btn-sm m-1" data-toggle="modal" data-target="#edit" (click)="setEdit(user)">
-                            <i class="fas fa-pen-square"></i> <span class="ml-2">Editar</span>
+                        <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-warning btn-sm m-1" data-bs-toggle="modal" data-bs-target="#edit" (click)="setEdit(user)">
+                            <i class="fas fa-pen-square"></i> <span class="ms-2">Editar</span>
                         </button>
                         <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-danger btn-sm m-1" (click)="removeUser(user._id)">
-                            <i class="fas fa-user-times"></i> <span class="ml-2">Eliminar</span>
+                            <i class="fas fa-user-times"></i> <span class="ms-2">Eliminar</span>
                         </button>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                         <img *ngIf="!user.picture" class="img-fluid" src="assets/images/user-default.png">
                         <img *ngIf="user.picture" class="img-fluid" [src]="url+'get-image-user/'+ user.picture">
                     </div>
-                    <div class="flex-grow-1 ml-3">
+                    <div class="flex-grow-1 ms-3">
                         <a class="text-primary" [routerLink]="['/perfil', user._id]">
                             <h5>{{ user.name }} {{ user.surname }}</h5>
                         </a>
@@ -68,11 +68,11 @@
                         </ng-container>
                     </div>
                     <div class="text-center">
-                        <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-warning btn-sm m-1" data-toggle="modal" data-target="#edit" (click)="setEdit(user)">
-                            <i class="fas fa-pen-square"></i> <span class="ml-2">Editar</span>
+                        <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-warning btn-sm m-1" data-bs-toggle="modal" data-bs-target="#edit" (click)="setEdit(user)">
+                            <i class="fas fa-pen-square"></i> <span class="ms-2">Editar</span>
                         </button>
                         <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-danger btn-sm m-1" (click)="removeUser(user._id)">
-                            <i class="fas fa-user-times"></i> <span class="ml-2">Eliminar</span>
+                            <i class="fas fa-user-times"></i> <span class="ms-2">Eliminar</span>
                         </button>
                     </div>
                 </div>
@@ -99,16 +99,16 @@
             <form [formGroup]="addForm" (ngSubmit)="onSubmit()" (input)="onChanges()">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addTitle">Agregar un usuario</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="restartValues()">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="restartValues()">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div *ngIf="status === 'error'" class="alert alert-danger fade show text-center" role="alert">
-                        <i class="fas fa-times-circle icon-message mr-2"></i> El usuario no fue agregado correctamente. Es posible que el correo electrónico suministrado ya se encuentra registrado.
+                        <i class="fas fa-times-circle icon-message me-2"></i> El usuario no fue agregado correctamente. Es posible que el correo electrónico suministrado ya se encuentra registrado.
                     </div>
                     <div *ngIf="status === 'success'" class="alert alert-success fade show text-center" role="alert">
-                        <i class="fas fa-check-circle icon-message mr-2"></i> El usuario fue agregado correctamente.
+                        <i class="fas fa-check-circle icon-message me-2"></i> El usuario fue agregado correctamente.
                     </div>
                     <div *ngFor="let field of addFieldsForm" class="form-group row">
                         <label for="{{field.id}}" class="col-4 col-form-label"><strong>{{field.label}}<span *ngIf="field.required">*</span></strong></label>
@@ -149,7 +149,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
                     <button id="save" type="submit" class="btn btn-success">Guardar</button>
                 </div>
             </form>
@@ -164,16 +164,14 @@
         <form class="modal-content" [formGroup]="editForm" (ngSubmit)="onEditSubmit()" (input)="onChanges()">
             <div class="modal-header">
                 <h5 class="modal-title" id="editTitle">Editar usuario</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="modal-body">
                 <div *ngIf="editStatus === 'error'" class="alert alert-danger fade show text-center" role="alert">
-                    <i class="fas fa-times-circle icon-message mr-2"></i> El usuario no ha podido ser editado correctamente.
+                    <i class="fas fa-times-circle icon-message me-2"></i> El usuario no ha podido ser editado correctamente.
                 </div>
                 <div *ngIf="editStatus === 'success'" class="alert alert-success fade show text-center" role="alert">
-                    <i class="fas fa-check-circle icon-message mr-2"></i> El usuario fue editado correctamente.
+                    <i class="fas fa-check-circle icon-message me-2"></i> El usuario fue editado correctamente.
                 </div>
                 <div *ngFor="let field of editFieldsForm" class="form-group row">
                     <label for="{{field.id}}" class="col-4 col-form-label"><strong>{{field.label}}<span *ngIf="field.required">*</span></strong></label>
@@ -198,7 +196,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-danger" data-dismiss="modal" (click)="restartValues()">Cancelar</button>
+                <button class="btn btn-danger" data-bs-dismiss="modal" (click)="restartValues()">Cancelar</button>
                 <button id="save" type="submit" class="btn btn-success">Guardar</button>
             </div>
         </form>

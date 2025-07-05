@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { landingGuard } from './guards/landing.guard';
 import { homeGuard } from './home-module/guards/home.guard';
+import { authGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   { path: '', loadChildren: () => import('./components/landing/landing.module').then(m => m.LandingModule), canActivate: [landingGuard] },
@@ -15,6 +16,10 @@ const routes: Routes = [
   { path: 'inicio', loadChildren: () => import('./home-module/home.module').then(m => m.HomeModule), canActivate: [homeGuard] },
   { path: 'error', loadChildren: () => import('./error/error.module').then(m => m.ErrorModule), canActivate: [homeGuard]  },
   { path: 'notificaciones', loadChildren: () => import('./notifications-module/notifications-module.module').then(m => m.NotificationsModule), canActivate: [homeGuard] },
+  { path: 'perfil', loadChildren: () => import('./profile-module/profile.module').then(m => m.ProfileModule), canActivate: [authGuard] },
+  { path: 'mensajes', loadChildren: () => import('./message-module/message.module').then(m => m.MessageModule), canActivate: [authGuard] },
+  { path: 'leccion', loadChildren: () => import('./lesson-module/lesson.module').then(m => m.LessonModule), canActivate: [authGuard] },
+  { path: 'admin', loadChildren: () => import('./admin-module/admin.module').then(m => m.AdminModule), canActivate: [authGuard] },
   { path: '**', loadChildren: () => import('./components/landing/landing.module').then(m => m.LandingModule), canActivate: [landingGuard] }
 ];
 

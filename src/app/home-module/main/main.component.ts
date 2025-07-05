@@ -252,8 +252,14 @@ export class MainComponent {
     public tempPublicationId;
     setDelete(publicationId) {
         this.tempPublicationId = publicationId;
-
+        // Abrir modal de confirmación
+        const modalElement = document.getElementById('delete');
+        if (modalElement) {
+            const modal = new (window as any).bootstrap.Modal(modalElement);
+            modal.show();
+        }
     }
+    
     public errorMessage: string = '';
     public errorMessageTimeout: any = null;
 
@@ -266,7 +272,7 @@ export class MainComponent {
                 }
                 this.tempPublicationId = null;
                 this.getPublications(this.page);
-                this.clearErrorMessage(); // Clear any existing error message immediately on success
+                this.clearErrorMessage();
             }),
             catchError(error => {
                 console.error(error);
@@ -276,49 +282,53 @@ export class MainComponent {
         ).subscribe({
             error: (error) => {
                 console.error('Deletion failed', error);
-                // Error is already handled in catchError, no need to set errorMessage here.
             }
         });
     }
+    
     setErrorMessage(message: string) {
-        // Clear any existing timeout to prevent it from clearing the message prematurely
         if (this.errorMessageTimeout) {
             clearTimeout(this.errorMessageTimeout);
         }
         this.errorMessage = message;
-        // Set a new timeout to clear the message after 5 seconds
         this.errorMessageTimeout = setTimeout(() => {
             this.errorMessage = '';
-            this.errorMessageTimeout = null; // Reset the timeout reference
+            this.errorMessageTimeout = null;
         }, 5000);
     }
+    
     clearErrorMessage() {
         this.errorMessage = '';
         if (this.errorMessageTimeout) {
             clearTimeout(this.errorMessageTimeout);
-            this.errorMessageTimeout = null; // Reset the timeout reference
+            this.errorMessageTimeout = null;
         }
     }
+    
     public tempCommentId;
     setDeleteComment(commentId) {
         this.tempCommentId = commentId;
+        // Abrir modal de confirmación
+        const modalElement = document.getElementById('deleteComment');
+        if (modalElement) {
+            const modal = new (window as any).bootstrap.Modal(modalElement);
+            modal.show();
+        }
     }
 
     deleteComment() {
         this._commentService.removeComment(this.token, this.tempCommentId).pipe(
-            takeUntil(this.unsubscribe$), // Unsubscribe automatically to prevent memory leaks
+            takeUntil(this.unsubscribe$),
             tap(response => {
                 if (!response.comment) {
                     throw new Error('Failed to delete the comment');
                 }
-                // Reset the tempCommentId and refresh publications if deletion is successful
                 this.tempCommentId = null;
                 this.getPublications(this.page);
             }),
             catchError(error => {
                 console.error(error);
                 this.setErrorMessage('Failed to delete the comment. Please try again.');
-                // Handle error, optionally return a more specific observable error if needed
                 return throwError(() => new Error('Failed to delete the comment'));
             })
         ).subscribe({
@@ -326,7 +336,6 @@ export class MainComponent {
                 console.log('Comment deleted successfully');
             },
             error: (error) => {
-                // Error handling logic has already been applied in catchError
                 console.error('Deletion of comment failed', error);
             }
         });
@@ -342,46 +351,6 @@ export class MainComponent {
         this.getPublications(this.page, true);
     }
 
-
-    public focusPublication
-    setFocusPublication(publicationId) {
-        this.focusPublication = publicationId;
-    }
-
-    onCommentSubmit(publicationId) {
-        const commentToAdd = new Comment(this.commentForm.value.text, this.identity._id);
-    
-        this._commentService.addComment(this.token, commentToAdd).pipe(
-            switchMap(response => {
-                // Verify if the response of adding a comment is successful before proceeding
-                if (!response.comment || !response.comment._id) {
-                    throw new Error('Failed to add the comment');
-                }
-                // If successful, proceed to update the publication's comments
-                return this._publicationService.updatePublicationComments(this.token, publicationId, response.comment);
-            }),
-            takeUntil(this.unsubscribe$), // Ensure unsubscribing to prevent memory leaks
-            tap(updatedResponse => {
-                // Ensure the publication update was successful
-                if (!updatedResponse.publication || !updatedResponse.publication._id) {
-                    throw new Error('Failed to update publication with the new comment');
-                }
-                // If everything was successful, reset the form and refresh publications
-                this.getPublications(this.page);
-                this.commentForm.reset();
-            }),
-            catchError(error => {
-                console.error(error);
-                this.setErrorMessage('Failed to submit the comment. Please try again.');
-                // Return an observable that errors out to trigger the subscription's error callback
-                return throwError(() => new Error('Failed to submit the comment'));
-            })
-        ).subscribe({
-            next: () => console.log('Comment submitted successfully'),
-            error: (error) => console.error('Comment submission failed', error)
-        });
-    }
-   
     newLines(text) {
         let innerHtml = '';
 

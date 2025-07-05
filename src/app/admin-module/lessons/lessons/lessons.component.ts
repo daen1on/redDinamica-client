@@ -172,13 +172,13 @@ export class LessonsComponent implements OnInit, OnDestroy {
 
     fetchAllLessons(): void {
         let orderBy = this.orderControl.value || 'created_at';
-        this.lessonService.getAllLessons(this.token, orderBy).pipe(takeUntil(this.unsubscribe$)).subscribe({
+        // Agregar el parámetro visibleOnes que faltaba (true para lecciones visibles en admin)
+        this.lessonService.getAllLessons(this.token, orderBy, true).pipe(takeUntil(this.unsubscribe$)).subscribe({
           next: response => {
             this.allLessons = response.lessons; // Store ALL lessons
-            console.log("All Lessons: ", this.allLessons[0]);
-          //  this.applyFilters(this.allLessons); // Apply filters after fetching all lessons
-          //  this.total = response.total;
-          // this.pages = response.pages;
+            console.log("All Lessons: ", this.allLessons.length > 0 ? this.allLessons[0] : 'No lessons found');
+            this.total = response.total;
+            this.pages = response.pages;
             this.loading = false;
             
           },

@@ -1,0 +1,202 @@
+/* Contenedor principal */
+.card {
+    border: 1px solid #e9ecef;
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Avatar del perfil */
+.profile-picture-container {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #e9ecef;
+}
+
+.profile-picture {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Avatar de comentarios */
+.comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid #e9ecef;
+}
+
+.comment-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Contenido de la publicación */
+.publication-content {
+    line-height: 1.5;
+}
+
+.publication-text {
+    font-size: 14px;
+    color: #333;
+}
+
+.publication-text p {
+    margin-bottom: 0.5rem;
+}
+
+.publication-text p:last-child {
+    margin-bottom: 0;
+}
+
+.publication-image {
+    text-align: center;
+}
+
+.publication-image img {
+    max-height: 400px;
+    object-fit: cover;
+}
+
+/* Botones de interacción */
+.interaction-bar {
+    border-top: 1px solid #f8f9fa;
+    padding-top: 0.75rem;
+}
+
+.interaction-btn {
+    border: none;
+    background: none;
+    padding: 0.25rem 0.5rem;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.interaction-btn:hover {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.interaction-btn.text-danger:hover {
+    background-color: #ffeaea;
+}
+
+.interaction-btn.text-primary:hover {
+    background-color: #e3f2fd;
+}
+
+/* Formulario de comentario */
+.comment-form {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.comment-form textarea {
+    border: 1px solid #dee2e6;
+    resize: none;
+    font-size: 14px;
+}
+
+.comment-form textarea:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Sección de comentarios */
+.comments-section {
+    background-color: #fafafa;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+}
+
+.comments-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.comment-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.comment-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.comment-bubble {
+    background-color: white;
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+
+.comment-header {
+    margin-bottom: 0.5rem;
+}
+
+.comment-text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.4;
+}
+
+.comment-actions {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f8f9fa;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .profile-picture-container {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .comment-avatar {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .publication-text {
+        font-size: 13px;
+    }
+    
+    .comment-text {
+        font-size: 13px;
+    }
+}
+
+/* Animaciones */
+.interaction-btn {
+    transition: all 0.2s ease;
+}
+
+.interaction-btn:active {
+    transform: scale(0.95);
+}
+
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Estados de hover para enlaces */
+a.text-primary:hover {
+    color: #0056b3 !important;
+    text-decoration: none;
+}

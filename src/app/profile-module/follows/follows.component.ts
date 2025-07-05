@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 import { GLOBAL } from 'src/app/services/global';
 import { FollowService } from 'src/app/services/follow.service';
@@ -13,7 +13,7 @@ import { Follow } from 'src/app/models/follow.model';
     templateUrl: './follows.component.html',
     standalone: false
 })
-export class FollowsComponent {
+export class FollowsComponent implements OnInit {
     public title: string;
     public fieldsForm;
     public identity;
@@ -44,6 +44,7 @@ export class FollowsComponent {
 
     public throttle = 0;
     public distance = 2;
+    public activeButton;
 
 
     constructor(
@@ -56,57 +57,58 @@ export class FollowsComponent {
         this.identity = this._userService.getIdentity();
         this.token = this._userService.getToken();
         this.url = GLOBAL.url;
-        this.activeButton = 'followers';
+        this.activeButton = 'followers'; // Default
         this.followingPage = 1;
-
 
         this._route.parent.params.subscribe(params => {
             let id = params['id'];
             this.ownProfile._id = id;
         });
-        
-
-
     }
+
     ngOnInit(){
         this.actualPage();
         this.loadPage();
         
+        // Leer query parameters para determinar qué pestaña mostrar
+        this._route.queryParams.subscribe(params => {
+            const tab = params['tab'];
+            if (tab === 'following') {
+                this.activeButton = 'following';
+                this.setActiveButton('following');
+            } else if (tab === 'followers') {
+                this.activeButton = 'followers';
+                this.setActiveButton('followers');
+            } else {
+                // Default a followers si no hay parámetro
+                this.activeButton = 'followers';
+                this.setActiveButton('followers');
+            }
+        });
     }
     
-    public activeButton;
     setActiveButton(activeButton) {
         this.activeButton = activeButton;
 
         if (this.activeButton == 'followers') {
-            this.getFollowerUsers(this.page);
+            this.getFollowerUsers(this.page || 1);
         } else {
-            this.getFollowingUsers(this.page);
+            this.getFollowingUsers(this.page || 1);
         }
     }
     
     loadPage() {
-        //console.log("identidad1: ", this.identity);
-        //this.identity = this._userService.getIdentity(); desactivada pq esta redundando
-        //console.log(this.identity); //probando si cambia 
-        
         this._route.parent.params.subscribe(params => {
             let id = params['id'];
-
             this.getUser(id);
-            
         });
 
         this._route.params.subscribe(params => {
             let reload = params['reload'];
-
             if (reload) {
                this._router.navigate(['perfil', this.ownProfile._id, 'red']);
-               
             }
-
         });
-
     }
 
     actualPage() {
@@ -126,20 +128,16 @@ export class FollowsComponent {
                     this.prevPage = 1;
                 }
             }
-
         });
     }
 
-    
     getUser(userId) {
         this._userService.getUser(userId).subscribe(
             response => {
                 if (response.user) {
                     this.ownProfile = response.user;
-                    this.followersPage=1; // desde aquí permite que entre a la función
-                    this.getFollowerUsers(this.followersPage);
-                    //this.getFollowingUsers(this.followingPage);
-
+                    this.followersPage = 1;
+                    // No llamar automáticamente aquí, se llamará desde setActiveButton
                 } else {
                     this.status = 'error';
                     this.ownProfile = this.identity;
@@ -148,7 +146,6 @@ export class FollowsComponent {
             error => {
                 console.log(<any>error);
                 this.ownProfile = this.identity;
-
             }
         );
     }
@@ -157,21 +154,17 @@ export class FollowsComponent {
         this._followService.getFollowingUsers(this.token, this.ownProfile._id, page).subscribe(
             response => {
                 if (response) {
-                    if (page==1){
-                    this.status = 'success';
-                    this.following = response.follows;
-                    this.followingPages = response.pages;
-                    this.followingTotal = response.total;
-                    }
-                    else{
-                        //console.log(response.follows);
-                        //console.log(this.following);
-                        //Cuando se hace scroll, se envía por acá la petición
-                        for (let i in response.follows){
+                    if (page == 1) {
+                        this.status = 'success';
+                        this.following = response.follows;
+                        this.followingPages = response.pages;
+                        this.followingTotal = response.total;
+                    } else {
+                        // Cuando se hace scroll, se envía por acá la petición
+                        for (let i in response.follows) {
                             this.following.push(response.follows[i]);
                         }
-                        //console.log(this.following);
-                        }
+                    }
                 } else {
                     this.status = 'error';
                 }
@@ -186,22 +179,18 @@ export class FollowsComponent {
         this._followService.getFollowersUsers(this.token, this.ownProfile._id, page).subscribe(
             response => {
                 if (response) {
-                    if (page==1){
-                    this.status = 'success';
-                    this.followers = response.follows;
-                    this.followersPages = response.pages;
-                    this.followersTotal = response.total;
-                    this.followingUsersId = response.following; //los que esta siguiendo el perfil logueado
-                    console.log("oh");      
-                    }
-                    else{
-                        //se envia al array  de followers
-                        for (let i in response.follows){
-
+                    if (page == 1) {
+                        this.status = 'success';
+                        this.followers = response.follows;
+                        this.followersPages = response.pages;
+                        this.followersTotal = response.total;
+                        this.followingUsersId = response.following; // los que esta siguiendo el perfil logueado
+                    } else {
+                        // se envia al array de followers
+                        for (let i in response.follows) {
                             this.followers.push(response.follows[i]);
                         }
                     }
-
                 } else {
                     this.status = 'error';
                 }
@@ -218,7 +207,6 @@ export class FollowsComponent {
         this.followUserOver = userId;
     }
 
-
     mouseLeave() {
         this.followUserOver = 0;
     }
@@ -230,72 +218,57 @@ export class FollowsComponent {
 
         this._followService.addFollow(this.token, follow).subscribe(
             response => {
-
                 if (response) {
-                    
                     this.getFollowerUsers(this.page);
                     this.getFollowingUsers(this.page);
                 }
-
             },
             error => {
                 console.log(<any>error);
             }
         )
     }
+    
     public TempU;
-    getU(userId){
-        //console.log(userId);
-
+    getU(userId) {
         this.TempU = userId;
-        
     }
 
-    unfollow(){
-        //así se llama a la función desde el botón de continuar
+    unfollow() {
+        // así se llama a la función desde el botón de continuar
         this.unfollowUser(this.TempU);
-        this.TempU="";
-     
+        this.TempU = "";
     }
-    onScrolld(){
-        //following
-        this.loading = true;
-        if (this.page<this.followingPages){
-            
-            this.page++;
-            this.getFollowingUsers(this.page);
-            //console.log("seguidos",this.followingPages);
-            //console.log("actual",this.page)
-        }
-        else{
-            this.loading = false;
-        }
-        
 
-    }
-    onScroll(){  
-        //followers
-        if (this.page<this.followersPages){
-            console.log(this.page);
-            this.page++;
-            
-            this.getFollowerUsers(this.page);
-            
+    onScrolld() {
+        if (this.activeButton == 'followers') {
+            this.followersPage += 1;
+            if (this.followersPage <= this.followersPages) {
+                this.loading = true;
+                this.getFollowerUsers(this.followersPage);
+                this.loading = false;
+            }
+        } else {
+            this.followingPage += 1;
+            if (this.followingPage <= this.followingPages) {
+                this.loading = true;
+                this.getFollowingUsers(this.followingPage);
+                this.loading = false;
+            }
         }
-
     }
+
+    onScroll() {
+        // Función alternativa de scroll si es necesaria
+    }
+
     unfollowUser(userId) {
-        let index;
-
         this._followService.removeFollow(this.token, userId).subscribe(
             response => {
-                //console.log(response)
                 if (response) {
                     this.getFollowerUsers(this.page);
                     this.getFollowingUsers(this.page);
-                    
                 }
-
             },
             error => {
                 console.log(<any>error);

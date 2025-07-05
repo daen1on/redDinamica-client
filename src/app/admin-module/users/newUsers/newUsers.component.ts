@@ -79,8 +79,7 @@ export class NewUsersComponent {
     }
     
     activeUser(user: any) {
-        user['actived'] = true;
-        this._UserService.updateUser(user)
+        this._UserService.activateUserByAdmin(user)
           .pipe(takeUntil(this.unsubscribe$))
           .subscribe({
             next: (response) => {
@@ -93,7 +92,7 @@ export class NewUsersComponent {
               }
             },
             error: (error) => {
-              console.error(error);
+              console.error('Error al activar usuario:', error);
             }
           });
     }

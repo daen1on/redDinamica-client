@@ -4,12 +4,12 @@
     <h3 class="m-0 text-primary font-weight-bolder float-left">{{ title }}</h3>
     <button
       type="button"
-      class="btn btn-primary float-right ml-3"
-      data-toggle="modal"
-      data-target="#add"
+      class="btn btn-primary float-right ms-3"
+      data-bs-toggle="modal"
+      data-bs-target="#add"
     >
       <i class="fas fa-plus"></i>
-      <span class="ml-2">Agregar tema</span>
+      <span class="ms-2">Agregar tema</span>
     </button>
   </div>
 
@@ -198,7 +198,7 @@
 
   <!-- Order -->
   <div *ngIf="selectedStates.includes('completed')" class="form-group row mb-3">
-    <label for="order" class="col-3 offset-6 col-form-label text-right">
+    <label for="order" class="col-3 offset-6 col-form-label text-end">
       <small class="text-muted">Ordenar por:</small>
     </label>
 
@@ -250,7 +250,7 @@
                   <div class="row mt-1">
                     <div class="col-12">
                       <button
-                        class="btn btn-block btn-sm"
+                        class="btn w-100 btn-sm"
                         disabled
                         title="Versión"
                       >
@@ -258,7 +258,7 @@
                       </button>
                       <button
                         *ngIf="lesson.state == 'completed'"
-                        class="btn btn-block btn-sm"
+                        class="btn w-100 btn-sm"
                         disabled
                         title="Calificación"
                       >
@@ -267,7 +267,7 @@
                       </button>
                       <button
                         *ngIf="lesson.state == 'completed'"
-                        class="btn btn-block btn-sm"
+                        class="btn w-100 btn-sm"
                         disabled
                         title="Visualizaciones"
                       >
@@ -298,7 +298,7 @@
                         <span
                           class="badge badge-{{
                             lesson_states[lesson.state].class
-                          }} mr-1"
+                          }} me-1"
                         >
                           {{ lesson_states[lesson.state].label }}
                         </span>
@@ -391,7 +391,7 @@
                           >
                             <small
                               *ngFor="let area of lesson.knowledge_area"
-                              class="badge badge-info mr-1 mb-1 text-truncate"
+                              class="badge badge-info me-1 mb-1 text-truncate"
                               title="{{ area.name }}"
                               >{{ area.name }}</small
                             >
@@ -422,7 +422,7 @@
                           <div class="row">
                             <div
                               *ngFor="let member of lesson.development_group"
-                              class="col-auto pr-0"
+                              class="col-auto pe-0"
                             >
                               <a class="text-primary">
                                 <button
@@ -470,7 +470,7 @@
                       <div class="card mt-2">
                         <div class="card-body p-1">
                           <div class="row">
-                            <div class="col-auto pr-0">
+                            <div class="col-auto pe-0">
                               <a class="text-primary">
                                 <button
                                   [routerLink]="['/perfil', lesson.author._id]"
@@ -526,19 +526,19 @@
               </div>
 
               <!-- buttons -->
-              <div class="row mt-3 text-right">
+              <div class="row mt-3 text-end">
                 <div class="col">
                   <button
-                    class="btn btn-info ml-2"
+                    class="btn btn-info ms-2"
                     [routerLink]="['/admin', 'leccion', lesson._id]"
                   >
                     <i class="fas fa-eye"></i> Ver lección
                   </button>
                   <button
                     *ngIf="['proposed'].includes(lesson.state) && !lesson.call"
-                    class="btn btn-warning ml-2"
-                    data-toggle="modal"
-                    data-target="#addCall"
+                    class="btn btn-warning ms-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addCall"
                     (click)="setAddCallLesson(lesson)"
                   >
                     <i class="fas fa-bullhorn"></i> Abrir convocatoria
@@ -549,9 +549,9 @@
                       lesson.call &&
                       !lesson.son_lesson
                     "
-                    class="btn btn-warning ml-2"
-                    data-toggle="modal"
-                    data-target="#addCall"
+                    class="btn btn-warning ms-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addCall"
                     (click)="setAddCallLesson(lesson, true)"
                   >
                     <i class="fas fa-bullhorn"></i> Abrir convocatoria V.{{
@@ -560,9 +560,9 @@
                   </button>
                   <button
                     *ngIf="['proposed'].includes(lesson.state) && lesson.call"
-                    class="btn btn-success ml-2"
-                    data-toggle="modal"
-                    data-target="#call"
+                    class="btn btn-success ms-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#call"
                     (click)="setCallLesson(lesson)"
                   >
                     <i class="fas fa-bullhorn"></i> Ver convocatoria
@@ -572,14 +572,14 @@
                         lesson.call.interested &&
                         lesson.call.interested.length > 0
                       "
-                      class="badge badge-secondary ml-1"
+                      class="badge badge-secondary ms-1"
                       >{{ lesson.call.interested.length }}</span
                     >
                   </button>
                   <button
-                    class="btn btn-danger ml-2"
-                    data-toggle="modal"
-                    data-target="#delete"
+                    class="btn btn-danger ms-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#delete"
                     (click)="setDeleteLesson(lesson._id)"
                   >
                     <i class="fas fa-trash"></i> Eliminar
@@ -630,7 +630,7 @@
                   <div class="row mt-1">
                     <div class="col-12">
                       <button
-                        class="btn btn-block btn-sm"
+                        class="btn w-100 btn-sm"
                         disabled
                         title="Versión"
                       >
@@ -638,7 +638,7 @@
                       </button>
                       <button
                         *ngIf="lesson.state == 'completed'"
-                        class="btn btn-block btn-sm"
+                        class="btn w-100 btn-sm"
                         disabled
                         title="Calificación"
                       >
@@ -647,7 +647,7 @@
                       </button>
                       <button
                         *ngIf="lesson.state == 'completed'"
-                        class="btn btn-block btn-sm"
+                        class="btn w-100 btn-sm"
                         disabled
                         title="Visualizaciones"
                       >
@@ -678,7 +678,7 @@
                         <span
                           class="badge badge-{{
                             lesson_states[lesson.state].class
-                          }} mr-1"
+                          }} me-1"
                         >
                           {{ lesson_states[lesson.state].label }}
                         </span>
@@ -771,7 +771,7 @@
                           >
                             <small
                               *ngFor="let area of lesson.knowledge_area"
-                              class="badge badge-info mr-1 mb-1 text-truncate"
+                              class="badge badge-info me-1 mb-1 text-truncate"
                               title="{{ area.name }}"
                               >{{ area.name }}</small
                             >
@@ -797,7 +797,7 @@
                           <div class="row">
                             <div
                               *ngFor="let member of lesson.development_group"
-                              class="col-auto pr-0"
+                              class="col-auto pe-0"
                             >
                               <a class="text-primary">
                                 <button
@@ -839,7 +839,7 @@
                       <div class="card mt-2">
                         <div class="card-body p-1">
                           <div class="row">
-                            <div class="col-auto pr-0">
+                            <div class="col-auto pe-0">
                               <a class="text-primary">
                                 <div
                                   class="flex-shrink-0 rounded-circle border-1 overflow-hidden"
@@ -902,19 +902,19 @@
               </div>
 
               <!-- buttons -->
-              <div class="row mt-3 text-right">
+              <div class="row mt-3 text-end">
                 <div class="col">
                   <button
-                    class="btn btn-info ml-2"
+                    class="btn btn-info ms-2"
                     [routerLink]="['/admin', 'leccion', lesson._id]"
                   >
                     <i class="fas fa-eye"></i> Ver lección
                   </button>
                   <button
                     *ngIf="['proposed'].includes(lesson.state) && !lesson.call"
-                    class="btn btn-warning ml-2"
-                    data-toggle="modal"
-                    data-target="#addCall"
+                    class="btn btn-warning ms-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addCall"
                     (click)="setAddCallLesson(lesson)"
                   >
                     <i class="fas fa-bullhorn"></i> Abrir convocatoria
@@ -925,9 +925,9 @@
                       lesson.call &&
                       !lesson.son_lesson
                     "
-                    class="btn btn-warning ml-2"
-                    data-toggle="modal"
-                    data-target="#addCall"
+                    class="btn btn-warning ms-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addCall"
                     (click)="setAddCallLesson(lesson, true)"
                   >
                     <i class="fas fa-bullhorn"></i> Abrir convocatoria V.{{
@@ -936,9 +936,9 @@
                   </button>
                   <button
                     *ngIf="['proposed'].includes(lesson.state) && lesson.call"
-                    class="btn btn-success ml-2"
-                    data-toggle="modal"
-                    data-target="#call"
+                    class="btn btn-success ms-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#call"
                     (click)="setCallLesson(lesson)"
                   >
                     <i class="fas fa-bullhorn"></i> Ver convocatoria
@@ -948,14 +948,14 @@
                         lesson.call.interested &&
                         lesson.call.interested.length > 0
                       "
-                      class="badge badge-secondary ml-1"
+                      class="badge badge-secondary ms-1"
                       >{{ lesson.call.interested.length }}</span
                     >
                   </button>
                   <button
-                    class="btn btn-danger ml-2"
-                    data-toggle="modal"
-                    data-target="#delete"
+                    class="btn btn-danger ms-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#delete"
                     (click)="setDeleteLesson(lesson._id)"
                   >
                     <i class="fas fa-trash"></i> Eliminar

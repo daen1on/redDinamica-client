@@ -1,106 +1,214 @@
 <!-- Header -->
+<nav
+  *ngIf="!identity"
+  id="header"
+  class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top fixed-top"
+>
+  <div class="container">
+    <a [routerLink]="['/']" class="navbar-brand" href="#">
+      <!-- Changed me-2 to me-2 -->
+      <img
+        class="me-2 d-inline"
+        src="assets/images/RDLogo.png"
+        alt="Logo RedDinámica"
+      />
+      <!-- Changed font-weight-bolder to fw-bolder -->
+      <h1 class="d-inline align-middle rd fw-bolder">RedDinámica</h1>
+    </a>
 
-<nav *ngIf="!identity" id="header" class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top fixed-top">
-    <div class="container">        
-        <a [routerLink]="['/']" class="navbar-brand" href="#">
-            <img class="mr-2 d-inline" src="assets/images/RDLogo.png" alt="Logo RedDinámica">
-            <h1 class="d-inline align-middle rd font-weight-bolder">RedDinámica</h1>
-        </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarColor01"
+      aria-controls="navbarColor01"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01"
-            aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarColor01">
-            <ul class="navbar-nav ml-auto">
-                
-                <li class="nav-item">
-                    <a [routerLink]="['/login']" class="btn btn-secondary btn-block my-2 my-sm-2" href="#"
-                        role="button">Iniciar sesión</a>
-                </li>
-                <li class="nav-item mr-2 mr-0">
-                    <a [routerLink]="['/registro']" class="btn btn-success btn-block my-2 ml-lg-2 my-sm-2" href="#"
-                        role="button">Crear una cuenta</a>
-                </li>
-
-            </ul>
-        </div>
-
-
+    <div class="collapse navbar-collapse" id="navbarColor01">
+      <!-- Changed ml-auto to ms-auto -->
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a
+            [routerLink]="['/login']"
+            class="btn btn-secondary w-100 my-2 my-sm-2"
+            href="#"
+            role="button"
+            >Iniciar sesión</a
+          >
+        </li>
+        <!-- Changed me-2 to me-2 and ml-lg-2 to ms-lg-2 -->
+        <li class="nav-item me-lg-2">
+          <!-- Simplified spacing, me-0 was likely redundant -->
+          <a
+            [routerLink]="['/registro']"
+            class="btn btn-success w-100 my-2 ms-lg-2 my-sm-2"
+            href="#"
+            role="button"
+            >Crear una cuenta</a
+          >
+        </li>
+      </ul>
     </div>
+  </div>
 </nav>
-
 <!-- /Header -->
- <!-- Header user logged -->
-<nav *ngIf="identity" id="header-home" class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top fixed-top py-0">
-    <div class="container bg-primary">
-        <a [routerLink]="['/inicio']" class="navbar-brand mr-2 pb-2">
-            <img class="mr-2 d-inline" src="assets/images/RDLogo.png" alt="Logo RedDinámica">
-            <h4 class="d-inline align-middle rd font-weight-bolder">RedDinámica</h4>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01"
-            aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarColor01">
-            <ul class="navbar-nav ml-auto">
-                <li [routerLink]="['/perfil', identity._id]" class="nav-item" style="cursor: pointer">
-                    <a class="nav-link d-flex align-items-center">
-                        <div class="rounded-circle border-1 overflow-hidden mr-2" style="width: 30px; height:30px;">
-                            <img *ngIf="!identity.picture" class="img-fluid" src="assets/images/user-default.png">
-                            <img *ngIf="identity.picture" class="img-fluid" src="{{this.url+'get-image-user/'+ identity.picture}}">
-                        </div>
-                        <span>{{identity.name}}</span>
-                    </a>
-                </li>
-                <li class="nav-item d-flex align-items-center">
-                    <a [routerLink]="['/inicio']" class="nav-link d-flex align-items-center">
-                        <i class="fas fa-home" style="font-size:1.5em"></i>
-                        <span class="mx-1">Inicio</span>
-                    </a>
-                </li>
-                <li class="nav-item d-flex align-items-center">
-                    <a [routerLink]="['/mensajes']" class="nav-link btn btn-primary d-flex align-items-center">
-                        <i class="fas fa-envelope" style="font-size:1.5em"></i>
-                        <span class="mx-1">Mensajes</span>
-                        <span *ngIf="unviewMessages > 0" class="badge badge-pill badge-info">{{unviewMessages}}</span>
-                    </a>
-                </li>
-                <li *ngIf="['admin', 'delegated_admin'].includes(identity.role)" class="nav-item d-flex align-items-center">
-                    <a [routerLink]="['/admin']" class="nav-link btn btn-primary d-flex align-items-center">
-                        <i class="fas fa-user-cog" style="font-size:1.5em"></i>
-                        <span class="mx-1">Panel de administración</span>
-                    </a>
-                </li>
-                <li class="nav-item d-flex align-items-center">
-                    <a class="nav-link d-flex align-items-center" href="#" id="notificationDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-bell" style="font-size:1.5em"></i>
-                        <span *ngIf="unreadCount > 0" class="badge badge-pill badge-danger">{{unreadCount}}</span>
-                    </a>
-                    <app-notifications></app-notifications>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-bars" style="font-size:1.5em"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-lg-right" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" [routerLink]="['/seguridad']">
-                            <i class="fas fa-shield-alt mr-2"></i> Opciones de seguridad
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" [routerLink]="['/error/report-error']">
-                            <i class="fas fa-exclamation-circle mr-2"></i> Reportar un problema
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" [routerLink]="['/']" (click)="logout()">
-                            <i class="fas fa-sign-out-alt mr-2"></i> Cerrar sesión
-                        </a>
-                    </div>
-                </li>
-            </ul>
-        </div>
+
+<!-- Header user logged -->
+<!-- Changed ID for collapse target to be unique -->
+<nav
+  *ngIf="identity"
+  id="header-home"
+  class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top fixed-top py-0"
+>
+  <div class="container bg-primary">
+    <!-- Changed me-2 to me-2 -->
+    <a [routerLink]="['/inicio']" class="navbar-brand me-2 pb-2">
+      <!-- Changed me-2 to me-2 -->
+      <img
+        class="me-2 d-inline"
+        src="assets/images/RDLogo.png"
+        alt="Logo RedDinámica"
+      />
+      <!-- Changed font-weight-bolder to fw-bolder -->
+      <h4 class="d-inline align-middle rd fw-bolder">RedDinámica</h4>
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarColor02"
+      aria-controls="navbarColor02"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <!-- Changed ID to match the button's target -->
+    <div class="collapse navbar-collapse" id="navbarColor02">
+      <!-- Changed ml-auto to ms-auto -->
+      <ul class="navbar-nav ms-auto">
+        <li [routerLink]="['/perfil', identity?._id]" class="nav-item" style="cursor: pointer">
+            <a class="nav-link d-flex align-items-center">
+              <div class="profile-picture-container me-2">
+                <!-- This part is correct for cache-busting -->
+                <img *ngIf="identity?.picture"
+                     class="profile-picture"
+                     [src]="url + 'get-image-user/' + identity.picture + '?v=' + profilePicVersion"
+                     alt="Foto de perfil" />
+                <img *ngIf="!identity?.picture"
+                     class="profile-picture"
+                     src="assets/images/user-default.png"
+                     alt="Imagen por defecto" />
+              </div>
+              <span>{{ identity?.name }}</span>
+            </a>
+          </li>
+        <li class="nav-item d-flex align-items-center">
+          <a
+            [routerLink]="['/inicio']"
+            class="nav-link d-flex align-items-center"
+          >
+            <i class="fas fa-home" style="font-size: 1.5em"></i>
+            <span class="mx-1">Inicio</span>
+            <!-- mx-1 remains the same -->
+          </a>
+        </li>
+        <li class="nav-item d-flex align-items-center">
+          <a
+            [routerLink]="['/mensajes']"
+            class="nav-link btn btn-primary d-flex align-items-center"
+          >
+            <i class="fas fa-envelope" style="font-size: 1.5em"></i>
+            <span class="mx-1">Mensajes</span>
+            <!-- mx-1 remains the same -->
+            <!-- Changed rounded-pill to rounded-pill -->
+            <span
+              *ngIf="unviewMessages > 0"
+              class="badge rounded-pill bg-info text-dark"
+              >{{ unviewMessages }}</span
+            >
+            <!-- Added bg-* and text-* for contrast -->
+          </a>
+        </li>
+        <li
+          *ngIf="['admin', 'delegated_admin'].includes(identity.role)"
+          class="nav-item d-flex align-items-center"
+        >
+          <a
+            [routerLink]="['/admin']"
+            class="nav-link btn btn-primary d-flex align-items-center"
+          >
+            <i class="fas fa-user-cog" style="font-size: 1.5em"></i>
+            <span class="mx-1">Panel de administración</span>
+            <!-- mx-1 remains the same -->
+          </a>
+        </li>
+        <li class="nav-item dropdown d-flex align-items-center">
+          <a
+            class="nav-link d-flex align-items-center position-relative"
+            href="#"
+            id="notificationDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            style="cursor: pointer;"
+          >
+            <i class="fas fa-bell" style="font-size: 1.5em"></i>
+            <span
+              *ngIf="unreadCount > 0"
+              class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle"
+              style="font-size: 0.7em; min-width: 1.2em; height: 1.2em; display: flex; align-items: center; justify-content: center;"
+              >{{ unreadCount }}</span
+            >
+          </a>
+          <!-- Dropdown menu para notificaciones -->
+          <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0" 
+               aria-labelledby="notificationDropdown"
+               style="min-width: 380px; max-width: 400px; max-height: 70vh; overflow-y: auto; border-radius: 12px; margin-top: 8px;">
+            <app-notifications></app-notifications>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <!-- Changed data-toggle to data-bs-toggle -->
+          <a
+            class="nav-link"
+            href="#"
+            id="navbarDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <i class="fas fa-bars" style="font-size: 1.5em"></i>
+          </a>
+          <!-- Changed dropdown-menu-lg-right to dropdown-menu-end -->
+          <div
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="navbarDropdown"
+          >
+            <a class="dropdown-item" [routerLink]="['/seguridad']">
+              <!-- Changed me-2 to me-2 -->
+              <i class="fas fa-shield-alt me-2"></i> Opciones de seguridad
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" [routerLink]="['/error/report-error']">
+              <!-- Changed me-2 to me-2 -->
+              <i class="fas fa-exclamation-circle me-2"></i> Reportar un
+              problema
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" [routerLink]="['/']" (click)="logout()">
+              <!-- Changed me-2 to me-2 -->
+              <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
+            </a>
+          </div>
+        </li>
+      </ul>
     </div>
+  </div>
 </nav>
 
 <router-outlet></router-outlet>

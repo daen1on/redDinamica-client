@@ -73,21 +73,21 @@
                             <div class="col text-center">
                                 <button *ngIf="following.indexOf(user._id) < 0" type="button"
                                     class="btn btn-outline-primary btn-sm" (click)="followUser(user._id)">
-                                    <i class="fas fa-plus-square mr-2"></i>
+                                    <i class="fas fa-plus-square me-2"></i>
                                     Seguir
                                 </button>
                                 
                                 <button *ngIf="following.indexOf(user._id) >= 0" type="button"
                                     class="btn btn-primary btn-sm" (mouseenter)="mouseEnter(user._id)"
                                     (mouseleave)="mouseLeave()" [class.btn-danger]="user._id == followUserOver"
-                                    (click)="getU(user._id)" data-toggle="modal" data-target="#unfollowU">
+                                    (click)="getU(user._id)" data-bs-toggle="modal" data-bs-target="#unfollowU">
                                     <span *ngIf="user._id == followUserOver; else following">
-                                        <i class="fas fa-minus-square mr-2"></i>
+                                        <i class="fas fa-minus-square me-2"></i>
                                         Dejar de seguir
                                     </span>
                                     <ng-template #following>
                                         <span>
-                                            <i class="fas fa-check-square mr-2"></i>
+                                            <i class="fas fa-check-square me-2"></i>
                                             Siguiendo
                                         </span>
                                     </ng-template>
@@ -128,20 +128,20 @@
                             <div class="col text-center">
                                 <button *ngIf="following.indexOf(user._id) < 0" type="button"
                                     class="btn btn-outline-primary btn-sm" (click)="followUser(user._id)">
-                                    <i class="fas fa-plus-square mr-2"></i>
+                                    <i class="fas fa-plus-square me-2"></i>
                                     Seguir
                                 </button>
                                 <button *ngIf="following.indexOf(user._id) >= 0" type="button"
                                     class="btn btn-primary btn-sm" (mouseenter)="mouseEnter(user._id)"
                                     (mouseleave)="mouseLeave()" [class.btn-danger]="user._id == followUserOver"
-                                    (click)="getU(user._id)" data-toggle="modal" data-target="#unfollowU">
+                                    (click)="getU(user._id)" data-bs-toggle="modal" data-bs-target="#unfollowU">
                                     <span *ngIf="user._id == followUserOver; else following">
-                                        <i class="fas fa-minus-square mr-2"></i>
+                                        <i class="fas fa-minus-square me-2"></i>
                                         Dejar de seguir
                                     </span>
                                     <ng-template #following>
                                         <span>
-                                            <i class="fas fa-check-square mr-2"></i>
+                                            <i class="fas fa-check-square me-2"></i>
                                             Siguiendo
                                         </span>
                                     </ng-template>
@@ -175,20 +175,18 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="unfollowUsr">Dejar de seguir a esta persona</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <div class="modal-body">
                 <div class="alert alert-warning mb-0" role="alert">
-                    <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
+                    <i class="fas fa-exclamation-triangle icon-message me-2"></i>
                     No verás sus publicaciones ni su actividad en el inicio de Reddinámica, ¿deseas continuar?
                 </div>
             </div>
             <div class="modal-footer">
-                <button class=" btn btn-danger" data-dismiss="modal" (click)="unfollow()">Sí</button>
-                <button class="btn btn-primary text-white" data-dismiss="modal">No</button>
+                <button class=" btn btn-danger" data-bs-dismiss="modal" (click)="unfollow()">Sí</button>
+                <button class="btn btn-primary text-white" data-bs-dismiss="modal">No</button>
             </div>
 
         </div>

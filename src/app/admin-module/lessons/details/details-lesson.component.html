@@ -5,9 +5,7 @@
             <!-- modal-header -->
             <div class="modal-header">
                 <h5 class="modal-title" id="detailsTitle">Detalles de la lección propuesta</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <!-- /modal-header -->
 
@@ -31,7 +29,7 @@
                     <div class="col-9">
                         <div *ngIf="lesson.knowledge_area.length > 0" style="display: flex; flex-wrap: wrap;">
                             <small *ngFor="let area of lesson.knowledge_area"
-                                class="badge badge-info mr-1 mb-1 text-truncate"
+                                class="badge badge-info me-1 mb-1 text-truncate"
                                 title="{{area.name}}">{{area.name}}</small>
                         </div>
                     </div>
@@ -102,11 +100,11 @@
                         <strong *ngIf="parent == 'experiences'">Experiencia enviada por:</strong>
                     </label>
 
-                    <div class="col-auto pr-0">
+                    <div class="col-auto pe-0">
                         <a class="text-primary">
                             <div class="flex-shrink-0 rounded-circle border-1 overflow-hidden"
                                 style="width: 40px; height:40px; background-color: aqua">
-                                <a [routerLink]="['/perfil', lesson.author._id]" data-dismiss="modal">
+                                <a [routerLink]="['/perfil', lesson.author._id]" data-bs-dismiss="modal">
 
                                     <img *ngIf="!lesson.author.picture" class="img-fluid"
                                         src="assets/images/user-default.png">
@@ -119,7 +117,7 @@
                     </div>
                     <div class="col rounded px-2">
                         <h6 class="mb-1">
-                            <a [routerLink]="['/perfil', lesson.author._id]" class="text-primary" data-dismiss="modal">
+                            <a [routerLink]="['/perfil', lesson.author._id]" class="text-primary" data-bs-dismiss="modal">
                                 <strong>
                                     {{lesson.author.name}} {{lesson.author.surname}}
                                 </strong>
@@ -137,7 +135,7 @@
 
             <!-- modal-footer -->
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
 
             </div>
             <!-- /modal-footer -->

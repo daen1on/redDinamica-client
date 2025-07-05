@@ -5,10 +5,10 @@
 
 
         <!-- Button trigger modal add-->
-        <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#addInstitution"
+        <button type="button" class="btn btn-primary float-right" data-bs-toggle="modal" data-bs-target="#addInstitution"
             (click)="setAdd()">
             <i class="fas fa-plus"></i>
-            <span class="ml-2">Agregar</span>
+            <span class="ms-2">Agregar</span>
         </button>
 
     </div>
@@ -58,15 +58,15 @@
                 <tr *ngFor="let institution of institutions">
                     <td>{{institution.name}}</td>
                     <td>
-                        <button type="button" class="btn btn-warning btn-sm mx-1" data-toggle="modal"
-                            data-target="#editInstitution" (click)="setEditInstitution(institution)">
+                        <button type="button" class="btn btn-warning btn-sm mx-1" data-bs-toggle="modal"
+                            data-bs-target="#editInstitution" (click)="setEditInstitution(institution)">
                             <i class="fas fa-pen-square"></i>
-                            <span class="ml-2"><small>Editar</small></span>
+                            <span class="ms-2"><small>Editar</small></span>
                         </button>
-                        <button type="button" class="btn btn-danger btn-sm mx-1" data-toggle="modal"
-                            data-target="#deleteInstitution" (click)="setDeleteInstitution(institution._id)">
+                        <button type="button" class="btn btn-danger btn-sm mx-1" data-bs-toggle="modal"
+                            data-bs-target="#deleteInstitution" (click)="setDeleteInstitution(institution._id)">
                             <i class="fas fa-trash"></i>
-                            <span class="ml-2"><small>Eliminar</small></span>
+                            <span class="ms-2"><small>Eliminar</small></span>
                         </button>
                     </td>
                 </tr>
@@ -76,15 +76,15 @@
                 <tr *ngFor="let institution of allInstitutions | filter: filter.value">
                     <td>{{institution.name}}</td>
                     <td>
-                        <button type="button" class="btn btn-warning btn-sm mx-1" data-toggle="modal"
-                            data-target="#editInstitution" (click)="setEditInstitution(institution)">
+                        <button type="button" class="btn btn-warning btn-sm mx-1" data-bs-toggle="modal"
+                            data-bs-target="#editInstitution" (click)="setEditInstitution(institution)">
                             <i class="fas fa-pen-square"></i>
-                            <span class="ml-2"><small>Editar</small></span>
+                            <span class="ms-2"><small>Editar</small></span>
                         </button>
-                        <button type="button" class="btn btn-danger btn-sm mx-1" data-toggle="modal"
-                            data-target="#deleteInstitution" (click)="setDeleteInstitution(institution._id)">
+                        <button type="button" class="btn btn-danger btn-sm mx-1" data-bs-toggle="modal"
+                            data-bs-target="#deleteInstitution" (click)="setDeleteInstitution(institution._id)">
                             <i class="fas fa-trash"></i>
-                            <span class="ml-2"><small>Eliminar</small></span>
+                            <span class="ms-2"><small>Eliminar</small></span>
                         </button>
                     </td>
                 </tr>
@@ -115,23 +115,21 @@
             <form [formGroup]="institutionForm" (ngSubmit)="onSubmit()" (input)="onChanges()">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addInstitutionTitle">Agregar una institución</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
 
                     <div *ngIf="status === 'error'; successMessage" class="alert alert-danger fade show text-center"
                         role="alert">
-                        <i class="fas fa-times-circle icon-message mr-2"></i>
+                        <i class="fas fa-times-circle icon-message me-2"></i>
                         La institución no fue agregada correctamente. Intentalo de nuevo.
 
                     </div>
 
                     <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center"
                         role="alert">
-                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                        <i class="fas fa-check-circle icon-message me-2"></i>
                         La institución fue agregada correctamente.
 
                     </div>
@@ -169,7 +167,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
                     <button id="save" type="submit" class="btn btn-success">Guardar</button>
                 </div>
             </form>
@@ -186,23 +184,21 @@
             <form [formGroup]="editInstitutionForm" (ngSubmit)="onEditSubmit()" (input)="onChanges()">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editInstitutionTitle">Editar institución</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
 
                     <div *ngIf="status === 'error'; successMessage" class="alert alert-danger fade show text-center"
                         role="alert">
-                        <i class="fas fa-times-circle icon-message mr-2"></i>
+                        <i class="fas fa-times-circle icon-message me-2"></i>
                         La institución no fue agregada correctamente. Intentalo de nuevo.
 
                     </div>
 
                     <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center"
                         role="alert">
-                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                        <i class="fas fa-check-circle icon-message me-2"></i>
                         La institución fue agregada correctamente.
 
                     </div>
@@ -240,7 +236,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
                     <button id="save" type="submit" class=" btn btn-warning">Editar</button>
                 </div>
             </form>
@@ -256,20 +252,18 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="deleteInstitutionTitle">Eliminar institución</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <div class="modal-body">
                 <div class="alert alert-warning mb-0" role="alert">
-                    <i class="fas fa-exclamation-triangle icon-message mr-2"></i>
+                    <i class="fas fa-exclamation-triangle icon-message me-2"></i>
                     ¿Esta seguro que desea eliminar este registro?
                 </div>
             </div>
             <div class="modal-footer">
-                <button class=" btn btn-danger" data-dismiss="modal" (click)="delete()">Sí</button>
-                <button class="btn btn-primary text-white" data-dismiss="modal">No</button>
+                <button class=" btn btn-danger" data-bs-dismiss="modal" (click)="delete()">Sí</button>
+                <button class="btn btn-primary text-white" data-bs-dismiss="modal">No</button>
             </div>
 
         </div>

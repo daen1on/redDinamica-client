@@ -2,34 +2,34 @@
     <div class="row py-3">
       <div class="col-3" style="position:relative;">
         <div class="accordion" id="menu" style="width:253px; position:fixed">
-          <div class="card rounded" [routerLink]="['/perfil', identity._id]">
+          <div class="card rounded" [routerLink]="identity ? ['/perfil', identity._id] : ['/login']">
             <a class="card-header bg-primary text-white d-flex align-items-center px-2" style="cursor: pointer">
               <div class="rounded-circle border-1 flex-shrink-0 overflow-hidden" style="width: 40px; height:40px">
-                <img *ngIf="!identity.picture" class="img-fluid" src="assets/images/user-default.png">
-                <img *ngIf="identity.picture" class="img-fluid" src="{{this.url+'get-image-user/'+ identity.picture}}">
+                <img *ngIf="!identity || !identity.picture" class="img-fluid" src="assets/images/user-default.png">
+                <img *ngIf="identity && identity.picture" class="img-fluid" src="{{this.url+'get-image-user/'+ identity.picture}}">
               </div>
-              <h4 class="card-link text-center mb-0 ml-1 text-truncate">
-                <strong>{{identity.name}} {{identity.surname}}</strong>
+              <h4 class="card-link text-center mb-0 ms-1 text-truncate">
+                <strong>{{identity ? (identity.name + ' ' + identity.surname) : 'Usuario'}}</strong>
               </h4>
             </a>
           </div>
   
           <div class="card mt-2 rounded">
-            <button type="button" class="btn btn-block text-left d-flex justify-content-between py-2 btn-info" data-toggle="collapse" data-target="#start" aria-expanded="true" aria-controls="start" [routerLink]="['/inicio']">
+            <button type="button" class="btn w-100 text-start d-flex justify-content-between py-2 btn-info" data-bs-toggle="collapse" data-bs-target="#start" aria-expanded="true" aria-controls="start" [routerLink]="['/inicio']">
               <div>
                 <i class="text-ligth fas fa-home"></i>
-                <span class="ml-2">Inicio</span>
+                <span class="ms-2">Inicio</span>
               </div>
             </button>
           </div>
   
           <!-- lesson-button -->
-          <div *ngIf="identity.actived" class="card mt-2 rounded">
+          <div *ngIf="identity && identity.actived" class="card mt-2 rounded">
             <ng-container *ngIf="identity.role != 'guest'; else guestUser">
-              <button type="button" class="btn btn-block text-left d-flex justify-content-between py-2 btn-warning pl-3" data-toggle="collapse" data-target="#lesson" aria-expanded="false" aria-controls="lesson">
+              <button type="button" class="btn w-100 text-start d-flex justify-content-between py-2 btn-warning ps-3" data-bs-toggle="collapse" data-bs-target="#lesson" aria-expanded="false" aria-controls="lesson">
                 <div>
                   <i class="text-ligth fas fa-file-alt"></i>
-                  <span class="ml-2">Lecciones</span>
+                  <span class="ms-2">Lecciones</span>
                 </div>
                 <i class="text-ligth fas fa-sort-down"></i>
               </button>
@@ -38,53 +38,53 @@
                 <div class="card-body py-2 px-0">
                   <ul class="nav flex-column">
                     <li subclass="nav-item">
-                      <a class="nav-link dropdown-item text-left" [routerLink]="['/inicio/lecciones']" routerLinkActive="active">Todas las lecciones</a>
+                      <a class="nav-link dropdown-item text-start" [routerLink]="['/inicio/lecciones']" routerLinkActive="active">Todas las lecciones</a>
                     </li>
                     <li subclass="nav-item">
-                      <a class="nav-link dropdown-item text-left" [routerLink]="['/inicio/convocatorias']" routerLinkActive="active">Convocatorias</a>
+                      <a class="nav-link dropdown-item text-start" [routerLink]="['/inicio/convocatorias']" routerLinkActive="active">Convocatorias</a>
                     </li>
                     <li subclass="nav-item">
-                      <a class="nav-link dropdown-item text-left" [routerLink]="['/inicio/mis-lecciones']" routerLinkActive="active">Mis lecciones</a>
+                      <a class="nav-link dropdown-item text-start" [routerLink]="['/inicio/mis-lecciones']" routerLinkActive="active">Mis lecciones</a>
                     </li>
                     <li *ngIf="identity.role == 'expert' || identity.canAdvise || identity.role == 'admin' || identity.role == 'delegated_admin'" subclass="nav-item">
-                      <a class="nav-link dropdown-item text-left" [routerLink]="['/inicio/asesorar-lecciones']" routerLinkActive="active">Asesorar lecciones</a>
+                      <a class="nav-link dropdown-item text-start" [routerLink]="['/inicio/asesorar-lecciones']" routerLinkActive="active">Asesorar lecciones</a>
                     </li>
                   </ul>
                 </div>
               </div>
             </ng-container>
             <ng-template #guestUser>
-              <button type="button" class="btn btn-block text-left d-flex justify-content-between py-2 btn-warning pl-3" data-toggle="collapse" data-target="#lesson" aria-expanded="false" aria-controls="lesson" [routerLink]="[ '/inicio/lecciones']">
+              <button type="button" class="btn w-100 text-start d-flex justify-content-between py-2 btn-warning ps-3" data-bs-toggle="collapse" data-bs-target="#lesson" aria-expanded="false" aria-controls="lesson" [routerLink]="[ '/inicio/lecciones']">
                 <div>
                   <i class="text-ligth fas fa-file-alt"></i>
-                  <span class="ml-2">Lecciones</span>
+                  <span class="ms-2">Lecciones</span>
                 </div>
               </button>
             </ng-template>
           </div>
           <!-- /lesson-button -->
   
-          <div *ngIf="identity.actived" class="card mt-2 rounded">
-            <button type="button" class="btn btn-block text-left d-flex justify-content-between btn-danger pl-3" data-toggle="collapse" data-target="#resources" aria-expanded="true" aria-controls="resources" [routerLink]="['/inicio/recursos']">
+          <div *ngIf="identity && identity.actived" class="card mt-2 rounded">
+            <button type="button" class="btn w-100 text-start d-flex justify-content-between btn-danger ps-3" data-bs-toggle="collapse" data-bs-target="#resources" aria-expanded="true" aria-controls="resources" [routerLink]="['/inicio/recursos']">
               <div>
                 <i class="text-ligth fas fa-paperclip"></i>
-                <span class="ml-2">Repositorio</span>
+                <span class="ms-2">Repositorio</span>
               </div>
             </button>
           </div>
   
           <div class="card mt-2 rounded">
-            <button type="button" class="btn btn-block text-left d-flex justify-content-between py-2 btn-success" data-toggle="collapse" data-target="#user" aria-expanded="true" aria-controls="user" [routerLink]="['/inicio/usuarios']">
+            <button type="button" class="btn w-100 text-start d-flex justify-content-between py-2 btn-success" data-bs-toggle="collapse" data-bs-target="#user" aria-expanded="true" aria-controls="user" [routerLink]="['/inicio/usuarios']">
               <div>
                 <i class="text-ligth fas fa-user-friends"></i>
-                <span class="ml-2">Usuarios</span>
+                <span class="ms-2">Usuarios</span>
               </div>
             </button>
           </div>
         </div>
       </div>
   
-      <div class="col-9 pl-0">
+      <div class="col-9 ps-0">
         <router-outlet></router-outlet>
       </div>
     </div>

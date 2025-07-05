@@ -1,0 +1,171 @@
+<div class="card mb-3 shadow-sm">
+    <div class="card-body p-3">
+        <!-- Header de la publicación -->
+        <div class="d-flex align-items-start mb-3">
+            <div class="flex-shrink-0 me-3">
+                <a [routerLink]="['/perfil', publication.user._id]">
+                    <div class="profile-picture-container">
+                        <img *ngIf="!publication.user.picture" 
+                             class="profile-picture"
+                             src="assets/images/user-default.png"
+                             alt="Imagen por defecto">
+                        <img *ngIf="publication.user.picture" 
+                             class="profile-picture"
+                             [src]="url + 'get-image-user/' + publication.user.picture"
+                             alt="Foto de perfil">
+                    </div>
+                </a>
+            </div>
+            <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1">
+                            <a class="text-primary text-decoration-none fw-bold" 
+                               [routerLink]="['/perfil', publication.user._id]">
+                                {{publication.user.name}} {{publication.user.surname}}
+                            </a>
+                        </h6>
+                        <small class="text-muted">
+                            {{ (publication.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL' }}
+                        </small>
+                    </div>
+                    <div *ngIf="showDeleteButton && identity._id == publication.user._id">
+                        <button class="btn btn-link p-1 text-secondary" 
+                                (click)="deletePublication()"
+                                title="Eliminar publicación">
+                            <i class="fas fa-trash fa-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido de la publicación -->
+        <div class="publication-content mb-3">
+            <div class="publication-text" innerHTML="{{newLines(publication.text | linky)}}"></div>
+            
+            <div *ngIf="publication.file" class="publication-image mt-2">
+                <img class="img-fluid rounded" 
+                     [src]="url + 'get-image-post/' + publication.file"
+                     alt="Imagen de publicación">
+            </div>
+        </div>
+
+        <!-- Botones de interacción -->
+        <div class="interaction-bar d-flex justify-content-between align-items-center mb-3">
+            <div class="interaction-buttons">
+                <button class="btn btn-sm interaction-btn" 
+                        [class.text-danger]="hasUserLikedPublication(publication)" 
+                        [class.text-dark]="!hasUserLikedPublication(publication)"
+                        (click)="toggleLikePublication(publication._id)"
+                        title="Me gusta">
+                    <i class="fas fa-heart me-1"></i>
+                    <span *ngIf="publication.likesCount && publication.likesCount > 0">{{publication.likesCount}}</span>
+                </button>
+                <button class="btn btn-sm interaction-btn text-primary ms-3" 
+                        title="Comentar"
+                        (click)="scrollToComments(publication._id)">
+                    <i class="fas fa-comment me-1"></i>
+                    <span *ngIf="publication.comments && publication.comments.length > 0">{{publication.comments.length}}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Formulario de comentario -->
+        <form [formGroup]="commentForm" 
+              (ngSubmit)="onCommentSubmit(publication._id)" 
+              id="comments-form-{{publication._id}}"
+              class="comment-form mb-3">
+            <div class="d-flex align-items-start">
+                <div class="flex-shrink-0 me-2">
+                    <div class="comment-avatar">
+                        <img *ngIf="!identity.picture" 
+                             class="img-fluid rounded-circle" 
+                             src="assets/images/user-default.png"
+                             alt="Tu avatar">
+                        <img *ngIf="identity.picture" 
+                             class="img-fluid rounded-circle"
+                             [src]="url + 'get-image-user/' + identity.picture"
+                             alt="Tu avatar">
+                    </div>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="input-group">
+                        <textarea class="form-control form-control-sm" 
+                                  formControlName="text" 
+                                  rows="2"
+                                  placeholder="Escribe un comentario..."
+                                  (focus)="setFocusPublication(publication._id)"></textarea>
+                        <button type="submit" 
+                                class="btn btn-primary btn-sm"
+                                [disabled]="!commentForm.valid || focusPublication != publication._id">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Lista de comentarios -->
+        <div *ngIf="publication.comments && publication.comments.length > 0" 
+             class="comments-section">
+            <div class="comments-header mb-2">
+                <small class="text-primary fw-bold">
+                    <i class="fas fa-comments me-1"></i>
+                    Comentarios ({{publication.comments.length}})
+                </small>
+            </div>
+
+            <div *ngFor="let comment of publication.comments" class="comment-item mb-2">
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0 me-2">
+                        <a [routerLink]="['/perfil', comment.user._id]">
+                            <div class="comment-avatar">
+                                <img *ngIf="!comment.user.picture" 
+                                     class="img-fluid rounded-circle" 
+                                     src="assets/images/user-default.png"
+                                     alt="Avatar">
+                                <img *ngIf="comment.user.picture" 
+                                     class="img-fluid rounded-circle"
+                                     [src]="url + 'get-image-user/' + comment.user.picture"
+                                     alt="Avatar">
+                            </div>
+                        </a>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="comment-bubble">
+                            <div class="comment-header">
+                                <a class="text-primary text-decoration-none fw-bold" 
+                                   [routerLink]="['/perfil', comment.user._id]">
+                                    {{comment.user.name}} {{comment.user.surname}}
+                                </a>
+                                <small class="text-muted ms-2">
+                                    {{ (comment.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL' }}
+                                </small>
+                            </div>
+                            <div class="comment-text">
+                                <p class="mb-1">{{comment.text}}</p>
+                            </div>
+                            <div class="comment-actions d-flex justify-content-between align-items-center">
+                                <button class="btn btn-sm interaction-btn" 
+                                        [class.text-danger]="hasUserLikedComment(comment)" 
+                                        [class.text-dark]="!hasUserLikedComment(comment)"
+                                        (click)="toggleLikeComment(comment._id)"
+                                        title="Me gusta">
+                                    <i class="fas fa-heart me-1"></i>
+                                    <span *ngIf="comment.likesCount && comment.likesCount > 0">{{comment.likesCount}}</span>
+                                </button>
+                                <button *ngIf="comment.user._id == identity._id"
+                                        class="btn btn-link p-0 text-secondary" 
+                                        (click)="deleteComment(comment._id)"
+                                        title="Eliminar comentario">
+                                    <i class="fas fa-trash fa-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

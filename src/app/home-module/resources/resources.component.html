@@ -3,10 +3,10 @@
     <div class="card-header">
         <h3 class="m-0 text-primary font-weight-bolder float-left">{{title}}</h3>
 
-        <button *ngIf="identity.role != 'guest'" type="button" class="btn btn-primary float-right" data-toggle="modal"
-            data-target="#add">
+        <button *ngIf="identity.role != 'guest'" type="button" class="btn btn-primary float-right" data-bs-toggle="modal"
+            data-bs-target="#add">
             <i class="fas fa-plus"></i>
-            <span class="ml-2">Sugerir recurso</span>
+            <span class="ms-2">Sugerir recurso</span>
         </button>
 
     </div>
@@ -61,7 +61,7 @@
 
         <!-- Order -->
         <div *ngIf="filter.value || selectedTypes.length > 0" class="form-group row mb-3">
-            <label for="order" class="col-3 offset-6 col-form-label text-right">
+            <label for="order" class="col-3 offset-6 col-form-label text-end">
                 <small class="text-muted">Ordenar por:</small>
             </label>
 
@@ -97,10 +97,10 @@
                                     <div class="row mt-1">
 
                                         <div class="col-12">
-                                            <button class="btn btn-block btn-sm" disabled title="Ver calificaciones">
+                                            <button class="btn w-100 btn-sm" disabled title="Ver calificaciones">
                                                 <i class="fas fa-star"></i> {{resource.score.toFixed(2)}}
                                             </button>
-                                            <button class="btn btn-block btn-sm text-truncate" disabled>
+                                            <button class="btn w-100 btn-sm text-truncate" disabled>
                                                 <span>
                                                     <i class="fas fa-download"></i>
                                                     <span> {{resource.downloads}}</span>
@@ -120,7 +120,7 @@
                                     <p><strong>Subido por:</strong></p>
 
                                     <div class="row">
-                                        <div class="col-auto pr-0">
+                                        <div class="col-auto pe-0">
                                             <a class="text-primary">
                                                 <div class="flex-shrink-0 rounded-circle border-1 overflow-hidden"
                                                     style="width: 40px; height:40px; background-color: aqua">
@@ -156,12 +156,12 @@
                                     <div class="row">
                                         <div class="col">
 
-                                            <button class="btn btn-info mr-2" title="Ver detalles" data-toggle="modal"
-                                                data-target="#details" (click)="setDetailResource(resource)">
+                                            <button class="btn btn-info me-2" title="Ver detalles" data-bs-toggle="modal"
+                                                data-bs-target="#details" (click)="setDetailResource(resource)">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="btn btn-warning mr-2" title="Calificar recurso"
-                                                data-toggle="modal" data-target="#rating"
+                                            <button class="btn btn-warning me-2" title="Calificar recurso"
+                                                data-bs-toggle="modal" data-bs-target="#rating"
                                                 (click)="setRatingResource(resource)">
                                                 <i class="fas fa-star"></i>
                                             </button>
@@ -213,10 +213,10 @@
                                     <div class="row mt-1">
 
                                         <div class="col-12">
-                                            <button class="btn btn-block btn-sm" disabled title="Ver calificaciones">
+                                            <button class="btn w-100 btn-sm" disabled title="Ver calificaciones">
                                                 <i class="fas fa-star"></i> {{resource.score.toFixed(2)}}
                                             </button>
-                                            <button class="btn btn-block btn-sm text-truncate" disabled>
+                                            <button class="btn w-100 btn-sm text-truncate" disabled>
                                                 <span>
                                                     <i class="fas fa-download"></i>
                                                     <span> {{resource.downloads}}</span>
@@ -236,7 +236,7 @@
                                     <p><strong>Subido por:</strong></p>
 
                                     <div class="row">
-                                        <div class="col-auto pr-0">
+                                        <div class="col-auto pe-0">
                                             <a class="text-primary">
                                                 <div class="flex-shrink-0 rounded-circle border-1 overflow-hidden"
                                                     style="width: 40px; height:40px; background-color: aqua">
@@ -272,12 +272,12 @@
                                     <div class="row">
                                         <div class="col">
 
-                                            <button class="btn btn-info mr-2" title="Ver detalles" data-toggle="modal"
-                                                data-target="#details" (click)="setDetailResource(resource)">
+                                            <button class="btn btn-info me-2" title="Ver detalles" data-bs-toggle="modal"
+                                                data-bs-target="#details" (click)="setDetailResource(resource)">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="btn btn-warning mr-2" title="Calificar recurso"
-                                                data-toggle="modal" data-target="#rating"
+                                            <button class="btn btn-warning me-2" title="Calificar recurso"
+                                                data-bs-toggle="modal" data-bs-target="#rating"
                                                 (click)="setRatingResource(resource)">
                                                 <i class="fas fa-star"></i>
                                             </button>

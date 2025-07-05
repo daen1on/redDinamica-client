@@ -45,4 +45,43 @@ export class CommentService {
 
         return this._http.delete(this.url+'comment/' + commentId, {headers:headers});
     }
+
+    // Métodos para likes en comentarios
+    toggleLikeComment(token, commentId):Observable<any>{
+        let headers = new HttpHeaders({
+            'Content-Type':'application/json', 
+            'Authorization': token
+        });
+
+        return this._http.post(this.url + 'comment-like/' + commentId, {}, {headers:headers});
+    }
+
+    getCommentLikes(token, commentId):Observable<any>{
+        let headers = new HttpHeaders({
+            'Content-Type':'application/json', 
+            'Authorization': token
+        });
+
+        return this._http.get(this.url + 'comment-likes/' + commentId, {headers:headers});
+    }
+
+    // Métodos para respuestas anidadas
+    addReply(token, parentCommentId, reply):Observable<any>{
+        let params = JSON.stringify(reply);
+        let headers = new HttpHeaders({
+            'Content-Type':'application/json', 
+            'Authorization': token
+        });
+
+        return this._http.post(this.url + 'comment/' + parentCommentId + '/reply', params, {headers:headers});
+    }
+
+    getReplies(token, commentId):Observable<any>{
+        let headers = new HttpHeaders({
+            'Content-Type':'application/json', 
+            'Authorization': token
+        });
+
+        return this._http.get(this.url + 'comment/' + commentId + '/replies', {headers:headers});
+    }
 }

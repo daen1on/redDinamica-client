@@ -40,7 +40,7 @@ export class LessonService {
         return this._http.get(`${this.url}lesson/${lessonId}`, { headers: headers });
     }
 
-    getLessons(token: string, page: number = 1, visibleOnes: boolean = false): Observable<any> {
+    getLessons(token: string, page: number = 1, visibleOnes: boolean = true): Observable<any> {
         console.log("entered get lesson");
 
         let headers = new HttpHeaders({
@@ -48,8 +48,10 @@ export class LessonService {
             'Authorization': token
         });
 
-        //return this._http.get(`${this.url}lessons/${visibleOnes}/${page}`, { headers: headers });
-        return this._http.get(`${this.url}lessons/${visibleOnes}/${page}`, { headers: headers })
+        // Convertir boolean a string para la URL
+        const visibleParam = visibleOnes ? 'true' : 'false';
+
+        return this._http.get(`${this.url}lessons/${visibleParam}/${page}`, { headers: headers })
         .pipe(
             map(response => {
                 console.log('API Response:', response);
@@ -62,23 +64,24 @@ export class LessonService {
         );
     }
 
-    getAllLessons(token: string, orderBy: string = '', visibleOnes: boolean = true): Observable<any> {
+    getAllLessons(token: string, orderBy: string = 'created_at', visibleOnes: boolean = true): Observable<any> {
         console.log("entered all lesson");
         let headers = new HttpHeaders({
             'Content-Type': 'application/json',
             'Authorization': token
         });
 
-        //return this._http.get(`${this.url}all-lessons/${visibleOnes}/${orderBy}`, { headers: headers });
+        // Convertir boolean a string para la URL
+        const visibleParam = visibleOnes ? 'true' : 'false';
 
-        return this._http.get(`${this.url}all-lessons/${visibleOnes}/${orderBy}`, { headers: headers })
+        return this._http.get(`${this.url}all-lessons/${visibleParam}/${orderBy}`, { headers: headers })
         .pipe(
             map(response => {
                 console.log('API Responseall:', response);
                 return response;
             }),
             catchError(error => {
-                console.log('Error en getLessons:', error);
+                console.log('Error en getAllLessons:', error);
                 throw error;
             })
         );
@@ -141,19 +144,8 @@ export class LessonService {
   
 
     getExperiences(token: string, page: number = 1): Observable<any> {
-        let headers = new HttpHeaders({
-            'Content-Type': 'application/json',
-            'Authorization': token
-        });
-
-        return this._http.get(this.url + 'all-lessons/false/created_at', { headers: headers })
-        .pipe(
-          map(response => response),
-          catchError(error => {
-            console.log('Error en getExperiences:', error);
-            throw error;
-          })
-        );
+        // Reusar el método getAllLessons existente para obtener experiencias (lecciones no visibles)
+        return this.getAllLessons(token, 'created_at', false);
     }
     editLesson(token: string, lesson: any): Observable<any> {
         let headers = new HttpHeaders().set('Content-Type', 'application/json')
@@ -162,9 +154,8 @@ export class LessonService {
     }
     
     getSuggestedLesson(token: string, page: number): Observable<any> {
-        let headers = new HttpHeaders().set('Content-Type', 'application/json')
-                                        .set('Authorization', token);
-        return this._http.get(this.url + 'lessons/false/' + page, { headers: headers });
+        // Reusar el método getLessons existente para obtener lecciones no visibles (sugerencias)
+        return this.getLessons(token, page, false);
     }
 
     deleteLesson(token: string, lessonId: string): Observable<any> {

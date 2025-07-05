@@ -1,43 +1,269 @@
+/* --- Base Image Styles --- */
+/* Use max-width for flexibility, height: auto maintains aspect ratio */
 #header img {
-    width: 60px;
+    max-width: 80px;
+    height: auto;
 }
 
 #header-home img {
-    width: 30px;
+    max-width: 30px;
+    height: auto;
 }
 
+/* General rule for images to prevent distortion */
+img {
+    height: auto;
+    max-width: 100%; /* Prevent images from overflowing their containers */
+}
+
+
+/* --- Search Bar Responsiveness --- */
+/* Remove fixed width. Rely on Bootstrap grid/form classes in HTML first. */
+/* If you need CSS control, use max-width and percentages */
 #searchBar {
-    width: 390px;
+    width: 100%;      /* Allow it to shrink on smaller screens */
+    max-width: 390px; /* Set a maximum width for larger screens */
+    /* Consider adding margin (e.g., margin-bottom: 1rem;) for spacing on mobile */
 }
 
-.rounded-circle img {
-    background-color: white;
-    object-fit: cover;
+
+/* --- Profile Picture Styling --- */
+.profile-picture-container {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+}
+
+.profile-picture {
+    width: 100%;
     height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    border-radius: 50%;
 }
 
+/* Fallback for older browsers */
+.profile-picture-container img {
+    min-width: 100%;
+    min-height: 100%;
+}
+
+
+/* --- Notifications Dropdown Styles --- */
+/* Estilos específicos para el dropdown de notificaciones en el header */
+#notificationDropdown {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+#notificationDropdown:hover {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transform: scale(1.05);
+}
+
+/* Badge de notificaciones no leídas */
+#notificationDropdown .badge {
+    position: absolute;
+    top: -2px;
+    right: -8px;
+    font-size: 0.65rem;
+    min-width: 1.1em;
+    height: 1.1em;
+    padding: 0;
+    border: 2px solid #007bff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    animation: notificationPulse 2s infinite;
+}
+
+@keyframes notificationPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Dropdown menu de notificaciones */
+.nav-item.dropdown .dropdown-menu[aria-labelledby="notificationDropdown"] {
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    padding: 0;
+    margin-top: 12px;
+    overflow: hidden;
+    animation: dropdownSlideIn 0.3s ease-out;
+    transform-origin: top center;
+}
+
+@keyframes dropdownSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Asegurar que el dropdown no afecte el layout del navbar */
+.navbar-nav .nav-item.dropdown {
+    position: static;
+}
+
+.navbar-nav .nav-item.dropdown .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: auto;
+    z-index: 1050;
+}
+
+/* Mejoras para el responsive del dropdown */
+@media (max-width: 991.98px) {
+    .nav-item.dropdown .dropdown-menu[aria-labelledby="notificationDropdown"] {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: auto;
+        min-width: 320px;
+        max-width: 350px;
+        margin-top: 8px;
+    }
+}
+
+/* Hover effect para el icono de notificaciones */
+.nav-item.dropdown:hover #notificationDropdown {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Estilos para cuando el dropdown está abierto */
+.nav-item.dropdown.show #notificationDropdown {
+    color: rgba(255, 255, 255, 1);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px;
+    margin: -8px;
+}
+
+
+/* --- Remove Fixed Button Height --- */
+/* REMOVED - Let Bootstrap handle button height via padding for better adaptability */
+/*
 button .dropdown-toggle {
     height: 42px;
 }
+*/
 
-@media screen and (max-width: 320px) {
+
+/* --- Media Queries for Responsiveness --- */
+
+/* Styles for small screens (up to Bootstrap's 'sm' breakpoint) */
+@media screen and (max-width: 575.98px) {
     #header h1 {
-        font-size: 1.5em;
+        font-size: 1.5em; /* Smaller heading on small screens */
     }
 
     #header img {
+        max-width: 40px; /* Smaller logo on small screens */
+    }
+
+    /* You might want smaller icons on mobile */
+    .nav-item .fas {
+        font-size: 1.3em;
+    }
+    .nav-item.dropdown .dropdown-menu .dropdown-item i {
+        font-size: 1.1em;
+    }
+
+    /* Smaller profile picture on mobile */
+    .profile-picture-container {
+        width: 30px;
+        height: 30px;
+    }
+
+    /* Ajustes para notificaciones en móvil */
+    .nav-item.dropdown .dropdown-menu[aria-labelledby="notificationDropdown"] {
+        min-width: 300px;
+        max-width: 320px;
+        margin-top: 5px;
+    }
+
+    #notificationDropdown .badge {
+        font-size: 0.6rem;
+        min-width: 1em;
+        height: 1em;
+    }
+
+    /* Example: Reduce padding/margins specific elements if needed */
+    /* .navbar-nav .nav-item {
+        margin-bottom: 0.5rem;
+    } */
+}
+
+/* Additional styling for better profile picture display */
+@media screen and (min-width: 768px) {
+    .profile-picture-container {
         width: 40px;
+        height: 40px;
     }
 }
 
+/* Styles for medium screens and up (Bootstrap 'md' breakpoint) */
+/* @media screen and (min-width: 768px) { */
+    /* Add specific styles for medium screens if default Bootstrap/base styles aren't enough */
+    /* For example, maybe the search bar could get slightly wider here if needed */
+    /* #searchBar {
+        max-width: 500px;
+    } */
+/* } */
+
+
+/* --- Navbar Toggler Icon --- */
+/* Keep custom toggler if desired for navbar-dark */
 .navbar-toggler-icon {
     background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' linecap='round' linejoin='round' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
 }
 
+
+/* --- Font Awesome Icon Sizes (Base) --- */
+/* These are your default sizes */
 .nav-item .fas {
     font-size: 1.5em;
 }
 
 .nav-item.dropdown .dropdown-menu .dropdown-item i {
     font-size: 1.2em;
+}
+
+/* --- Mejoras generales para dropdowns en el navbar --- */
+.navbar-nav .dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.navbar-nav .dropdown-item {
+    transition: all 0.2s ease;
+}
+
+.navbar-nav .dropdown-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(2px);
 }

@@ -75,7 +75,7 @@
                         </h6>
                         <div class="card-text" style="display: flex; flex-wrap: wrap;">
                             <label *ngFor="let area of lesson.knowledge_area"
-                                class="badge badge-{{lesson_states[lesson.state].class}} mr-1 text-truncate"
+                                class="badge badge-{{lesson_states[lesson.state].class}} me-1 text-truncate"
                                 title="{{area.name}}">{{area.name}}</label>
 
                         </div>
@@ -96,7 +96,7 @@
                         </div>
                         <div class="card-text">
                             <div class="row p-1">
-                                <div class="col-auto pr-0">
+                                <div class="col-auto pe-0">
                                     <a class="text-primary">
                                         <button [routerLink]="['/perfil', lesson.author._id]"
                                             class="btn flex-shrink-0 rounded-circle  overflow-hidden p-0"

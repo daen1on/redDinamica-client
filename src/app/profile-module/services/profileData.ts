@@ -88,7 +88,7 @@ export const FIELDS_FORM = [
         label: "Redes sociales",
         type: "textarea",
         attr: "socialNetworks",
-        placeholder: "Escribe las direcciones web de tus redes sociales separadas por una coma."      
+        placeholder: "Escribe las direcciones web de tus redes sociales separadas por punto y coma (;). Ejemplo: facebook.com/miperfil; twitter.com/miusuario; linkedin.com/in/miperfil"      
     },    
 ];
 

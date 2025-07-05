@@ -73,6 +73,22 @@ small.badge{
     object-fit: cover;
 }
 
+.avatar-container { 
+    display: inline-block; /* or can be block, TODO test */
+    border-radius: 50%;
+    overflow: hidden; /* crops it to match the container shape */
+    background-color: #f0f0f0; 
+    vertical-align: middle; 
+}
+
+.avatar-container img {
+    display: block; 
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    object-position: center;
+     
+}
 /* Invalid feedback for ng-select */
 .ng-select.is-invalid .ng-select-container{
     border: 1px solid #E74C3C;
@@ -103,3 +119,6 @@ small.badge{
 .resource-delete:hover {
     color: #E74C3C !important;
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

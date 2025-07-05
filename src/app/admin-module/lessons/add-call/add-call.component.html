@@ -5,7 +5,7 @@
             <!-- modal-header -->
             <div class="modal-header">
                 <h5 class="modal-title" id="addCallTitle">{{title}}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="restartValues()">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="restartValues()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -16,13 +16,13 @@
             <div class="modal-body">
                 <div *ngIf="status === 'error'; successMessage" class="alert alert-danger fade show text-center"
                     role="alert">
-                    <i class="fas fa-times-circle icon-message mr-2"></i>
+                    <i class="fas fa-times-circle icon-message me-2"></i>
                     {{errorMsg}}
                 </div>
 
                 <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center"
                     role="alert">
-                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    <i class="fas fa-check-circle icon-message me-2"></i>
                     {{successMsg}}
                 </div>
 
@@ -100,7 +100,7 @@
 
             <!-- modal-footer -->
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-dismiss="modal" (click)="restartValues()">Cerrar</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal" (click)="restartValues()">Cerrar</button>
                 <button [disabled]="status == 'success'" type="submit" class="btn btn-success">Crear y publicar</button>
             </div>
             <!-- /modal-footer -->

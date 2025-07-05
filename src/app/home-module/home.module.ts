@@ -23,6 +23,7 @@ import { RatingResourceComponent } from './resources/rating/rating-resource.comp
 import { DetailsCallComponent } from './lessons/details/details-call.component';
 import { LessonModule } from '../lesson-module/lesson.module';
 import { AdviseLessonComponent } from './lessons/advise-lesson/advise-lesson.component';
+import { PublicationCardComponent } from '../shared/publication-card/publication-card.component';
 
 @NgModule({
     declarations: [
@@ -50,7 +51,8 @@ import { AdviseLessonComponent } from './lessons/advise-lesson/advise-lesson.com
         LessonModule,    
         HomeRoutingModule,
         MomentModule,
-        LinkyModule
+        LinkyModule,
+        PublicationCardComponent,
     ],
     exports: [
         HomeComponent

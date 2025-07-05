@@ -7,7 +7,7 @@
             <div class="modal-header">
                 <h5 class="modal-title" id="editTitle">{{title}}</h5>
                 
-                <button *ngIf="loading ==false" type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="restartValues()">
+                <button *ngIf="loading ==false" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="restartValues()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -18,17 +18,17 @@
             <div class="modal-body" id="body">
                 <div *ngIf="status === 'error'; successMessage" class="alert alert-danger fade show text-center"
                     role="alert">
-                    <i class="fas fa-times-circle icon-message mr-2"></i>
+                    <i class="fas fa-times-circle icon-message me-2"></i>
                     {{errorMsg}}
                 </div>
                 <div *ngIf="status === 'warning'; successMessage" class="alert alert-warning fade show text-center"
                     role="alert">
-                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    <i class="fas fa-check-circle icon-message me-2"></i>
                     {{warningMsg}}
                 </div>
                 <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center"
                     role="alert">
-                    <i class="fas fa-check-circle icon-message mr-2"></i>
+                    <i class="fas fa-check-circle icon-message me-2"></i>
                     {{successMsg}}
                 </div>
 
@@ -167,7 +167,7 @@
 
             <!-- modal-footer -->
             <div class="modal-footer">
-                <button *ngIf="loading==false" class="btn btn-danger" data-dismiss="modal" (click)="restartValues()">Cancelar</button>
+                <button *ngIf="loading==false" class="btn btn-danger" data-bs-dismiss="modal" (click)="restartValues()">Cancelar</button>
                 
                 <button type= "submit"  [disabled]="loading" class="btn btn-success">
                         <span *ngIf="loading && !editForm.invalid" class="spinner-border spinner-border-sm" role="status"

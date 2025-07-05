@@ -14,12 +14,12 @@
     </div>
 
     <div *ngIf="status === 'error'" class="alert alert-danger fade show text-center" role="alert">
-            <i class="fas fa-times-circle icon-message mr-2"></i>
+            <i class="fas fa-times-circle icon-message me-2"></i>
             {{errorMsg}}
         </div>
     
         <div *ngIf="status === 'success'" class="alert alert-success fade show text-center" role="alert">
-            <i class="fas fa-check-circle icon-message mr-2"></i>
+            <i class="fas fa-check-circle icon-message me-2"></i>
             {{successMsg}}
         </div>
 
@@ -27,7 +27,7 @@
         <div class="row">
             <div class="col">
                 <div class="card">
-                    <div *ngIf="lesson.development_group.length > 0 && parentUrl != 'admin'" class="card-body text-left">
+                    <div *ngIf="lesson.development_group.length > 0 && parentUrl != 'admin'" class="card-body text-start">
 
                         <div *ngIf="lesson.leader" class="row">
                             <div class="col-6">
@@ -40,7 +40,7 @@
                                     <div class="col">
                                         <div class="card">
                                             <div class="row p-1">
-                                                <div class="col-auto pr-0">
+                                                <div class="col-auto pe-0">
                                                     <a class="text-primary">
                                                         <button [routerLink]="['/perfil', lesson.leader._id]"
                                                             class="btn flex-shrink-0 rounded-circle  overflow-hidden p-0"
@@ -77,7 +77,7 @@
                                     <div class="col">
                                         <div class="card">
                                             <div class="row p-1">
-                                                <div class="col-auto pr-0">
+                                                <div class="col-auto pe-0">
                                                     <a class="text-primary">
                                                         <button [routerLink]="['/perfil', lesson.expert._id]"
                                                             class="btn flex-shrink-0 rounded-circle  overflow-hidden p-0"
@@ -121,8 +121,8 @@
                                                 <div *ngFor="let user of lesson.development_group" class="col-12">
                                                     <div *ngIf="lesson.leader && user._id != lesson.leader._id && lesson.expert && user._id != lesson.expert._id"
                                                         class="row mt-1">
-                                                        <div class="col-auto pr-0">
-                                                            <a class="text-primary ml-1">
+                                                        <div class="col-auto pe-0">
+                                                            <a class="text-primary ms-1">
                                                                 <button [routerLink]="['/perfil', user._id]"
                                                                     class="btn flex-shrink-0 rounded-circle  overflow-hidden p-0"
                                                                     style="width: 40px; height:40px;">
@@ -157,13 +157,13 @@
                         </div>
                     </div>
                     <div *ngIf="lesson.development_group.length <= 0 && parentUrl != 'admin'"
-                        class="card-body text-left">
+                        class="card-body text-start">
                         <h4 class="text-muted">
                             No se ha asignado el grupo de desarrollo.
 
                         </h4>
                     </div>
-                    <div *ngIf="parentUrl == 'admin'" class="card-body text-left">
+                    <div *ngIf="parentUrl == 'admin'" class="card-body text-start">
 
                         <div class="row">
                                 <div class="col-6">
@@ -177,7 +177,7 @@
                                                 <ng-select [items]="users" bindLabel="name" formControlName="members"
                                                     [multiple]="true" [hideSelected]="true" notFoundText="No se encontro" (change)="onChanges(); membersChanges()">
                                                     <ng-template ng-option-tmp let-item="item">
-                                                        <div class=" flex-shrink-0 rounded-circle border-1 overflow-hidden mr-2 float-left"
+                                                        <div class=" flex-shrink-0 rounded-circle border-1 overflow-hidden me-2 float-left"
                                                             style="width: 30px; height:30px;">
                                                             <img *ngIf="!item.picture" class="img-fluid"
                                                                 src="assets/images/user-default.png">
@@ -203,7 +203,7 @@
                                         <ng-select [items]="leaderUsers" bindLabel="name" formControlName="leader"
                                             [multiple]="false" [hideSelected]="true" notFoundText="No se encontro" (change)="onChanges();">
                                             <ng-template ng-option-tmp let-item="item">
-                                                <div class=" flex-shrink-0 rounded-circle border-1 overflow-hidden mr-2 float-left"
+                                                <div class=" flex-shrink-0 rounded-circle border-1 overflow-hidden me-2 float-left"
                                                     style="width: 30px; height:30px;">
                                                     <img *ngIf="!item.picture" class="img-fluid"
                                                         src="assets/images/user-default.png">
@@ -227,7 +227,7 @@
                                         <ng-select [items]="expertUsers" bindLabel="name" formControlName="expert"
                                             [multiple]="false" [hideSelected]="true" notFoundText="No se encontro" (change)="onChanges()">
                                             <ng-template ng-option-tmp let-item="item">
-                                                <div class=" flex-shrink-0 rounded-circle border-1 overflow-hidden mr-2 float-left"
+                                                <div class=" flex-shrink-0 rounded-circle border-1 overflow-hidden me-2 float-left"
                                                     style="width: 30px; height:30px;">
                                                     <img *ngIf="!item.picture" class="img-fluid"
                                                         src="assets/images/user-default.png">

@@ -7,9 +7,7 @@
       <ul>
         <li *ngFor="let message of errorMessages">{{ message }}</li>
       </ul>
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-             <span aria-hidden="true">&times;</span>
-       </button>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
      
          <form [formGroup]="editForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">   
      
@@ -18,28 +16,23 @@
 
 
       <div *ngIf="status === 'warning'" class="alert alert-warning alert-dismissible fade show text-center" role="alert">
-        <i class="fas fa-check-circle icon-message mr-2"></i>
+        <i class="fas fa-check-circle icon-message me-2"></i>
         Se está subiendo la foto, por favor evita cerrar la página.
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
       <div *ngIf="status === 'success'" class="alert alert-success alert-dismissible fade show text-center" role="alert">
-        <i class="fas fa-check-circle icon-message mr-2"></i>
-        Los datos se han actualizado correctamente.
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <i class="fas fa-check-circle icon-message me-2"></i>
+        <span *ngIf="filesToUpload.length > 0">¡Perfil actualizado! Tu nueva foto de perfil se está procesando. Serás redirigido automáticamente...</span>
+        <span *ngIf="filesToUpload.length === 0">Los datos se han actualizado correctamente.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
       <div *ngIf="typeError" class="alert alert-danger alert-dismissible fade show text-center">
         Archivo inválido, solo se permite cargar imágenes con extensión jpg, png o gif.
       </div>
       <div *ngIf="status === 'error'" class="alert alert-danger alert-dismissible fade show text-center" role="alert">
-        <i class="fas fa-times-circle icon-message mr-2"></i>
+        <i class="fas fa-times-circle icon-message me-2"></i>
         Los datos no pudieron ser actualizados. Inténtalo de nuevo.
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
       <div *ngIf="maxSizeError" class="alert alert-danger alert-dismissible fade show text-center">
         El tamaño de la imagen es demasiado grande. El tamaño máximo permitido es {{MAX_FILE_SIZE}} MB.
@@ -83,6 +76,10 @@
                 *ngIf="editForm.get(field.id).touched && editForm.get(field.id).invalid">
                 <div *ngIf="editForm.get(field.id).hasError('required')">Campo requerido</div>
                 <div *ngIf="editForm.get(field.id).hasError('maxlength')">Debe tener menos de {{ editForm.get(field.id).errors?.['maxlength']?.['requiredLength'] }} caracteres</div>
+                <div *ngIf="editForm.get(field.id).hasError('maxLines')">
+                  Asegúrate de que la descripción no sea mayor a {{ editForm.get(field.id).errors?.['maxLines']?.['maxLines'] }} líneas 
+                  (actualmente: {{ editForm.get(field.id).errors?.['maxLines']?.['actualLines'] }} líneas)
+                </div>
               </div>
             </div>
             <div *ngIf="field.type == 'select' && field.autocomplete && field.id != 'city'">
@@ -114,7 +111,7 @@
         </div>
   
         <div class="form-group row mb-5">
-          <div class="col-3 offset-9 text-right">
+          <div class="col-3 offset-9 text-end">
             <button type="submit" class="btn btn-warning">
               Guardar cambios
             </button>

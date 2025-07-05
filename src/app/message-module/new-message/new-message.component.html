@@ -11,14 +11,14 @@
                 <div class="col">
                     <div *ngIf="status === 'error'; successMessage" class="alert alert-danger fade show text-center m-0"
                         role="alert">
-                        <i class="fas fa-times-circle icon-message mr-2"></i>
+                        <i class="fas fa-times-circle icon-message me-2"></i>
                         Hubo un error enviando el mensaje. Intentalo más tarde.
 
                     </div>
 
                     <div *ngIf="status === 'success'; successMessage"
                         class="alert alert-success fade show text-center m-0" role="alert">
-                        <i class="fas fa-check-circle icon-message mr-2"></i>
+                        <i class="fas fa-check-circle icon-message me-2"></i>
                         El mensaje se ha enviado correctamente. Ir a<a class="alert-link"
                             [routerLink]="[ '/mensajes', 'enviados' ]"> mensajes enviados.</a>
                     </div>
@@ -33,7 +33,7 @@
                         [searchFn]="customSearchFn" notFoundText="No se encuentra el usuario"
                         [ngClass]="{ 'is-invalid': submitted && f.to.errors}">
                         <ng-template ng-option-tmp let-item="item">
-                            <div class=" flex-shrink-0 rounded-circle border-1 overflow-hidden mr-2 float-left"
+                            <div class=" flex-shrink-0 rounded-circle border-1 overflow-hidden me-2 float-left"
                                 style="width: 30px; height:30px;">
                                 <img *ngIf="!item.picture" class="img-fluid" src="assets/images/user-default.png">
                                 <img *ngIf="item.picture" class="img-fluid"
@@ -64,7 +64,7 @@
                 </div>
 
             </div>
-            <div class="form-group text-right">
+            <div class="form-group text-end">
                 <button type="submit" class="btn btn-info">Enviar</button>
             </div>
         </form>

@@ -48,7 +48,7 @@
 
     <div class="form-group">
       <label for="file">Adjuntar Archivo</label>
-      <input type="file" formControlName="file" class="form-control-file" (change)="onFileChange($event)">
+                      <input type="file" formControlName="file" class="form-control" (change)="onFileChange($event)">
     </div>
 
     <button type="submit" class="btn btn-primary" [disabled]="loading">Enviar</button>

@@ -54,6 +54,8 @@ export class PublicationsComponent {
     // Comments
     public commentForm;
     public comment;
+    public replyForm; // Formulario para respuestas
+    public showReplyForm: {[commentId: string]: boolean} = {}; // Control de visibilidad de formularios de respuesta
     barWidth: string = "0%";
     private unsubscribe$: Subject<void> = new Subject<void>();
 
@@ -74,7 +76,7 @@ export class PublicationsComponent {
         this.filesToUpload = [];
 
         this.postForm = new UntypedFormGroup({
-            textPost: new UntypedFormControl(''),
+            textPost: new UntypedFormControl('', [this.maxLinesValidator(100)]),
             filePost: new UntypedFormControl('')
         });
 
@@ -91,6 +93,11 @@ export class PublicationsComponent {
 
         this.commentForm = new UntypedFormGroup({
             text: new UntypedFormControl('', Validators.required)
+        });
+
+        // Formulario para respuestas
+        this.replyForm = new UntypedFormGroup({
+            replyText: new UntypedFormControl('', Validators.required)
         });
     }
 
@@ -367,6 +374,15 @@ export class PublicationsComponent {
     
     }
 
+    // Validador personalizado para limitar líneas
+    maxLinesValidator(maxLines: number) {
+        return (control: any) => {
+            if (!control.value) return null;
+            const lines = control.value.split('\n').length;
+            return lines > maxLines ? { maxLines: { actualLines: lines, maxLines: maxLines } } : null;
+        };
+    }
+
     public focusPublication
     setFocusPublication(publicationId){
         this.focusPublication = publicationId;
@@ -402,6 +418,214 @@ export class PublicationsComponent {
     }
     
 
+    // Sistema de likes y ordenamiento
+    private sortOptions: {[publicationId: string]: string} = {}; // Almacena la opción de ordenamiento por publicación
+    
+    hasUserLikedPublication(publication: any): boolean {
+        return publication.likes && publication.likes.includes(this.identity._id);
+    }
+    
+    toggleLikePublication(publicationId: string) {
+        this._publicationService.toggleLikePublication(this.token, publicationId)
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe({
+                next: (response) => {
+                    if (response.message) {
+                        // Actualizar el estado local de la publicación
+                        const publication = this.publications.find(p => p._id === publicationId);
+                        if (publication) {
+                            const isLiked = response.action === 'liked';
+                            if (isLiked) {
+                                // Agregar like
+                                if (!publication.likes) publication.likes = [];
+                                if (!publication.likes.includes(this.identity._id)) {
+                                    publication.likes.push(this.identity._id);
+                                    publication.likesCount = (publication.likesCount || 0) + 1;
+                                }
+                            } else {
+                                // Quitar like
+                                if (publication.likes) {
+                                    publication.likes = publication.likes.filter(id => id !== this.identity._id);
+                                    publication.likesCount = Math.max(0, (publication.likesCount || 0) - 1);
+                                }
+                            }
+                        }
+                    }
+                },
+                error: (error) => {
+                    console.error('Error toggling publication like:', error);
+                }
+            });
+    }
+    
+    getCommentsCount(comments: any[]): number {
+        if (!comments) return 0;
+        // Contar comentarios principales + respuestas
+        let count = comments.length;
+        comments.forEach(comment => {
+            if (comment.replies && comment.replies.length > 0) {
+                count += comment.replies.length;
+            }
+        });
+        return count;
+    }
+    
+    getSortOption(publicationId: string): string {
+        return this.sortOptions[publicationId] || 'time';
+    }
+    
+    setSortOption(publicationId: string, option: string) {
+        this.sortOptions[publicationId] = option;
+        this.sortComments(publicationId, option);
+    }
+    
+    sortComments(publicationId: string, sortBy: string) {
+        const publication = this.publications.find(p => p._id === publicationId);
+        if (!publication || !publication.comments) return;
+        
+        publication.comments.sort((a: any, b: any) => {
+            if (sortBy === 'likes') {
+                return (b.likesCount || 0) - (a.likesCount || 0);
+            } else {
+                // Por defecto ordenar por tiempo (más reciente primero)
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            }
+        });
+    }
+    
+    getSortedComments(publication: any): any[] {
+        if (!publication.comments) return [];
+        
+        const sortBy = this.getSortOption(publication._id);
+        const sortedComments = [...publication.comments];
+        
+        sortedComments.sort((a: any, b: any) => {
+            if (sortBy === 'likes') {
+                return (b.likesCount || 0) - (a.likesCount || 0);
+            } else {
+                // Por defecto ordenar por tiempo (más reciente primero)
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            }
+        });
+        
+        return sortedComments;
+    }
+
+    // Métodos para likes en comentarios
+    hasUserLikedComment(comment: any): boolean {
+        return comment.likes && comment.likes.includes(this.identity._id);
+    }
+    
+    toggleLikeComment(commentId: string) {
+        this._commentService.toggleLikeComment(this.token, commentId)
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe({
+                next: (response) => {
+                    if (response.message) {
+                        // Actualizar el estado local del comentario
+                        this.updateCommentLikeStatus(commentId, response.action === 'liked');
+                    }
+                },
+                error: (error) => {
+                    console.error('Error toggling comment like:', error);
+                }
+            });
+    }
+
+    private updateCommentLikeStatus(commentId: string, isLiked: boolean) {
+        // Buscar el comentario en todas las publicaciones
+        for (let publication of this.publications) {
+            if (publication.comments) {
+                // Buscar en comentarios principales
+                const comment = publication.comments.find(c => c._id === commentId);
+                if (comment) {
+                    this.updateSingleCommentLike(comment, isLiked);
+                    return;
+                }
+                
+                // Buscar en respuestas anidadas
+                for (let mainComment of publication.comments) {
+                    if (mainComment.replies) {
+                        const reply = mainComment.replies.find(r => r._id === commentId);
+                        if (reply) {
+                            this.updateSingleCommentLike(reply, isLiked);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private updateSingleCommentLike(comment: any, isLiked: boolean) {
+        if (isLiked) {
+            // Agregar like
+            if (!comment.likes) comment.likes = [];
+            if (!comment.likes.includes(this.identity._id)) {
+                comment.likes.push(this.identity._id);
+                comment.likesCount = (comment.likesCount || 0) + 1;
+            }
+        } else {
+            // Quitar like
+            if (comment.likes) {
+                comment.likes = comment.likes.filter(id => id !== this.identity._id);
+                comment.likesCount = Math.max(0, (comment.likesCount || 0) - 1);
+            }
+        }
+    }
+
+    // Métodos para respuestas
+    toggleReplyForm(commentId: string) {
+        this.showReplyForm[commentId] = !this.showReplyForm[commentId];
+        
+        // Limpiar el formulario al abrir
+        if (this.showReplyForm[commentId]) {
+            this.replyForm.reset();
+        }
+    }
+
+    cancelReply(commentId: string) {
+        this.showReplyForm[commentId] = false;
+        this.replyForm.reset();
+    }
+
+    onReplySubmit(publicationId: string, parentCommentId: string) {
+        if (!this.replyForm.valid) return;
+
+        const replyText = this.replyForm.get('replyText')?.value;
+        const reply = {
+            text: replyText,
+            publication: publicationId
+        };
+        
+        this._commentService.addReply(this.token, parentCommentId, reply)
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe({
+                next: (response) => {
+                    if (response.reply) {
+                        // Encontrar el comentario padre y agregar la respuesta
+                        const publication = this.publications.find(p => p._id === publicationId);
+                        if (publication && publication.comments) {
+                            const parentComment = publication.comments.find(c => c._id === parentCommentId);
+                            if (parentComment) {
+                                if (!parentComment.replies) {
+                                    parentComment.replies = [];
+                                }
+                                parentComment.replies.push(response.reply);
+                            }
+                        }
+                        
+                        // Limpiar formulario y ocultar
+                        this.replyForm.reset();
+                        this.showReplyForm[parentCommentId] = false;
+                    }
+                },
+                error: (error) => {
+                    console.error('Error creating reply:', error);
+                }
+            });
+    }
+
     newLines(text){
         let innerHtml = '';
         
@@ -412,5 +636,24 @@ export class PublicationsComponent {
         }
 
         return innerHtml;
+    }
+
+    // Método para hacer scroll a comentarios y activar formulario
+    scrollToComments(publicationId: string) {
+        // Activar el formulario de comentario para esta publicación
+        this.setFocusPublication(publicationId);
+        
+        // Hacer scroll hacia el formulario de comentarios
+        setTimeout(() => {
+            const commentElement = document.querySelector(`#comments-form-${publicationId}`);
+            if (commentElement) {
+                commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Enfocar el textarea
+                const textarea = commentElement.querySelector('textarea');
+                if (textarea) {
+                    textarea.focus();
+                }
+            }
+        }, 100);
     }
 }
