@@ -15,7 +15,10 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   public notifications: Notification[] = [];
   public unreadCount: number = 0;
   public loading: boolean = false;
+  public loadingMore: boolean = false;
   public error: string = '';
+  public currentPage: number = 1;
+  public hasMoreNotifications: boolean = true;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -36,7 +39,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  loadNotifications(): void {
+  loadNotifications(reset: boolean = true): void {
     const token = this.userService.getToken();
     const identity = this.userService.getIdentity();
     
@@ -73,24 +76,47 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loading = true;
+    if (reset) {
+      this.loading = true;
+      this.currentPage = 1;
+    } else {
+      this.loadingMore = true;
+    }
+    
     this.error = '';
     
-    this.notificationService.getNotifications(1, 20)
+    this.notificationService.getNotifications(this.currentPage, 20)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
           console.log('Notifications response:', response);
-          this.notifications = response.notifications || [];
+          const newNotifications = response.notifications || [];
+          
+          if (reset) {
+            this.notifications = newNotifications;
+          } else {
+            this.notifications = [...this.notifications, ...newNotifications];
+          }
+          
           this.unreadCount = response.unreadCount || 0;
+          this.hasMoreNotifications = newNotifications.length === 20; // Si recibimos menos de 20, no hay más
           this.loading = false;
+          this.loadingMore = false;
         },
         error: (error) => {
           console.error('Error loading notifications:', error);
           this.error = 'Error al cargar notificaciones';
           this.loading = false;
+          this.loadingMore = false;
         }
       });
+  }
+
+  loadMoreNotifications(): void {
+    if (this.hasMoreNotifications && !this.loadingMore) {
+      this.currentPage++;
+      this.loadNotifications(false);
+    }
   }
 
   loadUnreadCount(): void {
@@ -122,8 +148,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         next: () => {
           notification.read = true;
           this.unreadCount = Math.max(0, this.unreadCount - 1);
-          // Cerrar el dropdown después de marcar como leída
-          this.closeDropdown();
+          // NO cerrar el dropdown al marcar como leída
+          // this.closeDropdown(); // <-- Comentado
         },
         error: (error) => {
           console.error('Error marking notification as read:', error);
@@ -157,7 +183,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         next: () => {
           this.notifications.forEach(notification => notification.read = true);
           this.unreadCount = 0;
-          // Cerrar dropdown después de marcar todas como leídas
+          // Cerrar dropdown después de marcar todas como leídas (esto sí tiene sentido)
           this.closeDropdown();
         },
         error: (error) => {

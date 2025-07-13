@@ -16,14 +16,15 @@ const profileRoutes: Routes = [
         component: ProfileComponent,
         canActivate: [authGuard], // Proteger toda la ruta del perfil
         children: [
-            { path: '', component: PublicationsComponent},
+            { path: '', redirectTo: 'publicaciones', pathMatch: 'full' },
+            { path: 'publicaciones', component: PublicationsComponent},
             { path: 'editar', component: EditInfoComponent, canActivate: [ProfileGuard]},
             { path: 'info', component: InfoComponent},
             { path: 'lecciones', component: LessonsComponent},
             { path: 'posts', component: PublicationsComponent},
             { path: 'red', component: FollowsComponent},
             { path: 'red/:reload', component: FollowsComponent},
-            { path: '**', component: PublicationsComponent},
+            { path: '**', redirectTo: 'publicaciones'},
         ]
     }
 

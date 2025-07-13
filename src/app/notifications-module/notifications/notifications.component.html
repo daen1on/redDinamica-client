@@ -111,8 +111,31 @@
 
   <!-- Footer -->
   <div *ngIf="notifications.length > 0" class="notifications-footer p-2 text-center border-top bg-light">
-    <button class="btn btn-sm btn-outline-primary" (click)="loadNotifications()">
-      <i class="fas fa-sync-alt me-1"></i>Cargar más
+    <button *ngIf="hasMoreNotifications" 
+            class="btn btn-sm btn-outline-primary" 
+            (click)="loadMoreNotifications()"
+            [disabled]="loadingMore">
+      <span *ngIf="!loadingMore">
+        <i class="fas fa-plus me-1"></i>Cargar más notificaciones
+      </span>
+      <span *ngIf="loadingMore">
+        <div class="spinner-border spinner-border-sm me-1" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        Cargando más...
+      </span>
+    </button>
+    
+    <button *ngIf="!hasMoreNotifications && notifications.length > 0" 
+            class="btn btn-sm btn-outline-secondary" 
+            disabled>
+      <i class="fas fa-check me-1"></i>No hay más notificaciones
+    </button>
+    
+    <button class="btn btn-sm btn-outline-success ms-2" 
+            (click)="loadNotifications(true)"
+            [disabled]="loading">
+      <i class="fas fa-sync-alt me-1"></i>Actualizar
     </button>
   </div>
 </div>

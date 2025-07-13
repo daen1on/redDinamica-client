@@ -134,6 +134,7 @@
 
                     <li class="nav-item" *ngFor="let menu of menuOptions">
                         <a class="nav-link" [routerLink]="['/perfil/', ownProfile?._id, menu.value]"
+                            [queryParams]="menu.value === 'publicaciones' ? { scrollTo: 'top' } : {}"
                             routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
                             <i class="{{menu.icon}} me-2"></i>{{menu.name}}
                         </a>
@@ -143,10 +144,15 @@
                 
                 <!-- Botón flotante para volver a publicaciones -->
                 <button *ngIf="!isOnPublications()" 
-                        class="btn btn-primary position-fixed rounded-circle shadow-lg"
-                        style="right: 20px; bottom: 20px; width: 60px; height: 60px; z-index: 1000;"
+                        class="btn position-fixed rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+                        style="right: 20px; bottom: 20px; width: 60px; height: 60px; z-index: 1000; 
+                               background-color: #6c757d; border: 2px solid #2c3e50; color: white;
+                               transition: all 0.3s ease;"
                         [routerLink]="['/perfil/', ownProfile?._id, 'publicaciones']"
-                        title="Volver a publicaciones">
+                        [queryParams]="{ scrollTo: 'top' }"
+                        title="Volver a publicaciones"
+                        onmouseover="this.style.backgroundColor='#2c3e50'; this.style.transform='scale(1.1)'"
+                        onmouseout="this.style.backgroundColor='#6c757d'; this.style.transform='scale(1)'">
                     <i class="fas fa-newspaper fa-lg"></i>
                 </button>
             </div>

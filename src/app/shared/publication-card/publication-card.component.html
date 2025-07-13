@@ -3,13 +3,13 @@
         <!-- Header de la publicación -->
         <div class="d-flex align-items-start mb-3">
             <div class="flex-shrink-0 me-3">
-                <a [routerLink]="['/perfil', publication.user._id]">
+                <a [routerLink]="['/perfil', publication.user?._id || publication.user]">
                     <div class="profile-picture-container">
-                        <img *ngIf="!publication.user.picture" 
+                        <img *ngIf="!publication.user?.picture" 
                              class="profile-picture"
                              src="assets/images/user-default.png"
                              alt="Imagen por defecto">
-                        <img *ngIf="publication.user.picture" 
+                        <img *ngIf="publication.user?.picture" 
                              class="profile-picture"
                              [src]="url + 'get-image-user/' + publication.user.picture"
                              alt="Foto de perfil">
@@ -21,17 +21,23 @@
                     <div>
                         <h6 class="mb-1">
                             <a class="text-primary text-decoration-none fw-bold" 
-                               [routerLink]="['/perfil', publication.user._id]">
-                                {{publication.user.name}} {{publication.user.surname}}
+                               [routerLink]="['/perfil', publication.user?._id || publication.user]">
+                                <span *ngIf="publication.user?.name; else userFallback">
+                                    {{publication.user.name}} {{publication.user.surname}}
+                                </span>
+                                <ng-template #userFallback>
+                                    <span class="text-muted">Cargando usuario...</span>
+                                </ng-template>
                             </a>
                         </h6>
                         <small class="text-muted">
                             {{ (publication.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL' }}
                         </small>
                     </div>
-                    <div *ngIf="showDeleteButton && identity._id == publication.user._id">
+                    <div *ngIf="showDeleteButton && identity._id == (publication.user?._id || publication.user)">
                         <button class="btn btn-link p-1 text-secondary" 
-                                (click)="deletePublication()"
+                                data-bs-toggle="modal" 
+                                [attr.data-bs-target]="'#deleteModal-' + publication._id"
                                 title="Eliminar publicación">
                             <i class="fas fa-trash fa-sm"></i>
                         </button>
@@ -165,6 +171,28 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de eliminación -->
+<div class="modal fade" id="deleteModal-{{publication._id}}" tabindex="-1" role="dialog" [attr.aria-labelledby]="'deleteModalLabel-' + publication._id" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel-{{publication._id}}">Eliminar publicación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning mb-0" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ¿Estás seguro que deseas eliminar esta publicación? Esta acción no se puede deshacer.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="deletePublication()">Eliminar</button>
             </div>
         </div>
     </div>

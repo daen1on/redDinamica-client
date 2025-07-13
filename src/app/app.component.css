@@ -57,67 +57,104 @@ img {
 }
 
 
-/* --- Notifications Dropdown Styles --- */
-/* Estilos específicos para el dropdown de notificaciones en el header */
+/* --- Notifications Dropdown Styles MEJORADOS --- */
+/* Estilos modernos para el dropdown de notificaciones en el header */
 #notificationDropdown {
     position: relative;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 #notificationDropdown:hover {
-    color: rgba(255, 255, 255, 0.9) !important;
-    transform: scale(1.05);
+    color: rgba(255, 255, 255, 1) !important;
+    transform: scale(1.1) translateY(-2px);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Badge de notificaciones no leídas */
+#notificationDropdown i {
+    font-size: 1.2em;
+    transition: all 0.3s ease;
+}
+
+#notificationDropdown:hover i {
+    animation: bellShake 0.6s ease-in-out;
+}
+
+@keyframes bellShake {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+    20%, 40%, 60%, 80% { transform: rotate(10deg); }
+}
+
+/* Badge de notificaciones no leídas MEJORADO */
 #notificationDropdown .badge {
     position: absolute;
-    top: -2px;
-    right: -8px;
+    top: -3px;
+    right: -3px;
     font-size: 0.65rem;
-    min-width: 1.1em;
-    height: 1.1em;
+    min-width: 1.3em;
+    height: 1.3em;
     padding: 0;
-    border: 2px solid #007bff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
+    border: 2px solid white;
+    box-shadow: 0 3px 8px rgba(255, 71, 87, 0.4);
     animation: notificationPulse 2s infinite;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @keyframes notificationPulse {
     0% {
         transform: scale(1);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 3px 8px rgba(255, 71, 87, 0.4);
     }
     50% {
-        transform: scale(1.1);
-        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+        transform: scale(1.15);
+        box-shadow: 0 5px 15px rgba(255, 71, 87, 0.6);
     }
     100% {
         transform: scale(1);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 3px 8px rgba(255, 71, 87, 0.4);
     }
 }
 
-/* Dropdown menu de notificaciones */
+/* Dropdown menu de notificaciones MEJORADO */
 .nav-item.dropdown .dropdown-menu[aria-labelledby="notificationDropdown"] {
     border: none;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
     padding: 0;
-    margin-top: 12px;
+    margin-top: 15px;
     overflow: hidden;
-    animation: dropdownSlideIn 0.3s ease-out;
+    animation: dropdownSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     transform-origin: top center;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.98);
 }
 
 @keyframes dropdownSlideIn {
     from {
         opacity: 0;
-        transform: translateY(-10px) scale(0.95);
+        transform: translateY(-15px) scale(0.9);
+        filter: blur(5px);
     }
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
+        filter: blur(0);
     }
 }
 
@@ -143,22 +180,48 @@ img {
         left: auto;
         min-width: 320px;
         max-width: 350px;
-        margin-top: 8px;
+        margin-top: 12px;
+    }
+    
+    #notificationDropdown {
+        width: 40px;
+        height: 40px;
+    }
+    
+    #notificationDropdown i {
+        font-size: 1.1em;
     }
 }
 
-/* Hover effect para el icono de notificaciones */
+/* Hover effect para el icono de notificaciones MEJORADO */
 .nav-item.dropdown:hover #notificationDropdown {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 1);
 }
 
-/* Estilos para cuando el dropdown está abierto */
+/* Estilos para cuando el dropdown está abierto MEJORADO */
 .nav-item.dropdown.show #notificationDropdown {
     color: rgba(255, 255, 255, 1);
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 8px;
-    margin: -8px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Efectos adicionales para una mejor UX */
+#notificationDropdown:active {
+    transform: scale(0.95);
+}
+
+/* Indicador visual de actividad */
+.nav-item.dropdown.show #notificationDropdown::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+    border-radius: 2px;
 }
 
 

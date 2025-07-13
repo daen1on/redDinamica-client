@@ -1,6 +1,9 @@
 export const PROFILE_MENU = [    
     {
         "id": "publications",
+        "name": "Publicaciones",
+        "value": "publicaciones",
+        "icon": "fas fa-newspaper",
         "buttonClass": "btn-info",
         "iconClass": "fa-newspaper",
         "spanContent": "Publicaciones",
@@ -9,6 +12,9 @@ export const PROFILE_MENU = [
     },
     {
         "id": "red",
+        "name": "Red",
+        "value": "red",
+        "icon": "fas fa-users",
         "buttonClass": "btn-success",
         "iconClass": "fa-users",
         "spanContent": "Red",
@@ -17,6 +23,9 @@ export const PROFILE_MENU = [
     },
     {
         "id": "info",
+        "name": "Información",
+        "value": "info",
+        "icon": "fas fa-info-circle",
         "buttonClass": "btn-warning",
         "iconClass": "fa-info-circle",
         "spanContent": "Información",

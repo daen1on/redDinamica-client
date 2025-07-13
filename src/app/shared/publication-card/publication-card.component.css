@@ -76,16 +76,34 @@
     background: none;
     padding: 0.25rem 0.5rem;
     font-size: 14px;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
+    color: #333 !important; /* Color negro por defecto */
 }
 
 .interaction-btn:hover {
     background-color: #f8f9fa;
     border-radius: 4px;
+    transform: scale(1.05);
+}
+
+/* Estado de me gusta activo - rojo */
+.interaction-btn.text-danger {
+    color: #dc3545 !important; /* Rojo cuando está activo */
 }
 
 .interaction-btn.text-danger:hover {
     background-color: #ffeaea;
+    color: #c82333 !important; /* Rojo más oscuro al hacer hover */
+}
+
+/* Estado de me gusta inactivo - negro */
+.interaction-btn.text-dark {
+    color: #333 !important; /* Negro cuando no está activo */
+}
+
+.interaction-btn.text-dark:hover {
+    background-color: #f8f9fa;
+    color: #000 !important; /* Negro más oscuro al hacer hover */
 }
 
 .interaction-btn.text-primary:hover {

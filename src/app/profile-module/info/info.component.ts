@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 
 import { INFO_FIELDS } from '../services/profileData';
@@ -10,7 +10,9 @@ import { Router, ActivatedRoute } from '@angular/router';
     styleUrls: ['./info.component.css'],
     standalone: false
 })
-export class InfoComponent {
+export class InfoComponent implements AfterViewInit {
+    @ViewChild('infoCard') infoCard!: ElementRef;
+    
     public title: string;
     public fieldsForm;
     public identity;
@@ -28,6 +30,18 @@ export class InfoComponent {
     ngOnInit(): void {        
         this.loadPage();      
         
+    }
+
+    ngAfterViewInit(): void {
+        // Hacer scroll automático hacia el formulario después de que la vista se haya inicializado
+        setTimeout(() => {
+            if (this.infoCard && this.infoCard.nativeElement) {
+                this.infoCard.nativeElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        }, 300);
     }
 
     loadPage(){
