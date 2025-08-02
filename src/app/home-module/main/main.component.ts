@@ -77,12 +77,81 @@ export class MainComponent {
 
         this.createForm();
 
-
         this.page = 1;
 
         this.getPublications(this.page);
 
+        // Suscribirse a cambios en la ruta para manejar navegación desde notificaciones
+        this.handleNavigationFromNotifications();
+    }
 
+    // Método para manejar navegación desde notificaciones
+    private handleNavigationFromNotifications(): void {
+        // Manejar fragments (publication-123)
+        this._route.fragment.pipe(
+            takeUntil(this.unsubscribe$)
+        ).subscribe(fragment => {
+            if (fragment && fragment.startsWith('publication-')) {
+                const publicationId = fragment.replace('publication-', '');
+                console.log('Scrolling to publication:', publicationId);
+                
+                // Esperar a que las publicaciones se carguen y luego hacer scroll
+                setTimeout(() => {
+                    this.scrollToPublication(publicationId);
+                }, 1000);
+            }
+        });
+
+        // Manejar query params para highlight
+        this._route.queryParams.pipe(
+            takeUntil(this.unsubscribe$)
+        ).subscribe(params => {
+            if (params['highlight']) {
+                console.log('Highlighting element type:', params['highlight']);
+                // Aquí puedes agregar lógica adicional para destacar elementos
+            }
+        });
+    }
+
+    // Método para hacer scroll a una publicación específica
+    private scrollToPublication(publicationId: string): void {
+        // Buscar el elemento de la publicación
+        const publicationElement = document.querySelector(`#publication-${publicationId}`) ||
+                                 document.querySelector(`[data-publication-id="${publicationId}"]`);
+        
+        if (publicationElement) {
+            // Hacer scroll suave al elemento
+            publicationElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start',
+                inline: 'nearest'
+            });
+            
+            // Agregar efecto de highlight temporal
+            publicationElement.classList.add('highlight-notification');
+            setTimeout(() => {
+                publicationElement.classList.remove('highlight-notification');
+            }, 3000);
+            
+            console.log('Scrolled to publication:', publicationId);
+        } else {
+            console.log('Publication element not found, trying to load more publications');
+            // Si no se encuentra, intentar cargar más publicaciones
+            this.loadPublicationById(publicationId);
+        }
+    }
+
+    // Método para cargar una publicación específica si no está visible
+    private loadPublicationById(publicationId: string): void {
+        // Este método podría implementarse para buscar una publicación específica
+        // Por ahora, simplemente cargamos más publicaciones
+        if (!this.noMore && this.page < this.pages) {
+            this.viewMore();
+            // Reintentar scroll después de cargar
+            setTimeout(() => {
+                this.scrollToPublication(publicationId);
+            }, 500);
+        }
     }
 
     // Get controls form
@@ -114,37 +183,40 @@ export class MainComponent {
             text: ['', Validators.required]
         });
     }
-    getPublications(page: number, add = false): void {
-        this._publicationService.getPublications(this.token, page).pipe(
-            catchError(error => {
-                console.error(error);
-                this.loading = false;
-                // Return an observable of null so the stream remains intact
-                return of(null);
-            }),
-            takeUntil(this.unsubscribe$)
-        ).subscribe({
-            next: (response: any) => {
-                if (response && response.publications) {
-                    this.total = response.total;
-                    this.pages = response.pages;
-                    this.itemsPerPage = response.itemsPerPage;
-                    this.noMore = this.page >= this.pages;
-    
-                    if (!add) {
-                        this.publications = response.publications;
-                    } else {
-                        this.publications = this.publications.concat(response.publications);
-                    }
-    
-                    if (page > this.pages && this.pages > 0) {
-                        this._router.navigate(['/inicio/post', 1]);
-                    }
-                }
-                this.loading = false;
-            },
-            error: (error) => console.error(error)
-        });
+      getPublications(page: number, add = false): void {
+    this._publicationService.getPublications(this.token, page, 10, 5).pipe(
+      takeUntil(this.unsubscribe$),
+      catchError(error => {
+        console.error('Error loading publications:', error);
+        this.noMore = true;
+        this.loading = false;
+        return of(null);
+      }),
+      finalize(() => {
+        this.loading = false;
+      })
+    ).subscribe({
+      next: response => {
+        if (!response) return;
+
+        if (response.publications && response.publications.length > 0) {
+          // Agregar las nuevas publicaciones al array existente
+          this.publications = this.publications.concat(response.publications);
+          this.page = page;
+
+          // Si las publicaciones devueltas son menos que el límite, no hay más
+          if (response.publications.length < 10) {
+            this.noMore = true;
+          }
+        } else {
+          this.noMore = true;
+        }
+      },
+      error: error => {
+        console.error('Error en suscripción:', error);
+        this.noMore = true;
+      }
+    });
     }
 
     
@@ -342,8 +414,15 @@ export class MainComponent {
     }
 
     viewMore() {
+        // Verificar que no se hayan acabado las publicaciones antes de hacer la solicitud
+        if (this.noMore || this.page >= this.pages) {
+            console.log('No more publications to load');
+            return;
+        }
+        
         this.page += 1;
 
+        // Pre-establecer noMore si ya llegamos al límite antes de la solicitud
         if (this.page >= this.pages) {
             this.noMore = true;
         }
@@ -361,5 +440,25 @@ export class MainComponent {
         }
 
         return innerHtml;
+    }
+
+    // Método de utilidad para detectar si no hay más publicaciones
+    private checkNoMorePublications(currentPage: number, totalPages: number, publicationsReceived: number, itemsPerPage: number): boolean {
+        // Múltiples condiciones para detectar el final de la paginación
+        const reachedLastPage = currentPage >= totalPages;
+        const noPublicationsReceived = publicationsReceived === 0;
+        const lessThanExpected = currentPage > 1 && publicationsReceived < itemsPerPage;
+        const exceedsTotal = totalPages > 0 && currentPage > totalPages;
+        
+        return reachedLastPage || noPublicationsReceived || lessThanExpected || exceedsTotal;
+    }
+
+    // Método para resetear paginación (útil al cambiar filtros o actualizar)
+    public resetPagination(): void {
+        this.page = 1;
+        this.noMore = false;
+        this.publications = [];
+        this.total = 0;
+        this.pages = 0;
     }
 }

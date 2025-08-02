@@ -82,7 +82,16 @@ export class PublicationsComponent implements OnInit, OnDestroy, AfterViewInit {
     get f() { return this.postForm.controls; }
     
     ngOnInit() {
-        this.loadUserData(this._route.snapshot.params['id']);
+        // Suscribirse a cambios en los parámetros de ruta para recargar cuando cambie el perfil
+        this._route.parent?.params.pipe(takeUntil(this.unsubscribe$)).subscribe(params => {
+            const userId = params['id'];
+            if (userId) {
+                // Resetear paginación antes de cargar nuevos datos
+                this.resetPagination();
+                
+                this.loadUserData(userId);
+            }
+        });
     }
 
     ngOnDestroy() {
@@ -154,24 +163,36 @@ export class PublicationsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     getUserPublications(page: number, add: boolean = false) {
-        this._publicationService.getUserPublications(this.token, this.ownProfile._id, page).pipe(takeUntil(this.unsubscribe$)).subscribe(
+        this._publicationService.getUserPublications(this.token, this.ownProfile._id, page, 10, 5).pipe(takeUntil(this.unsubscribe$)).subscribe(
             response => {
                 if (response.publications) {
                     this.total = response.totalItems;
                     this.pages = response.totalPages;
                     this.itemsPerPage = response.itemsPerPage;
                     
+                    // Detectar si no hay más publicaciones que cargar
+                    this.noMore = (this.page >= this.pages) || 
+                                  (response.publications.length === 0) ||
+                                  (this.page > 1 && response.publications.length < this.itemsPerPage);
+                    
                     if (!add) {
                         this.publications = response.publications;
                     } else {
-                        this.publications = this.publications.concat(response.publications);
+                        // Solo agregar si hay publicaciones nuevas
+                        if (response.publications.length > 0) {
+                            this.publications = this.publications.concat(response.publications);
+                        }
                     }
                     
                     if (page > this.pages) {
                         this._router.navigate(['/home']);
                     }
+                    
+                    // Log para debugging
+                    console.log(`User publications - Page ${this.page}/${this.pages}, Publications: ${response.publications.length}, NoMore: ${this.noMore}`);
                 } else {
                     this.status = 'error';
+                    this.noMore = true; // En caso de error, evitar solicitudes adicionales
                 }
             },
             error => {
@@ -179,6 +200,7 @@ export class PublicationsComponent implements OnInit, OnDestroy, AfterViewInit {
                 console.log(errorMessage);
                 if (errorMessage != null) {
                     this.status = 'error';
+                    this.noMore = true; // En caso de error, evitar solicitudes adicionales
                 }
             }
         );
@@ -308,9 +330,16 @@ export class PublicationsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     viewMore() {
+        // Verificar que no se hayan acabado las publicaciones antes de hacer la solicitud
+        if (this.noMore || this.page >= this.pages) {
+            console.log('No more publications to load');
+            return;
+        }
+        
         this.page += 1;
         
-        if (this.page == this.pages) {
+        // Pre-establecer noMore si ya llegamos al límite antes de la solicitud
+        if (this.page >= this.pages) {
             this.noMore = true;
         }
         
@@ -325,5 +354,25 @@ export class PublicationsComponent implements OnInit, OnDestroy, AfterViewInit {
             }
             return null;
         };
+    }
+
+    // Método de utilidad para detectar si no hay más publicaciones
+    private checkNoMorePublications(currentPage: number, totalPages: number, publicationsReceived: number, itemsPerPage: number): boolean {
+        // Múltiples condiciones para detectar el final de la paginación
+        const reachedLastPage = currentPage >= totalPages;
+        const noPublicationsReceived = publicationsReceived === 0;
+        const lessThanExpected = currentPage > 1 && publicationsReceived < itemsPerPage;
+        const exceedsTotal = totalPages > 0 && currentPage > totalPages;
+        
+        return reachedLastPage || noPublicationsReceived || lessThanExpected || exceedsTotal;
+    }
+
+    // Método para resetear paginación (útil al cambiar de usuario)
+    public resetPagination(): void {
+        this.page = 1;
+        this.noMore = false;
+        this.publications = [];
+        this.total = 0;
+        this.pages = 0;
     }
 }

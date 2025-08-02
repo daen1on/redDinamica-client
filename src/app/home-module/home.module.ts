@@ -8,6 +8,7 @@ import { LinkyModule } from 'ngx-linky';
 import { HomeRoutingModule } from './home.routing';
 import { HomeComponent } from './home.component';
 import { MainComponent } from './main/main.component';
+import { SinglePublicationComponent } from './single-publication/single-publication.component';
 import { UsersComponent } from './users/users.component';
 import { FilterPipe } from './pipes/filter.pipe';
 
@@ -29,6 +30,7 @@ import { PublicationCardComponent } from '../shared/publication-card/publication
     declarations: [
         HomeComponent,
         MainComponent,
+        SinglePublicationComponent,
         UsersComponent,
         ResourcesComponent,
         DetailsResourceComponent,

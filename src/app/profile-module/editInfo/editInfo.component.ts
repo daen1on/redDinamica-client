@@ -106,8 +106,6 @@ export class EditInfoComponent implements OnDestroy {
             profileImage: '',
             contactNumber: [this.identity.contactNumber,[Validators.pattern('[- +()0-9]+'),Validators.maxLength(15)]],
             socialNetworks: this.identity.socialNetworks
-        },{
-            //TODO validar en html del edit y hacer que el numero sea solo de numeros...
         });
 
 

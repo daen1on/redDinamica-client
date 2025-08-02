@@ -60,18 +60,38 @@
   border-bottom: 1px solid #f1f3f4;
 }
 
+/* Mejorar hover en notificaciones */
 .notification-item:hover {
-  background-color: #f8f9fa !important;
-  transform: translateX(2px);
+    background-color: #f8f9fa !important;
+    transform: translateX(2px);
+    transition: all 0.2s ease;
 }
 
-.notification-item:last-child {
-  border-bottom: none;
+/* Efecto de click en notificaciones */
+.notification-item:active {
+    transform: translateX(0px);
 }
 
+/* Mejorar iconos de notificaciones */
+.notification-icon i {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Estilo para notificaciones no leídas */
 .notification-item.bg-light {
-  background-color: #f8f9fa;
-  border-left: 3px solid #007bff;
+    border-left: 4px solid #007bff;
 }
 
 .notification-item.bg-white {
@@ -156,6 +176,11 @@
 .notification-actions .btn-ghost:hover {
   background: #e9ecef;
   color: #495057;
+}
+
+/* Mejorar dropdown de acciones */
+.notification-actions .btn:hover {
+    opacity: 1 !important;
 }
 
 /* Colores de iconos por tipo */
@@ -286,4 +311,23 @@
 
 .notifications-list::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 123, 255, 0.5);
+}
+
+/* Scroll suave para la lista de notificaciones */
+.notifications-list {
+    scroll-behavior: smooth;
+}
+
+/* Indicador de carga en botón actualizar */
+.fa-spin {
+    animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

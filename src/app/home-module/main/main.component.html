@@ -120,7 +120,10 @@
 </div>
 
 <!-- Lista de publicaciones usando el nuevo componente -->
-<div *ngFor="let publication of publications">
+<div *ngFor="let publication of publications" 
+     [id]="'publication-' + publication._id"
+     [attr.data-publication-id]="publication._id"
+     class="publication-card">
     <app-publication-card 
         [publication]="publication"
         [identity]="identity"
@@ -133,6 +136,10 @@
 
 <div *ngIf="publications && publications.length > 0" class="text-center">
     <button *ngIf="!noMore" class="btn btn-primary" (click)="viewMore()">Ver más publicaciones</button>
+    <div *ngIf="noMore && publications.length > 0" class="text-muted mt-3">
+        <i class="fas fa-check-circle me-2"></i>
+        Has visto todas las publicaciones disponibles
+    </div>
 </div>
 
 <!-- Modal warning delete -->

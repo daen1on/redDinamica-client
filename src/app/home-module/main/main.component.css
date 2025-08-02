@@ -1,0 +1,36 @@
+/* Efecto de highlight para publicaciones desde notificaciones */
+.highlight-notification {
+    animation: highlightPulse 3s ease-in-out;
+    border: 2px solid #007bff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 0 20px rgba(0, 123, 255, 0.3) !important;
+}
+
+@keyframes highlightPulse {
+    0% {
+        background-color: rgba(0, 123, 255, 0.1);
+        transform: scale(1);
+    }
+    50% {
+        background-color: rgba(0, 123, 255, 0.2);
+        transform: scale(1.02);
+    }
+    100% {
+        background-color: transparent;
+        transform: scale(1);
+    }
+}
+
+/* Mejorar el efecto de hover en publicaciones */
+.publication-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Estilo base para publicaciones */
+.publication-card {
+    transition: all 0.3s ease;
+    position: relative;
+}
+

@@ -10,10 +10,10 @@
         <i class="fas fa-cog"></i>
       </button>
       <ul class="dropdown-menu dropdown-menu-end shadow">
-        <li><a class="dropdown-item" href="#" (click)="markAllAsRead(); $event.preventDefault()">
+        <li><a class="dropdown-item" href="#" (click)="markAllAsRead(); $event.preventDefault(); $event.stopPropagation()">
           <i class="fas fa-check-double me-2 text-success"></i>Marcar todas como leídas
         </a></li>
-        <li><a class="dropdown-item" href="#" (click)="loadNotifications(); $event.preventDefault()">
+        <li><a class="dropdown-item" href="#" (click)="refreshNotifications(); $event.preventDefault(); $event.stopPropagation()">
           <i class="fas fa-sync-alt me-2 text-primary"></i>Actualizar
         </a></li>
       </ul>
@@ -32,7 +32,7 @@
   <div *ngIf="error && !loading" class="alert alert-danger m-3 py-2">
     <i class="fas fa-exclamation-triangle me-2"></i>
     <small>{{error}}</small>
-    <button class="btn btn-sm btn-outline-danger ms-2" (click)="loadNotifications()">
+    <button class="btn btn-sm btn-outline-danger ms-2" (click)="refreshNotifications()">
       <i class="fas fa-redo-alt"></i>
     </button>
   </div>
@@ -50,9 +50,8 @@
          class="notification-item d-flex px-3 py-2 border-bottom position-relative hover-bg-light"
          [class.bg-light]="!notification.read"
          [class.bg-white]="notification.read"
-         (click)="notification.read ? null : markAsRead(notification)"
-         [style.cursor]="notification.read ? 'default' : 'pointer'"
-         style="transition: background-color 0.2s ease;">
+         (click)="onNotificationClick(notification)"
+         style="cursor: pointer; transition: background-color 0.2s ease;">
       
       <!-- Notification icon -->
       <div class="notification-icon me-2 flex-shrink-0" style="width: 30px;">
@@ -113,7 +112,7 @@
   <div *ngIf="notifications.length > 0" class="notifications-footer p-2 text-center border-top bg-light">
     <button *ngIf="hasMoreNotifications" 
             class="btn btn-sm btn-outline-primary" 
-            (click)="loadMoreNotifications()"
+            (click)="loadMoreNotifications(); $event.stopPropagation()"
             [disabled]="loadingMore">
       <span *ngIf="!loadingMore">
         <i class="fas fa-plus me-1"></i>Cargar más notificaciones
@@ -133,9 +132,9 @@
     </button>
     
     <button class="btn btn-sm btn-outline-success ms-2" 
-            (click)="loadNotifications(true)"
+            (click)="refreshNotifications(); $event.stopPropagation()"
             [disabled]="loading">
-      <i class="fas fa-sync-alt me-1"></i>Actualizar
+      <i class="fas fa-sync-alt me-1" [class.fa-spin]="loading"></i>Actualizar
     </button>
   </div>
 </div>

@@ -126,6 +126,11 @@
 
 <div *ngIf="publications && publications.length > 0" class="text-center">
     <button *ngIf="!noMore" class="btn btn-primary" (click)="viewMore()">Ver más publicaciones</button>
+    <div *ngIf="noMore && publications.length > 0" class="text-muted mt-3">
+        <i class="fas fa-check-circle me-2"></i>
+        <span *ngIf="identity._id == ownProfile._id">Has visto todas tus publicaciones</span>
+        <span *ngIf="identity._id != ownProfile._id">Has visto todas las publicaciones de {{ownProfile.name}}</span>
+    </div>
 </div>
 
 

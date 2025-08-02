@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { HomeComponent } from './home.component';
 import { MainComponent } from './main/main.component';
+import { SinglePublicationComponent } from './single-publication/single-publication.component';
 import { UsersComponent } from './users/users.component';
 import { LessonsComponent } from './lessons/lessons/lessons.component';
 import { ResourcesComponent } from './resources/resources.component';
@@ -23,6 +24,7 @@ const homeRoutes: Routes = [
             { path: '', component: MainComponent },
             { path: 'post', component: MainComponent },
             { path: 'post/:page', component: MainComponent },
+            { path: 'publicacion/:id', component: SinglePublicationComponent },
             { path: 'usuarios', component: UsersComponent },
             { path: 'usuarios/:page', component: UsersComponent },
             { path: 'lecciones', component: LessonsComponent },

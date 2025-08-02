@@ -115,63 +115,293 @@
         <!-- Lista de comentarios -->
         <div *ngIf="publication.comments && publication.comments.length > 0" 
              class="comments-section">
-            <div class="comments-header mb-2">
+            <div class="comments-header mb-2 d-flex justify-content-between align-items-center">
                 <small class="text-primary fw-bold">
                     <i class="fas fa-comments me-1"></i>
-                    Comentarios ({{publication.comments.length}})
+                    Comentarios ({{publication.comments.length}}
+                    <span *ngIf="commentsPagination.totalComments > publication.comments.length">
+                        de {{commentsPagination.totalComments}}
+                    </span>)
                 </small>
+                <div class="d-flex align-items-center">
+                    <!-- Notificación de nuevos comentarios -->
+                    <div *ngIf="hasNewComments" class="new-comments-notification me-2">
+                        <span class="badge bg-success">
+                            <i class="fas fa-bell me-1"></i>
+                            Nuevos comentarios
+                        </span>
+                    </div>
+                    <!-- Botón para forzar actualización -->
+                    <button class="btn btn-link p-0 text-primary" 
+                            (click)="forceUpdateComments()"
+                            title="Actualizar comentarios">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
             </div>
 
             <div *ngFor="let comment of publication.comments" class="comment-item mb-2">
                 <div class="d-flex align-items-start">
                     <div class="flex-shrink-0 me-2">
-                        <a [routerLink]="['/perfil', comment.user._id]">
+                        <a *ngIf="comment.user && comment.user._id" [routerLink]="['/perfil', comment.user._id]">
                             <div class="comment-avatar">
-                                <img *ngIf="!comment.user.picture" 
+                                <img *ngIf="!comment.user?.picture" 
                                      class="img-fluid rounded-circle" 
                                      src="assets/images/user-default.png"
                                      alt="Avatar">
-                                <img *ngIf="comment.user.picture" 
+                                <img *ngIf="comment.user?.picture" 
                                      class="img-fluid rounded-circle"
                                      [src]="url + 'get-image-user/' + comment.user.picture"
                                      alt="Avatar">
                             </div>
                         </a>
+                        <!-- Fallback si no hay usuario -->
+                        <div *ngIf="!comment.user || !comment.user._id" class="comment-avatar">
+                            <img class="img-fluid rounded-circle" 
+                                 src="assets/images/user-default.png"
+                                 alt="Avatar">
+                        </div>
                     </div>
-                    <div class="flex-grow-1">
+                    
+                    <div *ngIf="comment.user" class="flex-grow-1">
                         <div class="comment-bubble">
                             <div class="comment-header">
-                                <a class="text-primary text-decoration-none fw-bold" 
+                                <a *ngIf="comment.user._id" class="text-primary text-decoration-none fw-bold" 
                                    [routerLink]="['/perfil', comment.user._id]">
                                     {{comment.user.name}} {{comment.user.surname}}
                                 </a>
+                                <span *ngIf="!comment.user._id" class="text-muted">
+                                    Usuario no disponible
+                                </span>
                                 <small class="text-muted ms-2">
                                     {{ (comment.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL' }}
                                 </small>
                             </div>
                             <div class="comment-text">
-                                <p class="mb-1">{{comment.text}}</p>
+                                <p class="mb-1" [innerHTML]="formatTextWithMentions(comment.text)"></p>
                             </div>
                             <div class="comment-actions d-flex justify-content-between align-items-center">
-                                <button class="btn btn-sm interaction-btn" 
-                                        [class.text-danger]="hasUserLikedComment(comment)" 
-                                        [class.text-dark]="!hasUserLikedComment(comment)"
-                                        (click)="toggleLikeComment(comment._id)"
-                                        title="Me gusta">
-                                    <i class="fas fa-heart me-1"></i>
-                                    <span *ngIf="comment.likesCount && comment.likesCount > 0">{{comment.likesCount}}</span>
-                                </button>
-                                <button *ngIf="comment.user._id == identity._id"
-                                        class="btn btn-link p-0 text-secondary" 
-                                        (click)="deleteComment(comment._id)"
-                                        title="Eliminar comentario">
-                                    <i class="fas fa-trash fa-sm"></i>
-                                </button>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-sm interaction-btn" 
+                                            [class.text-danger]="hasUserLikedComment(comment)" 
+                                            [class.text-dark]="!hasUserLikedComment(comment)"
+                                            (click)="toggleLikeComment(comment._id)"
+                                            title="Me gusta">
+                                        <i class="fas fa-heart me-1"></i>
+                                        <span *ngIf="comment.likesCount && comment.likesCount > 0">{{comment.likesCount}}</span>
+                                    </button>
+                                    <button class="btn btn-sm interaction-btn text-primary ms-2" 
+                                            (click)="toggleReplyForm(comment._id)"
+                                            title="Responder">
+                                        <i class="fas fa-reply me-1"></i>
+                                        Responder
+                                    </button>
+                                    <span *ngIf="getTotalRepliesCount(comment) > 0" class="text-muted ms-2">
+                                        <small>{{getTotalRepliesCount(comment)}} respuesta(s)</small>
+                                    </span>
+                                </div>
+                                <div>
+                                    <button *ngIf="comment.user && comment.user._id == identity._id"
+                                            class="btn btn-link p-0 text-secondary" 
+                                            (click)="deleteComment(comment._id)"
+                                            title="Eliminar comentario">
+                                        <i class="fas fa-trash fa-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Formulario de respuesta -->
+                        <form *ngIf="showReplyForm[comment._id]" 
+                              [formGroup]="replyForm" 
+                              (ngSubmit)="onReplySubmit(comment._id, publication._id)" 
+                              class="reply-form mt-2">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0 me-2">
+                                    <div class="reply-avatar">
+                                        <img *ngIf="!identity?.picture" 
+                                             class="img-fluid rounded-circle" 
+                                             src="assets/images/user-default.png"
+                                             alt="Tu avatar">
+                                        <img *ngIf="identity?.picture" 
+                                             class="img-fluid rounded-circle"
+                                             [src]="url + 'get-image-user/' + identity.picture"
+                                             alt="Tu avatar">
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="input-group">
+                                        <textarea class="form-control form-control-sm" 
+                                                  formControlName="text" 
+                                                  rows="2"
+                                                  placeholder="Escribe una respuesta..."
+                                                  style="font-size: 13px;"
+                                                  [id]="'reply-textarea-' + comment._id"></textarea>
+                                        <button type="submit" 
+                                                class="btn btn-primary btn-sm"
+                                                [disabled]="!replyForm.valid">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                        <button type="button" 
+                                                class="btn btn-secondary btn-sm ms-1"
+                                                (click)="cancelReply(comment._id)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Botón para cargar más respuestas -->
+                        <div *ngIf="repliesPagination[comment._id]?.hasMore" class="mt-2">
+                            <button class="btn btn-link btn-sm p-0 text-primary" 
+                                    (click)="loadMoreReplies(comment._id)"
+                                    [disabled]="repliesPagination[comment._id]?.loading">
+                                <i class="fas fa-chevron-down me-1"></i>
+                                <span *ngIf="!repliesPagination[comment._id]?.loading">
+                                    Ver más respuestas ({{repliesPagination[comment._id]?.totalReplies - (comment.replies?.length || 0)}} restantes)
+                                </span>
+                                <span *ngIf="repliesPagination[comment._id]?.loading">
+                                    <i class="fas fa-spinner fa-spin me-1"></i>Cargando...
+                                </span>
+                            </button>
+                        </div>
+                        
+                        <!-- Respuestas anidadas -->
+                        <div *ngIf="comment.replies && comment.replies.length > 0" class="replies-section mt-2">
+                            <div *ngFor="let reply of comment.replies" class="reply-item mb-2">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0 me-2">
+                                        <a *ngIf="reply.user && reply.user._id" [routerLink]="['/perfil', reply.user._id]">
+                                            <div class="reply-avatar">
+                                                <img *ngIf="!reply.user?.picture" 
+                                                     class="img-fluid rounded-circle" 
+                                                     src="assets/images/user-default.png"
+                                                     alt="Avatar">
+                                                <img *ngIf="reply.user?.picture" 
+                                                     class="img-fluid rounded-circle"
+                                                     [src]="url + 'get-image-user/' + reply.user.picture"
+                                                     alt="Avatar">
+                                            </div>
+                                        </a>
+                                        <!-- Fallback para respuestas sin usuario -->
+                                        <div *ngIf="!reply.user || !reply.user._id" class="reply-avatar">
+                                            <img class="img-fluid rounded-circle" 
+                                                 src="assets/images/user-default.png"
+                                                 alt="Avatar">
+                                        </div>
+                                    </div>
+                                    
+                                    <div *ngIf="reply.user" class="flex-grow-1">
+                                        <div class="reply-bubble">
+                                            <div class="reply-header">
+                                                <a *ngIf="reply.user._id" class="text-primary text-decoration-none fw-bold" 
+                                                   [routerLink]="['/perfil', reply.user._id]">
+                                                    {{reply.user.name}} {{reply.user.surname}}
+                                                </a>
+                                                <span *ngIf="!reply.user._id" class="text-muted">
+                                                    Usuario no disponible
+                                                </span>
+                                                <small class="text-muted ms-2">
+                                                    {{ (reply.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL' }}
+                                                </small>
+                                            </div>
+                                            <div class="reply-text">
+                                                <p class="mb-1" [innerHTML]="formatTextWithMentions(reply.text)"></p>
+                                            </div>
+                                            <div class="reply-actions d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center">
+                                                    <button class="btn btn-sm interaction-btn" 
+                                                            [class.text-danger]="hasUserLikedComment(reply)" 
+                                                            [class.text-dark]="!hasUserLikedComment(reply)"
+                                                            (click)="toggleLikeComment(reply._id)"
+                                                            title="Me gusta">
+                                                        <i class="fas fa-heart me-1"></i>
+                                                        <span *ngIf="reply.likesCount && reply.likesCount > 0">{{reply.likesCount}}</span>
+                                                    </button>
+                                                    <!-- Botón para responder dirigido al comentario principal -->
+                                                    <button class="btn btn-sm interaction-btn text-secondary ms-2" 
+                                                            (click)="replyToComment(reply._id)"
+                                                            title="Responder en el hilo principal">
+                                                        <i class="fas fa-reply me-1"></i>
+                                                        <small>Responder</small>
+                                                    </button>
+                                                </div>
+                                                <div>
+                                                    <button *ngIf="reply.user && reply.user._id == identity._id"
+                                                            class="btn btn-link p-0 text-secondary" 
+                                                            (click)="deleteComment(reply._id)"
+                                                            title="Eliminar respuesta">
+                                                        <i class="fas fa-trash fa-sm"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- REMOVER: Formulario de respuesta anidada ya no se necesita -->
+                                        <!-- <form *ngIf="showReplyForm[reply._id]" 
+                                              [formGroup]="replyForm" 
+                                              (ngSubmit)="onReplySubmit(reply._id, publication._id)" 
+                                              class="reply-form mt-2">
+                                            <div class="d-flex align-items-start">
+                                                <div class="flex-shrink-0 me-2">
+                                                    <div class="reply-avatar">
+                                                        <img *ngIf="!identity?.picture" 
+                                                             class="img-fluid rounded-circle" 
+                                                             src="assets/images/user-default.png"
+                                                             alt="Tu avatar">
+                                                        <img *ngIf="identity?.picture" 
+                                                             class="img-fluid rounded-circle"
+                                                             [src]="url + 'get-image-user/' + identity.picture"
+                                                             alt="Tu avatar">
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <div class="input-group">
+                                                        <textarea class="form-control form-control-sm" 
+                                                                  formControlName="text" 
+                                                                  rows="2"
+                                                                  placeholder="Escribe una respuesta..."
+                                                                  style="font-size: 12px;"
+                                                                  [id]="'reply-textarea-' + reply._id"></textarea>
+                                                        <button type="submit" 
+                                                                class="btn btn-primary btn-sm"
+                                                                [disabled]="!replyForm.valid">
+                                                            <i class="fas fa-paper-plane"></i>
+                                                        </button>
+                                                        <button type="button" 
+                                                                class="btn btn-secondary btn-sm ms-1"
+                                                                (click)="cancelReply(reply._id)">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form> -->
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Botón para cargar más comentarios -->
+            <div *ngIf="commentsPagination.hasMore" class="text-center mt-3">
+                <button class="btn btn-outline-primary btn-sm" 
+                        (click)="loadMoreComments()"
+                        [disabled]="commentsPagination.loading">
+                    <span *ngIf="!commentsPagination.loading">
+                        <i class="fas fa-chevron-down me-1"></i>
+                        Ver más comentarios ({{commentsPagination.totalComments - publication.comments.length}} restantes)
+                    </span>
+                    <span *ngIf="commentsPagination.loading">
+                        <i class="fas fa-spinner fa-spin me-1"></i>Cargando comentarios...
+                    </span>
+                </button>
+            </div>
+
+            
         </div>
     </div>
 </div>

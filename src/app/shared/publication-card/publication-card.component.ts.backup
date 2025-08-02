@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { UntypedFormGroup, UntypedFormControl, Validators, FormBuilder } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Subject, of, throwError, interval, timer } from 'rxjs';
-import { takeUntil, catchError, tap, switchMap, startWith, filter, debounceTime } from 'rxjs/operators';
+import { takeUntil, catchError, tap, switchMap, startWith } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MomentModule } from 'ngx-moment';
@@ -11,7 +11,6 @@ import { LinkyModule } from 'ngx-linky';
 import { UserService } from 'src/app/services/user.service';
 import { PublicationService } from 'src/app/services/publication.service';
 import { CommentService } from 'src/app/services/comment.service';
-import { ViewportDetectionService } from 'src/app/services/viewport-detection.service';
 import { GLOBAL } from 'src/app/services/global';
 import { Comment } from 'src/app/models/comment.model';
 
@@ -22,7 +21,7 @@ import { Comment } from 'src/app/models/comment.model';
   templateUrl: './publication-card.component.html',
   styleUrls: ['./publication-card.component.css']
 })
-export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
+export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges {
   @Input() publication: any;
   @Input() identity: any;
   @Input() showDeleteButton: boolean = true;
@@ -46,28 +45,13 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
   private pollTimer$ = new Subject<void>();
   private isPollingActive: boolean = false;
   private pollingSubscription: any = null;
-  private isInViewport: boolean = false;
-  private viewportObserverActive: boolean = false;
-
-  // Paginación de comentarios
-  public commentsPagination = {
-    currentPage: 1,
-    hasMore: false,
-    loading: false,
-    totalComments: 0
-  };
-
-  // Paginación de respuestas por comentario
-  public repliesPagination: { [commentId: string]: { currentPage: number, hasMore: boolean, loading: boolean, totalReplies: number } } = {};
 
   constructor(
     private _userService: UserService,
     private _publicationService: PublicationService,
     private _commentService: CommentService,
     private _router: Router,
-    private fb: FormBuilder,
-    private elementRef: ElementRef,
-    private viewportService: ViewportDetectionService
+    private fb: FormBuilder
   ) {
     this.url = GLOBAL.url;
     this.createForms();
@@ -90,14 +74,6 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
     this.pollTimer$.next();
     this.pollTimer$.complete();
     
-    // Limpiar viewport observation
-    if (this.viewportObserverActive && this.publication && this.publication._id) {
-      const element = this.elementRef.nativeElement;
-      if (element) {
-        this.viewportService.unobserveElement(element, this.publication._id);
-      }
-    }
-    
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
@@ -106,45 +82,6 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
     if (changes['publication']) {
       this.enrichPublicationUserData();
       this.initializeLastCommentCount();
-      this.checkAndInitializePagination();
-    }
-  }
-
-  private checkAndInitializePagination(): void {
-    // Si la publicación viene con información de paginación del backend
-    if (this.publication && this.publication.pagination) {
-      this.initializeCommentsPagination(
-        this.publication.pagination.totalComments,
-        this.publication.pagination.loadedComments
-      );
-    } else if (this.publication && this.publication.comments) {
-      // Fallback: Si hay exactamente 10 comentarios, asumir que hay más
-      const commentsLength = this.publication.comments.length;
-      const hasMore = commentsLength === 10;
-      const totalEstimated = hasMore ? commentsLength + 10 : commentsLength;
-      
-      this.commentsPagination = {
-        currentPage: 1,
-        hasMore: hasMore,
-        loading: false,
-        totalComments: totalEstimated
-      };
-      
-    } else {
-      // Publicación sin comentarios
-      this.commentsPagination = {
-        currentPage: 1,
-        hasMore: false,
-        loading: false,
-        totalComments: 0
-      };
-    }
-  }
-
-  ngAfterViewInit(): void {
-    // Inicializar detección de viewport solo si está habilitado el tiempo real
-    if (this.enableRealTimeUpdates && this.publication && this.publication._id) {
-      this.initializeViewportDetection();
     }
   }
 
@@ -152,57 +89,8 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
     this.lastCommentCount = this.getTotalCommentsCount();
   }
 
-  private initializeViewportDetection(): void {
-    if (!this.publication || !this.publication._id) {
-      return;
-    }
-
-    const publicationId = this.publication._id;
-    
-    // Observar el elemento de la publicación
-    setTimeout(() => {
-      const element = this.elementRef.nativeElement;
-      if (element) {
-        this.viewportService.observeElement(element, publicationId);
-        this.viewportObserverActive = true;
-
-        // Suscribirse a cambios de visibilidad con debounce para evitar múltiples triggers
-        this.viewportService.visibilityChanges$
-          .pipe(
-            takeUntil(this.unsubscribe$),
-            debounceTime(300), // Esperar 300ms antes de procesar cambios
-            filter(visibilityMap => visibilityMap.has(publicationId))
-          )
-          .subscribe(visibilityMap => {
-            const item = visibilityMap.get(publicationId);
-            if (item) {
-              const wasInViewport = this.isInViewport;
-              this.isInViewport = item.isVisible;
-
-              // Solo actuar si hay cambio de estado
-              if (wasInViewport !== this.isInViewport) {
-                if (this.isInViewport) {
-                  console.log(`Publication ${publicationId} entered viewport - starting polling`);
-                  this.startRealTimePolling();
-                } else {
-                  console.log(`Publication ${publicationId} left viewport - pausing polling`);
-                  this.pauseRealTimeUpdates();
-                }
-              }
-            }
-          });
-      }
-    }, 100); // Pequeño delay para asegurar que el DOM esté listo
-  }
-
   private startRealTimePolling() {
     if (!this.enableRealTimeUpdates || this.isPollingActive) {
-      return;
-    }
-
-    // Si tenemos viewport detection activo, solo hacer polling si está visible
-    if (this.viewportObserverActive && !this.isInViewport) {
-      console.log('Skipping polling - publication not in viewport');
       return;
     }
 
@@ -244,22 +132,11 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
 
   private fetchUpdatedComments() {
     const token = this._userService.getToken();
-    if (!token || !this.publication._id || !this.isPollingActive) {
+    if (!token || !this.publication._id) {
       return of(null);
     }
 
-    // Si tenemos viewport detection activo, verificar visibilidad antes de hacer request
-    if (this.viewportObserverActive && !this.isInViewport) {
-      console.log('Skipping fetch - publication not visible');
-      return of(null);
-    }
-
-    return this._publicationService.getPublication(token, this.publication._id).pipe(
-      catchError(error => {
-        console.error('Error fetching updated comments:', error);
-        return of(null);
-      })
-    );
+    return this._publicationService.getPublication(token, this.publication._id);
   }
 
   private processUpdatedComments(publicationData: any) {
@@ -354,43 +231,17 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
 
   // Método para pausar/reanudar polling
   pauseRealTimeUpdates() {
-    this.isPollingActive = false;
     this.pollTimer$.next();
-    
-    if (this.pollingSubscription) {
-      this.pollingSubscription.unsubscribe();
-      this.pollingSubscription = null;
-    }
   }
 
   resumeRealTimeUpdates() {
-    if (this.isPollingActive) {
-      return; // Ya está activo
-    }
-    
     this.pollTimer$ = new Subject<void>();
     this.startRealTimePolling();
   }
 
   // Método para forzar actualización manual
   forceUpdateComments() {
-    console.log('Force update requested. Polling active:', this.isPollingActive);
-    
-    // Para actualizaciones manuales, permitir incluso si polling no está activo
-    // pero verificar que tenemos datos válidos
-    if (!this.publication || !this.publication._id) {
-      console.log('No publication ID available for force update');
-      return;
-    }
-
-    const token = this._userService.getToken();
-    if (!token) {
-      console.log('No token available for force update');
-      return;
-    }
-
-    // Obtener datos actualizados directamente
-    this._publicationService.getPublication(token, this.publication._id)
+    this.fetchUpdatedComments()
       .pipe(
         takeUntil(this.unsubscribe$),
         catchError(error => {
@@ -399,23 +250,9 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
           return of(null);
         })
       )
-      .subscribe({
-        next: (response) => {
-          console.log('Force update response:', response);
-          // Solo procesar si la respuesta es válida
-          if (response && response.publication && response.publication.comments) {
-            this.processUpdatedComments(response);
-            console.log('Comments updated successfully');
-          } else {
-            console.log('Invalid response, preserving current comments');
-            if (!response) {
-              this.onError.emit('No se pudo obtener la información actualizada');
-            }
-          }
-        },
-        error: (error) => {
-          console.error('Force update failed:', error);
-          this.onError.emit('Error al actualizar comentarios');
+      .subscribe(response => {
+        if (response) {
+          this.processUpdatedComments(response);
         }
       });
   }
@@ -773,7 +610,7 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
       return;
     }
 
-    const commentToAdd = new Comment(this.commentForm.value.text, this.identity._id, publicationId);
+    const commentToAdd = new Comment(this.commentForm.value.text, this.identity._id);
 
     this._commentService.addComment(this._userService.getToken(), commentToAdd).pipe(
       takeUntil(this.unsubscribe$),
@@ -972,7 +809,7 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
           console.error('Error adding reply:', error);
           this.onError.emit('Error al enviar la respuesta. Inténtalo de nuevo.');
           this.resumeRealTimeUpdates();
-          return of(null); // Retorna un observable, no throwError
+          return throwError(() => new Error('Failed to add reply'));
         })
       )
       .subscribe({
@@ -1144,235 +981,12 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
     return matches ? matches.map(match => match.substring(1).trim()) : [];
   }
 
-  // Método para formatear texto con menciones como hiperenlaces
+  // Método para formatear texto con menciones
   formatTextWithMentions(text: string): string {
     if (!text || typeof text !== 'string') {
       return '';
     }
-    
-    //console.log('Formatting text with mentions:', text);
-    
-    // Regex mejorado para capturar solo nombre y apellido (máximo 2 palabras después de @)
-    const mentionRegex = /@([A-Za-zÀ-ÿ]+(?:\s+[A-Za-zÀ-ÿ]+)?)\b/g;
-    
-    const result = text.replace(mentionRegex, (match, mentionName) => {
-      const trimmedName = mentionName.trim();
-    //  console.log('Found mention:', trimmedName);
-      
-      // Buscar el usuario mencionado en los comentarios para obtener su ID
-      const mentionedUser = this.findUserByName(trimmedName);
-    //  console.log('Mentioned user found:', mentionedUser);
-      
-      if (mentionedUser && mentionedUser._id) {
-        // Crear hiperenlace al perfil del usuario que abre en nueva pestaña
-        const link = `<a href="/perfil/${mentionedUser._id}" target="_blank" class="mention-link" title="Ver perfil de ${trimmedName}">@${trimmedName}</a>`;
-        //console.log('Created link:', link);
-        return link;
-      } else {
-        // Si no se encuentra el usuario, crear enlace genérico pero funcional
-        // Esto es temporal hasta que implementemos búsqueda global de usuarios
-       // console.log('User not found, showing styled mention that could be clickable');
-        return `<span class="mention-unknown" style="color: #007bff; font-weight: 600; background-color: #e8f4f8; padding: 2px 6px; border-radius: 4px; cursor: help;" title="Usuario mencionado: ${trimmedName}">@${trimmedName}</span>`;
-      }
-    });
-    
-    //console.log('Final result:', result);
-    return result;
-  }
-
-  // Método auxiliar para buscar usuario por nombre completo
-  private findUserByName(fullName: string): any {
-    
-    if (!fullName || !this.publication) {
-      return null;
-    }
-    
-    const nameParts = fullName.toLowerCase().split(' ').filter(part => part.length > 0);
-    
-    // Buscar también en el autor de la publicación
-    if (this.publication.user && this.matchesUserName(this.publication.user, nameParts)) {
-      return this.publication.user;
-    }
-    
-    // Buscar en comentarios principales
-    if (this.publication.comments && Array.isArray(this.publication.comments)) {
-      for (const comment of this.publication.comments) {
-        if (comment && comment.user && this.matchesUserName(comment.user, nameParts)) {
-        //  console.log('Found in comment user:', comment.user);
-          return comment.user;
-        }
-        
-        // Buscar en respuestas anidadas
-        if (comment.replies && Array.isArray(comment.replies)) {
-          for (const reply of comment.replies) {
-            if (reply && reply.user && this.matchesUserName(reply.user, nameParts)) {
-            //  console.log('Found in reply user:', reply.user);
-              return reply.user;
-            }
-          }
-        }
-      }
-    }
-    
-    //console.log('User not found anywhere');
-    return null;
-  }
-
-  // Método auxiliar para verificar si un usuario coincide con el nombre buscado
-  private matchesUserName(user: any, nameParts: string[]): boolean {
-    if (!user || !user.name || !user.surname) {
-      return false;
-    }
-    
-    const userName = user.name.toLowerCase().trim();
-    const userSurname = user.surname.toLowerCase().trim();
-    
-    
-    if (nameParts.length === 1) {
-      // Solo una palabra - puede ser nombre o apellido
-      return userName === nameParts[0] || userSurname === nameParts[0];
-    } else if (nameParts.length === 2) {
-      // Dos palabras - verificar nombre+apellido en cualquier orden
-      const [first, second] = nameParts;
-      return (userName === first && userSurname === second) ||
-             (userName === second && userSurname === first);
-    }
-    
-    return false;
-  }
-
-  loadReplies(commentId: string): void {
-    // Since replies are already loaded with the comment, just ensure they're visible
-    // This method exists to satisfy the template binding
-  }
-
-  loadMoreComments(): void {
-    if (this.commentsPagination.loading || !this.commentsPagination.hasMore) {
-      return;
-    }
-
-    this.commentsPagination.loading = true;
-    this.commentsPagination.currentPage++;
-
-    this._publicationService.loadMoreComments(
-      this._userService.getToken(),
-      this.publication._id,
-      this.commentsPagination.currentPage,
-      10
-    ).pipe(
-      takeUntil(this.unsubscribe$),
-      catchError(error => {
-        console.error('Error loading more comments:', error);
-        this.commentsPagination.loading = false;
-        this.commentsPagination.currentPage--;
-        return of(null);
-      })
-    ).subscribe(response => {
-      if (response && response.comments) {
-        // Agregar nuevos comentarios al final de la lista
-        if (!this.publication.comments) {
-          this.publication.comments = [];
-        }
-        
-        this.publication.comments.push(...response.comments);
-        
-        // Actualizar paginación
-        this.commentsPagination.hasMore = response.pagination.hasMore;
-        this.commentsPagination.totalComments = response.pagination.totalComments;
-
-        // Inicializar paginación de respuestas para nuevos comentarios
-        response.comments.forEach(comment => {
-          if (comment.totalReplies > 5) {
-            this.repliesPagination[comment._id] = {
-              currentPage: 1,
-              hasMore: true,
-              loading: false,
-              totalReplies: comment.totalReplies
-            };
-          }
-        });
-      }
-      this.commentsPagination.loading = false;
-    });
-  }
-
-  loadMoreReplies(commentId: string): void {
-    if (!this.repliesPagination[commentId]) {
-      this.repliesPagination[commentId] = {
-        currentPage: 1,
-        hasMore: true,
-        loading: false,
-        totalReplies: 0
-      };
-    }
-
-    const pagination = this.repliesPagination[commentId];
-    if (pagination.loading || !pagination.hasMore) {
-      return;
-    }
-
-    pagination.loading = true;
-    pagination.currentPage++;
-
-    this._publicationService.loadMoreReplies(
-      this._userService.getToken(),
-      commentId,
-      pagination.currentPage,
-      5
-    ).pipe(
-      takeUntil(this.unsubscribe$),
-      catchError(error => {
-        console.error('Error loading more replies:', error);
-        pagination.loading = false;
-        pagination.currentPage--;
-        return of(null);
-      })
-    ).subscribe(response => {
-      if (response && response.replies) {
-        // Encontrar el comentario y agregar nuevas respuestas
-        const comment = this.findCommentById(commentId);
-        if (comment) {
-          if (!comment.replies) {
-            comment.replies = [];
-          }
-          comment.replies.push(...response.replies);
-          
-          // Actualizar paginación
-          pagination.hasMore = response.pagination.hasMore;
-          pagination.totalReplies = response.pagination.totalReplies;
-        }
-      }
-      pagination.loading = false;
-    });
-  }
-
-  initializeCommentsPagination(totalComments: number, loadedComments: number): void {
-    this.commentsPagination = {
-      currentPage: 1,
-      hasMore: loadedComments < totalComments,
-      loading: false,
-      totalComments: totalComments
-    };
-
-    console.log('✅ Paginación inicializada:', {
-      publicationId: this.publication._id,
-      totalComments,
-      loadedComments,
-      hasMore: this.commentsPagination.hasMore
-    });
-
-    // Inicializar paginación de respuestas para cada comentario
-    if (this.publication.comments) {
-      this.publication.comments.forEach(comment => {
-        if (comment.totalReplies && comment.totalReplies > 5) {
-          this.repliesPagination[comment._id] = {
-            currentPage: 1,
-            hasMore: true,
-            loading: false,
-            totalReplies: comment.totalReplies
-          };
-        }
-      });
-    }
+    const mentionRegex = /@([A-Za-zÀ-ÿ\s]+)/g;
+    return text.replace(mentionRegex, '<span class="mention">@$1</span>');
   }
 }

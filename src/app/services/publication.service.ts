@@ -36,22 +36,33 @@ export class PublicationService {
         return this._http.delete(this.url+'publication/' + publicationId, {headers:headers});
     }
 
-    getPublications(token, page = 1):Observable<any>{
+    getPublications(token, page = 1, commentsLimit = 10, repliesLimit = 5):Observable<any>{
         let headers = new HttpHeaders({
             'Content-Type':'application/json', 
             'Authorization': token
         });
 
-        return this._http.get(this.url+'publications/' + page, {headers:headers});
+        const fullUrl = this.url+'publications/' + page + `?commentsLimit=${commentsLimit}&repliesLimit=${repliesLimit}`;
+
+        return this._http.get(fullUrl, {headers:headers});
     }
 
-    getUserPublications(token, userId, page = 1):Observable<any>{
+    getPublication(token, publicationId, commentsLimit = 10, repliesLimit = 5):Observable<any>{
         let headers = new HttpHeaders({
             'Content-Type':'application/json', 
             'Authorization': token
         });
 
-        return this._http.get(this.url+'user-publications/' + userId + '/' + page , {headers:headers});
+        return this._http.get(this.url+'publication/' + publicationId + `?commentsLimit=${commentsLimit}&repliesLimit=${repliesLimit}`, {headers:headers});
+    }
+
+    getUserPublications(token, userId, page = 1, commentsLimit = 10, repliesLimit = 5):Observable<any>{
+        let headers = new HttpHeaders({
+            'Content-Type':'application/json', 
+            'Authorization': token
+        });
+
+        return this._http.get(this.url+'user-publications/' + userId + '/' + page + `?commentsLimit=${commentsLimit}&repliesLimit=${repliesLimit}`, {headers:headers});
     }
 
     updatePublicationComments(token, publicationId, comment):Observable<any>{
@@ -61,6 +72,26 @@ export class PublicationService {
         });
 
         return this._http.put(this.url + 'publication-comment/' + publicationId, comment,{headers:headers});
+    }
+
+    loadMoreComments(token, publicationId, page = 1, limit = 10):Observable<any>{
+        let headers = new HttpHeaders({
+            'Content-Type':'application/json', 
+            'Authorization': token
+        });
+
+        const fullUrl = this.url + `publication/${publicationId}/comments?page=${page}&limit=${limit}`;
+
+        return this._http.get(fullUrl, {headers:headers});
+    }
+
+    loadMoreReplies(token, commentId, page = 1, limit = 5):Observable<any>{
+        let headers = new HttpHeaders({
+            'Content-Type':'application/json', 
+            'Authorization': token
+        });
+
+        return this._http.get(this.url + `publication/comment/${commentId}/replies?page=${page}&limit=${limit}`, {headers:headers});
     }
 
     // Métodos para likes en publicaciones

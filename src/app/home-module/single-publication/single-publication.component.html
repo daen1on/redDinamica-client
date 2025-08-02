@@ -1,0 +1,105 @@
+<!-- Navegación de regreso -->
+<div class="row mb-3">
+  <div class="col">
+    <button class="btn btn-outline-primary" (click)="goBackToFeed()">
+      <i class="fas fa-arrow-left me-2"></i>
+      Volver al feed
+    </button>
+  </div>
+</div>
+
+<!-- Loading state -->
+<div *ngIf="loading" class="card">
+  <div class="card-body text-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Cargando publicación...</span>
+    </div>
+    <p class="mt-3 text-muted">Cargando publicación...</p>
+  </div>
+</div>
+
+<!-- Error state -->
+<div *ngIf="error && !loading" class="card">
+  <div class="card-body">
+    <div class="alert alert-danger" role="alert">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      {{ error }}
+    </div>
+    <div class="text-center">
+      <button class="btn btn-primary" (click)="goBackToFeed()">
+        <i class="fas fa-home me-2"></i>
+        Ir al inicio
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Publication content -->
+<div *ngIf="publication && !loading && !error" class="single-publication-container">
+  <!-- Breadcrumb o contexto -->
+  <div class="alert alert-info mb-3" role="alert">
+    <i class="fas fa-info-circle me-2"></i>
+    Estás viendo una publicación específica. Esta vista está optimizada para comentarios y interacciones.
+  </div>
+
+  <!-- Publication card -->
+  <div class="publication-spotlight">
+    <app-publication-card 
+      [publication]="publication"
+      [identity]="identity"
+      [showDeleteButton]="identity && identity._id === publication.user._id"
+      [enableRealTimeUpdates]="true"
+      (onDelete)="onDeletePublication($event)"
+      (onDeleteComment)="onDeleteComment($event)"
+      (onError)="onError($event)">
+    </app-publication-card>
+  </div>
+
+  <!-- Context actions -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card bg-light">
+        <div class="card-body">
+          <h6 class="card-title">
+            <i class="fas fa-comments me-2"></i>
+            Interacciones
+          </h6>
+          <p class="card-text small text-muted">
+            Desde aquí puedes comentar, dar me gusta y responder a otros usuarios de forma más cómoda.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card bg-light">
+        <div class="card-body">
+          <h6 class="card-title">
+            <i class="fas fa-bolt me-2"></i>
+            Actualizaciones en tiempo real
+          </h6>
+          <p class="card-text small text-muted">
+            Los nuevos comentarios y respuestas aparecerán automáticamente sin necesidad de recargar.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation actions -->
+  <div class="row mt-4">
+    <div class="col text-center">
+      <div class="btn-group" role="group">
+        <button class="btn btn-outline-secondary" (click)="goBackToFeed()">
+          <i class="fas fa-stream me-2"></i>
+          Ver todas las publicaciones
+        </button>
+        <button 
+          class="btn btn-outline-primary" 
+          [routerLink]="['/perfil', publication.user._id]">
+          <i class="fas fa-user me-2"></i>
+          Ver perfil de {{ publication.user.name }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

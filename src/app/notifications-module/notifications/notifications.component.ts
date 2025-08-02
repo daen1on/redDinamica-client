@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { NotificationService } from '../../services/notification.service';
 import { Notification } from '../../models/notification.model';
 import { UserService } from '../../services/user.service';
@@ -23,11 +24,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   constructor(
     private notificationService: NotificationService,
-    private userService: UserService
+    private userService: UserService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    // Usar setTimeout para asegurar que el componente esté completamente inicializado
     setTimeout(() => {
       this.loadNotifications();
       this.loadUnreadCount();
@@ -46,7 +47,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     if (!token) {
       console.log('No hay token disponible para cargar notificaciones');
       this.error = 'Usuario no autenticado';
-      // Intentar recargar después de un breve delay
       setTimeout(() => {
         const retryToken = this.userService.getToken();
         if (retryToken) {
@@ -59,7 +59,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     if (!identity) {
       console.log('No hay identity disponible para cargar notificaciones');
       this.error = 'Usuario no autenticado';
-      // Intentar recargar después de un breve delay
       setTimeout(() => {
         const retryIdentity = this.userService.getIdentity();
         if (retryIdentity) {
@@ -69,7 +68,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       return;
     }
     
-    // Verificar que el usuario esté activado
     if (!identity.actived) {
       console.log('Usuario no activado, no se cargan notificaciones');
       this.error = 'Usuario no activado';
@@ -99,7 +97,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
           }
           
           this.unreadCount = response.unreadCount || 0;
-          this.hasMoreNotifications = newNotifications.length === 20; // Si recibimos menos de 20, no hay más
+          this.hasMoreNotifications = newNotifications.length === 20;
           this.loading = false;
           this.loadingMore = false;
         },
@@ -110,13 +108,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
           this.loadingMore = false;
         }
       });
-  }
-
-  loadMoreNotifications(): void {
-    if (this.hasMoreNotifications && !this.loadingMore) {
-      this.currentPage++;
-      this.loadNotifications(false);
-    }
   }
 
   loadUnreadCount(): void {
@@ -139,6 +130,126 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       });
   }
 
+  onNotificationClick(notification: Notification): void {
+    if (!notification.read) {
+      this.markAsRead(notification);
+    }
+
+    this.navigateToNotificationTarget(notification);
+    
+    setTimeout(() => {
+      this.closeDropdown();
+    }, 100);
+  }
+
+  private navigateToNotificationTarget(notification: Notification): void {
+    try {
+      switch (notification.type) {
+        case 'comment':
+          this.handleCommentNotification(notification);
+          break;
+        case 'follow':
+          this.handleFollowNotification(notification);
+          break;
+        case 'message':
+          this.handleMessageNotification(notification);
+          break;
+        case 'lesson':
+          this.handleLessonNotification(notification);
+          break;
+        case 'publication':
+          this.handlePublicationNotification(notification);
+          break;
+        case 'resource':
+          this.handleResourceNotification(notification);
+          break;
+        default:
+          this.handleDefaultNotification(notification);
+      }
+    } catch (error) {
+      console.error('Error navigating to notification target:', error);
+      if (notification.link) {
+        this.router.navigateByUrl(notification.link);
+      }
+    }
+  }
+
+  private handleCommentNotification(notification: Notification): void {
+    // Para comentarios y menciones, usar la nueva vista de publicación específica
+    if (notification.relatedId) {
+      this.router.navigate(['/inicio/publicacion', notification.relatedId], { 
+        queryParams: { highlight: 'comment' }
+      });
+    } else if (notification.link) {
+      this.router.navigateByUrl(notification.link);
+    } else {
+      this.router.navigate(['/inicio']);
+    }
+  }
+
+  private handleFollowNotification(notification: Notification): void {
+    if (notification.from) {
+      this.router.navigate(['/perfil', notification.from]);
+    } else if (notification.link) {
+      this.router.navigateByUrl(notification.link);
+    } else {
+      this.router.navigate(['/inicio']);
+    }
+  }
+
+  private handleMessageNotification(notification: Notification): void {
+    if (notification.relatedId) {
+      this.router.navigate(['/mensajes'], { 
+        queryParams: { messageId: notification.relatedId }
+      });
+    } else {
+      this.router.navigate(['/mensajes']);
+    }
+  }
+
+  private handleLessonNotification(notification: Notification): void {
+    if (notification.relatedId) {
+      this.router.navigate(['/inicio/leccion', notification.relatedId]);
+    } else if (notification.link) {
+      this.router.navigateByUrl(notification.link);
+    } else {
+      this.router.navigate(['/inicio/lecciones']);
+    }
+  }
+
+  private handlePublicationNotification(notification: Notification): void {
+    // Para publicaciones, usar la nueva vista de publicación específica
+    if (notification.relatedId) {
+      this.router.navigate(['/inicio/publicacion', notification.relatedId], { 
+        queryParams: { highlight: 'publication' }
+      });
+    } else if (notification.link) {
+      this.router.navigateByUrl(notification.link);
+    } else {
+      this.router.navigate(['/inicio']);
+    }
+  }
+
+  private handleResourceNotification(notification: Notification): void {
+    if (notification.relatedId) {
+      this.router.navigate(['/inicio/recursos'], { 
+        queryParams: { resourceId: notification.relatedId }
+      });
+    } else if (notification.link) {
+      this.router.navigateByUrl(notification.link);
+    } else {
+      this.router.navigate(['/inicio/recursos']);
+    }
+  }
+
+  private handleDefaultNotification(notification: Notification): void {
+    if (notification.link) {
+      this.router.navigateByUrl(notification.link);
+    } else {
+      this.router.navigate(['/inicio']);
+    }
+  }
+
   markAsRead(notification: Notification): void {
     if (notification.read) return;
 
@@ -148,32 +259,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         next: () => {
           notification.read = true;
           this.unreadCount = Math.max(0, this.unreadCount - 1);
-          // NO cerrar el dropdown al marcar como leída
-          // this.closeDropdown(); // <-- Comentado
         },
         error: (error) => {
           console.error('Error marking notification as read:', error);
         }
       });
-  }
-
-  closeDropdown(): void {
-    // Cerrar el dropdown de notificaciones
-    const dropdownElement = document.querySelector('#notificationDropdown');
-    if (dropdownElement) {
-      // Usar Bootstrap 5 para cerrar el dropdown
-      const dropdown = (window as any).bootstrap?.Dropdown?.getInstance(dropdownElement);
-      if (dropdown) {
-        dropdown.hide();
-      } else {
-        // Fallback: remover la clase show manualmente
-        const dropdownMenu = document.querySelector('.dropdown-menu[aria-labelledby="notificationDropdown"]');
-        if (dropdownMenu) {
-          dropdownMenu.classList.remove('show');
-          dropdownElement.setAttribute('aria-expanded', 'false');
-        }
-      }
-    }
   }
 
   markAllAsRead(): void {
@@ -183,13 +273,17 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         next: () => {
           this.notifications.forEach(notification => notification.read = true);
           this.unreadCount = 0;
-          // Cerrar dropdown después de marcar todas como leídas (esto sí tiene sentido)
-          this.closeDropdown();
+          console.log('Todas las notificaciones marcadas como leídas');
         },
         error: (error) => {
           console.error('Error marking all notifications as read:', error);
         }
       });
+  }
+
+  refreshNotifications(): void {
+    this.loadNotifications(true);
+    this.loadUnreadCount();
   }
 
   deleteNotification(notification: Notification): void {
@@ -253,5 +347,24 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   trackByNotificationId(index: number, notification: Notification): string {
     return notification._id;
+  }
+
+  loadMoreNotifications(): void {
+    if (this.loadingMore || !this.hasMoreNotifications) {
+      return;
+    }
+    
+    this.currentPage += 1;
+    this.loadNotifications(false);
+  }
+
+  closeDropdown(): void {
+    const dropdownElement = document.querySelector('.notifications-container')?.closest('.dropdown');
+    if (dropdownElement) {
+      const dropdownToggle = dropdownElement.querySelector('[data-bs-toggle="dropdown"]') as HTMLElement;
+      if (dropdownToggle) {
+        dropdownToggle.click();
+      }
+    }
   }
 }
