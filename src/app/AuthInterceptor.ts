@@ -26,25 +26,48 @@ export class AuthInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
       // Obtén el token de autorización del almacenamiento local
-      const authToken = localStorage.getItem('token'); // Cambiado de 'authToken' a 'token'
+      const authToken = localStorage.getItem('token');
 
-      // Si el token de autorización existe, clona la solicitud y añade el token de autorización a las cabeceras
-      if (authToken) {
+      // Solo añadir token si es válido y la request no tiene ya Authorization header
+      if (authToken && authToken.trim() !== '' && !request.headers.get('Authorization')) {
         request = request.clone({
           setHeaders: {
-            Authorization: authToken // Removido 'Bearer ' ya que el backend no lo espera
+            Authorization: authToken
           }
         });
       }
 
     return next.handle(request).pipe(
       catchError((err) => {
-        if (err.status === 401 || err.status === 403) {
+        console.log('🚨 AuthInterceptor: Error', err.status, 'on', request.url);
+        
+        // Detectar errores de autenticación (incluyendo cuando status es undefined/null)
+        const isAuthError = err.status === 401 || err.status === 403 || 
+                           (err.error && err.error.message && 
+                            (err.error.message.includes('authorization header') || 
+                             err.error.message.includes('Authorization') ||
+                             err.error.message.includes('null'))) ||
+                           (!err.status && err.message && err.message.includes('null')) ||
+                           (err.message && err.message.includes('No hay token de autenticación')) ||
+                           (typeof err === 'string' && err.includes('No hay token de autenticación'));
+        
+        if (isAuthError) {
           if (!this.isTokenExpiredPopupDisplayed) {
             this.isTokenExpiredPopupDisplayed = true;
 
-            // Verificar si es un token invalidado/desactualizado
+            // Verificar el tipo de error de autenticación
             let message = 'La sesión ha expirado, por favor iniciar sesión de nuevo.';
+            
+            if (err.error && err.error.message) {
+              if (err.error.message.includes("hasn't got authorization header")) {
+                message = 'Sesión no válida. Por favor, inicie sesión nuevamente.';
+              } else if (err.error.message.includes('expired')) {
+                message = 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.';
+              } else if (err.error.message.includes('invalid')) {
+                message = 'Token de sesión inválido. Por favor, inicie sesión nuevamente.';
+              }
+            }
+            
             if (err.error && err.error.code === 'TOKEN_INVALIDATED') {
               message = 'Su cuenta fue actualizada por un administrador. Por favor, inicie sesión nuevamente.';
             } else if (err.error && err.error.code === 'TOKEN_OUTDATED') {
@@ -55,6 +78,11 @@ export class AuthInterceptor implements HttpInterceptor {
             this._userService.clearIdentityAndToken();
             sessionStorage.clear();
             localStorage.clear();
+
+            // Forzar actualización de la UI
+            setTimeout(() => {
+              this._userService.identityChanged.next(null);
+            }, 50);
 
             // Display a simple warning message using the browser's native alert
             alert(message);
