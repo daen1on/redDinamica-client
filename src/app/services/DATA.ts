@@ -8,6 +8,16 @@ export const LESSON_STATES = {
         value: "proposed",
         class: "secondary"
     },
+    approved_by_expert: {
+        label: "Aprobada por Facilitador",
+        value: "approved_by_expert",
+        class: "info" // Usando 'info' para diferenciarlo de 'completed'
+    },
+    rejected_by_expert: {
+        label: "Rechazada por Facilitador",
+        value: "rejected_by_expert",
+        class: "danger"
+    },
     assigned: {
         label: "Asignada",
         value: "assigned",
@@ -32,13 +42,12 @@ export const LESSON_STATES = {
 
 // DATA.ts
 export const ACADEMIC_LEVEL = {
-    PRESCHOOL: "Preescolar",
-    PRIMARY_SCHOOL: "Primaria",
-    MIDDLE_SCHOOL: "Secundaria", // More specific
-    HIGH_SCHOOL: "Bachillerato", // More specific
+    GARDEN: "Preescolar",
+    SCHOOL: "Primaria",
+    MIDDLESCHOOL: "Secundaria", // More specific
+    HIGHSCHOOL: "Bachillerato", // More specific
     UNIVERSITY: "Universitario",
     GRADUATE: "Posgrado",      // Added level
-    PROFESSIONAL: "Profesional",  // Added level
 };
 
 
