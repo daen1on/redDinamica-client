@@ -63,7 +63,7 @@
 }
 
 .card-header {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    background: linear-gradient(135deg, var(--rd-primary) 0%, #1763d6 100%);
     border-bottom: none;
     padding: 1.25rem;
 }
@@ -81,9 +81,9 @@
 
 /* Estilos para las filas de información */
 .row {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 
 .row:last-child {
@@ -93,7 +93,7 @@
 
 .row label {
     font-weight: 600;
-    color: #495057;
+    color: var(--rd-text);
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
@@ -101,9 +101,20 @@
 
 .row p {
     margin: 0;
-    color: #6c757d;
+    color: var(--rd-text);
+    opacity: 0.9;
     line-height: 1.6;
 }
+
+/* Ajustes para modo oscuro */
+.theme-dark .card { border-color: #2a2f36 !important; }
+.theme-dark .card-header { background: linear-gradient(135deg, #0d47a1, #1565c0); }
+.theme-dark .row { border-bottom-color: #2a2f36; }
+.theme-dark .profile-info .btn-outline-primary { color: var(--rd-text); border-color: #2a2f36; }
+.theme-dark .profile-info .btn-outline-primary:hover { background: #22303a; border-color: #3a4754; }
+
+.profile-label { color: var(--rd-text); }
+.profile-value { color: var(--rd-text); }
 
 /* Responsive design */
 @media (max-width: 768px) {

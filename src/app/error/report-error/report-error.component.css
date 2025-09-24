@@ -7,6 +7,13 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Modo oscuro para el contenedor */
+:host-context(.theme-dark) .container {
+    background-color: #1a1f24;
+    color: #f1f5f9;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
 .form-group {
     margin-bottom: 20px;
 }
@@ -18,6 +25,11 @@ label {
     margin-bottom: 5px;
 }
 
+/* Labels en modo oscuro */
+:host-context(.theme-dark) label {
+    color: #f1f5f9;
+}
+
 select.form-control,
 textarea.form-control,
 input.form-control-file {
@@ -25,13 +37,47 @@ input.form-control-file {
     padding: 1px;
 }
 
+/* Form controls en modo oscuro */
+:host-context(.theme-dark) select.form-control,
+:host-context(.theme-dark) textarea.form-control,
+:host-context(.theme-dark) input[type="file"] {
+    background-color: #11161a;
+    color: #f1f5f9;
+    border: 1px solid #2a2f36;
+}
+
+:host-context(.theme-dark) select.form-control:focus,
+:host-context(.theme-dark) textarea.form-control:focus,
+:host-context(.theme-dark) input[type="file"]:focus {
+    background-color: #11161a;
+    color: #f1f5f9;
+    border-color: #8ab4ff;
+    box-shadow: 0 0 0 0.2rem rgba(138, 180, 255, 0.15);
+}
+
+/* Options en modo oscuro */
+:host-context(.theme-dark) option {
+    background-color: #11161a;
+    color: #f1f5f9;
+}
+
 .invalid-feedback {
     color: red;
     font-size: 12px;
 }
 
+/* Invalid feedback en modo oscuro */
+:host-context(.theme-dark) .invalid-feedback {
+    color: #f5a7a7;
+}
+
 .is-invalid {
     border: 2px solid red;
+}
+
+/* Is-invalid en modo oscuro */
+:host-context(.theme-dark) .is-invalid {
+    border-color: #dc3545;
 }
 
 button.btn {
@@ -52,6 +98,33 @@ button.btn:hover {
 button.btn:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+}
+
+/* Botones en modo oscuro */
+:host-context(.theme-dark) button.btn {
+    background-color: #8ab4ff;
+    color: white;
+}
+
+:host-context(.theme-dark) button.btn:hover {
+    background-color: #6b9eff;
+}
+
+:host-context(.theme-dark) button.btn:disabled {
+    background-color: #4a5568;
+    color: #a1a1aa;
+}
+
+/* Alert success en modo oscuro */
+:host-context(.theme-dark) .alert-success {
+    background-color: rgba(25, 135, 84, 0.2);
+    border-color: rgba(25, 135, 84, 0.3);
+    color: #75b798;
+}
+
+/* Spinner en modo oscuro */
+:host-context(.theme-dark) .spinner-border {
+    color: #8ab4ff;
 }
 
 @media (max-width: 768px) {

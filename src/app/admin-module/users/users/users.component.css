@@ -1,3 +1,7 @@
+/* ===== ESTILOS ESPECÍFICOS DEL COMPONENTE USERS ===== */
+/* Los estilos de categorías ahora están en styles.css como clases globales */
+
+/* ===== ESTILOS DE PERFIL DE USUARIO ===== */
 .rounded-circle {
     width: 60px; 
     height: 60px; 

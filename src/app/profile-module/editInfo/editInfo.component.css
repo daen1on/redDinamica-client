@@ -1,3 +1,103 @@
+/* Mejoras visuales y compatibilidad con modo oscuro */
+.card { border: none; box-shadow: 0 4px 12px rgba(0,0,0,.08); border-radius: 12px; }
+.card-header { background: linear-gradient(135deg, var(--rd-primary), #1763d6); border-bottom: none; }
+.card-header h3 { color: #fff !important; }
+
+.form-group { margin-bottom: 1rem; }
+.col-form-label { color: var(--rd-text); font-weight: 600; }
+
+/* Inputs en dark mode (fallback adicional por si otros estilos no aplican) */
+.theme-dark .form-control,
+.theme-dark .ng-select .ng-select-container { background-color: #11161a !important; color: var(--rd-text) !important; border-color: #2a2f36 !important; }
+.theme-dark .form-control::placeholder, .theme-dark textarea::placeholder { color: #c1c9d2 !important; opacity: 1 !important; }
+.theme-dark label, .theme-dark .col-form-label { color: var(--rd-text) !important; }
+.theme-dark .progress { background-color: #1f2933; }
+.theme-dark .progress-bar { background-color: var(--rd-primary); }
+
+/* ===== NG-SELECT MODO OSCURO ESPECÍFICO ===== */
+:host-context(.theme-dark) .ng-select .ng-select-container {
+    background-color: #11161a !important;
+    border-color: #2a2f36 !important;
+}
+
+:host-context(.theme-dark) .ng-select.ng-select-focused .ng-select-container {
+    border-color: #8ab4ff !important;
+    box-shadow: 0 0 0 0.2rem rgba(138, 180, 255, 0.15) !important;
+}
+
+:host-context(.theme-dark) .ng-select .ng-placeholder {
+    color: #c1c9d2 !important;
+    opacity: 1 !important;
+}
+
+:host-context(.theme-dark) .ng-select .ng-value-container .ng-value {
+    color: #f1f5f9 !important;
+    background-color: rgba(138, 180, 255, 0.2) !important;
+    border-color: rgba(138, 180, 255, 0.3) !important;
+}
+
+:host-context(.theme-dark) .ng-select .ng-value-container .ng-value .ng-value-label {
+    color: #f1f5f9 !important;
+}
+
+:host-context(.theme-dark) .ng-select .ng-arrow-wrapper {
+    color: #f1f5f9 !important;
+}
+
+:host-context(.theme-dark) .ng-select .ng-clear-wrapper {
+    color: #f1f5f9 !important;
+}
+
+/* Dropdown del ng-select */
+:host-context(.theme-dark) .ng-dropdown-panel {
+    background-color: #1a1f24 !important;
+    border-color: #2a2f36 !important;
+}
+
+:host-context(.theme-dark) .ng-dropdown-panel .ng-option {
+    background-color: #1a1f24 !important;
+    color: #f1f5f9 !important;
+}
+
+:host-context(.theme-dark) .ng-dropdown-panel .ng-option.ng-option-highlighted {
+    background-color: rgba(138, 180, 255, 0.2) !important;
+    color: #f1f5f9 !important;
+}
+
+:host-context(.theme-dark) .ng-dropdown-panel .ng-option.ng-option-selected {
+    background-color: rgba(138, 180, 255, 0.3) !important;
+    color: #f1f5f9 !important;
+}
+
+/* Input de búsqueda dentro del ng-select */
+:host-context(.theme-dark) .ng-select .ng-select-container .ng-value-container .ng-input > input {
+    color: #f1f5f9 !important;
+    background-color: transparent !important;
+}
+
+/* Mejorar placeholder específico para campos */
+:host-context(.theme-dark) .ng-select .ng-placeholder {
+    color: #c1c9d2 !important;
+    font-weight: 400 !important;
+    opacity: 1 !important;
+}
+
+/* Texto de "Agregar" en ng-select */
+:host-context(.theme-dark) .ng-dropdown-panel .ng-option.ng-option-add {
+    color: #8ab4ff !important;
+    font-style: italic;
+}
+
+/* Form controls adicionales */
+:host-context(.theme-dark) .form-control:focus {
+    background-color: #11161a !important;
+    border-color: #8ab4ff !important;
+    color: #f1f5f9 !important;
+    box-shadow: 0 0 0 0.2rem rgba(138, 180, 255, 0.15) !important;
+}
+
+/* Botón guardar más visible en dark */
+.btn.btn-warning { font-weight: 700; border-radius: 10px; }
 /* .rounded-circle {
     width: 10rem; 
     height: 10rem; 

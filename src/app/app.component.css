@@ -20,13 +20,13 @@ body:has(#header) {
 
 /* Ajuste para cuando hay usuario logueado */
 body:has(#header-home) {
-    padding-top: 92px ;
+    padding-top: 62px ;
 }
 
 /* Compensación específica para la vista Academia cuando el usuario está logueado */
 @media (min-width: 992px) {
     body:has(#header-home):has(.academic-dashboard) {
-        padding-top: 86px !important; /* evita solapamiento con el navbar fijo */
+        padding-top: 76px !important; /* evita solapamiento con el navbar fijo */
     }
 }
 

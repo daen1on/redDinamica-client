@@ -1,0 +1,425 @@
+/* 
+ * Lessons Component Styles
+ * Según DESIGN_LESSONS_PROFILE.md
+ */
+
+/* Variables CSS para consistencia */
+:root {
+  --lesson-primary-color: #007bff;
+  --lesson-success-color: #28a745;
+  --lesson-warning-color: #ffc107;
+  --lesson-info-color: #17a2b8;
+  --lesson-secondary-color: #6c757d;
+  --lesson-border-radius: 0.5rem;
+  --lesson-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --lesson-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --lesson-transition: all 0.3s ease;
+}
+
+/* Contenedor principal */
+.lessons-container {
+  max-width: 100%;
+}
+
+/* Header de lecciones */
+.lessons-header .card-header {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border-radius: var(--lesson-border-radius) var(--lesson-border-radius) 0 0;
+}
+
+.lessons-header .card-header h3 {
+  font-weight: 600;
+  color: white !important;
+}
+
+.lessons-header .btn.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+/* Sección de estadísticas */
+.stat-card {
+  transition: var(--lesson-transition);
+  background: #f8f9fa;
+  border-color: #e9ecef !important;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--lesson-shadow-lg);
+  background: white;
+}
+
+.stat-icon {
+  opacity: 0.8;
+}
+
+.stat-card h4 {
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+/* Cards de lecciones */
+.lesson-card {
+  transition: var(--lesson-transition);
+}
+
+.lesson-card .card {
+  border: 1px solid #e9ecef;
+  border-radius: var(--lesson-border-radius);
+  overflow: hidden;
+}
+
+.lesson-card .card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--lesson-shadow-lg);
+  border-color: var(--lesson-primary-color);
+}
+
+.lesson-card .card-title a {
+  color: #333;
+  font-weight: 600;
+  text-decoration: none !important;
+}
+
+.lesson-card .card-title a:hover {
+  color: var(--lesson-primary-color);
+}
+
+/* Badges personalizados */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.5em 0.75em;
+  border-radius: 0.375rem;
+}
+
+.badge.bg-primary {
+  background-color: var(--lesson-primary-color) !important;
+}
+
+.badge.bg-success {
+  background-color: var(--lesson-success-color) !important;
+}
+
+.badge.bg-warning {
+  background-color: var(--lesson-warning-color) !important;
+  color: #212529 !important;
+}
+
+.badge.bg-info {
+  background-color: var(--lesson-info-color) !important;
+}
+
+.badge.bg-secondary {
+  background-color: var(--lesson-secondary-color) !important;
+}
+
+/* Filtros */
+.btn-group .btn {
+  border-radius: 0.375rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Estados especiales */
+.alert-sm {
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.lesson-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Loading spinner personalizado */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Botones de acción */
+.btn-outline-primary:hover {
+  transform: scale(1.05);
+}
+
+.btn-outline-warning:hover,
+.btn-warning:hover {
+  transform: scale(1.05);
+}
+
+/* Estados vacíos */
+.text-center i[style*="font-size: 3rem"] {
+  opacity: 0.6;
+  margin-bottom: 1rem;
+}
+
+/* Responsive Design según especificaciones */
+
+/* Desktop (>768px) */
+@media (min-width: 768px) {
+  .lessons-container {
+    padding: 0;
+  }
+  
+  /* Grid de estadísticas en desktop */
+  .stat-card {
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Cards de lecciones en 2 columnas para desktop grande */
+  @media (min-width: 1200px) {
+    .lessons-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    .lessons-list .mb-3:first-child,
+    .lessons-list .text-center {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+/* Tablet (768px - 992px) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .lessons-container {
+    padding: 0 1rem;
+  }
+  
+  /* Estadísticas en carrusel horizontal */
+  .row.text-center {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    scroll-snap-type: x mandatory;
+  }
+  
+  .row.text-center > .col-6.col-md-3 {
+    flex: 0 0 auto;
+    width: 200px;
+    scroll-snap-align: start;
+  }
+  
+  /* Filtros desplegables */
+  .d-flex.flex-wrap.gap-2 {
+    flex-direction: column;
+  }
+  
+  .d-flex.flex-wrap.gap-2 > span:first-child {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Mobile (<768px) */
+@media (max-width: 767.98px) {
+  .lessons-container {
+    padding: 0 0.5rem;
+  }
+  
+  /* Header responsivo */
+  .lessons-header .card-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .lessons-header .card-header h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0;
+  }
+  
+  /* Panel de configuración en mobile */
+  .lessons-header .card-body .row {
+    flex-direction: column;
+  }
+  
+  .lessons-header .card-body .col-md-6 {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  /* Estadísticas apiladas en mobile */
+  .row.text-center {
+    margin: 0;
+  }
+  
+  .row.text-center > .col-6 {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  .stat-card {
+    padding: 1.5rem 1rem !important;
+  }
+  
+  .stat-card h4 {
+    font-size: 1.25rem;
+  }
+  
+  .stat-icon i {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Filtros en mobile */
+  .d-flex.flex-wrap.gap-2 {
+    flex-direction: column;
+    gap: 0.5rem !important;
+  }
+  
+  .d-flex.flex-wrap.gap-2 button {
+    width: 100%;
+    margin: 0;
+  }
+  
+  /* Cards de lecciones en mobile */
+  .lesson-card .row {
+    flex-direction: column;
+  }
+  
+  .lesson-card .col-auto {
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .lesson-card .d-flex.flex-column {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  /* Badges responsivos */
+  .d-flex.flex-wrap.gap-1 {
+    justify-content: center;
+  }
+  
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.25em 0.5em;
+  }
+  
+  /* Títulos en mobile */
+  .lesson-card .card-title {
+    font-size: 1rem;
+  }
+  
+  /* Meta información en mobile */
+  .d-flex.flex-wrap.gap-2.align-items-center {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+  
+  /* Descripción en mobile */
+  .card-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+}
+
+/* Animaciones específicas para mobile */
+@media (max-width: 767.98px) {
+  .lesson-card .card:hover {
+    transform: none; /* Deshabilitar hover en mobile */
+  }
+  
+  .stat-card:hover {
+    transform: none; /* Deshabilitar hover en mobile */
+  }
+}
+
+/* Estados de carga mejorados */
+.spinner-border.text-primary {
+  color: var(--lesson-primary-color) !important;
+}
+
+/* Mejoras de accesibilidad */
+.btn:focus,
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Indicadores de visibilidad */
+.border-warning {
+  border-color: var(--lesson-warning-color) !important;
+  border-width: 2px !important;
+}
+
+/* Optimizaciones de rendimiento */
+.lesson-card,
+.stat-card {
+  will-change: transform;
+}
+
+/* Mejoras de contraste */
+.text-muted {
+  color: #666 !important;
+}
+
+/* Espaciado consistente */
+.gap-1 {
+  gap: 0.25rem !important;
+}
+
+.gap-2 {
+  gap: 0.5rem !important;
+}
+
+/* Estados de hover mejorados */
+@media (hover: hover) {
+  .btn:hover {
+    transition: var(--lesson-transition);
+  }
+  
+  .card:hover {
+    transition: var(--lesson-transition);
+  }
+}
+
+/* Scroll suave para navegación */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mejoras para pantallas pequeñas específicas */
+@media (max-width: 480px) {
+  .lessons-container {
+    padding: 0 0.25rem;
+  }
+  
+  .card {
+    border-radius: 0.25rem;
+  }
+  
+  .btn {
+    font-size: 0.8rem;
+  }
+  
+  .lesson-card .card-body {
+    padding: 1rem 0.75rem;
+  }
+}
+
+/* Mejoras para pantallas muy grandes */
+@media (min-width: 1400px) {
+  .lessons-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}

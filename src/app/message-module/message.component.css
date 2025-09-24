@@ -1,0 +1,17 @@
+/* Compensar header fijo y sidebar de mensajes */
+@media (min-width: 992px) {
+  .container > .row > .col-3 > .accordion#menu {
+    position: fixed !important;
+    top: 76px !important; /* coincide con header fijo */
+    left:115px !important;
+    width: 253px !important;
+    z-index: 98 !important;
+  }
+
+  /* Desplazar la columna de contenido para no solaparse con el sidebar */
+  .container > .row > .col-9.ps-0 {
+    padding-left: 15px !important;
+  }
+}
+
+

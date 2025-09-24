@@ -1,0 +1,76 @@
+/* --- Ajustes para el sidebar con header fijo --- */
+.home-sidebar {
+    position: fixed !important;
+    top: 76px !important; /* Altura del header fijo */
+    left: 110px !important;
+    width: 253px !important;
+    max-height: calc(100vh - 90px) !important;
+    overflow-y: auto !important;
+    z-index: 98 !important;
+}
+
+/* Ajuste específico del contenedor home para dar espacio al sidebar */
+.container {
+    padding-top: 30px; /* Más espacio desde el header */
+    margin-top: 15px; /* Espacio adicional */
+}
+
+/* Solo afectar las columnas dentro del componente home */
+.container > .row > .col-3 {
+    position: relative;
+    min-height: 100vh;
+}
+
+/* Ajustar solo la columna de contenido principal */
+.container > .row > .col-9.ps-0 {
+    padding-left: 15px !important;
+    padding-top: 10px; /* Espacio adicional para el contenido */
+}
+
+/* Responsive para tablets */
+@media (max-width: 992px) {
+    .home-sidebar {
+        width: 240px !important;
+        left: 10px !important;
+    }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .home-sidebar {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: 100% !important;
+        max-height: none !important;
+        margin-bottom: 20px;
+    }
+}
+
+/* Mejoras visuales para el perfil en el sidebar */
+.home-sidebar .card-header {
+    transition: all 0.3s ease !important;
+    border-radius: 12px !important;
+}
+
+.home-sidebar .card-header:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Modo oscuro para el sidebar */
+.theme-dark .home-sidebar {
+    background: rgba(44, 62, 80, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.theme-dark .home-sidebar .card-header {
+    background: rgba(52, 73, 94, 0.8) !important;
+    color: #ecf0f1 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.theme-dark .home-sidebar .card-header:hover {
+    background: rgba(52, 73, 94, 1) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+}
