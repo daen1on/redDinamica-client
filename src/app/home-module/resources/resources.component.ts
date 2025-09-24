@@ -193,9 +193,79 @@ export class ResourcesComponent implements OnInit {
         this.ratingResourceItem = resource;
     }
 
+    // Métodos para abrir modales con manejo correcto del DOM
+    openDetailsModal(resource) {
+        this.setDetailResource(resource);
+        
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('details');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de detalles:', error);
+                // Fallback: mostrar detalles en alert o console
+                alert(`Detalles del recurso: ${resource.name}\nDescripción: ${resource.description}`);
+            }
+        }, 0);
+    }
+
+    openRatingModal(resource) {
+        if (!resource.accepted) {
+            alert('Este recurso está pendiente de aprobación y no se puede calificar aún.');
+            return;
+        }
+        
+        this.setRatingResource(resource);
+        
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('rating');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de rating:', error);
+                // Fallback: redirigir a una página de calificación
+                alert('Error al abrir el modal de calificación. Intenta recargar la página.');
+            }
+        }, 0);
+    }
+
     public needReloadData;
     setNeedReload(event){
         this.needReloadData = true;
+    }
+
+    onResourceSubmitted(event: any) {
+        // Recargar la lista de recursos cuando se envía un nuevo recurso
+        this.getAllResources();
+        this.actualPage();
     }
 
     increaseDownloads(resource){

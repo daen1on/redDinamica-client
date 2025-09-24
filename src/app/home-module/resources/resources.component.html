@@ -1,9 +1,9 @@
 <!-- Resources -->
 <div class="card">
     <div class="card-header">
-        <h3 class="m-0 text-primary font-weight-bolder float-left">{{title}}</h3>
+        <h3 class="m-0 text-primary fw-bolder float-start">{{title}}</h3>
 
-        <button *ngIf="identity.role != 'guest'" type="button" class="btn btn-primary float-right" data-bs-toggle="modal"
+        <button *ngIf="identity.role != 'guest'" type="button" class="btn btn-primary float-end" data-bs-toggle="modal"
             data-bs-target="#add">
             <i class="fas fa-plus"></i>
             <span class="ms-2">Sugerir recurso</span>
@@ -14,7 +14,7 @@
     <div *ngIf="loading" class="card-body">
         <div class="text-muted text-center">
             <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                <span class="sr-only">Loading...</span>
+                <span class="visually-hidden">Loading...</span>
             </div>
         </div>
     </div>
@@ -27,30 +27,32 @@
 
     <div *ngIf="resources.length != 0" class="card-body">
 
-        <!-- Filters checkboxes -->
-        <div class="form-group">
-            <div class="row">
-                <div *ngFor="let type of types" class="col">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="{{type.value}}"
+        <!-- Filtros de tipos de recursos -->
+        <form class="categories-form">
+            <h6 class="categories-section-title">
+                <i class="fas fa-folder-open"></i>
+                Tipos de recursos
+            </h6>
+            <div class="categories-container">
+                <div *ngFor="let type of types" class="category-item">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="{{type.value}}"
                             (click)="setType(type.value)">
-                        <label class="custom-control-label" for="{{type.value}}">
+                        <label class="form-check-label" for="{{type.value}}">
                             {{type.label}}
                         </label>
                     </div>
                 </div>
             </div>
-        </div>
-        <!-- /Filters checkboxes -->
+        </form>
+        <!-- /Filtros de tipos de recursos -->
 
         <!-- Filters input -->
         <div class="form-group row mb-1">
             <div class="col">
                 <form>
                     <div class="input-group mb-2">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">Filtrar:</div>
-                        </div>
+                        <span class="input-group-text">Filtrar:</span>
                         <input type="text" class="form-control" id="filter" placeholder="Filtro" autocomplete="off"
                             [formControl]="filter">
                     </div>
@@ -115,6 +117,12 @@
                                 <div class="col">
                                     <h5 class="mt-0 text-truncate">
                                         <strong>{{resource.name}}</strong>
+                                        <span *ngIf="!resource.accepted && resource.author._id === identity._id" class="badge bg-warning text-dark ms-2">
+                                            <i class="fas fa-clock"></i> Pendiente de aprobación
+                                        </span>
+                                        <span *ngIf="resource.accepted && resource.visible && resource.author._id === identity._id" class="badge bg-success ms-2">
+                                            <i class="fas fa-check"></i> Aprobado
+                                        </span>
                                     </h5>
                                     <p>{{resource.description}}</p>
                                     <p><strong>Subido por:</strong></p>
@@ -156,26 +164,31 @@
                                     <div class="row">
                                         <div class="col">
 
-                                            <button class="btn btn-info me-2" title="Ver detalles" data-bs-toggle="modal"
-                                                data-bs-target="#details" (click)="setDetailResource(resource)">
+                                            <button class="btn btn-info me-2" title="Ver detalles" 
+                                                (click)="openDetailsModal(resource)">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="btn btn-warning me-2" title="Calificar recurso"
-                                                data-bs-toggle="modal" data-bs-target="#rating"
-                                                (click)="setRatingResource(resource)">
+                                            <button class="btn btn-warning me-2" 
+                                                [title]="resource.accepted ? 'Calificar recurso' : 'Recurso pendiente de aprobación'"
+                                                [disabled]="!resource.accepted"
+                                                (click)="openRatingModal(resource)">
                                                 <i class="fas fa-star"></i>
                                             </button>
                                             <ng-container *ngIf="resource.type == 'link'; else getResource">
-                                                <button class="btn btn-secondary" title="Ir al enlace"
-                                                    (click)="goToUrl(resource.url); increaseDownloads(resource)">
+                                                <button class="btn btn-secondary" 
+                                                    [title]="resource.accepted ? 'Ir al enlace' : 'Recurso pendiente de aprobación'"
+                                                    [disabled]="!resource.accepted"
+                                                    (click)="resource.accepted && goToUrl(resource.url); resource.accepted && increaseDownloads(resource)">
                                                     <i class="fas fa-hand-pointer"></i>
                                                 </button>
                                             </ng-container>
                                             <ng-template #getResource>
                                                 <a class="btn btn-secondary"
-                                                    title="Descargar recurso: {{resource.file}}"
-                                                    href="{{this.url + 'get-resource/' + resource.file}}"
-                                                    target="_blank" (click)="increaseDownloads(resource)">
+                                                    [title]="resource.accepted ? 'Descargar recurso: ' + resource.file : 'Recurso pendiente de aprobación'"
+                                                    [class.disabled]="!resource.accepted"
+                                                    [href]="resource.accepted ? (this.url + 'get-resource/' + resource.file) : '#'"
+                                                    [target]="resource.accepted ? '_blank' : ''"
+                                                    (click)="resource.accepted && increaseDownloads(resource)">
                                                     <i class="fas fa-download"></i>
                                                 </a>
                                             </ng-template>
@@ -231,6 +244,12 @@
                                 <div class="col">
                                     <h5 class="mt-0 text-truncate">
                                         <strong>{{resource.name}}</strong>
+                                        <span *ngIf="!resource.accepted && resource.author._id === identity._id" class="badge bg-warning text-dark ms-2">
+                                            <i class="fas fa-clock"></i> Pendiente de aprobación
+                                        </span>
+                                        <span *ngIf="resource.accepted && resource.visible && resource.author._id === identity._id" class="badge bg-success ms-2">
+                                            <i class="fas fa-check"></i> Aprobado
+                                        </span>
                                     </h5>
                                     <p>{{resource.description}}</p>
                                     <p><strong>Subido por:</strong></p>
@@ -272,26 +291,31 @@
                                     <div class="row">
                                         <div class="col">
 
-                                            <button class="btn btn-info me-2" title="Ver detalles" data-bs-toggle="modal"
-                                                data-bs-target="#details" (click)="setDetailResource(resource)">
+                                            <button class="btn btn-info me-2" title="Ver detalles" 
+                                                (click)="openDetailsModal(resource)">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="btn btn-warning me-2" title="Calificar recurso"
-                                                data-bs-toggle="modal" data-bs-target="#rating"
-                                                (click)="setRatingResource(resource)">
+                                            <button class="btn btn-warning me-2" 
+                                                [title]="resource.accepted ? 'Calificar recurso' : 'Recurso pendiente de aprobación'"
+                                                [disabled]="!resource.accepted"
+                                                (click)="openRatingModal(resource)">
                                                 <i class="fas fa-star"></i>
                                             </button>
                                             <ng-container *ngIf="resource.type == 'link'; else getResource">
-                                                <button class="btn btn-secondary" title="Ir al enlace"
-                                                    (click)="goToUrl(resource.url); increaseDownloads(resource)">
+                                                <button class="btn btn-secondary" 
+                                                    [title]="resource.accepted ? 'Ir al enlace' : 'Recurso pendiente de aprobación'"
+                                                    [disabled]="!resource.accepted"
+                                                    (click)="resource.accepted && goToUrl(resource.url); resource.accepted && increaseDownloads(resource)">
                                                     <i class="fas fa-hand-pointer"></i>
                                                 </button>
                                             </ng-container>
                                             <ng-template #getResource>
                                                 <a class="btn btn-secondary"
-                                                    title="Descargar recurso: {{resource.file}}"
-                                                    href="{{this.url + 'get-resource/' + resource.file}}"
-                                                    target="_blank" (click)="increaseDownloads(resource)">
+                                                    [title]="resource.accepted ? 'Descargar recurso: ' + resource.file : 'Recurso pendiente de aprobación'"
+                                                    [class.disabled]="!resource.accepted"
+                                                    [href]="resource.accepted ? (this.url + 'get-resource/' + resource.file) : '#'"
+                                                    [target]="resource.accepted ? '_blank' : ''"
+                                                    (click)="resource.accepted && increaseDownloads(resource)">
                                                     <i class="fas fa-download"></i>
                                                 </a>
                                             </ng-template>
@@ -325,7 +349,7 @@
 </div>
 <!-- /Resources -->
 
-<suggest></suggest>
+<suggest (resourceSubmitted)="onResourceSubmitted($event)"></suggest>
 
 <details-resource *ngIf="detailsResourceItem" [resource]="detailsResourceItem"></details-resource>
 
