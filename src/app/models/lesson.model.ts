@@ -12,6 +12,7 @@ export class Lesson{
     public expert;
     public author;
     public leader;
+    public suggested_facilitator;
 
     public development_group;
     public created_at;
