@@ -48,7 +48,18 @@
 
         <!-- Contenido de la publicación -->
         <div class="publication-content mb-3">
-            <div class="publication-text" innerHTML="{{newLines(publication.text | linky)}}"></div>
+            <div class="publication-text" innerHTML="{{newLines(getDisplayContent() | linky)}}"></div>
+            
+            <!-- Botón Mostrar más/menos para publicaciones largas -->
+            <div *ngIf="shouldShowExpandButton()" class="mt-2">
+                <button class="btn btn-link btn-sm text-primary p-0" 
+                        (click)="toggleContentExpansion()">
+                    <i class="fas" [class.fa-chevron-down]="!isContentExpanded" 
+                                   [class.fa-chevron-up]="isContentExpanded"></i>
+                    <span *ngIf="!isContentExpanded">Mostrar más</span>
+                    <span *ngIf="isContentExpanded">Mostrar menos</span>
+                </button>
+            </div>
             
             <div *ngIf="publication.file" class="publication-image mt-2">
                 <img class="img-fluid rounded" 

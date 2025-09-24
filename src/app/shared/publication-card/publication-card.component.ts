@@ -60,6 +60,10 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
   // Paginación de respuestas por comentario
   public repliesPagination: { [commentId: string]: { currentPage: number, hasMore: boolean, loading: boolean, totalReplies: number } } = {};
 
+  // Control de contenido expandido para publicaciones largas
+  public isContentExpanded: boolean = false;
+  public readonly MAX_CONTENT_LENGTH: number = 300; // Caracteres máximos antes de mostrar "Ver más"
+
   constructor(
     private _userService: UserService,
     private _publicationService: PublicationService,
@@ -1142,6 +1146,25 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
     const mentionRegex = /@([A-Za-zÀ-ÿ\s]+)/g;
     const matches = text.match(mentionRegex);
     return matches ? matches.map(match => match.substring(1).trim()) : [];
+  }
+
+  // Métodos para manejar contenido expandible
+  shouldShowExpandButton(): boolean {
+    return this.publication?.text && this.publication.text.length > this.MAX_CONTENT_LENGTH;
+  }
+
+  getDisplayContent(): string {
+    if (!this.publication?.text) return '';
+    
+    if (this.isContentExpanded || this.publication.text.length <= this.MAX_CONTENT_LENGTH) {
+      return this.publication.text;
+    }
+    
+    return this.publication.text.substring(0, this.MAX_CONTENT_LENGTH) + '...';
+  }
+
+  toggleContentExpansion(): void {
+    this.isContentExpanded = !this.isContentExpanded;
   }
 
   // Método para formatear texto con menciones como hiperenlaces

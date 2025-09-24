@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 
 import { GLOBAL } from './global';
 import { Comment } from '../models/comment.model';
@@ -18,69 +18,91 @@ export class CommentService {
         this.url = GLOBAL.url;
     }
 
+    // Helper para crear headers seguros sin token null
+    private createSafeHeaders(token: string | null, contentType: string = 'application/json'): HttpHeaders {
+        const headers: { [key: string]: string } = {
+            'Content-Type': contentType
+        };
+        
+        // Solo agregar Authorization si el token es válido
+        if (token && token.trim() !== '') {
+            headers['Authorization'] = token;
+        }
+        
+        return new HttpHeaders(headers);
+    }
+
     addComment(token, comment):Observable<any>{
+        // Verificar si hay token antes de hacer la petición
+        if (!token || token.trim() === '') {
+            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+        }
+        
         let params = JSON.stringify(comment);
-        let headers = new HttpHeaders({
-            'Content-Type':'application/json', 
-            'Authorization': token
-        });
+        let headers = this.createSafeHeaders(token);
 
         return this._http.post(this.url + 'comment', params, {headers:headers});
     }
 
     updateComment(token, commentId):Observable<any>{
-        let headers = new HttpHeaders({
-            'Content-Type':'application/json', 
-            'Authorization': token
-        });
+        if (!token || token.trim() === '') {
+            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+        }
+        
+        let headers = this.createSafeHeaders(token);
 
         return this._http.put(this.url+'comment/' + commentId, {headers:headers});
     }
    
     removeComment(token, commentId):Observable<any>{
-        let headers = new HttpHeaders({
-            'Content-Type':'application/json', 
-            'Authorization': token
-        });
+        if (!token || token.trim() === '') {
+            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+        }
+        
+        let headers = this.createSafeHeaders(token);
 
         return this._http.delete(this.url+'comment/' + commentId, {headers:headers});
     }
 
     // Métodos para likes en comentarios
     toggleLikeComment(token, commentId):Observable<any>{
-        let headers = new HttpHeaders({
-            'Content-Type':'application/json', 
-            'Authorization': token
-        });
+        if (!token || token.trim() === '') {
+            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+        }
+        
+        let headers = this.createSafeHeaders(token);
 
         return this._http.post(this.url + 'comment-like/' + commentId, {}, {headers:headers});
     }
 
     getCommentLikes(token, commentId):Observable<any>{
-        let headers = new HttpHeaders({
-            'Content-Type':'application/json', 
-            'Authorization': token
-        });
+        if (!token || token.trim() === '') {
+            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+        }
+        
+        let headers = this.createSafeHeaders(token);
 
         return this._http.get(this.url + 'comment-likes/' + commentId, {headers:headers});
     }
 
     // Métodos para respuestas anidadas
     addReply(token, parentCommentId, reply):Observable<any>{
+        if (!token || token.trim() === '') {
+            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+        }
+        
         let params = JSON.stringify(reply);
-        let headers = new HttpHeaders({
-            'Content-Type':'application/json', 
-            'Authorization': token
-        });
+        let headers = this.createSafeHeaders(token);
 
         return this._http.post(this.url + 'comment/' + parentCommentId + '/reply', params, {headers:headers});
     }
 
     getReplies(token, commentId):Observable<any>{
-        let headers = new HttpHeaders({
-            'Content-Type':'application/json', 
-            'Authorization': token
-        });
+        if (!token || token.trim() === '') {
+            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+        }
+        
+        let headers = this.createSafeHeaders(token);
 
         return this._http.get(this.url + 'comment/' + commentId + '/replies', {headers:headers});
     }

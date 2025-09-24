@@ -218,6 +218,19 @@ export class PublicationsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.formError = false;
         this.typeError = false;
         this.maxSizeError = false;
+
+        // Validar tipos de archivo permitidos
+        if (this.filesToUpload && this.filesToUpload.length > 0) {
+            for (let file of this.filesToUpload) {
+                if (!this.isValidFileType(file)) {
+                    this.typeError = true;
+                    this.filesToUpload = []; // Limpiar archivos no válidos
+                    // Limpiar el input file
+                    fileInput.target.value = '';
+                    return;
+                }
+            }
+        }
     }
 
     public formError = false;
@@ -243,6 +256,13 @@ export class PublicationsComponent implements OnInit, OnDestroy, AfterViewInit {
         // Validar archivos si existen
         if (hasFiles) {
             for (let file of this.filesToUpload) {
+                // Validar tipo de archivo
+                if (!this.isValidFileType(file)) {
+                    this.typeError = true;
+                    this.submitted = false;
+                    return;
+                }
+                // Validar tamaño de archivo
                 if (file.size > this.maxSize) {
                     this.maxSizeError = true;
                     this.submitted = false;
@@ -374,5 +394,27 @@ export class PublicationsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.publications = [];
         this.total = 0;
         this.pages = 0;
+    }
+
+    // Método para validar tipos de archivo permitidos
+    private isValidFileType(file: File): boolean {
+        const allowedTypes = [
+            'image/jpeg',
+            'image/jpg', 
+            'image/png',
+            'image/gif'
+        ];
+        
+        // Validar por MIME type
+        if (!allowedTypes.includes(file.type.toLowerCase())) {
+            return false;
+        }
+        
+        // Validar por extensión como medida adicional de seguridad
+        const fileName = file.name.toLowerCase();
+        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+        const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+        
+        return hasValidExtension;
     }
 }
