@@ -1,8 +1,8 @@
 <span id="top"></span>
 
-<div *ngIf="!identity.actived" class="jumbotron bg-white py-4 mb-2">
+<div *ngIf="!identity.actived" class="bg-white py-5 mb-2 px-4 rounded border">
     <h2 class="">Bienvenido a
-        <strong class="display-4 text-primary font-weight-bolder rd">
+        <strong class="display-4 text-primary fw-bolder rd">
             RedDinámica
         </strong>
     </h2>
@@ -26,7 +26,7 @@
             </label>
         </div>
         <div class="card-body">
-            <div class="form-group row mb-0 justify-content-center">
+            <div class="row mb-0 justify-content-center">
                 <div class="col-2 align-items-center">
                     <a class="nav-link d-flex">
                         <div class=" flex-shrink-0 rounded-circle border-1 overflow-hidden me-2"
@@ -66,7 +66,7 @@
 
             </div>
             <div class="text-end py-1 px-0 bg-transparent">
-                <div class="form-group row mb-0 d-flex align-items-center">
+                <div class="row mb-0 d-flex align-items-center">
                     <div class="col-9">
                         <div *ngIf="status === 'error'; successMessage"
                             class="alert alert-danger fade show text-center m-0" role="alert">
@@ -114,7 +114,7 @@
 <div *ngIf="loading" class="card-body">
     <div class="text-muted text-center">
         <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-            <span class="sr-only">Loading...</span>
+            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
 </div>
