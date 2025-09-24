@@ -120,8 +120,6 @@ La implementación incluye soporte para iconos "maskable", siguiendo las especif
 #### 4.2.1 Métricas de Usabilidad
 
 **Instalación:**
-- Reducción del 73% en pasos requeridos para acceso
-- Eliminación de dependencia de tiendas de aplicaciones
 - Instalación directa desde navegador web
 
 **Rendimiento:**
