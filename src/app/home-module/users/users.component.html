@@ -8,24 +8,24 @@
 
     <div class="card-body">
 
-        <div class="form-group">
-            <form class="row">
-                <div *ngFor="let category of categories" class="col">
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="{{category.value}}"
+        <form class="categories-form">
+            <div class="categories-container">
+                <div *ngFor="let category of categories" class="category-item">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="{{category.value}}"
                             (click)="setCategory(category.value)">
-                        <label class="custom-control-label" for="{{category.value}}">
+                        <label class="form-check-label" for="{{category.value}}">
                             {{category.label}}
                         </label>
                     </div>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
         <div class="form-group row">
             <div class="col">
                 <form>
                     <div class="input-group mb-2">
-                        <div class="input-group-prepend">
+                        <div class="input-group-text">
                             <div class="input-group-text">Filtrar:</div>
                         </div>
                         <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Filtro"
@@ -64,9 +64,10 @@
                                     <h5>{{user.name}} {{user.surname}}</h5>
                                 </a>
 
-
-                                <span
-                                    class="badge {{labelProfile[user.role].class}}">{{labelProfile[user.role].label}}</span>
+                                <span *ngIf="labelProfile[user.role]"
+                                    class="badge badge-role {{labelProfile[user.role].class}}">
+                                    <i class="fas fa-user-tag me-1"></i>{{labelProfile[user.role].label}}
+                                </span>
                             </div>
 
 
@@ -121,8 +122,10 @@
                                     <h5>{{user.name}} {{user.surname}}</h5>
                                 </a>
 
-                                <span
-                                    class="badge {{labelProfile[user.role].class}}">{{labelProfile[user.role].label}}</span>
+                                <span *ngIf="labelProfile[user.role]"
+                                    class="badge badge-role {{labelProfile[user.role].class}}">
+                                    <i class="fas fa-user-tag me-1"></i>{{labelProfile[user.role].label}}
+                                </span>
                             </div>
 
                             <div class="col text-center">

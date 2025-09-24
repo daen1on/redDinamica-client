@@ -55,7 +55,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.counters = { 
             following: 0, 
             followed: 0,
-            publications: 0
+            publications: 0,
+            lessons: 0
         }
         
         this.profilePicVersion = new Date().getTime(); // Inicializar versión de imagen
@@ -326,6 +327,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
         }, 300);
     }
 
+    // Función para navegar a lecciones
+    goToLessons() {
+        this._router.navigate(['/perfil', this.ownProfile._id.toString(), 'lecciones']);
+        console.log('Navegando a lecciones');
+        
+        // Scroll automático hacia abajo después de un breve delay
+        setTimeout(() => {
+            this.scrollToContent();
+        }, 300);
+    }
+
     // Función de compatibilidad
     public TempU;
     getus_old(userId){
@@ -337,6 +349,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
     isOnPublications(): boolean {
         const currentUrl = this._router.url;
         return currentUrl.includes('/publicaciones') || currentUrl.endsWith('/' + this.ownProfile._id);
+    }
+
+    // Verifica si estamos en una ruta que NO es publicaciones (para mostrar el botón flotante)
+    shouldShowFloatingButton(): boolean {
+        const currentUrl = this._router.url;
+        return currentUrl.includes('/lecciones') || 
+               currentUrl.includes('/info') || 
+               currentUrl.includes('/red') ||
+               currentUrl.includes('/editar');
     }
 
     // Método para actualizar la versión de la imagen de perfil
@@ -403,6 +424,34 @@ export class ProfileComponent implements OnInit, OnDestroy {
         
         // Si no tiene protocolo, agregar https://
         return 'https://' + trimmedLink;
+    }
+
+    // Método para abrir modal de unfollow con manejo correcto del DOM
+    openUnfollowModal(userId: string) {
+        this.getus(userId);
+        
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('unfollowus');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de dejar de seguir:', error);
+            }
+        }, 0);
     }
 }
 

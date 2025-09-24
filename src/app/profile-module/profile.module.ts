@@ -15,6 +15,7 @@ import { PublicationsComponent } from './publications/publications.component';
 import { LinkyModule } from 'ngx-linky';
 import { PublicationCardComponent } from '../shared/publication-card/publication-card.component';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
+import { UserLessonsService } from '../services/user-lessons.service';
 
 @NgModule({
     declarations: [
@@ -41,7 +42,8 @@ import { InfiniteScrollDirective } from './directives/infinite-scroll.directive'
         ProfileComponent
     ],
     providers: [
-        ProfileGuard
+        ProfileGuard,
+        UserLessonsService
     ],
 })
 export class ProfileModule { }

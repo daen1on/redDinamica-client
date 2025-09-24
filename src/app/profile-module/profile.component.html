@@ -2,135 +2,156 @@
 <div class="container" *ngIf="identity && ownProfile">
     <section id="profile">
 
-        <div class="container-fluid card my-3 rounded overflow-hidden bg-white" style="min-height: 250px;">
+        <div class="container-fluid card rounded overflow-hidden bg-white profile-header-card">
 
             <div class="row bg-primary">
-
                 <div class="col">
-
-                    <div class="row">
-
-                        <div class="card border-0 text-center">
-                             <div class="card-body" style="position: absolute; z-index: 5;">
-                                <div class="row profile-picture-row">
-                                    <div class="profile-picture-large-container">
+                    <div class="card border-0">
+                        <div class="card-body bg-primary p-4">
+                            
+                            <!-- Layout horizontal centrado: Foto + Info + Contadores -->
+                            <div class="row align-items-center justify-content-center">
+                                
+                                <!-- Columna 1: Foto de perfil -->
+                                <div class="col-lg-3 col-md-3 text-center">
+                                    <div class="profile-picture-container-compact">
                                         <img *ngIf="!ownProfile?.picture" 
-                                             class="profile-picture-large"
+                                             class="profile-picture-compact"
                                              src="assets/images/user-default.png"
                                              alt="Imagen por defecto">
                                         <img *ngIf="ownProfile?.picture" 
-                                             class="profile-picture-large"
+                                             class="profile-picture-compact"
                                              [src]="url + 'get-image-user/' + ownProfile.picture + '?v=' + profilePicVersion"
                                              alt="Foto de perfil">
                                     </div>
-                                </div>
-                                <div class="mt-2">
-                                    <button *ngIf="identity?._id == ownProfile?._id" 
-                                            class="btn btn-danger btn-profile-action"
-                                            [routerLink]="['/perfil/', ownProfile._id, 'editar']"> 
-                                        <i class="fas fa-edit me-2"></i>Editar perfil
-                                    </button>
-
-                                    <button *ngIf="identity?._id != ownProfile?._id && !following" 
-                                            class="btn btn-follow-primary btn-profile-action" 
-                                            (click)="followUser(ownProfile._id.toString())">
-                                        <i class="fas fa-user-plus me-2"></i>Seguir
-                                    </button>
-
-                                    <button *ngIf="identity?._id != ownProfile?._id && following" 
-                                            type="button" 
-                                            class="btn btn-following btn-profile-action"
-                                            (mouseenter)="mouseEnter(ownProfile._id.toString())" 
-                                            (mouseleave)="mouseLeave()"
-                                            [class.btn-unfollow]="ownProfile._id == followUserOver"
-                                            (click)="getus(ownProfile._id.toString())" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#unfollowus">
-                                        <span *ngIf="ownProfile._id == followUserOver; else followingTemplate">
-                                            <i class="fas fa-user-minus me-2"></i>Dejar de seguir
-                                        </span>
-                                        <ng-template #followingTemplate>
-                                            <span>
-                                                <i class="fas fa-user-check me-2"></i>Siguiendo
-                                            </span>
-                                        </ng-template>
-                                    </button>
-
-                                </div>
-                            </div>
-
-                            <div class="card-body bg-primary"
-                                style="position: relative; z-index: 1; margin-top: 6rem; border-radius: 0;">
-
-                                <div class="mt-3 profile-header">
-                                    <h2 class="text-white text-capitalize">
-                                        <strong>{{ownProfile?.name}} {{ownProfile?.surname}}</strong>
-                                    </h2>
-                                    <span *ngIf="ownProfile?.role && hasRoleCategory(ownProfile.role.toString())" 
-                                          [class]="'badge ' + getRoleClass(ownProfile.role.toString())">
-                                          {{getRoleLabel(ownProfile.role.toString())}}
-                                    </span>
-                                </div>
-
-                                <!-- Información profesional -->
-                                <div class="mt-3 text-white profile-professional-info">
-                                    <p *ngIf="ownProfile?.profession" class="mb-1">
-                                        <small><i class="fas fa-briefcase me-2"></i>Profesión: {{ownProfile.profession.name}}</small>
-                                    </p>
-                                    <p *ngIf="ownProfile?.institution" class="mb-1">
-                                        <small><i class="fas fa-university me-2"></i>Institución educativa: {{ownProfile.institution.name}}</small> 
-                                    </p>
-                                    <p *ngIf="ownProfile?.city" class="mb-1">
-                                        <small><i class="fas fa-map-marker-alt me-2"></i>Vive en {{ownProfile.city.name}}, {{ownProfile.city.state}}, {{ownProfile.city.country}}</small>
-                                    </p>
-                                </div>
-
-                                <!-- Contadores clickeables -->
-                                <div class="row text-white mt-3">
-
-                                    <div class="col-md-4 text-center counter-clickable" 
-                                         (click)="goToPublications()"
-                                         title="Ver publicaciones">
-                                        <h5 class="counter-number">{{counters?.publications || 0}}</h5>
-                                        <span class="counter-label">Publicaciones</span>
-                                    </div>
-
-                                    <div class="col-md-4 text-center counter-clickable" 
-                                         (click)="showFollowers()"
-                                         title="Ver seguidores">
-                                        <h5 class="counter-number">{{counters?.followed || 0}}</h5>
-                                        <span class="counter-label">Seguidores</span>
-                                    </div>
                                     
-                                    <div class="col-md-4 text-center counter-clickable" 
-                                         (click)="showFollowing()"
-                                         title="Ver siguiendo">
-                                        <h5 class="counter-number">{{counters?.following || 0}}</h5>
-                                        <span class="counter-label">Siguiendo</span>
-                                    </div>
+                                    <!-- Botón de acción debajo de la foto -->
+                                    <div class="mt-3">
+                                        <button *ngIf="identity?._id == ownProfile?._id" 
+                                                class="btn btn-danger btn-profile-action-compact"
+                                                [routerLink]="['/perfil/', ownProfile._id, 'editar']"> 
+                                            <i class="fas fa-edit me-2"></i>Editar perfil
+                                        </button>
 
+                                        <button *ngIf="identity?._id != ownProfile?._id && !following" 
+                                                class="btn btn-follow-primary btn-profile-action-compact" 
+                                                (click)="followUser(ownProfile._id.toString())">
+                                            <i class="fas fa-user-plus me-2"></i>Seguir
+                                        </button>
+
+                                        <button *ngIf="identity?._id != ownProfile?._id && following" 
+                                                type="button" 
+                                                class="btn btn-following btn-profile-action-compact"
+                                                (mouseenter)="mouseEnter(ownProfile._id.toString())" 
+                                                (mouseleave)="mouseLeave()"
+                                                [class.btn-unfollow]="ownProfile._id == followUserOver"
+                                                (click)="openUnfollowModal(ownProfile._id.toString())">
+                                            <span *ngIf="ownProfile._id == followUserOver; else followingTemplate">
+                                                <i class="fas fa-user-minus me-2"></i>Dejar de seguir
+                                            </span>
+                                            <ng-template #followingTemplate>
+                                                <span>
+                                                    <i class="fas fa-user-check me-2"></i>Siguiendo
+                                                </span>
+                                            </ng-template>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Columna 2: Información del usuario -->
+                                <div class="col-lg-5 col-md-5 text-center text-lg-start">
+                                    <div class="profile-info-compact text-white">
+                                        <h2 class="text-white text-capitalize mb-2">
+                                            <strong>{{ownProfile?.name}} {{ownProfile?.surname}}</strong>
+                                        </h2>
+                                        <div class="mb-3">
+                                            <span *ngIf="ownProfile?.role && hasRoleCategory(ownProfile.role.toString())" 
+                                                  [class]="'badge role-badge role-' + ownProfile.role.toString().toLowerCase() + ' ' + getRoleClass(ownProfile.role.toString())">
+                                                  <i class="fas fa-user-tag me-1"></i>{{getRoleLabel(ownProfile.role.toString())}}
+                                            </span>
+                                        </div>
+
+                                        <!-- Información profesional compacta -->
+                                        <div class="profile-professional-info-compact">
+                                            <p *ngIf="ownProfile?.profession" class="mb-1">
+                                                <small><i class="fas fa-briefcase me-2"></i>{{ownProfile.profession.name}}</small>
+                                            </p>
+                                            <p *ngIf="ownProfile?.institution" class="mb-1">
+                                                <small><i class="fas fa-university me-2"></i>{{ownProfile.institution.name}}</small> 
+                                            </p>
+                                            <p *ngIf="ownProfile?.city" class="mb-1">
+                                                <small><i class="fas fa-map-marker-alt me-2"></i>{{ownProfile.city.name}}, {{ownProfile.city.state}}, {{ownProfile.city.country}}</small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Columna 3: Contadores compactos reorganizados -->
+                                <div class="col-lg-4 col-md-4">
+                                    <div class="row text-white counters-compact justify-content-center">
+                                        
+                                        <!-- Primera fila: Publicaciones y Lecciones -->
+                                        <div class="col-6 mb-3">
+                                            <div class="counter-compact text-center" 
+                                                 (click)="goToPublications()"
+                                                 title="Ver publicaciones">
+                                                <div class="counter-number-compact">{{counters?.publications || 0}}</div>
+                                                <div class="counter-label-compact">Publicaciones</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 mb-3">
+                                            <div class="counter-compact text-center" 
+                                                 (click)="goToLessons()"
+                                                 title="Ver lecciones">
+                                                <div class="counter-number-compact">{{counters?.lessons || 0}}</div>
+                                                <div class="counter-label-compact">Lecciones</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Segunda fila: Seguidores y Siguiendo -->
+                                        <div class="col-6 mb-3">
+                                            <div class="counter-compact text-center" 
+                                                 (click)="showFollowers()"
+                                                 title="Ver seguidores">
+                                                <div class="counter-number-compact">{{counters?.followed || 0}}</div>
+                                                <div class="counter-label-compact">Seguidores</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 mb-3">
+                                            <div class="counter-compact text-center" 
+                                                 (click)="showFollowing()"
+                                                 title="Ver siguiendo">
+                                                <div class="counter-number-compact">{{counters?.following || 0}}</div>
+                                                <div class="counter-label-compact">Siguiendo</div>
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </div>
 
                             </div>
 
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
         </div>
 
     </section>
 
-    <section id="menu">
+    <section id="menu" class="mt-0">
 
-        <nav class="navbar navbar-expand-lg navbar-light bg-white rounded" style="border: 1px solid #dee2e6;">
+        <nav class="navbar navbar-expand-lg rounded profile-menu-nav" style="border: 1px solid #dee2e6;"
+             [class.navbar-light]="true"
+             [class.bg-white]="true"
+             [class.navbar-dark]="false"
+             [class.bg-dark]="false">
 
             <div class="container-fluid">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 w-100 justify-content-around">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 w-100 justify-content-around" style="justify-content: space-evenly;">
 
                     <li class="nav-item" *ngFor="let menu of menuOptions">
                         <a class="nav-link" [routerLink]="['/perfil/', ownProfile?._id, menu.value]"
@@ -141,20 +162,6 @@
                     </li>
 
                 </ul>
-                
-                <!-- Botón flotante para volver a publicaciones -->
-                <button *ngIf="!isOnPublications()" 
-                        class="btn position-fixed rounded-circle shadow-lg d-flex align-items-center justify-content-center"
-                        style="right: 20px; bottom: 20px; width: 60px; height: 60px; z-index: 1000; 
-                               background-color: #6c757d; border: 2px solid #2c3e50; color: white;
-                               transition: all 0.3s ease;"
-                        [routerLink]="['/perfil/', ownProfile?._id, 'publicaciones']"
-                        [queryParams]="{ scrollTo: 'top' }"
-                        title="Volver a publicaciones"
-                        onmouseover="this.style.backgroundColor='#2c3e50'; this.style.transform='scale(1.1)'"
-                        onmouseout="this.style.backgroundColor='#6c757d'; this.style.transform='scale(1)'">
-                    <i class="fas fa-newspaper fa-lg"></i>
-                </button>
             </div>
 
         </nav>
@@ -162,7 +169,7 @@
     </section>
 
     <!-- Layout de dos columnas -->
-    <section id="content" class="mt-3">
+    <section id="content" class="mt-0">
         <div class="row">
             <!-- Columna izquierda: Información fija del perfil -->
             <div class="col-lg-4 col-md-5">
@@ -228,6 +235,15 @@
             </div>
         </div>
     </section>
+
+    <!-- Botón flotante para volver a publicaciones -->
+    <button *ngIf="shouldShowFloatingButton()" 
+            class="btn floating-publications-btn position-fixed rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+            [routerLink]="['/perfil/', ownProfile?._id, 'publicaciones']"
+            [queryParams]="{ scrollTo: 'top' }"
+            title="Volver a publicaciones">
+        <i class="fas fa-newspaper fa-lg"></i>
+    </button>
 
 </div>
 

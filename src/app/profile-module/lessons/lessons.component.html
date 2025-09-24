@@ -1,13 +1,343 @@
-<div class="card">
-        <div class="card-header">
-            <h3 class="m-0 text-primary font-weight-bolder">{{title}}</h3>
+<!-- Lessons Module según DESIGN_LESSONS_PROFILE.md -->
+<div class="lessons-container">
+    
+    <!-- Header con configuración -->
+    <div class="lessons-header card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="m-0 text-primary">
+                <i class="fas fa-book me-2"></i>
+                {{title}}
+            </h3>
+            <!-- Config button (solo para propietario) -->
+            <button *ngIf="isOwner" 
+                    class="btn btn-outline-secondary btn-sm" 
+                    (click)="toggleConfig()"
+                    [class.active]="showConfig">
+                <i class="fas fa-cog me-1"></i>
+                Config
+            </button>
         </div>
-        <div class="card-body">
-    
-    
-                ...              
-    
 
-    
+        <!-- Panel de configuración (solo propietario) -->
+        <div *ngIf="isOwner && showConfig" class="card-body border-top">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                               [(ngModel)]="privacySettings.showLessonsInProfile"
+                               (change)="updatePrivacySettings()"
+                               id="showLessonsCheck">
+                        <label class="form-check-label" for="showLessonsCheck">
+                            Mostrar mis lecciones en mi perfil
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" 
+                               [(ngModel)]="privacySettings.allowCollaborationRequests"
+                               (change)="updatePrivacySettings()"
+                               id="allowCollabCheck">
+                        <label class="form-check-label" for="allowCollabCheck">
+                            Permitir solicitudes de colaboración
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="loading" class="card">
+        <div class="card-body text-center py-5">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="text-muted">Cargando lecciones y estadísticas...</p>
+        </div>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="!loading && status === 'error'" class="card">
+        <div class="card-body">
+            <div class="alert alert-danger mb-0">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Hubo un error al cargar las lecciones. Por favor, intenta de nuevo.
+            </div>
+        </div>
+    </div>
+
+    <!-- Estados según el diseño -->
+    <div *ngIf="!loading && status !== 'error' && status !== 'success'">
+        
+        <!-- Estado: Lecciones deshabilitadas por el propietario -->
+        <div *ngIf="status === 'disabled_by_owner'" class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-eye-slash text-muted" style="font-size: 3rem;"></i>
+                <h4 class="text-muted mt-3">Lecciones ocultas</h4>
+                <p class="text-muted">Has deshabilitado la visualización de lecciones en tu perfil.</p>
+                <button class="btn btn-primary" (click)="toggleConfig()">
+                    <i class="fas fa-cog me-2"></i>
+                    Configurar visibilidad
+                </button>
+            </div>
+        </div>
+
+        <!-- Estado: Sin lecciones públicas (propietario) -->
+        <div *ngIf="status === 'no_public_lessons_owner'" class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-book-open text-muted" style="font-size: 3rem;"></i>
+                <h4 class="text-muted mt-3">Configura la visibilidad de tus lecciones</h4>
+                <p class="text-muted">
+                    Tienes lecciones completadas, pero ninguna está configurada como pública.
+                </p>
+                <button class="btn btn-primary" (click)="toggleConfig()">
+                    <i class="fas fa-cog me-2"></i>
+                    Configurar visibilidad
+                </button>
+            </div>
+        </div>
+
+        <!-- Estado: Sin lecciones públicas (visitante) -->
+        <div *ngIf="status === 'no_public_lessons_visitor'" class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-user-lock text-muted" style="font-size: 3rem;"></i>
+                <h4 class="text-muted mt-3">Sin lecciones públicas</h4>
+                <p class="text-muted">
+                    {{ownProfile?.name}} no ha compartido lecciones públicamente.
+                </p>
+            </div>
+        </div>
+
+        <!-- Estado: Vacío -->
+        <div *ngIf="status === 'empty'" class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-graduation-cap text-muted" style="font-size: 3rem;"></i>
+                <h4 class="text-muted mt-3">Sin lecciones completadas</h4>
+                <p class="text-muted">
+                    <span *ngIf="isOwner">Aún no has completado ninguna lección.</span>
+                    <span *ngIf="!isOwner">Este usuario no ha completado lecciones aún.</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido principal: Estadísticas + Lecciones -->
+    <div *ngIf="!loading && status === 'success'">
+        
+        <!-- Sección de Estadísticas -->
+        <div *ngIf="stats" class="card mb-4">
+            <div class="card-header">
+                <h5 class="m-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Estadísticas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <!-- Total de lecciones -->
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="stat-card p-3 border rounded">
+                            <div class="stat-icon text-primary mb-2">
+                                <i class="fas fa-book" style="font-size: 2rem;"></i>
+                            </div>
+                            <h4 class="mb-1">{{stats.totalCompleted}}</h4>
+                            <small class="text-muted">Lecciones</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Áreas de conocimiento -->
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="stat-card p-3 border rounded">
+                            <div class="stat-icon text-success mb-2">
+                                <i class="fas fa-bullseye" style="font-size: 2rem;"></i>
+                            </div>
+                            <h4 class="mb-1">{{stats.knowledgeAreas.length}}</h4>
+                            <small class="text-muted">Áreas</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Rol principal -->
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="stat-card p-3 border rounded">
+                            <div class="stat-icon text-warning mb-2">
+                                <i class="fas fa-user-graduate" style="font-size: 2rem;"></i>
+                            </div>
+                            <h4 class="mb-1">{{stats.totalAsAuthor}}</h4>
+                            <small class="text-muted">Como Autor</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Rating promedio -->
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="stat-card p-3 border rounded">
+                            <div class="stat-icon text-info mb-2">
+                                <i class="fas fa-star" style="font-size: 2rem;"></i>
+                            </div>
+                            <h4 class="mb-1">{{stats.averageRating.toFixed(1)}}</h4>
+                            <small class="text-muted">Rating</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Áreas de conocimiento -->
+                <div *ngIf="stats.knowledgeAreas.length > 0" class="mt-4">
+                    <h6 class="mb-3">Áreas de Especialización:</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span *ngFor="let area of stats.knowledgeAreas" 
+                              class="badge bg-{{getAreaBadgeClass(area)}} px-3 py-2">
+                            {{area.name}} ({{area.count}})
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="me-3"><strong>Filtrar por:</strong></span>
+                    
+                    <!-- Filtros de rol -->
+                    <button *ngFor="let role of availableRoles" 
+                            class="btn btn-sm"
+                            [class.btn-primary]="selectedRole === role.value"
+                            [class.btn-outline-secondary]="selectedRole !== role.value"
+                            (click)="setRoleFilter(role.value)">
+                        <span class="me-1">{{role.icon}}</span>
+                        {{role.label}}
+                    </button>
+                    
+                    <!-- Limpiar filtros -->
+                    <button *ngIf="selectedRole !== 'all'" 
+                            class="btn btn-sm btn-outline-danger"
+                            (click)="clearFilters()">
+                        <i class="fas fa-times me-1"></i>
+                        Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Lecciones -->
+        <div class="lessons-list">
+            
+            <!-- Contador de resultados -->
+            <div class="mb-3">
+                <small class="text-muted">
+                    <i class="fas fa-list me-1"></i>
+                    {{total}} lección{{total !== 1 ? 'es' : ''}} encontrada{{total !== 1 ? 's' : ''}}
+                </small>
+            </div>
+
+            <!-- Cards de lecciones -->
+            <div *ngFor="let lesson of lessons; let i = index" class="lesson-card mb-3">
+                <div class="card h-100" 
+                     [class.border-warning]="isOwner && isLessonHidden(lesson.id)">
+                    <div class="card-body">
+                        <div class="row align-items-start">
+                            
+                            <!-- Contenido principal -->
+                            <div class="col">
+                                
+                                <!-- Header con título y badges -->
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">
+                                        <a [routerLink]="['/leccion', lesson.id]" 
+                                           class="text-decoration-none">
+                                            {{lesson.title}}
+                                        </a>
+                                    </h5>
+                                    
+                                    <!-- Vistas -->
+                                    <div class="text-muted small">
+                                        <i class="fas fa-eye me-1"></i>
+                                        {{formatViews(lesson.views)}}
+                                    </div>
+                                </div>
+                                
+                                <!-- Meta información -->
+                                <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        Completada: {{formatDate(lesson.completionDate)}}
+                                    </small>
+                                    
+                                    <span class="badge bg-{{getRoleBadgeClass(lesson.userRole)}}">
+                                        {{getRoleLabel(lesson.userRole)}}
+                                    </span>
+                                    
+                                    <span *ngIf="lesson.rating > 0" class="text-warning small">
+                                        {{getRatingStars(lesson.rating)}} {{lesson.rating.toFixed(1)}}
+                                    </span>
+                                </div>
+                                
+                                <!-- Descripción -->
+                                <p *ngIf="lesson.description" class="card-text text-muted mb-3">
+                                    {{truncateDescription(lesson.description, 150)}}
+                                </p>
+                                
+                                <!-- Áreas de conocimiento -->
+                                <div *ngIf="lesson.knowledgeAreas && lesson.knowledgeAreas.length > 0" 
+                                     class="d-flex flex-wrap gap-1 mb-2">
+                                    <span *ngFor="let area of lesson.knowledgeAreas" 
+                                          class="badge bg-{{getAreaBadgeClass(area)}} text-dark">
+                                        {{getAreaName(area)}}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Acciones -->
+                            <div class="col-auto">
+                                <div class="d-flex flex-column gap-2">
+                                    <!-- Ver lección -->
+                                    <button class="btn btn-outline-primary btn-sm" 
+                                            (click)="goToLesson(lesson.id)">
+                                        <i class="fas fa-eye me-1"></i>
+                                        Ver más
+                                    </button>
+                                    
+                                    <!-- Toggle visibilidad (solo propietario) -->
+                                    <button *ngIf="isOwner" 
+                                            class="btn btn-sm"
+                                            [class.btn-outline-warning]="!isLessonHidden(lesson.id)"
+                                            [class.btn-warning]="isLessonHidden(lesson.id)"
+                                            (click)="toggleLessonVisibility(lesson.id)"
+                                            [title]="isLessonHidden(lesson.id) ? 'Mostrar en perfil' : 'Ocultar del perfil'">
+                                        <i class="fas" 
+                                           [class.fa-eye-slash]="isLessonHidden(lesson.id)"
+                                           [class.fa-eye]="!isLessonHidden(lesson.id)"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Indicador de lección oculta (solo propietario) -->
+                        <div *ngIf="isOwner && isLessonHidden(lesson.id)" 
+                             class="alert alert-warning alert-sm mt-2 mb-0">
+                            <i class="fas fa-eye-slash me-2"></i>
+                            <small>Esta lección está oculta de tu perfil público</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón ver más -->
+            <div *ngIf="!noMore && page < pages" class="text-center mt-4">
+                <button class="btn btn-primary px-4" (click)="viewMore()">
+                    <i class="fas fa-plus me-2"></i>
+                    Ver más lecciones
+                </button>
+            </div>
+            
+            <!-- Fin de resultados -->
+            <div *ngIf="noMore && lessons.length > 0" class="text-center mt-4">
+                <small class="text-muted">
+                    <i class="fas fa-check me-1"></i>
+                    Has visto todas las lecciones disponibles
+                </small>
+            </div>
+        </div>
         </div>
     </div>

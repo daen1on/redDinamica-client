@@ -1,50 +1,41 @@
 <div class="card" #infoCard>
     <div class="card-header">
-        <h3 class="card-header bg-info text-white">{{title}}</h3>
+        <h3 class="m-0 text-white">{{title}}</h3>
     </div>
-    <div class="card-body">
+    <div class="card-body profile-info">
 
 
-        <div *ngFor="let field of fieldsForm" class="row">
-
-            <label *ngIf="identity[field.attr]" for="{{field.id}}" class="col-2">
-                <strong> {{field.label}}:</strong>
-
-            </label>
-            <div class="col-10">
-                <p *ngIf="identity[field.attr] && field.type == 'text'" id="{{field.id}}">
-                    {{identity[field.attr]}}
-                </p>
-                <p *ngIf="identity[field.attr] && field.type == 'select' && field.autocomplete && field.id != 'city'"
-                    id="{{field.id}}">
-                    {{identity[field.attr].name}}
-                </p>
-                <p *ngIf="identity[field.attr] && field.type == 'select' && field.autocomplete && field.id == 'city'"
-                    id="{{field.id}}">
-                    {{identity[field.attr].name}}, {{identity[field.attr].state}}, {{identity[field.attr].country}}
-                </p>
-                <div *ngIf="identity[field.attr] && field.type == 'textarea'" id="{{field.id}}">
-                    <p *ngFor="let text of identity[field.attr].split('\n')">
-                        {{text}}
+        <ng-container *ngFor="let field of fieldsForm">
+            <div *ngIf="identity[field.attr]" class="row align-items-start">
+                <label for="{{field.id}}" class="col-md-3 col-12 profile-label">
+                    <strong>{{field.label}}:</strong>
+                </label>
+                <div class="col-md-9 col-12 profile-value">
+                    <p *ngIf="field.type == 'text'" id="{{field.id}}">
+                        {{identity[field.attr]}}
                     </p>
-                </div>
-                <div *ngIf="identity[field.attr] && field.type == 'list'" id="{{field.id}}">
-                    <div class="social-links-container">
-                        <div *ngFor="let link of getSocialLinks(identity[field.attr]); let i = index" 
-                             class="social-link-item mb-2">
-                            <a [href]="formatLink(link)" 
-                               target="_blank" 
-                               [title]="'Visitar ' + link.trim()" 
-                               class="btn btn-outline-primary btn-sm d-flex align-items-center">
-                                <i class="fas fa-external-link-alt me-2"></i>
-                                <span class="text-truncate">{{ link.trim() }}</span>
-                            </a>
+                    <p *ngIf="field.type == 'select' && field.autocomplete && field.id != 'city'" id="{{field.id}}">
+                        {{identity[field.attr].name}}
+                    </p>
+                    <p *ngIf="field.type == 'select' && field.autocomplete && field.id == 'city'" id="{{field.id}}">
+                        {{identity[field.attr].name}}, {{identity[field.attr].state}}, {{identity[field.attr].country}}
+                    </p>
+                    <div *ngIf="field.type == 'textarea'" id="{{field.id}}">
+                        <p *ngFor="let text of identity[field.attr].split('\n')">{{text}}</p>
+                    </div>
+                    <div *ngIf="field.type == 'list'" id="{{field.id}}">
+                        <div class="social-links-container">
+                            <div *ngFor="let link of getSocialLinks(identity[field.attr]); let i = index" class="social-link-item mb-2">
+                                <a [href]="formatLink(link)" target="_blank" [title]="'Visitar ' + link.trim()" class="btn btn-outline-primary btn-sm d-flex align-items-center">
+                                    <i class="fas fa-external-link-alt me-2"></i>
+                                    <span class="text-truncate">{{ link.trim() }}</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-        </div>
+        </ng-container>
 
 
 

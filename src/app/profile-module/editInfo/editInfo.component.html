@@ -1,6 +1,6 @@
 <div class="card">
     <div class="card-header">
-      <h3 class="m-0 text-primary font-weight-bolder">{{title}}</h3>
+      <h3 class="m-0 text-primary fw-bolder">{{title}}</h3>
     </div>
     <div class="card-body">
       <div *ngIf="errorMessages.length > 0" class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -15,7 +15,7 @@
          </div>
 
 
-      <div *ngIf="status === 'warning'" class="alert alert-warning alert-dismissible fade show text-center" role="alert">
+  <div *ngIf="status === 'warning'" class="alert alert-warning alert-dismissible fade show text-center" role="alert">
         <i class="fas fa-check-circle icon-message me-2"></i>
         Se está subiendo la foto, por favor evita cerrar la página.
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -39,7 +39,7 @@
       </div>
   
       <form [formGroup]="editForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
-        <div class="form-group row align-items-end">
+        <div class="mb-3 row align-items-end">
           <label for="profileImage" class="col-3 col-form-label">
             <strong>Foto de perfil</strong>
           </label>
@@ -52,7 +52,7 @@
           <div #progress class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
             [style.width]="barWidth" aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
         </div>
-        <div *ngFor="let field of fieldsForm" class="form-group row">
+        <div *ngFor="let field of fieldsForm" class="mb-3 row">
           <label for="{{field.id}}" class="col-3 col-form-label">
             <strong>{{field.label}}</strong>
           </label>
@@ -110,7 +110,7 @@
           </div>
         </div>
   
-        <div class="form-group row mb-5">
+        <div class="mb-3 row mb-5">
           <div class="col-3 offset-9 text-end">
             <button type="submit" class="btn btn-warning">
               Guardar cambios
