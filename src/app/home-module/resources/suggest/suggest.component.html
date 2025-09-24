@@ -1,15 +1,13 @@
 <!-- Resources suggest modal-->
-<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="add" aria-hidden="true" data-keyboard="false" data-backdrop="static" >
-    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document" id="modalD">
+<div class="modal fade" id="add" tabindex="-1" aria-labelledby="addTitle" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" id="modalD">
         <form [formGroup]="addForm" (ngSubmit)="onSubmit()" class="modal-content" enctype="multipart/form-data"
             (input)="onChanges()">
             <!-- modal-header -->
             <div class="modal-header">
                 <h5 class="modal-title" id="addTitle">Sugerir un recurso para el repositorio</h5>
                 <button type="button" class="buttonClose" id="closeBtn" data-bs-dismiss="modal" style="display: none;"> Close</button>
-                <button  type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#cancelModal" aria-label="Close" >
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <!-- /modal-header -->
 
@@ -22,10 +20,20 @@
                     {{errorMsg}}
                 </div>
 
-                <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center"
+                <div *ngIf="status === 'success' && showSuccessActions" class="alert alert-success fade show text-center"
                     role="alert">
                     <i class="fas fa-check-circle icon-message me-2"></i>
                     {{successMsg}}
+                    
+                    <!-- Opciones después del éxito -->
+                    <div class="mt-3 d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-primary" (click)="createAnotherResource()">
+                            <i class="fas fa-plus"></i> Sugerir Otro Recurso
+                        </button>
+                        <button type="button" class="btn btn-secondary" (click)="closeAndRefresh()">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                    </div>
                 </div>  
 
                 <div *ngIf="status === 'warning'; successMessage" class="alert alert-warning fade show text-center"
@@ -39,7 +47,7 @@
                     {{deletedMsg}}
                 </div>  
                 
-                <div *ngFor="let field of fields" class="form-group row">
+                <div *ngFor="let field of fields" class="mb-3 row" [ngStyle]="{'display': showSuccessActions ? 'none' : 'flex'}">
                     <label for="{{field.id}}" class="col-3 col-form-label">
                         <strong>{{field.label}}<span *ngIf="field.required">*</span></strong>
                     </label>
@@ -91,14 +99,14 @@
             <!-- /modal-body -->
 
             <!-- modal-footer -->
-            <div class="modal-footer">
+            <div class="modal-footer" [ngStyle]="{'display': showSuccessActions ? 'none' : 'flex'}">
                 <div data-bs-toggle="modal" data-bs-target="#cancelModal" >
                 <button type="button" class="btn btn-danger"   >Cancelar</button>
                 </div>
                 <button type="submit" [disabled]="loading" class="btn btn-success">
                     <span *ngIf="loading && !addForm.invalid" class="spinner-border spinner-border-sm" role="status"
                         aria-hidden="true"></span>
-                    <span class="sr-only">Enviar</span>
+                    <span class="visually-hidden">Enviar</span>
                     Enviar
                 </button>
             </div>

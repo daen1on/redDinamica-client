@@ -18,6 +18,41 @@ export class LessonDetailsComponent {
     public lesson_states = LESSON_STATES;
     
     public loading = true;
+    public showMotivationalMessage = true;
+    
+    // Configuración de progreso y mensajes por estado
+    public progressConfig = {
+        proposed: {
+            progress: 20,
+            message: "¡Excelente! Tu propuesta ha sido recibida. El equipo administrativo la está revisando. ¡Pronto tendrás noticias!",
+            icon: "fas fa-lightbulb",
+            color: "secondary"
+        },
+        assigned: {
+            progress: 40,
+            message: "¡Felicitaciones! Tu lección ha sido asignada. Es momento de formar tu equipo de desarrollo y comenzar a trabajar.",
+            icon: "fas fa-users",
+            color: "warning"
+        },
+        development: {
+            progress: 60,
+            message: "¡Están en pleno desarrollo! El equipo está trabajando duro. ¡Sigan así, están haciendo un gran trabajo!",
+            icon: "fas fa-code",
+            color: "info"
+        },
+        test: {
+            progress: 80,
+            message: "¡Ya casi terminan! La lección está en fase de pruebas. ¡El último esfuerzo los llevará al éxito!",
+            icon: "fas fa-flask",
+            color: "primary"
+        },
+        completed: {
+            progress: 100,
+            message: "¡Increíble! ¡Han completado la lección exitosamente! Su trabajo contribuye al crecimiento de toda la comunidad educativa.",
+            icon: "fas fa-trophy",
+            color: "success"
+        }
+    };
 
     constructor(private _userService: UserService) {        
         this.url = GLOBAL.url;
@@ -26,6 +61,40 @@ export class LessonDetailsComponent {
 
     ngOnInit(): void {
         this.loading = false;
+        
+        // Asegurar que lesson.level sea siempre un array para el template
+        if (this.lesson && this.lesson.level && !Array.isArray(this.lesson.level)) {
+            this.lesson.level = [this.lesson.level];
+        }
+        
+        // Verificar si ya se leyó el mensaje para esta lección
+        this.checkMotivationalMessageStatus();
+    }
+    
+    getCurrentProgress(): number {
+        if (!this.lesson?.state) return 0;
+        return this.progressConfig[this.lesson.state]?.progress || 0;
+    }
+    
+    getCurrentConfig() {
+        if (!this.lesson?.state) return null;
+        return this.progressConfig[this.lesson.state];
+    }
+    
+    checkMotivationalMessageStatus(): void {
+        if (!this.lesson?._id) return;
+        
+        const messageKey = `motivational_message_${this.lesson._id}_${this.lesson.state}`;
+        const isRead = localStorage.getItem(messageKey);
+        this.showMotivationalMessage = !isRead;
+    }
+    
+    dismissMotivationalMessage(): void {
+        if (!this.lesson?._id) return;
+        
+        const messageKey = `motivational_message_${this.lesson._id}_${this.lesson.state}`;
+        localStorage.setItem(messageKey, 'read');
+        this.showMotivationalMessage = false;
     }
 
     

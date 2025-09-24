@@ -1,21 +1,21 @@
 <div class="container">
     <div class="row py-3">
       <div class="col-3" style="position:relative;">
-        <div class="accordion" id="menu" style="width:253px; position:fixed">
+        <div class="accordion home-sidebar" id="menu" style="width:253px; position:fixed">
           <div class="card rounded" [routerLink]="identity ? ['/perfil', identity._id] : ['/login']">
-            <a class="card-header bg-primary text-white d-flex align-items-center px-2" style="cursor: pointer">
+            <a class="card-header d-flex align-items-center px-2" style="cursor: pointer; background: #ffffff; color: #333;">
               <div class="rounded-circle border-1 flex-shrink-0 overflow-hidden" style="width: 40px; height:40px">
                 <img *ngIf="!identity || !identity.picture" class="img-fluid" src="assets/images/user-default.png">
                 <img *ngIf="identity && identity.picture" class="img-fluid" src="{{this.url+'get-image-user/'+ identity.picture}}">
               </div>
-              <h4 class="card-link text-center mb-0 ms-1 text-truncate">
+              <h4 class="text-center mb-0 ms-1 text-truncate" style="color: inherit; font-size: 1rem; font-weight: 600; line-height: 1.2;">
                 <strong>{{identity ? (identity.name + ' ' + identity.surname) : 'Usuario'}}</strong>
               </h4>
             </a>
           </div>
   
           <div class="card mt-2 rounded">
-            <button type="button" class="btn w-100 text-start d-flex justify-content-between py-2 btn-info" data-bs-toggle="collapse" data-bs-target="#start" aria-expanded="true" aria-controls="start" [routerLink]="['/inicio']">
+            <button type="button" class="btn nav-link w-100 text-start d-flex justify-content-between py-2 btn-info" data-bs-toggle="collapse" data-bs-target="#start" aria-expanded="true" aria-controls="start" [routerLink]="['/inicio']">
               <div>
                 <i class="text-ligth fas fa-home"></i>
                 <span class="ms-2">Inicio</span>
@@ -26,7 +26,7 @@
           <!-- lesson-button -->
           <div *ngIf="identity && identity.actived" class="card mt-2 rounded">
             <ng-container *ngIf="identity.role != 'guest'; else guestUser">
-              <button type="button" class="btn w-100 text-start d-flex justify-content-between py-2 btn-warning ps-3" data-bs-toggle="collapse" data-bs-target="#lesson" aria-expanded="false" aria-controls="lesson">
+              <button type="button" class="btn nav-link w-100 text-start d-flex justify-content-between py-2 btn-warning ps-3" data-bs-toggle="collapse" data-bs-target="#lesson" aria-expanded="false" aria-controls="lesson">
                 <div>
                   <i class="text-ligth fas fa-file-alt"></i>
                   <span class="ms-2">Lecciones</span>
@@ -54,7 +54,7 @@
               </div>
             </ng-container>
             <ng-template #guestUser>
-              <button type="button" class="btn w-100 text-start d-flex justify-content-between py-2 btn-warning ps-3" data-bs-toggle="collapse" data-bs-target="#lesson" aria-expanded="false" aria-controls="lesson" [routerLink]="[ '/inicio/lecciones']">
+              <button type="button" class="btn nav-link w-100 text-start d-flex justify-content-between py-2 btn-warning ps-3" data-bs-toggle="collapse" data-bs-target="#lesson" aria-expanded="false" aria-controls="lesson" [routerLink]="[ '/inicio/lecciones']">
                 <div>
                   <i class="text-ligth fas fa-file-alt"></i>
                   <span class="ms-2">Lecciones</span>
@@ -65,7 +65,7 @@
           <!-- /lesson-button -->
   
           <div *ngIf="identity && identity.actived" class="card mt-2 rounded">
-            <button type="button" class="btn w-100 text-start d-flex justify-content-between btn-danger ps-3" data-bs-toggle="collapse" data-bs-target="#resources" aria-expanded="true" aria-controls="resources" [routerLink]="['/inicio/recursos']">
+            <button type="button" class="btn nav-link w-100 text-start d-flex justify-content-between btn-danger ps-3" data-bs-toggle="collapse" data-bs-target="#resources" aria-expanded="true" aria-controls="resources" [routerLink]="['/inicio/recursos']">
               <div>
                 <i class="text-ligth fas fa-paperclip"></i>
                 <span class="ms-2">Repositorio</span>
@@ -74,10 +74,23 @@
           </div>
   
           <div class="card mt-2 rounded">
-            <button type="button" class="btn w-100 text-start d-flex justify-content-between py-2 btn-success" data-bs-toggle="collapse" data-bs-target="#user" aria-expanded="true" aria-controls="user" [routerLink]="['/inicio/usuarios']">
+            <button type="button" class="btn nav-link w-100 text-start d-flex justify-content-between py-2 btn-success" data-bs-toggle="collapse" data-bs-target="#user" aria-expanded="true" aria-controls="user" [routerLink]="['/inicio/usuarios']">
               <div>
                 <i class="text-ligth fas fa-user-friends"></i>
                 <span class="ms-2">Usuarios</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- RedDinámica Académica -->
+          <div *ngIf="identity && identity.actived" class="card mt-2 rounded">
+            <button type="button" class="btn nav-link w-100 text-start d-flex justify-content-between py-2 btn-info" [routerLink]="['/academia']">
+              <div>
+                <i class="text-ligth fas fa-graduation-cap"></i>
+                <span class="ms-2">RedDinámica Académica</span>
+                <span *ngIf="identity.studentBadge" class="badge bg-warning text-dark ms-2">
+                  <i class="fas fa-user-graduate"></i> Estudiante
+                </span>
               </div>
             </button>
           </div>

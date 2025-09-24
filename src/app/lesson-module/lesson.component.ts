@@ -89,20 +89,16 @@ export class LessonComponent implements OnInit {
     getLesson(lessonId){
         this._lessonService.getLesson(this.token,lessonId).subscribe(
             response => {
-                
                 if (response.lesson) {
                     this.status = 'success';
                     this.lesson = response.lesson;
-
                 } else {
                     this.status = 'error';
-                    
                     this._router.navigate([this.parentUrl,'lecciones']);
                 }
-
             },
             error => {
-                console.log(<any>error);                
+                console.error('Error loading lesson:', error);
                 this._router.navigate([this.parentUrl,'lecciones']);
             }
         );       

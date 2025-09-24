@@ -1,4 +1,4 @@
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, AfterViewInit } from '@angular/core';
 import { FIELDS_FORM } from '../resourcesData';
 import { Validators, UntypedFormControl, UntypedFormGroup,   } from '@angular/forms';
 import { Resource } from 'src/app/models/resource.model';
@@ -6,7 +6,7 @@ import { UserService } from 'src/app/services/user.service';
 import { ResourceService } from 'src/app/services/resource.service';
 import { UploadService } from 'src/app/services/upload.service';
 import { GLOBAL } from 'src/app/services/global';
-import { MAX_FILE_SIZE } from 'src/app/services/DATA';
+import { MAX_FILE_SIZE, ACADEMIC_LEVEL } from 'src/app/services/DATA';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 
@@ -17,7 +17,7 @@ import { Subscription } from 'rxjs';
     templateUrl: './suggest.component.html',
     standalone: false
 })
-export class SuggestComponent implements OnInit {
+export class SuggestComponent implements OnInit, AfterViewInit {
     
     public closeBtn;
     
@@ -32,6 +32,7 @@ export class SuggestComponent implements OnInit {
     
     public fields;
     public addForm;
+    public academicLevels = Object.entries(ACADEMIC_LEVEL).map(([key, value]) => ({ key, value }));
 
     public status;
     public submitted;
@@ -49,8 +50,9 @@ export class SuggestComponent implements OnInit {
     public barWidth: string = "0%";
     
     private resourceId = '';
+    public showSuccessActions = false;
 
-    // useless for now @Output() deleted = new EventEmitter();
+    @Output() resourceSubmitted = new EventEmitter<any>();
 
     constructor(
         private _userService: UserService,
@@ -86,33 +88,88 @@ export class SuggestComponent implements OnInit {
         this.closeBtn = document.getElementById('closeBtn'); //test wtf
     }
 
+    ngAfterViewInit(): void {
+        // Configurar eventos del modal para manejar aria-hidden correctamente
+        this.setupModalEvents();
+    }
+
+    setupModalEvents() {
+        const modal = document.getElementById('add');
+        if (modal) {
+            // Escuchar cuando el modal se muestra
+            modal.addEventListener('shown.bs.modal', () => {
+                // Remover aria-hidden cuando el modal está completamente visible
+                modal.removeAttribute('aria-hidden');
+            });
+
+            // Escuchar cuando el modal se oculta
+            modal.addEventListener('hidden.bs.modal', () => {
+                // Restaurar aria-hidden cuando el modal está completamente oculto
+                modal.setAttribute('aria-hidden', 'true');
+            });
+
+            // Escuchar cuando el modal está mostrándose
+            modal.addEventListener('show.bs.modal', () => {
+                // Preparar el modal para ser visible
+                modal.removeAttribute('aria-hidden');
+            });
+        }
+    }
+
 
     get f() { return this.addForm.controls; }
 
 
     restartValues() {
-        //data-dismiss="modal"
-        //console.log("restart")
-        //console.log("submitted", this.submitted);
-        //console.log("loading: ",this.loading);
         this.status = null;
-        if (this.loading ==true){
+        this.showSuccessActions = false;
+        if (this.loading == true){
             this.cancelResource();
-
-            
         }
         this.addForm.reset();
         this.disableForm(false);
         this.submitted = false;
         this.maxSizeError = false;
         this.barWidth = '0%';
-        if (this.loading ==false || this.loading == null){
-            console.log(this.closeBtn);
-            this.closeBtn.click();
-            //data-dismiss="modal";
+        if (this.loading == false || this.loading == null){
+            this.closeModal();
         }
-        
-        
+    }
+
+    closeModal() {
+        try {
+            const modal = document.getElementById('add');
+            if (modal) {
+                const bootstrapModal = (window as any).bootstrap?.Modal?.getInstance(modal);
+                if (bootstrapModal) {
+                    bootstrapModal.hide();
+                } else {
+                    // Fallback para cerrar modal manualmente
+                    this.closeBtn = document.getElementById('closeBtn');
+                    if (this.closeBtn) {
+                        this.closeBtn.click();
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('Error al cerrar modal de sugerir:', error);
+        }
+    }
+
+    createAnotherResource() {
+        this.status = null;
+        this.showSuccessActions = false;
+        this.addForm.reset();
+        this.disableForm(false);
+        this.submitted = false;
+        this.maxSizeError = false;
+        this.barWidth = '0%';
+        this.loading = false;
+    }
+
+    closeAndRefresh() {
+        this.restartValues();
+        this.resourceSubmitted.emit(true); // Emitir evento para actualizar la lista
     }
     getValue(){
         //gets R.Id if cancelling is needed
@@ -240,9 +297,9 @@ export class SuggestComponent implements OnInit {
                     this.setResId(response.resource._id);
                     if(!this.filesToUpload ){
                         //console.log("entró",this.resource.url); if user sent a url resource
-                        this.addForm.reset();                    
                         this.status = 'success';
                         this.loading = false;
+                        this.showSuccessActions = true;
                     }
                     else {
                         if (this.filesToUpload.length > 0){
@@ -263,10 +320,10 @@ export class SuggestComponent implements OnInit {
                               break;
                               case HttpEventType.Response: // give final response
                               this.status ='success';
-                              this.addForm.reset();                    
                               this.disableForm(false);
                               this.barWidth ='0%';
                               this.loading = false;
+                              this.showSuccessActions = true;
                                                                                    
 
                             }
@@ -327,6 +384,13 @@ export class SuggestComponent implements OnInit {
         });
         }
         
+    }
+
+    // Método para convertir valores seleccionados de nivel académico a claves
+    convertAcademicLevelValuesToKeys(selectedValues: string[]): string[] {
+        return Object.entries(ACADEMIC_LEVEL)
+            .filter(([key, value]) => selectedValues.includes(value))
+            .map(([key, value]) => key);
     }
 }
 

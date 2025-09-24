@@ -1,15 +1,15 @@
 <!-- Lessons -->
 <div class="card">
     <div class="card-header">
-        <h3 class="m-0 text-primary font-weight-bolder float-left">{{title}}</h3>
+        <h3 class="m-0 text-primary fw-bolder float-start">{{title}}</h3>
 
-        <button *ngIf="identity.role != 'guest'" type="button" class="btn btn-primary float-right ms-3"
-            data-bs-toggle="modal" data-bs-target="#add">
+        <button *ngIf="identity.role != 'guest'" type="button" class="btn btn-primary float-end ms-3"
+            (click)="openSuggestModal()">
             <i class="fas fa-plus"></i>
             <span class="ms-2">Sugerir leccion</span>
         </button>
-        <button *ngIf="identity.role != 'guest'" type="button" class="btn btn-secondary float-right" data-bs-toggle="modal"
-            data-bs-target="#send">
+        <button *ngIf="identity.role != 'guest'" type="button" class="btn btn-secondary float-end" 
+            (click)="openSendExperienceModal()">
             <i class="fas fa-plus"></i>
             <span class="ms-2">Enviar experiencias</span>
         </button>
@@ -19,7 +19,7 @@
     <div *ngIf="loading" class="card-body">
         <div class="text-muted text-center">
             <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                <span class="sr-only">Loading...</span>
+                <span class="visually-hidden">Loading...</span>
             </div>
         </div>
     </div>
@@ -34,12 +34,13 @@
         <!-- checkbox filter -->
         <div class="row">
             <div class="col">
-                <div class="form-group">
+                <div>
                     <div class="row">
                         <div class="col">
-                            <h6 class="text-primary font-weight-bold mb-0">
+                            <h6 class="categories-section-title">
+                                <i class="fas fa-filter"></i>
                                 Área de conocimiento
-                                <button class="btn btn-link" (click)="setShowAreas()">
+                                <button class="categories-toggle-btn" (click)="setShowAreas()">
                                     <ng-container *ngIf="showAreas; else showOptions">
                                         Ocultar opciones
                                     </ng-container>
@@ -51,14 +52,16 @@
                         </div>
                     </div>
 
-                    <div *ngIf="showAreas" class="row">
-                        <div *ngFor="let area of areas" class="col-6">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="{{area.name}}"
-                                    (click)="setArea(area.name)">
-                                <label class="custom-control-label" for="{{area.name}}">
-                                    {{area.name}}
-                                </label>
+                    <div *ngIf="showAreas" class="collapsible-categories expanded">
+                        <div class="categories-grid">
+                            <div *ngFor="let area of areas" class="category-item">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="{{area.name}}"
+                                        (click)="setArea(area.name)">
+                                    <label class="form-check-label" for="{{area.name}}">
+                                        {{area.name}}
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -67,10 +70,10 @@
 
             </div>
             <div class="col">
-                <div class="form-group">
+                <div>
                     <div class="row">
                         <div class="col">
-                            <h6 class="text-primary font-weight-bold mb-0">Nivel académico
+                            <h6 class="text-primary fw-bold mb-0">Nivel académico
                                 <button class="btn btn-link" (click)="setShowLevels()">
                                     <ng-container *ngIf="showLevels; else showOptions">
                                         Ocultar opciones
@@ -84,10 +87,10 @@
                     </div>
                     <div *ngIf="showLevels" class="row">
                         <div *ngFor="let level of levels" class="col-6">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="{{level.value}}"
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="{{level.value}}"
                                     (click)="setLevel(level.value)">
-                                <label class="custom-control-label" for="{{level.value}}">
+                                <label class="form-check-label" for="{{level.value}}">
                                     {{level.label}}
                                 </label>
                             </div>
@@ -99,13 +102,11 @@
         <!-- /checkbox filter -->
 
         <!-- Filters input -->
-        <div class="form-group row mb-1">
+        <div class="row mb-1">
             <div class="col">
                 <form>
                     <div class="input-group mb-2">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">Filtrar:</div>
-                        </div>
+                        <span class="input-group-text">Filtrar:</span>
                         <input type="text" class="form-control" id="filter" placeholder="Filtro" autocomplete="off"
                             [formControl]="filter">
                     </div>
@@ -115,7 +116,7 @@
         <!-- /Filters input -->
 
         <!-- Order -->
-        <div class="form-group row mb-3">
+        <div class="row mb-3">
             <label for="order" class="col-3 offset-6 col-form-label text-end">
                 <small class="text-muted">Ordenar por:</small>
             </label>
@@ -243,7 +244,7 @@
                                                     <div *ngIf="lesson.knowledge_area.length > 0; else notAssigned"
                                                         style="display: flex; flex-wrap: wrap;">
                                                         <small *ngFor="let area of lesson.knowledge_area"
-                                                            class="badge badge-info me-1 mb-1 text-truncate"
+                                                            class="badge bg-info text-dark me-1 mb-1 text-truncate"
                                                             title="{{area.name}}">{{area.name}}</small>
                                                     </div>
 
@@ -473,7 +474,7 @@
                                                     <div *ngIf="lesson.knowledge_area.length > 0; else notAssigned"
                                                         style="display: flex; flex-wrap: wrap;">
                                                         <small *ngFor="let area of lesson.knowledge_area"
-                                                            class="badge badge-info me-1 mb-1 text-truncate"
+                                                            class="badge bg-info text-dark me-1 mb-1 text-truncate"
                                                             title="{{area.name}}">{{area.name}}</small>
                                                     </div>
                                                     <ng-template #notAssigned>

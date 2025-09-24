@@ -26,7 +26,7 @@
                     Se ha asignado el grupo de desarrollo correctamente.
 
                 </div>
-                <p *ngFor="let text of lesson.call.text.split('\n')" class="text-break mt-2">
+                <p *ngFor="let text of lesson?.call?.text?.split('\n')" class="text-break mt-2">
                     {{text}}
                 </p>
 
@@ -58,7 +58,7 @@
                                 <strong>Interesados en participar</strong>
                             </div>
                             <div class="card-body p-1">
-                                <div *ngFor="let interested of lesson.call.interested" class="row mb-1">
+                                <div *ngFor="let interested of lesson?.call?.interested" class="row mb-1">
 
                                     <div class="col-auto pe-0">
                                         <a class="text-primary">
@@ -108,7 +108,7 @@
                                 <strong>Grupo de desarrollo</strong>
                             </div>
                             <div class="card-body p-1">
-                                <div *ngFor="let interested of lesson.development_group" class="row mb-1">
+                                <div *ngFor="let interested of lesson?.development_group" class="row mb-1">
                                     <div class="col-auto pe-0">
                                         <a class="text-primary">
                                             <button [routerLink]="['/perfil', interested._id]"
@@ -153,19 +153,56 @@
                     </div>
                 </div>
 
+                <!-- Mostrar líder actual si existe -->
+                <div *ngIf="lesson?.leader" class="row mb-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                <strong>Líder Actual</strong>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="row align-items-center">
+                                    <div class="col-auto pe-0">
+                                        <button [routerLink]="['/perfil', lesson.leader._id]"
+                                            class="btn flex-shrink-0 rounded-circle overflow-hidden p-0"
+                                            style="width: 40px; height:40px;" data-bs-dismiss="modal">
+                                            <img *ngIf="!lesson.leader.picture" class="img-fluid"
+                                                src="assets/images/user-default.png">
+                                            <img *ngIf="lesson.leader.picture" class="img-fluid"
+                                                src="{{this.url+'get-image-user/'+ lesson.leader.picture}}">
+                                        </button>
+                                    </div>
+                                    <div class="col">
+                                        <h6 class="mb-1">
+                                            <a [routerLink]="['/perfil', lesson.leader._id]" class="text-primary"
+                                                data-bs-dismiss="modal">
+                                                <strong>{{lesson.leader.name}} {{lesson.leader.surname}}</strong>
+                                            </a>
+                                            <br>
+                                            <span *ngIf="lesson.leader.role"
+                                                class="text-muted">{{profile_label[lesson.leader.role].label}}</span>
+                                        </h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group row my-4">
                     <label for="toinput" class="col-sm-3 col-form-label">
-                        <strong>Líder de desarrollo*</strong>
+                        <strong>Cambiar Líder de desarrollo</strong>
                     </label>
                     <div class="col-sm-9">
                         <select class="form-control" [formControl]="leader"
                             [ngClass]="{ 'is-invalid': submitted && leader.errors}">
-                            <option *ngFor="let member of lesson.development_group" value="{{member._id}}">
+                            <option value="">Seleccionar nuevo líder...</option>
+                            <option *ngFor="let member of lesson?.development_group" value="{{member._id}}">
                                 {{member.name}}
                                 {{member.surname}}</option>
                         </select>
                         <small *ngIf="!submitted" class="form-text text-muted">
-                            Selecciona el líder del grupo de desarrollo.
+                            Selecciona un nuevo líder del grupo de desarrollo (opcional).
                         </small>
                         <div *ngIf="submitted && leader.errors">
                             <div *ngIf="leader.errors.required" class="invalid-feedback-select">

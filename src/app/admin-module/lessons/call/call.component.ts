@@ -65,7 +65,7 @@ export class CallComponent implements OnInit {
         this.token = this._userService.getToken();
         this.url = GLOBAL.url;
 
-        this.leader = new UntypedFormControl('', Validators.required);
+        this.leader = new UntypedFormControl('');
         
         this.expert = new UntypedFormControl('', Validators.required);
 
@@ -75,9 +75,45 @@ export class CallComponent implements OnInit {
 
     ngOnInit(): void { 
         this.getExpertUsers();
-        this.leader.setValue(this.getLeader());
+        this.initializeLesson();
         this.setLeader();
+    }
+
+    initializeLesson(): void {
+        // Asegurar que development_group existe
+        if (!this.lesson.development_group) {
+            this.lesson.development_group = [];
+        }
         
+        // Asegurar que call existe
+        if (!this.lesson.call) {
+            this.lesson.call = {
+                text: '',
+                visible: false,
+                interested: []
+            };
+        }
+        
+        // IMPORTANTE: Solo inicializar interested si realmente no existe
+        // No sobrescribir si ya tiene datos
+        if (!this.lesson.call.interested) {
+            this.lesson.call.interested = [];
+        }
+        
+        console.log('Call interested after initialization:', this.lesson.call.interested);
+        console.log('Development group after initialization:', this.lesson.development_group);
+        
+        // Debug adicional para development_group
+        if (this.lesson.development_group && this.lesson.development_group.length > 0) {
+            console.log('Development group types:', this.lesson.development_group.map(member => typeof member));
+            console.log('First development group member:', this.lesson.development_group[0]);
+        }
+        
+        // Inicializar el valor del líder
+        const leaderValue = this.getLeader();
+        if (leaderValue) {
+            this.leader.setValue(leaderValue);
+        }
     }       
     setLeader(){
         if(this.lesson.development_group.length > 0){
@@ -88,14 +124,22 @@ export class CallComponent implements OnInit {
         }
     }
     getLeader(){
-        this.lesson.leader;
+        return this.lesson.leader;
     }
     restartValues() {
         this.status = null;
         this.submitted = false;
         this.assigned.emit();
-        this.leader = new UntypedFormControl('', Validators.required);
+        
+        // Reinicializar controles de formulario
+        this.leader = new UntypedFormControl('');
         this.expert = new UntypedFormControl('', Validators.required);
+        
+        // Reinicializar valores si hay una lección
+        if (this.lesson) {
+            this.initializeLesson();
+            this.setLeader();
+        }
     }
 
     getExpertUsers(){
@@ -112,12 +156,18 @@ export class CallComponent implements OnInit {
     }
 
     addGroup(interested){
-        this.lesson.development_group.push(interested);
+        // Verificar que el usuario no esté ya en el grupo de desarrollo
+        const isAlreadyInGroup = this.lesson.development_group.some(member => 
+            member._id === interested._id
+        );
+
+        if (!isAlreadyInGroup) {
+            this.lesson.development_group.push(interested);
+        }
 
         if(this.lesson.development_group.length > 0){
             this.leader.enable();
         } 
-
     }
 
     removeGroup(interested){
@@ -134,45 +184,40 @@ export class CallComponent implements OnInit {
     }
 
     isInDevelopmentGroup(interested){
+        if (!this.lesson || !this.lesson.development_group || !interested) {
+            return false;
+        }
 
         let found = this.lesson.development_group.find(item => {
-            
             return item._id == interested._id;
         });
 
-        if(found){
-            
-            return true;
-        }else{
-            
-            return false;
-        }
+        return !!found;
     }
 
     belongsTo(expert): void{
-        //if the expert was 
+        // Verificar si el experto ya está en el grupo de desarrollo
         let found = this.lesson.development_group.find(item => {
-            
             return item._id == expert;
         });    
         
         if (!found){
             let expertU = this.expertUsers.find(item => {
-            
                 return item._id == expert;
             });
 
-            this.lesson.development_group.push(expertU);
-            console.log("entra")
-            
-        
-            
+            if (expertU) {
+                // Verificación adicional para evitar duplicados
+                const isDuplicate = this.lesson.development_group.some(member => 
+                    member._id === expertU._id
+                );
+                
+                if (!isDuplicate) {
+                    this.lesson.development_group.push(expertU);
+                    console.log("Experto agregado al grupo de desarrollo");
+                }
+            }
         }
-        else{
-            
-        }
-            
-    
     }
     editLesson() {
         this.submitted = true;
@@ -191,18 +236,41 @@ export class CallComponent implements OnInit {
         this.lesson.call.visible = false;
         
         this.belongsTo(this.expert.value);
-        this._lessonService.editLesson(this.token, this.lesson).subscribe(
-            response => {
+        
+        console.log("Enviando actualización de lección (call):", {
+            id: this.lesson._id,
+            leader: this.lesson.leader,
+            expert: this.lesson.expert,
+            state: this.lesson.state
+        });
+
+        this._lessonService.editLesson(this.token, this.lesson).subscribe({
+            next: response => {
                 if (response && response.lesson._id) {
                     this.status = 'success';
                     this.assigned.emit();
+                    console.log("Lección asignada exitosamente");
+                } else {
+                    this.status = 'error';
+                    console.error("Respuesta inválida del servidor");
                 }
             },
-            error => {
+            error: error => {
                 this.status = 'error';
-                console.log(<any>error);
+                console.error('Error updating lesson call:', error);
+                
+                // Manejo específico de errores
+                if (error.status === 500) {
+                    console.error('Error interno del servidor. Por favor, verifica que todos los campos estén correctamente completados.');
+                } else if (error.status === 400) {
+                    console.error(error.error?.message || 'Datos inválidos. Por favor, revisa los campos del formulario.');
+                } else if (error.status === 404) {
+                    console.error('La lección no fue encontrada.');
+                } else {
+                    console.error(error.error?.message || 'Error al asignar el grupo a la lección.');
+                }
             }
-        )
+        })
 
         document.querySelector('.modal-body').scrollTop = 0;
     }

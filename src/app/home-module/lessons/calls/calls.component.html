@@ -1,13 +1,13 @@
 <!-- Calls -->
 <div class="card">
     <div class="card-header">
-        <h3 class="m-0 text-primary font-weight-bolder float-left">{{title}}</h3>
+        <h3 class="m-0 text-primary fw-bolder float-start">{{title}}</h3>
     </div>
 
     <div *ngIf="loading" class="card-body">
         <div class="text-muted text-center">
             <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                <span class="sr-only">Loading...</span>
+                <span class="visually-hidden">Loading...</span>
             </div>
         </div>
     </div>
@@ -23,10 +23,10 @@
         <!-- checkbox filter -->
         <div class="row">
             <div class="col">
-                <div class="form-group">
+                <div>
                     <div class="row">
                         <div class="col">
-                            <h6 class="text-primary font-weight-bold mb-0">
+                            <h6 class="text-primary fw-bold mb-0">
                                 Área de conocimiento
                                 <button class="btn btn-link" (click)="setShowAreas()">
                                     <ng-container *ngIf="showAreas; else showOptions">
@@ -42,10 +42,10 @@
 
                     <div *ngIf="showAreas" class="row">
                         <div *ngFor="let area of areas" class="col-6">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="{{area.name}}"
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="{{area.name}}"
                                     (click)="setArea(area.name)">
-                                <label class="custom-control-label" for="{{area.name}}">
+                                <label class="form-check-label" for="{{area.name}}">
                                     {{area.name}}
                                 </label>
                             </div>
@@ -56,10 +56,10 @@
 
             </div>
             <div class="col">
-                <div class="form-group">
+                <div>
                     <div class="row">
                         <div class="col">
-                            <h6 class="text-primary font-weight-bold mb-0">Nivel académico
+                            <h6 class="text-primary fw-bold mb-0">Nivel académico
                                 <button class="btn btn-link" (click)="setShowLevels()">
                                     <ng-container *ngIf="showLevels; else showOptions">
                                         Ocultar opciones
@@ -73,10 +73,10 @@
                     </div>
                     <div *ngIf="showLevels" class="row">
                         <div *ngFor="let level of levels" class="col-6">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="{{level.value}}"
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="{{level.value}}"
                                     (click)="setLevel(level.value)">
-                                <label class="custom-control-label" for="{{level.value}}">
+                                <label class="form-check-label" for="{{level.value}}">
                                     {{level.label}}
                                 </label>
                             </div>
@@ -89,7 +89,7 @@
 
 
         <!-- call items -->
-        <div *ngIf="selectedAreas.length == 0 && selectedLevels.length == 0">
+        <div *ngIf="!hasActiveFilters()">
             <div *ngFor="let lesson of lessons, let i=index">
                 <div class="card">
                     <div class="card-body">
@@ -139,20 +139,20 @@
                                                     <strong>Nivel académico:</strong>
                                                 </div>
                                             </div>
-                                            <div class="row">
-                                                <div class="col">
-                                                    <p>
-                                                        <span
-                                                            *ngIf="academic_level.hasOwnProperty(lesson.level); else notAssigned">
-                                                            {{academic_level[lesson.level]}}
-                                                        </span>
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <div *ngIf="lesson.level && lesson.level.length > 0; else notAssigned">
+                                                            <small *ngFor="let level of lesson.level" 
+                                                                class="badge bg-primary text-white me-1 mb-1">
+                                                                {{ academic_level[level] || level }}
+                                                            </small>
+                                                        </div>
                                                         <ng-template #notAssigned>
                                                             <small class="text-muted">No se ha asignado</small>
                                                         </ng-template>
-                                                    </p>
-                                                </div>
+                                                    </div>
 
-                                            </div>
+                                                </div>
 
 
                                         </div>
@@ -170,7 +170,7 @@
 
                                                     <div *ngIf="lesson.knowledge_area.length > 0; else notAssigned">
                                                         <small *ngFor="let area of lesson.knowledge_area"
-                                                            class="badge badge-info me-1 text-truncate">{{area.name}}</small>
+                                                            class="badge bg-info text-dark me-1 text-truncate">{{area.name}}</small>
                                                     </div>
                                                     <ng-template #notAssigned>
                                                         <small class="text-muted">No se ha asignado</small>
@@ -193,24 +193,52 @@
                                     <div class="row">
                                         <div class="col">
 
-                                            <button class="btn btn-info me-2" title="Ver detalles" data-bs-toggle="modal"
-                                                data-bs-target="#details" (click)="setCallLesson(lesson)">
+                                            <button class="btn btn-info me-2" title="Ver detalles" (click)="openDetailsModal(lesson)">
                                                 <i class="fas fa-eye"></i>
                                             </button>
 
-                                            <ng-container *ngIf="!hasJoined(lesson); else leaveGroup">
-                                                <button class="btn btn-success me-2" title="Unirse"
-                                                    (click)="editLesson(lesson, 'add')">
-                                                    <i class="fas fa-user-plus"></i>
-                                                </button>
+                                            <!-- Solo mostrar botones de unirse/retirarse si no es el líder -->
+                                            <ng-container *ngIf="!isLessonLeader(lesson)">
+                                                <ng-container *ngIf="!hasJoined(lesson); else leaveGroup">
+                                                    <button class="btn btn-success me-2" title="Unirse"
+                                                        (click)="editLesson(lesson, 'add'); $event.stopPropagation()">
+                                                        <i class="fas fa-user-plus"></i>
+                                                    </button>
+                                                </ng-container>
+                                                <ng-template #leaveGroup>
+                                                    <button class="btn btn-danger me-2" title="Retirarse" (click)="openLeaveModal(lesson)">
+                                                        <i class="fas fa-user-minus"></i>
+                                                    </button>
+                                                </ng-template>
                                             </ng-container>
-                                            <ng-template #leaveGroup>
-                                                <button class="btn btn-danger me-2" title="Retirarse" data-bs-toggle="modal" data-bs-target="#leftconvo"
-                                                    (click)="getLesson(lesson)">
-                                                    <i class="fas fa-user-minus"></i>
-                                                </button>
-                                            </ng-template>
+                                            
+                                            <!-- Indicador para el líder -->
+                                            <ng-container *ngIf="isLessonLeader(lesson) && !isApprovedByFacilitator(lesson)">
+                                                <span class="badge bg-info text-dark me-2">
+                                                    <i class="fas fa-crown me-1"></i>Eres el líder
+                                                </span>
+                                            </ng-container>
 
+                                            <!-- Botón de activación - solo visible para líder en estado 'approved_by_expert' -->
+                                            <button *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)"
+                                                class="btn btn-warning me-2" 
+                                                (click)="activateLesson(lesson)"
+                                                [title]="'Activar Lección (' + getParticipantCount(lesson) + ' participantes)'">
+                                                <i class="fas fa-play-circle me-1"></i>
+                                                Activar Lección
+                                            </button>
+
+                                        </div>
+                                        
+                                        <!-- Información adicional para gestión de líder -->
+                                        <div *ngIf="isLeaderManagement && isLessonLeader(lesson)" class="col-12 mt-2">
+                                            <div class="alert alert-info">
+                                                <strong><i class="fas fa-info-circle me-1"></i>Gestión de Convocatoria:</strong>
+                                                <br>• Participantes actuales: <strong>{{getParticipantCount(lesson)}}</strong>
+                                                <br>• <span *ngIf="hasSufficientParticipants(lesson)" class="text-success">✓ Suficientes participantes para activar</span>
+                                                <span *ngIf="!hasSufficientParticipants(lesson)" class="text-warning">⚠ Se recomienda al menos 2 participantes</span>
+                                                <br>• Puedes activar la lección cuando consideres que hay suficientes participantes
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -226,8 +254,8 @@
         <!-- /call items -->
 
         <!-- call items filtered -->
-        <div *ngIf="selectedAreas.length > 0 || selectedLevels.length > 0">
-            <ng-container *ngIf="allLessons.length == 0; else elseTemplate">
+        <div *ngIf="hasActiveFilters()">
+            <ng-container *ngIf="filteredLessons.length === 0; else elseTemplate">
                 <div class="card-body">
                     <h4 class="text-muted">
                         No se encontraron convocatorias para los criterios de búsqueda seleccionados.
@@ -235,7 +263,7 @@
                 </div>
             </ng-container>
             <ng-template #elseTemplate>
-                <div *ngFor="let lesson of allLessons, let i=index">
+                <div *ngFor="let lesson of filteredLessons, let i=index">
                     <div class="card">
                         <div class="card-body">
                             <div class="media-body">
@@ -284,15 +312,15 @@
                                                 </div>
                                                 <div class="row">
                                                     <div class="col">
-                                                        <p>
-                                                            <span
-                                                                *ngIf="academic_level.hasOwnProperty(lesson.level); else notAssigned">
-                                                                {{academic_level[lesson.level]}}
-                                                            </span>
-                                                            <ng-template #notAssigned>
-                                                                <small class="text-muted">No se ha asignado</small>
-                                                            </ng-template>
-                                                        </p>
+                                                        <div *ngIf="lesson.level && lesson.level.length > 0; else notAssigned">
+                                                            <small *ngFor="let level of lesson.level" 
+                                                                class="badge badge-info me-1 mb-1 text-truncate">
+                                                                {{ academic_level[level] || level }}
+                                                            </small>
+                                                        </div>
+                                                        <ng-template #notAssigned>
+                                                            <small class="text-muted">No se ha asignado</small>
+                                                        </ng-template>
                                                     </div>
 
                                                 </div>
@@ -313,7 +341,7 @@
 
                                                         <div *ngIf="lesson.knowledge_area.length > 0; else notAssigned">
                                                             <small *ngFor="let area of lesson.knowledge_area"
-                                                                class="badge badge-info me-1 text-truncate">{{area.name}}</small>
+                                                                class="badge bg-info text-primary me-1 text-truncate">{{area.name}}</small>
                                                         </div>
                                                         <ng-template #notAssigned>
                                                             <small class="text-muted">No se ha asignado</small>
@@ -336,28 +364,52 @@
                                         <div class="row">
                                             <div class="col">
 
-                                                <button class="btn btn-info me-2" title="Ver detalles"
-                                                    data-bs-toggle="modal" data-bs-target="#details"
-                                                    (click)="setCallLesson(lesson)">
+                                                <button class="btn btn-info me-2" title="Ver detalles" (click)="openDetailsModal(lesson)">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
 
-                                                <ng-container *ngIf="!hasJoined(lesson); else leaveGroup2">
-                                                    <button class="btn btn-success me-2" title="Unirse"
-                                                        (click)="editLesson(lesson, 'add')">
-                                                        <i class="fas fa-user-plus"></i>
-                                                    </button>
+                                                <!-- Solo mostrar botones de unirse/retirarse si no es el líder -->
+                                                <ng-container *ngIf="!isLessonLeader(lesson)">
+                                                    <ng-container *ngIf="!hasJoined(lesson); else leaveGroup2">
+                                                        <button class="btn btn-success me-2" title="Unirse"
+                                                            (click)="editLesson(lesson, 'add'); $event.stopPropagation()">
+                                                            <i class="fas fa-user-plus"></i>
+                                                        </button>
+                                                    </ng-container>
+                                                    <ng-template #leaveGroup2> <!-- diferente a leaveGroup, genera error si se deja igual-->
+                                                        <button class="btn btn-danger me-2" title="Retirarse" (click)="openLeaveModal(lesson)">
+                                                            <i class="fas fa-user-minus"></i>
+                                                        </button>
+                                                    </ng-template>
                                                 </ng-container>
-                                                <ng-template #leaveGroup2> <!-- diferente a leaveGroup, genera error si se deja igual-->
-                                                    <button class="btn btn-danger me-2" title="Retirarse" data-bs-toggle="modal" data-bs-target="#leftconvo"
-                                                        (click)="getLesson(lesson)">
-                                                        <i class="fas fa-user-minus"></i>
-                                                    </button>
-                                                </ng-template>
+                                                
+                                                <!-- Indicador para el líder -->
+                                                <ng-container *ngIf="isLessonLeader(lesson) && !isApprovedByFacilitator(lesson)">
+                                                    <span class="badge bg-info text-dark me-2">
+                                                        <i class="fas fa-crown me-1"></i>Eres el líder
+                                                    </span>
+                                                </ng-container>
 
+                                                <!-- Botón de activación - solo visible para líder en estado 'approved_by_expert' -->
+                                                <button *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)"
+                                                    class="btn btn-warning me-2" 
+                                                    (click)="activateLesson(lesson)"
+                                                    [title]="'Activar Lección (' + getParticipantCount(lesson) + ' participantes)'">
+                                                    <i class="fas fa-play-circle me-1"></i>
+                                                    Activar Lección
+                                                </button>
 
-
-
+                                            </div>
+                                            
+                                            <!-- Información adicional para gestión de líder -->
+                                            <div *ngIf="isLeaderManagement && isLessonLeader(lesson)" class="col-12 mt-2">
+                                                <div class="alert alert-info">
+                                                    <strong><i class="fas fa-info-circle me-1"></i>Gestión de Convocatoria:</strong>
+                                                    <br>• Participantes actuales: <strong>{{getParticipantCount(lesson)}}</strong>
+                                                    <br>• <span *ngIf="hasSufficientParticipants(lesson)" class="text-success">✓ Suficientes participantes para activar</span>
+                                                    <span *ngIf="!hasSufficientParticipants(lesson)" class="text-warning">⚠ Se recomienda al menos 2 participantes</span>
+                                                    <br>• Puedes activar la lección cuando consideres que hay suficientes participantes
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -377,7 +429,7 @@
         </div>
         <!-- /call items filtered -->
         <!-- Navigation -->
-        <nav *ngIf="!filter.value && selectedAreas.length == 0 && selectedLevels.length == 0" class="mt-3"
+        <nav *ngIf="!hasActiveFilters()" class="mt-3"
             aria-label="Page navigation">
             <ul class="pagination justify-content-end">
                 <li *ngIf="page > 1" class="page-item">

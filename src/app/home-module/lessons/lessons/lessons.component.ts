@@ -111,7 +111,7 @@ export class LessonsComponent implements OnInit {
         this.orderControl = new UntypedFormControl('');
         this.filter = new UntypedFormControl('');
 
-        this.orderBy = '';
+        this.orderBy = 'created_at'; // Valor por defecto válido
 
 
     }
@@ -169,10 +169,14 @@ export class LessonsComponent implements OnInit {
     getAllLessons() {
         let filteredLessons = [];
         let res;
+        
+        // Asegurar que orderBy tenga un valor válido por defecto
+        const orderBy = this.orderBy || 'created_at';
+        this.loading = true;
 
-        this._lessonService.getAllLessons(this.token, this.orderBy, true).subscribe({
+        this._lessonService.getAllLessons(this.token, orderBy, true).subscribe({
             next: (response) => {
-                if (response.lessons) {
+                if (response && response.lessons) {
                     this.allLessons = response.lessons;
 
                     // Filter by area
@@ -181,12 +185,14 @@ export class LessonsComponent implements OnInit {
                             filteredLessons = filteredLessons.concat(this.allLessons.filter((lesson) => {
                                 res = false;
 
-                                lesson.knowledge_area.some(function (knowledge_area) {
-                                    res = knowledge_area.name == area;
-                                    if (res) {
-                                        return true;
-                                    }
-                                });
+                                if (lesson.knowledge_area && lesson.knowledge_area.length > 0) {
+                                    lesson.knowledge_area.some(function (knowledge_area) {
+                                        res = knowledge_area.name == area;
+                                        if (res) {
+                                            return true;
+                                        }
+                                    });
+                                }
 
                                 return res;
                             }));
@@ -207,11 +213,18 @@ export class LessonsComponent implements OnInit {
                         this.allLessons = filteredLessons;
                         filteredLessons = [];
                     }
-
+                    
+                    console.log('Lessons loaded successfully:', this.allLessons.length);
+                } else {
+                    console.warn('No lessons data received');
+                    this.allLessons = [];
                 }
+                this.loading = false;
             },
             error: (error) => {
-                console.log(error);
+                console.error('Error fetching lessons:', error);
+                this.loading = false;
+                this.allLessons = [];
             }
         });
     }
@@ -266,6 +279,8 @@ export class LessonsComponent implements OnInit {
             this.orderBy = 'views';
         } else if (this.orderControl.value == 'score') {
             this.orderBy = 'score';
+        } else {
+            this.orderBy = 'created_at'; // Valor por defecto
         }
 
         this.getAllLessons();
@@ -307,5 +322,56 @@ export class LessonsComponent implements OnInit {
                  console.log(<any>error);
              }
     })
+    }
+
+    // Métodos para abrir modales con manejo correcto del DOM
+    openSuggestModal() {
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('add');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de sugerir lección:', error);
+            }
+        }, 0);
+    }
+
+    openSendExperienceModal() {
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('send');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de enviar experiencia:', error);
+            }
+        }, 0);
     }
 }

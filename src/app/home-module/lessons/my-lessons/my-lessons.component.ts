@@ -141,11 +141,14 @@ export class MyLessonsComponent implements OnInit {
 
     getAllMyLessons() {
         let filteredLessons = [];
+        console.log("getAllMyLessons called, loading:", this.loading);
 
         this._lessonService.getAllMyLessons(this.token).subscribe(
             response => {
+                console.log("getAllMyLessons response:", response);
                 if (response.lessons) {
-                    this.allLessons = response.lessons;                    
+                    this.allLessons = response.lessons;
+                    console.log("All lessons received:", this.allLessons.length);
 
                     // Filter by state
                     if (this.selectedStates.length > 0) {
@@ -157,18 +160,28 @@ export class MyLessonsComponent implements OnInit {
 
                         this.allLessons = filteredLessons;
                         filteredLessons = [];
+                        console.log("Filtered lessons:", this.allLessons.length);
                     }
 
+                    // IMPORTANTE: Actualizar lessons para que el template lo vea
+                    this.lessons = this.allLessons;
+                    this.loading = false;
+                } else {
+                    console.warn("No lessons in response");
+                    this.lessons = [];
+                    this.loading = false;
                 }
             }, error => {
-                console.log(<any>error);
+                console.error("Error getting my lessons:", error);
+                this.lessons = [];
+                this.loading = false;
             });
     }
 
     getMyLessons(page = 1) {
 
-        this._lessonService.getMyLessons(this.token, page).subscribe(
-            response => {
+        this._lessonService.getMyLessons(this.token, page).subscribe({
+            next: response => {
                 if (response.lessons) {
                     this.lessons = response.lessons;
                     this.total = response.total;
@@ -180,11 +193,12 @@ export class MyLessonsComponent implements OnInit {
 
                     this.loading = false;
                 }
-            }, error => {
+            },
+            error: error => {
                 this.loading = false;
                 console.log(<any>error);
             }
-        );
+        });
     }
 
     actualPage() {

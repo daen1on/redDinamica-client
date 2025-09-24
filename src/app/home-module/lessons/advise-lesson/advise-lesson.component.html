@@ -113,8 +113,18 @@
 
                                             <!-- buttons -->
                                             <button class="btn btn-info ms-2"
-                                                [routerLink]="['/inicio','leccion', lesson._id]" title="Ver lección">
+                                                (click)="handleViewLesson(lesson)" 
+                                                title="Ver lección">
                                                 <i class="fas fa-eye"></i>
+                                            </button>
+                                            
+                                            <!-- Botón de aprobación - solo visible para facilitador sugerido en estado 'proposed' -->
+                                            <button *ngIf="isSuggestedFacilitator(lesson) && isProposedLesson(lesson)"
+                                                class="btn btn-success ms-2" 
+                                                (click)="approveLessonAndCreateCall(lesson)"
+                                                title="Avalar Lección y Abrir Convocatoria">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                Avalar y Abrir Convocatoria
                                             </button>
                                             <!-- /buttons -->
 
@@ -263,8 +273,18 @@
 
                                             <!-- buttons -->
                                             <button class="btn btn-info ms-2"
-                                                [routerLink]="['/inicio','leccion', lesson._id]" title="Ver lección">
+                                                (click)="handleViewLesson(lesson)" 
+                                                title="Ver lección">
                                                 <i class="fas fa-eye"></i>
+                                            </button>
+                                            
+                                            <!-- Botón de aprobación - solo visible para facilitador sugerido en estado 'proposed' -->
+                                            <button *ngIf="isSuggestedFacilitator(lesson) && isProposedLesson(lesson)"
+                                                class="btn btn-success ms-2" 
+                                                (click)="approveLessonAndCreateCall(lesson)"
+                                                title="Avalar Lección y Abrir Convocatoria">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                Avalar y Abrir Convocatoria
                                             </button>
                                             <!-- /buttons -->
 
@@ -363,3 +383,151 @@
 
 </div>
 <!-- /my lessons -->
+
+<!-- Modal de Previsualización de Lección -->
+<div class="modal fade" [class.show]="showPreviewModal" [style.display]="showPreviewModal ? 'block' : 'none'" 
+     id="previewLessonModal" tabindex="-1" role="dialog" aria-labelledby="previewLessonModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content" *ngIf="selectedLessonForPreview">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="previewLessonModalLabel">
+                    <i class="fas fa-eye me-2"></i>
+                    Previsualización de Lección Propuesta
+                </h5>
+                <button type="button" class="btn-close btn-close-white" (click)="closePreviewModal()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Información del autor -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <img *ngIf="selectedLessonForPreview.author?.picture" 
+                                     [src]="url + 'get-file-user/' + selectedLessonForPreview.author.picture" 
+                                     class="rounded-circle me-3" width="50" height="50" alt="Autor">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <strong>Propuesta enviada por:</strong> 
+                                        {{selectedLessonForPreview.author?.name}} {{selectedLessonForPreview.author?.surname}}
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ (selectedLessonForPreview.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LL' }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalles de la lección -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Detalles de la Lección
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <strong>Título:</strong>
+                                        <p class="mt-1">{{selectedLessonForPreview.title}}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Estado:</strong>
+                                        <p class="mt-1">
+                                            <span class="badge bg-secondary">
+                                                {{lesson_states[selectedLessonForPreview.state]?.label || 'Propuesta'}}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <strong>Niveles Académicos:</strong>
+                                        <div class="mt-1" *ngIf="selectedLessonForPreview.level && selectedLessonForPreview.level.length > 0; else noLevels">
+                                            <span *ngFor="let level of selectedLessonForPreview.level" 
+                                                  class="badge bg-info me-1 mb-1">
+                                                {{academic_level[level] || level}}
+                                            </span>
+                                        </div>
+                                        <ng-template #noLevels>
+                                            <p class="text-muted mt-1">No especificado</p>
+                                        </ng-template>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Áreas de Conocimiento:</strong>
+                                        <div class="mt-1" *ngIf="selectedLessonForPreview.knowledge_area && selectedLessonForPreview.knowledge_area.length > 0; else noAreas">
+                                            <span *ngFor="let area of selectedLessonForPreview.knowledge_area" 
+                                                  class="badge bg-success me-1 mb-1">
+                                                {{area.name || area}}
+                                            </span>
+                                        </div>
+                                        <ng-template #noAreas>
+                                            <p class="text-muted mt-1">No especificado</p>
+                                        </ng-template>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <strong>Resumen:</strong>
+                                        <p class="mt-1" style="white-space: pre-line;">{{selectedLessonForPreview.resume}}</p>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <strong>Referencias:</strong>
+                                        <p class="mt-1" style="white-space: pre-line;">{{selectedLessonForPreview.references}}</p>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3" *ngIf="selectedLessonForPreview.justification">
+                                    <div class="col-12">
+                                        <strong>Justificación:</strong>
+                                        <p class="mt-1" style="white-space: pre-line;">{{selectedLessonForPreview.justification}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!-- Botones solo visibles para facilitador sugerido -->
+                <div *ngIf="isSuggestedFacilitator(selectedLessonForPreview) && isProposedLesson(selectedLessonForPreview)" 
+                     class="w-100 d-flex justify-content-between">
+                    <div>
+                        <button type="button" class="btn btn-danger me-2" (click)="rejectLessonSuggestion(selectedLessonForPreview)">
+                            <i class="fas fa-times me-1"></i>
+                            Rechazar Lección
+                        </button>
+                        <button type="button" class="btn btn-success" (click)="approveLessonAndCreateCall(selectedLessonForPreview)">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Avalar y Abrir Convocatoria
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-secondary" (click)="closePreviewModal()">
+                        Cerrar
+                    </button>
+                </div>
+                
+                <!-- Botón solo de cerrar para otros usuarios -->
+                <div *ngIf="!isSuggestedFacilitator(selectedLessonForPreview) || !isProposedLesson(selectedLessonForPreview)" 
+                     class="w-100 d-flex justify-content-end">
+                    <button type="button" class="btn btn-secondary" (click)="closePreviewModal()">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Overlay del modal -->
+<div class="modal-backdrop fade" [class.show]="showPreviewModal" *ngIf="showPreviewModal" (click)="closePreviewModal()"></div>

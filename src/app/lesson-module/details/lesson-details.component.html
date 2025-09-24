@@ -19,6 +19,42 @@
                             {{lesson.title}}
                         </h5>
                     </div>
+                    
+                    <!-- Barra de Progreso -->
+                    <div *ngIf="lesson.state" class="card-body py-2">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="{{getCurrentConfig()?.icon}} text-{{getCurrentConfig()?.color}} me-2"></i>
+                            <small class="text-muted me-2">Progreso:</small>
+                            <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                <div class="progress-bar bg-{{getCurrentConfig()?.color}}" 
+                                     role="progressbar" 
+                                     [style.width.%]="getCurrentProgress()"
+                                     [attr.aria-valuenow]="getCurrentProgress()" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <small class="text-muted">{{getCurrentProgress()}}%</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mensaje Motivacional -->
+                <div *ngIf="lesson.state && showMotivationalMessage && getCurrentConfig()" 
+                     class="alert alert-{{getCurrentConfig()?.color}} alert-dismissible fade show mb-3" 
+                     role="alert">
+                    <div class="d-flex align-items-start">
+                        <i class="{{getCurrentConfig()?.icon}} me-3 mt-1"></i>
+                        <div class="flex-grow-1">
+                            <strong>{{lesson_states[lesson.state].label}}</strong>
+                            <p class="mb-0 mt-1">{{getCurrentConfig()?.message}}</p>
+                        </div>
+                        <button type="button" 
+                                class="btn-close" 
+                                (click)="dismissMotivationalMessage()"
+                                aria-label="Cerrar mensaje">
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -62,7 +98,7 @@
                             <strong>Estado</strong>
                         </h6>
                         <div class="card-text">
-                            <h1 class="badge badge-{{lesson_states[lesson.state].class}}">
+                            <h1 class="badge bg-{{lesson_states[lesson.state].class}}">
                                 {{lesson_states[lesson.state].label}}</h1>
                         </div>
                     </div>
@@ -75,16 +111,19 @@
                         </h6>
                         <div class="card-text" style="display: flex; flex-wrap: wrap;">
                             <label *ngFor="let area of lesson.knowledge_area"
-                                class="badge badge-{{lesson_states[lesson.state].class}} me-1 text-truncate"
-                                title="{{area.name}}">{{area.name}}</label>
+                                class="badge bg-success me-1 text-truncate"
+                                title="{{area?.name || area}}">{{area?.name || area}}</label>
 
                         </div>
 
                         <h6 class="card-title">
                             <strong>Nivel académico</strong>
                         </h6>
-                        <div class="card-text">
-                            {{academic_level[lesson.level]}}
+                        <div class="card-text" style="display: flex; flex-wrap: wrap;">
+                            <label *ngFor="let level of lesson.level"
+                                class="badge bg-info me-1 text-truncate"
+                                title="{{academic_level[level]}}">{{academic_level[level]}}</label>
+                            <span *ngIf="!lesson.level || lesson.level.length === 0" class="text-muted">No asignado</span>
                         </div>
                     </div>
                 </div>

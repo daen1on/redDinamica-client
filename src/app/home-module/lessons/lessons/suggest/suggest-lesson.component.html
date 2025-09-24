@@ -1,86 +1,273 @@
 <!-- suggest lesson -->
-<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="add" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+<div class="modal fade" id="add" tabindex="-1" aria-labelledby="addTitle" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <form [formGroup]="addForm" (ngSubmit)="onSubmit()" class="modal-content" enctype="multipart/form-data" (input)="onChanges()">
             <!-- modal-header -->
-            <div class="modal-header">
-                <h5 class="modal-title" id="addTitle">Sugerir lección</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="restartValues()">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addTitle">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    Sugerir Nueva Lección
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" (click)="restartValues()"></button>
             </div>
             <!-- /modal-header -->
 
             <!-- modal-body -->
             <div class="modal-body">
-                <div *ngIf="status === 'error'; successMessage" class="alert alert-danger fade show text-center"
-                    role="alert">
-                    <i class="fas fa-times-circle icon-message me-2"></i>
+                <!-- Mensajes de estado -->
+                <div *ngIf="status === 'error'" class="alert alert-danger fade show" role="alert">
+                    <i class="fas fa-times-circle me-2"></i>
                     {{errorMsg}}
                 </div>
 
-                <div *ngIf="status === 'success'; successMessage" class="alert alert-success fade show text-center"
-                    role="alert">
-                    <i class="fas fa-check-circle icon-message me-2"></i>
+                <div *ngIf="status === 'success' && showSuccessActions" class="alert alert-success fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
                     {{successMsg}}
-                </div>
-
-                <div class="mb-2">
-                    <p>Esta opción le permite solicitar o dar sugerencia de un tema sobre el cual considera que se debe desarrollar una lección en la red.</p>
-                    <p>El administrador se encargará de enviar una convocatoria pública para formar el grupo de desarrollo de la lección.</p>
-                </div>
-
-                <div *ngFor="let field of fields" class="form-group row">
-                    <label for="{{field.id}}" class="col-3 col-form-label">
-                        <strong>{{field.label}}<span *ngIf="field.required">*</span></strong>
-                    </label>
-
-                    <div class="col-9">
-                        <input *ngIf="field.type == 'text'" type="text" class="form-control" id="{{field.id}}"
-                            autocomplete="off" formControlName="{{field.id}}"
-                            [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}">
-
-                        <textarea *ngIf="field.type === 'textarea'" class="form-control" id="{{field.id}}" rows="3"
-                            formControlName="{{field.id}}" [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}">
-                        </textarea>
-
-                        <div *ngIf="submitted && f[field.id].errors" class="invalid-feedback">
-                            <div *ngIf="f[field.id].errors.required">
-                                El campo {{field.label}} es obligatorio.
-                            </div>
-                        </div>
+                    
+                    <!-- Opciones después del éxito -->
+                    <div class="mt-3 d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-primary" (click)="createAnotherSuggestion()">
+                            <i class="fas fa-plus me-1"></i> Sugerir Otra Lección
+                        </button>
+                        <button type="button" class="btn btn-secondary" (click)="closeAndRefresh()">
+                            <i class="fas fa-times me-1"></i> Cerrar
+                        </button>
                     </div>
                 </div>
 
-                <div class="form-group row">
-                    <label for="knowledge_area" class="col-3 col-form-label">
-                        <strong>Área de Conocimiento<span *ngIf="true">*</span></strong>
-                    </label>
-                    <div class="col-9">
-                        <select formControlName="knowledge_area" class="form-control" id="knowledge_area"
-                            [ngClass]="{'is-invalid': submitted && f['knowledge_area'].errors}">
-                            <option *ngFor="let area of knowledgeAreas" [value]="area._id">{{area.name}}</option>
-                        </select>
-                        <div *ngIf="submitted && f['knowledge_area'].errors" class="invalid-feedback">
-                            <div *ngIf="f['knowledge_area'].errors.required">
-                                El campo Área de Conocimiento es obligatorio.
+                <!-- Información introductoria -->
+                <div class="alert alert-info mb-4" [ngStyle]="{'display': showSuccessActions ? 'none' : 'block'}">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>¿Cómo funciona?</strong>
+                    <p class="mb-1 mt-2">Esta opción te permite solicitar o dar sugerencia de un tema sobre el cual consideras que se debe desarrollar una lección en la red.</p>
+                    <p class="mb-0">El administrador se encargará de enviar una convocatoria pública para formar el grupo de desarrollo de la lección.</p>
+                </div>
+
+                <!-- Formulario principal -->
+                <div [ngStyle]="{'display': showSuccessActions ? 'none' : 'block'}">
+                    <!-- Campos básicos -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div *ngFor="let field of fields" class="mb-3">
+                                <label for="{{field.id}}" class="form-label">
+                                    <strong>{{field.label}}<span *ngIf="field.required" class="text-danger">*</span></strong>
+                                </label>
+
+                                <input *ngIf="field.type == 'text'" 
+                                       type="text" 
+                                       class="form-control" 
+                                       id="{{field.id}}"
+                                       autocomplete="off" 
+                                       formControlName="{{field.id}}"
+                                       [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}"
+                                       placeholder="Ingresa {{field.label.toLowerCase()}}">
+
+                                <textarea *ngIf="field.type === 'textarea'" 
+                                          class="form-control" 
+                                          id="{{field.id}}" 
+                                          rows="3"
+                                          formControlName="{{field.id}}" 
+                                          [ngClass]="{ 'is-invalid': submitted && f[field.id].errors}"
+                                          placeholder="Describe {{field.label.toLowerCase()}}">
+                                </textarea>
+
+                                <div *ngIf="submitted && f[field.id].errors" class="invalid-feedback">
+                                    <div *ngIf="f[field.id].errors['required']">
+                                        El campo {{field.label}} es obligatorio.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="form-group row">
-                    <label for="level" class="col-3 col-form-label">
-                        <strong>Nivel Académico<span *ngIf="true">*</span></strong>
-                    </label>
-                    <div class="col-9">
-                        <select formControlName="level" class="form-control" id="level"
-                            [ngClass]="{'is-invalid': submitted && f['level'].errors}">
-                            <option *ngFor="let level of academicLevels" [value]="level">{{level}}</option>
-                        </select>
-                        <div *ngIf="submitted && f['level'].errors" class="invalid-feedback">
-                            <div *ngIf="f['level'].errors.required">
-                                El campo Nivel Académico es obligatorio.
+                    <div class="row">
+                        <!-- Áreas de Conocimiento con Autocompletado -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <strong>Áreas de Conocimiento<span class="text-danger">*</span></strong>
+                                </label>
+                                
+                                <!-- Chips de áreas seleccionadas -->
+                                <div class="selected-items-container mb-2" *ngIf="selectedKnowledgeAreas.length > 0">
+                                    <span *ngFor="let area of selectedKnowledgeAreas" 
+                                          class="badge bg-primary me-1 mb-1 selected-chip">
+                                        {{area.name}}
+                                        <button type="button" 
+                                                class="btn-close btn-close-white ms-1" 
+                                                (click)="removeKnowledgeArea(area)"
+                                                aria-label="Eliminar">
+                                        </button>
+                                    </span>
+                                </div>
+
+                                <!-- Input de autocompletado -->
+                                <div class="knowledge-area-autocomplete position-relative">
+                                    <input type="text" 
+                                           class="form-control" 
+                                           [(ngModel)]="knowledgeAreaInput"
+                                           [ngModelOptions]="{standalone: true}"
+                                           (input)="onKnowledgeAreaInputChange()"
+                                           (keyup.enter)="addNewKnowledgeAreaFromInput()"
+                                           [ngClass]="{'is-invalid': submitted && f['knowledge_area'].errors}"
+                                           placeholder="Escribe para buscar o agregar área de conocimiento..."
+                                           autocomplete="off">
+                                    
+                                    <!-- Dropdown de sugerencias -->
+                                    <div *ngIf="showKnowledgeAreaDropdown" 
+                                         class="dropdown-menu show position-absolute w-100 mt-1" 
+                                         style="z-index: 1050; max-height: 200px; overflow-y: auto;">
+                                        
+                                        <!-- Áreas existentes -->
+                                        <button *ngFor="let area of filteredKnowledgeAreas" 
+                                                type="button"
+                                                class="dropdown-item" 
+                                                (click)="selectKnowledgeArea(area)">
+                                            <i class="fas fa-tag me-2"></i>
+                                            {{area.name}}
+                                        </button>
+                                        
+                                        <!-- Opción para crear nueva área -->
+                                        <div *ngIf="knowledgeAreaInput.trim() && filteredKnowledgeAreas.length === 0" 
+                                             class="dropdown-divider"></div>
+                                        <button *ngIf="knowledgeAreaInput.trim() && filteredKnowledgeAreas.length === 0" 
+                                                type="button"
+                                                class="dropdown-item text-success" 
+                                                (click)="addNewKnowledgeAreaFromInput()">
+                                            <i class="fas fa-plus me-2"></i>
+                                            Crear "{{knowledgeAreaInput}}"
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <small class="form-text text-muted">
+                                    Escribe para buscar áreas existentes o crear nuevas
+                                </small>
+
+                                <div *ngIf="submitted && f['knowledge_area'].errors" class="invalid-feedback d-block">
+                                    <div *ngIf="f['knowledge_area'].errors['required']">
+                                        Debes seleccionar al menos un área de conocimiento.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Niveles Académicos con Autocompletado -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <strong>Niveles Académicos<span class="text-danger">*</span></strong>
+                                </label>
+                                
+                                <!-- Chips de niveles seleccionados -->
+                                <div class="selected-items-container mb-2" *ngIf="selectedLevels.length > 0">
+                                    <span *ngFor="let level of selectedLevels" 
+                                          class="badge bg-success me-1 mb-1 selected-chip">
+                                        {{level.value}}
+                                        <button type="button" 
+                                                class="btn-close btn-close-white ms-1" 
+                                                (click)="removeLevel(level)"
+                                                aria-label="Eliminar">
+                                        </button>
+                                    </span>
+                                </div>
+
+                                <!-- Input de autocompletado -->
+                                <div class="level-autocomplete position-relative">
+                                    <input type="text" 
+                                           class="form-control" 
+                                           [(ngModel)]="levelInput"
+                                           [ngModelOptions]="{standalone: true}"
+                                           (input)="onLevelInputChange()"
+                                           [ngClass]="{'is-invalid': submitted && f['level'].errors}"
+                                           placeholder="Escribe para buscar los niveles académicos."
+                                           autocomplete="off">
+                                    
+                                    <!-- Dropdown de sugerencias -->
+                                    <div *ngIf="showLevelDropdown" 
+                                         class="dropdown-menu show position-absolute w-100 mt-1" 
+                                         style="z-index: 1050; max-height: 200px; overflow-y: auto;">
+                                        
+                                        <button *ngFor="let level of filteredLevels" 
+                                                type="button"
+                                                class="dropdown-item" 
+                                                (click)="selectLevel(level)">
+                                            <i class="fas fa-graduation-cap me-2"></i>
+                                            {{level.value}}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <small class="form-text text-muted">
+                                    Seleccionar uno o más niveles académicos. e.g Preescolar - Primaria - Secundaria - Bachillerato - Universitario - Posgrado.
+                                </small>
+
+                                <div *ngIf="submitted && f['level'].errors" class="invalid-feedback d-block">
+                                    <div *ngIf="f['level'].errors['required']">
+                                        Debes seleccionar al menos un nivel académico.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Facilitador Sugerido -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="suggested_facilitator" class="form-label">
+                                    <strong>Facilitador Sugerido <small class="text-muted">(Opcional)</small></strong>
+                                </label>
+                                <select formControlName="suggested_facilitator" 
+                                        class="form-select" 
+                                        id="suggested_facilitator">
+                                    <option value="">Selecciona un facilitador (opcional)</option>
+                                    <option *ngFor="let facilitator of facilitators" [value]="facilitator._id">
+                                        {{facilitator.name}} {{facilitator.surname}}
+                                        <span *ngIf="facilitator.profession"> - {{facilitator.profession.name}}</span>
+                                    </option>
+                                </select>
+                                <small class="form-text text-muted">
+                                    Si conoces a alguien que podría liderar esta lección, puedes sugerirlo aquí. 
+                                    Se le enviará una notificación para que considere participar.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen de selección -->
+                    <div class="card bg-light" *ngIf="selectedKnowledgeAreas.length > 0 || selectedLevels.length > 0">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="fas fa-eye me-2"></i>
+                                Resumen de tu sugerencia
+                            </h6>
+                            
+                            <div *ngIf="selectedKnowledgeAreas.length > 0" class="mb-2">
+                                <strong>Áreas seleccionadas:</strong>
+                                <div class="mt-1">
+                                    <span *ngFor="let area of selectedKnowledgeAreas; let last = last" 
+                                          class="badge bg-primary me-1">
+                                        {{area.name}}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div *ngIf="selectedLevels.length > 0" class="mb-2">
+                                <strong>Niveles seleccionados:</strong>
+                                <div class="mt-1">
+                                    <span *ngFor="let level of selectedLevels; let last = last" 
+                                          class="badge bg-success me-1">
+                                        {{level.value}}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div *ngIf="addForm.get('suggested_facilitator')?.value" class="mb-0">
+                                <strong>Facilitador sugerido:</strong>
+                                <span class="badge bg-info ms-1">
+                                    {{getFacilitatorName(addForm.get('suggested_facilitator')?.value)}}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -89,13 +276,17 @@
             <!-- /modal-body -->
 
             <!-- modal-footer -->
-            <div class="modal-footer">
-                <button class="btn btn-danger" data-bs-dismiss="modal" (click)="restartValues()">Cancelar</button>
-                <button type="submit" class="btn btn-success">
-                    <span *ngIf="loading && !addForm.invalid" class="spinner-border spinner-border-sm" role="status"
-                        aria-hidden="true"></span>
-                    <span class="sr-only">Enviar</span>
-                    Enviar
+            <div class="modal-footer" [ngStyle]="{'display': showSuccessActions ? 'none' : 'flex'}">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="restartValues()">
+                    <i class="fas fa-times me-1"></i>
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        [disabled]="loading || addForm.invalid" 
+                        class="btn btn-success">
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <i *ngIf="!loading" class="fas fa-paper-plane me-1"></i>
+                    {{loading ? 'Enviando...' : 'Enviar Sugerencia'}}
                 </button>
             </div>
             <!-- /modal-footer -->
@@ -103,3 +294,44 @@
     </div>
 </div>
 <!-- /suggest lesson -->
+
+<!-- Estilos CSS adicionales -->
+<style>
+.selected-chip {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.5rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.selected-chip .btn-close {
+    font-size: 0.7rem;
+    width: 0.8rem;
+    height: 0.8rem;
+}
+
+.selected-items-container {
+    min-height: 2rem;
+    padding: 0.375rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+}
+
+.dropdown-menu.show {
+    display: block;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.dropdown-item:hover {
+    background-color: #e9ecef;
+}
+
+.knowledge-area-autocomplete .dropdown-menu,
+.level-autocomplete .dropdown-menu {
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+}
+</style>
