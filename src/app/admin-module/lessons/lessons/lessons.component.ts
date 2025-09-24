@@ -53,6 +53,7 @@ export class LessonsComponent implements OnInit, OnDestroy {
     selectedLevels = [];
     states = [
         { label: "Propuesta", value: "proposed", class: "secondary" },
+        { label: "Aprobada por Facilitador", value: "approved_by_expert", class: "info" },
         { label: "Asignada", value: "assigned", class: "warning" },
         { label: "Desarrollo", value: "development", class: "info" },
         { label: "Prueba", value: "test", class: "primary" },
@@ -65,6 +66,11 @@ export class LessonsComponent implements OnInit, OnDestroy {
         { label: "Secundaria", value: "highschool" },
         { label: "Universitario", value: "university" }
     ];*/
+
+    // Nuevas propiedades para enfoque desde notificaciones
+    public focusedLessonId: string | null = null;
+    public actionType: string | null = null;
+    public showFocusedLesson = false;
 
     constructor(
         private userService: UserService,
@@ -81,22 +87,41 @@ export class LessonsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        // Verificar si viene desde una notificación con parámetros específicos
+        this.route.queryParams.subscribe(params => {
+            this.focusedLessonId = params['lesson'] || null;
+            this.actionType = params['action'] || null;
+            
+            if (this.focusedLessonId && (this.actionType === 'review' || this.actionType === 'manage')) {
+                console.log('Enfocando lección desde notificación (Admin):', this.focusedLessonId);
+                this.showFocusedLesson = true;
+                this.title = this.actionType === 'review' ? 'Revisar Nueva Lección' : 'Gestionar Lección';
+            }
+        });
+
         this.loadInitialData();
         this.filter.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
             this.applyFilters(this.allLessons); // Use allLessons for filtering
         });
-     
+        
+        // Inicializar filteredLessons como copia de allLessons al inicio
+        this.filteredLessons = [...this.allLessons];
     }
     ngOnDestroy(): void {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
     }
     loadInitialData(): void {
-        // Fetch areas
-        this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe(params => {
-            this.page = +params['page'] || 1;
-            this.fetchLessons(this.page);
-        });
+        // Si hay una lección enfocada, cargar solo esa lección
+        if (this.showFocusedLesson && this.focusedLessonId) {
+            this.getFocusedLesson();
+        } else {
+            // Fetch areas y lecciones normalmente
+            this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe(params => {
+                this.page = +params['page'] || 1;
+                this.fetchLessons(this.page);
+            });
+        }
     
         this.basicDataService.getAllKnowledgeAreas().pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: (response) => {
@@ -154,6 +179,7 @@ export class LessonsComponent implements OnInit, OnDestroy {
 
     setLevel(selectedLevel: string): void {
         const index = this.selectedLevels.indexOf(selectedLevel);
+        console.log("Selected level: ", selectedLevel);
         if (index > -1) {
             this.selectedLevels.splice(index, 1);
         } else {
@@ -172,64 +198,114 @@ export class LessonsComponent implements OnInit, OnDestroy {
 
     fetchAllLessons(): void {
         let orderBy = this.orderControl.value || 'created_at';
-        // Agregar el parámetro visibleOnes que faltaba (true para lecciones visibles en admin)
-        this.lessonService.getAllLessons(this.token, orderBy, true).pipe(takeUntil(this.unsubscribe$)).subscribe({
+        this.loading = true;
+        
+        // Para admin: usar 'all' para ver todas las lecciones (propuestas + aceptadas)
+        this.lessonService.getAllLessons(this.token, orderBy, 'all').pipe(takeUntil(this.unsubscribe$)).subscribe({
           next: response => {
-            this.allLessons = response.lessons; // Store ALL lessons
-            console.log("All Lessons: ", this.allLessons.length > 0 ? this.allLessons[0] : 'No lessons found');
-            this.total = response.total;
-            this.pages = response.pages;
+            if (response && response.lessons) {
+                this.allLessons = response.lessons;
+                this.total = response.total || 0;
+                this.pages = response.pages || 0;
+                console.log("All Lessons fetched successfully: ", this.allLessons.length);
+                
+                
+                // Aplicar filtros después de obtener todas las lecciones
+                this.applyFilters(this.allLessons);
+            } else {
+                console.warn('No lessons data received');
+                this.allLessons = [];
+                this.filteredLessons = [];
+                this.total = 0;
+                this.pages = 0;
+            }
             this.loading = false;
-            
           },
-          error: error => console.error('Error fetching all lessons:', error)
+          error: error => {
+            console.error('Error fetching all lessons:', error);
+            this.loading = false;
+            // Manejar el error de manera más amigable
+            this.allLessons = [];
+            this.filteredLessons = [];
+            this.total = 0;
+            this.pages = 0;
+          }
         });
       }
     
       applyFilters(lessons: any): void {
         let filteredLessons = [...lessons]; // Create a copy to avoid modifying the original
+        
+        // Verificar si hay algún filtro aplicado
+        const hasFilters = !!(this.filter.value || 
+                            this.selectedStates.length > 0 || 
+                            this.selectedAreas.length > 0 || 
+                            this.selectedLevels.length > 0);
     
         if (this.filter.value) {
           const filterValue = this.filter.value.toLowerCase();
           console.log("Filter value: ", filterValue);
           
           filteredLessons = filteredLessons.filter(lesson =>
-            
-            lesson.title.toLowerCase().includes(filterValue) // Filter by title;
+            lesson.title && lesson.title.toLowerCase().includes(filterValue) // Filter by title
           );
         }
     
         if (this.selectedStates.length > 0) {
-          filteredLessons = filteredLessons.filter(lesson => this.selectedStates.includes(lesson.state));
+          filteredLessons = filteredLessons.filter(lesson => 
+            lesson.state && this.selectedStates.includes(lesson.state)
+          );
         }
     
         if (this.selectedAreas.length > 0) {
           filteredLessons = filteredLessons.filter(lesson =>
-            lesson.knowledge_area.some(area => this.selectedAreas.includes(area.name))
+            lesson.knowledge_area && lesson.knowledge_area.some(area => 
+              area && area.name && this.selectedAreas.includes(area.name)
+            )
           );
         }
     
         if (this.selectedLevels.length > 0) {
-          filteredLessons = filteredLessons.filter(lesson => this.selectedLevels.includes(lesson.level));
+          filteredLessons = filteredLessons.filter(
+            lesson => {
+                console.log(lesson.level),       
+               lesson.level && this.selectedLevels.includes(lesson.level)
+            }
+          );
         }
     
-        this.filteredLessons = filteredLessons; // Update filteredLessons
-        this.allLessons = this.filteredLessons; // Update lessons for the current page
-        console.log("Filtered Lessons: ", this.filteredLessons);
-        console.log("Lessons for current page: ", this.allLessons);
+        this.filteredLessons = filteredLessons; // Update filteredLessons only
+        
+        console.log("Filters applied:", hasFilters);
+        console.log("Filtered Lessons: ", this.filteredLessons.length);
+        console.log("Total lessons available: ", this.allLessons.length);
+      }
+      
+      // Método para verificar si hay filtros aplicados
+      hasActiveFilters(): boolean {
+        return !!(this.filter.value || 
+                 this.selectedStates.length > 0 || 
+                 this.selectedAreas.length > 0 || 
+                 this.selectedLevels.length > 0);
       }
 
       fetchLessons(page: number): void {
-        this.lessonService.getLessons(this.token, page).pipe(takeUntil(this.unsubscribe$)).subscribe({
+        // Para admin: usar 'all' para ver todas las lecciones (propuestas + aceptadas)
+        this.lessonService.getLessons(this.token, page, 'all').pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: response => {
                 this.allLessons = response.lessons;
                 this.total = response.total;
                 this.pages = response.pages;
                 this.loading = false;
+                console.log('Lessons fetched successfully:', response);
             },
             error: error => {
                 console.error('Error fetching lessons:', error);
                 this.loading = false;
+                // Manejar el error de manera más amigable
+                this.allLessons = [];
+                this.total = 0;
+                this.pages = 0;
             }
         });
     } 
@@ -263,11 +339,42 @@ export class LessonsComponent implements OnInit, OnDestroy {
         if (visibilityChange) {
             lesson.visible = !lesson.visible;
         }
+        
+        console.log("Enviando actualización de lección:", {
+            id: lesson._id,
+            visible: lesson.visible,
+            visibilityChange
+        });
+
         this.lessonService.editLesson(this.token, lesson).pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: response => {
                 console.log('Lesson updated:', response);
-                this.fetchAllLessons();},
-            error: error => console.error('Error updating lesson:', error)
+                this.fetchAllLessons();
+            },
+            error: error => {
+                console.error('Error updating lesson:', error);
+                
+                // Revertir cambio de visibilidad si falló
+                if (visibilityChange) {
+                    lesson.visible = !lesson.visible;
+                }
+                
+                // Manejo específico de errores
+                let errorMessage = 'Error al actualizar la lección';
+                if (error.status === 500) {
+                    errorMessage = 'Error interno del servidor. Por favor, inténtalo de nuevo.';
+                } else if (error.status === 400) {
+                    errorMessage = error.error?.message || 'Datos inválidos en la lección.';
+                } else if (error.status === 404) {
+                    errorMessage = 'La lección no fue encontrada.';
+                } else {
+                    errorMessage = error.error?.message || 'Error al actualizar la lección.';
+                }
+                
+                // Mostrar error al usuario (puedes implementar un servicio de notificaciones)
+                console.error(errorMessage);
+                alert(errorMessage); // Temporal, reemplazar con un sistema de notificaciones mejor
+            }
         });
     }
     
@@ -308,5 +415,152 @@ export class LessonsComponent implements OnInit, OnDestroy {
             this.showLevels = show;
         }
     }
-}
 
+    // Métodos para abrir modales con manejo correcto del DOM
+    openAddModal() {
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('add');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de agregar lección:', error);
+            }
+        }, 0);
+    }
+
+    openAddCallModal(lesson, nextVersion = false) {
+        this.setAddCallLesson(lesson, nextVersion);
+        
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('addCall');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de agregar convocatoria:', error);
+            }
+        }, 0);
+    }
+
+    openCallModal(lesson) {
+        this.setCallLesson(lesson);
+        
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('call');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de convocatoria:', error);
+            }
+        }, 0);
+    }
+
+    openDeleteModal(lessonId) {
+        this.setDeleteLesson(lessonId);
+        
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('delete');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de eliminar:', error);
+            }
+        }, 0);
+    }
+
+    // NUEVO MÉTODO PARA ENFOQUE DESDE NOTIFICACIONES
+    getFocusedLesson() {
+        if (!this.focusedLessonId) return;
+        
+        console.log('Cargando lección enfocada para admin:', this.focusedLessonId);
+        
+        this.lessonService.getLesson(this.token, this.focusedLessonId).subscribe(
+            response => {
+                if (response.lesson) {
+                    // Crear arrays con solo la lección enfocada
+                    this.lessons = [response.lesson];
+                    this.allLessons = [response.lesson];
+                    this.filteredLessons = [response.lesson];
+                    this.loading = false;
+                    
+                    console.log('Lección enfocada cargada para admin:', response.lesson.title);
+                    
+                    // Scroll suave hacia la lección si es necesario
+                    setTimeout(() => {
+                        const lessonElement = document.querySelector('.card-lesson');
+                        if (lessonElement) {
+                            lessonElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 100);
+                } else {
+                    console.error('No se pudo cargar la lección enfocada');
+                    this.loading = false;
+                }
+            },
+            error => {
+                console.error('Error cargando lección enfocada:', error);
+                this.loading = false;
+            }
+        );
+    }
+
+    // Verificar si una lección está enfocada
+    isFocusedLesson(lesson: any): boolean {
+        return this.focusedLessonId === lesson._id;
+    }
+}
