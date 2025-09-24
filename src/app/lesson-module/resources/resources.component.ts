@@ -332,10 +332,19 @@ export class ResourcesComponent implements OnInit {
                 }
             },
             error: (error) => {
-                if (error != null) {
-                    this.status = 'error';
-                    this.loading = false;
-                    console.log(<any>error);
+                this.status = 'error';
+                this.loading = false;
+                console.error('Error updating lesson resources:', error);
+                
+                // Manejo específico de errores
+                if (error.status === 500) {
+                    this.errorMsg = 'Error interno del servidor. Por favor, verifica que todos los archivos sean válidos.';
+                } else if (error.status === 400) {
+                    this.errorMsg = error.error?.message || 'Datos inválidos. Por favor, revisa los archivos seleccionados.';
+                } else if (error.status === 404) {
+                    this.errorMsg = 'La lección no fue encontrada.';
+                } else {
+                    this.errorMsg = error.error?.message || 'Hubo un error agregando los recursos. Inténtalo de nuevo más tarde.';
                 }
             }
         });
@@ -383,10 +392,12 @@ export class ResourcesComponent implements OnInit {
     }
 
     onChanges(){
-        this.name.valueChanges.subscribe(val => {
-            if (val) {
-                this.status = null;
-                this.submitted = false;
+        this.name.valueChanges.subscribe({
+            next: val => {
+                if (val) {
+                    this.status = null;
+                    this.submitted = false;
+                }
             }
         });
         

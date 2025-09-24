@@ -143,8 +143,11 @@
                                             </div>
                                         </div>
 
-                                        <button type="submit" [disabled]="loading"  class="btn btn-success mb-2 float-right"
-                                            (click)="onSubmit(group)">Guardar</button>
+                                        <button type="submit" [disabled]="loading"  class="btn btn-success mb-2 float-end"
+                                            (click)="onSubmit(group)">
+                                            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            Guardar
+                                        </button>
                                     </section>
 
                                     <p *ngFor="let file of getfiles(group)">
@@ -233,8 +236,11 @@
                                             </div>
                                         </div>
 
-                                        <button  [disabled]="loading"  type="submit" class="btn btn-success mb-2 float-right"
-                                            (click)="onSubmit()">Guardar</button>
+                                        <button  [disabled]="loading"  type="submit" class="btn btn-success mb-2 float-end"
+                                            (click)="onSubmit()">
+                                            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            Guardar
+                                        </button>
 
                                     </form>
 
