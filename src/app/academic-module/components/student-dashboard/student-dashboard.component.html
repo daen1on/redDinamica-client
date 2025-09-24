@@ -83,7 +83,7 @@
           <div class="group-details">
             <div class="detail-item">
               <i class="fas fa-chalkboard-teacher"></i>
-              <span>Docente: {{ (group as any).teacher?.name || (group as any).teacher?.surname ? ((group as any).teacher?.name + ' ' + (group as any).teacher?.surname) : (group as any).teacher?.toString?.() || group.teacher }}</span>
+              <span>Docente: {{ group.teacher}}</span>
             </div>
             <div class="detail-item">
               <i class="fas fa-graduation-cap"></i>
