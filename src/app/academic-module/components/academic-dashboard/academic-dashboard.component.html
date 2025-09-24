@@ -1,0 +1,84 @@
+<div class="academic-dashboard">
+  <!-- Header movido al AcademicLayout (fijo para todas las páginas de Academia) -->
+
+  <div class="dashboard-content">
+    <div class="sidebar">
+      <nav class="nav flex-column">
+        <a class="nav-link" (click)="handleTeacherPanelAccess()" *ngIf="canAccessTeacherPanel()">
+          <i class="fas fa-chalkboard-teacher"></i> Panel de Docente
+        </a>
+        <a class="nav-link" routerLink="/academia/student" routerLinkActive="active" *ngIf="isStudent">
+          <i class="fas fa-user-graduate"></i> Panel de Estudiante
+        </a>
+        <a class="nav-link" routerLink="/academia/groups" routerLinkActive="active" *ngIf="canAccessTeacherPanel()">
+          <i class="fas fa-users"></i> Gestión de Grupos
+        </a>
+        <a class="nav-link" routerLink="/academia/lessons" routerLinkActive="active" *ngIf="canAccessTeacherPanel() || isStudent">
+          <i class="fas fa-book"></i> Gestión de Lecciones
+        </a>
+        
+        <!-- Opciones para usuarios con roles de docente/facilitador/admin -->
+        <div *ngIf="canAccessTeacherPanel()" class="role-selection">
+          <h4>Selecciona tu rol:</h4>
+          <a class="nav-link" (click)="handleTeacherPanelAccess()">
+            <i class="fas fa-chalkboard-teacher"></i> Panel de Docente
+          </a>
+          <a class="nav-link" routerLink="/academia/student">
+            <i class="fas fa-user-graduate"></i> Panel de Estudiante
+          </a>
+        </div>
+        
+        <!-- Opciones para usuarios sin rol académico específico -->
+        <div *ngIf="!canAccessTeacherPanel() && !isStudent && userRole !== 'student' && userRole !== 'invitado' && userRole !== 'facilitator'" class="role-selection">
+          <h4>Selecciona tu rol:</h4>
+          <a class="nav-link" (click)="handleTeacherPanelAccess()">
+            <i class="fas fa-chalkboard-teacher"></i> Soy Docente
+          </a>
+          <a class="nav-link" routerLink="/academia/student">
+            <i class="fas fa-user-graduate"></i> Soy Estudiante
+          </a>
+        </div>
+      </nav>
+    </div>
+
+    <div class="main-content">
+      <!-- Mensaje de bienvenida para usuarios con roles de docente/facilitador/admin -->
+      <div *ngIf="canAccessTeacherPanel()" class="welcome-message">
+        <h2>¡Bienvenido a RedDinámica Académica!</h2>
+        <p>Como {{ userRole }}, puedes acceder tanto al panel de docente como al panel de estudiante. Selecciona el modo que desees usar.</p>
+        <div class="role-cards">
+          <div class="role-card" (click)="handleTeacherPanelAccess()">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <h3>Panel de Docente</h3>
+            <p>Gestiona grupos académicos y lecciones</p>
+          </div>
+          <div class="role-card" routerLink="/academia/student">
+            <i class="fas fa-user-graduate"></i>
+            <h3>Panel de Estudiante</h3>
+            <p>Participa en grupos y crea lecciones</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mensaje de bienvenida para usuarios sin rol académico específico -->
+      <div *ngIf="!canAccessTeacherPanel() && !isStudent && userRole !== 'student' && userRole !== 'invitado' && userRole !== 'facilitator'" class="welcome-message">
+        <h2>¡Bienvenido a RedDinámica Académica!</h2>
+        <p>Selecciona tu rol en el menú lateral para acceder a las funcionalidades correspondientes.</p>
+        <div class="role-cards">
+          <div class="role-card" (click)="handleTeacherPanelAccess()">
+            <i class="fas fa-chalkboard-teacher"></i>
+            <h3>Docente</h3>
+            <p>Gestiona grupos académicos y lecciones</p>
+          </div>
+          <div class="role-card" routerLink="/academia/student">
+            <i class="fas fa-user-graduate"></i>
+            <h3>Estudiante</h3>
+            <p>Participa en grupos y crea lecciones</p>
+          </div>
+        </div>
+      </div>
+      
+      <router-outlet *ngIf="userRole === 'student' || userRole === 'invitado'"></router-outlet>
+    </div>
+  </div>
+</div>

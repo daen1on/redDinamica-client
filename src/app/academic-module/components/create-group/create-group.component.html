@@ -1,0 +1,179 @@
+<div class="create-group-container">
+  <div class="header">
+    <h2>Crear Nuevo Grupo Académico</h2>
+    <button class="btn btn-secondary" (click)="cancel()">
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+  </div>
+
+  <!-- Mensajes de éxito y error -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <div class="form-container">
+    <form [formGroup]="groupForm" (ngSubmit)="onSubmit()" class="group-form">
+      
+      <!-- Nombre del grupo -->
+      <div class="mb-3">
+        <label for="name">Nombre del Grupo *</label>
+        <input 
+          type="text" 
+          id="name"
+          formControlName="name"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('name')"
+          placeholder="Ej: Matemáticas Avanzadas 2024">
+        <div *ngIf="isFieldInvalid('name')" class="invalid-feedback">
+          {{ getErrorMessage('name') }}
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="mb-3">
+        <label for="description">Descripción *</label>
+        <textarea 
+          id="description"
+          formControlName="description"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('description')"
+          rows="4"
+          placeholder="Describe el propósito y objetivos del grupo..."></textarea>
+        <div *ngIf="isFieldInvalid('description')" class="invalid-feedback">
+          {{ getErrorMessage('description') }}
+        </div>
+      </div>
+
+      <!-- Materias -->
+      <div class="mb-3">
+        <label>Materias</label>
+        <div class="subjects-container">
+          <div *ngFor="let subject of groupForm.get('subjects')?.value; let i = index" class="subject-item">
+            <span class="subject-tag">{{ subject }}</span>
+            <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeSubject(i)">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <button type="button" class="btn btn-outline-primary btn-sm" (click)="addSubject()">
+            <i class="fas fa-plus"></i> Agregar Materia Personalizada
+          </button>
+        </div>
+        
+        <!-- Áreas de conocimiento disponibles -->
+        <div *ngIf="knowledgeAreas.length > 0" class="knowledge-areas-section">
+          <h5>Áreas de Conocimiento Disponibles</h5>
+          <div class="knowledge-areas-grid">
+            <button 
+              *ngFor="let area of knowledgeAreas" 
+              type="button" 
+              class="btn btn-outline-secondary btn-sm knowledge-area-btn"
+              (click)="addSubjectFromKnowledgeArea(area)"
+              [disabled]="groupForm.get('subjects')?.value?.includes(area.name)">
+              <i class="fas fa-book"></i> {{ area.name }}
+            </button>
+          </div>
+        </div>
+        
+        <small class="form-text text-muted">
+          Agrega las materias que se impartirán en este grupo. Puedes usar las áreas de conocimiento disponibles o crear materias personalizadas.
+        </small>
+      </div>
+
+      <!-- Nivel académico -->
+      <div class="mb-3">
+        <label for="academicLevel">Nivel Académico *</label>
+        <select 
+          id="academicLevel"
+          formControlName="academicLevel"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('academicLevel')">
+          <option value="">Selecciona un nivel</option>
+          <option value="Colegio">Colegio</option>
+          <option value="Universidad">Universidad</option>
+        </select>
+        <div *ngIf="isFieldInvalid('academicLevel')" class="invalid-feedback">
+          {{ getErrorMessage('academicLevel') }}
+        </div>
+      </div>
+
+      <!-- Grado -->
+      <div class="mb-3">
+        <label for="grade">Grado *</label>
+        <select 
+          id="grade"
+          formControlName="grade"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('grade')"
+          [disabled]="!groupForm.get('academicLevel')?.value">
+          <option value="">Selecciona un grado</option>
+          <option *ngFor="let grade of validGrades" [value]="grade">
+            {{ grade }}
+          </option>
+        </select>
+        <div *ngIf="isFieldInvalid('grade')" class="invalid-feedback">
+          {{ getErrorMessage('grade') }}
+        </div>
+        <small class="form-text text-muted" *ngIf="!groupForm.get('academicLevel')?.value">
+          Primero selecciona el nivel académico
+        </small>
+      </div>
+
+      <!-- Número máximo de estudiantes -->
+      <div class="mb-3">
+        <label for="maxStudents">Número Máximo de Estudiantes *</label>
+        <input 
+          type="number" 
+          id="maxStudents"
+          formControlName="maxStudents"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('maxStudents')"
+          min="1"
+          max="100"
+          placeholder="30">
+        <div *ngIf="isFieldInvalid('maxStudents')" class="invalid-feedback">
+          {{ getErrorMessage('maxStudents') }}
+        </div>
+        <small class="form-text text-muted">
+          Máximo 100 estudiantes por grupo
+        </small>
+      </div>
+
+
+      <!-- Botones de acción -->
+      <div class="form-actions">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="cancel()"
+          [disabled]="loading">
+          Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary" 
+          [disabled]="loading || groupForm.invalid">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          <i *ngIf="!loading" class="fas fa-save me-2"></i>
+          {{ loading ? 'Creando...' : 'Crear Grupo' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Información adicional -->
+  <div class="info-section">
+    <div class="info-card">
+      <h4><i class="fas fa-info-circle"></i> Información del Grupo</h4>
+      <ul>
+        <li>Los grupos académicos permiten organizar a los estudiantes por nivel y grado</li>
+        <li>Como profesor, tendrás acceso completo a todas las lecciones creadas por los estudiantes del grupo</li>
+        <li>Puedes importar contenido de RedDinámica principal a tus grupos</li>
+        <li>Las mejores lecciones pueden ser exportadas a la comunidad principal</li>
+      </ul>
+    </div>
+  </div>
+</div>

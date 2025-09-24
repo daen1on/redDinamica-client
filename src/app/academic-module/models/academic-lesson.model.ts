@@ -5,6 +5,100 @@ export interface UserRef {
   avatar?: string;
 }
 
+export interface KnowledgeArea {
+  _id: string;
+  name: string;
+}
+
+export interface Collaborator {
+  user: string | UserRef;
+  role: 'member' | 'reviewer' | 'contributor';
+  joinedAt: string;
+  contribution?: string;
+  status: 'active' | 'inactive' | 'left';
+}
+
+export interface ChatMessage {
+  _id: string;
+  content: string;
+  author: string | UserRef;
+  timestamp: string;
+  edited: boolean;
+  editedAt?: string;
+  type: 'text' | 'file' | 'system';
+  fileUrl?: string;
+  fileName?: string;
+}
+
+export interface SharedResource {
+  _id: string;
+  name: string;
+  originalName: string;
+  path: string;
+  url?: string;
+  size: number;
+  mimeType: string;
+  uploadedBy: string | UserRef;
+  uploadedAt: string;
+  description?: string;
+  category: 'document' | 'image' | 'video' | 'audio' | 'link' | 'other';
+}
+
+export interface Milestone {
+  _id: string;
+  title: string;
+  description: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  assignedTo?: string | UserRef;
+  dueDate?: string;
+  completedAt?: string;
+  order: number;
+}
+
+export interface LessonFile {
+  _id?: string;
+  name: string;
+  originalName: string;
+  path: string;
+  size: number;
+  mimeType: string;
+  uploadedBy: string | UserRef;
+  uploadedAt: string;
+}
+
+export interface Conversation {
+  _id?: string;
+  title: string;
+  participants: (string | UserRef)[];
+  messages: ConversationMessage[];
+  createdAt: string;
+}
+
+export interface ConversationMessage {
+  _id?: string;
+  content: string;
+  author: string | UserRef;
+  timestamp: string;
+  edited: boolean;
+  editedAt?: string;
+}
+
+export interface DevelopmentGroupMember {
+  user: string | UserRef;
+  role: 'leader' | 'collaborator' | 'reviewer';
+  joinedAt: string;
+  status: 'active' | 'inactive' | 'removed';
+}
+
+export interface TeacherComment {
+  _id?: string;
+  content: string;
+  author: string | UserRef;
+  timestamp: string;
+  type: 'feedback' | 'suggestion' | 'approval' | 'correction';
+  isFromTeacher: boolean;
+}
+
 export interface AcademicLesson {
   _id: string;
   title: string;
@@ -12,33 +106,54 @@ export interface AcademicLesson {
   academicGroup: string;
   author: string | UserRef;
   teacher?: string | UserRef;
-  level: 'Básico' | 'Intermedio' | 'Avanzado' | 'Colegio';
-  objectives: string;
-  methodology: string;
-  evaluation: string;
-  resources?: string;
-  duration: number;
-  difficulty: 'Fácil' | 'Moderado' | 'Difícil';
-  status: 'draft' | 'proposed' | 'approved' | 'rejected' | 'completed' | 'graded';
+  leader: string | UserRef;
+  justification: {
+    methodology: string;
+    objectives: string;
+  };
+  tags?: string[];
+  knowledge_areas: KnowledgeArea[];
+  
+  // Nuevos campos requeridos
+  files: LessonFile[];
+  conversations: Conversation[];
+  level: string[]; // Heredado del grupo
+  state: 'draft' | 'in_development' | 'review_requested' | 'under_review' | 'approved' | 'rejected' | 'completed' | 'ready_for_migration';
+  development_group: DevelopmentGroupMember[];
+  
+  status: 'draft' | 'proposed' | 'approved' | 'rejected' | 'in_development' | 'completed' | 'graded' | 'ready_for_migration';
   grade?: number;
   feedback?: string;
   isExported: boolean;
   exportedLesson?: string;
-  academicSettings: {
+  
+  // Colaboración (mantener compatibilidad)
+  collaborators: Collaborator[];
+  
+  // Comunicación
+  chatMessages: ChatMessage[];
+  
+  // Recursos compartidos
+  sharedResources: SharedResource[];
+  
+  // Configuración académica implícita del grupo
+  academicSettings?: {
     academicLevel: 'Colegio' | 'Universidad';
     grade: string;
     subjects: string[];
   };
+  
+  // Progreso colaborativo
   progress: {
     completed: boolean;
     completedAt?: string;
     timeSpent: number;
+    milestones: Milestone[];
   };
+  
   views: number;
   likes: string[];
-  comments: Comment[];
-  messages: Message[];
-  files: File[];
+  comments: TeacherComment[]; // Comentarios del profesor
   calls: Call[];
   proposedAt?: string;
   approvedAt?: string;
@@ -93,25 +208,50 @@ export interface CreateAcademicLessonRequest {
   title: string;
   resume: string;
   academicGroup: string;
-  level: 'Básico' | 'Intermedio' | 'Avanzado' | 'Colegio';
-  objectives: string;
-  methodology: string;
-  evaluation: string;
-  resources?: string;
-  duration: number;
-  difficulty: 'Fácil' | 'Moderado' | 'Difícil';
+  justification: {
+    methodology: string;
+    objectives: string;
+  };
+  tags?: string;
+  knowledge_areas: string[];
 }
 
 export interface UpdateAcademicLessonRequest {
   title?: string;
   resume?: string;
-  level?: 'Básico' | 'Intermedio' | 'Avanzado' | 'Colegio';
-  objectives?: string;
-  methodology?: string;
-  evaluation?: string;
-  resources?: string;
-  duration?: number;
-  difficulty?: 'Fácil' | 'Moderado' | 'Difícil';
+  justification?: {
+    methodology?: string;
+    objectives?: string;
+  };
+  tags?: string;
+  knowledge_areas?: string[];
+}
+
+export interface InviteCollaboratorRequest {
+  lessonId: string;
+  userEmail: string;
+  role: 'member' | 'reviewer' | 'contributor';
+  message?: string;
+}
+
+export interface UpdateLessonStatusRequest {
+  status: 'draft' | 'proposed' | 'approved' | 'rejected' | 'in_development' | 'completed' | 'graded' | 'ready_for_migration';
+  message?: string;
+}
+
+export interface SendChatMessageRequest {
+  lessonId: string;
+  content: string;
+  type: 'text' | 'file';
+  fileUrl?: string;
+  fileName?: string;
+}
+
+export interface UploadResourceRequest {
+  lessonId: string;
+  file: File;
+  description?: string;
+  category: 'document' | 'image' | 'video' | 'audio' | 'link' | 'other';
 }
 
 export interface ApproveLessonRequest {

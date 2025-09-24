@@ -1,0 +1,151 @@
+<div class="lesson-management-container">
+  <div class="header">
+    <h2>Gestión de Lecciones Académicas</h2>
+    <button *ngIf="userRole === 'student'" class="btn btn-primary" (click)="createNewLesson()">
+      <i class="fas fa-plus"></i> Crear Nueva Lección
+    </button>
+  </div>
+
+  <!-- Filtros y búsqueda -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        placeholder="Buscar lecciones..." 
+        [(ngModel)]="searchTerm"
+        class="form-control">
+    </div>
+    
+    <div class="filter-controls">
+      <select [(ngModel)]="filterStatus" class="form-control">
+        <option value="">Todos los estados</option>
+        <option value="draft">Borrador</option>
+        <option value="proposed">Propuesta</option>
+        <option value="approved">Aprobada</option>
+        <option value="rejected">Rechazada</option>
+        <option value="completed">Completada</option>
+        <option value="graded">Calificada</option>
+      </select>
+      
+      <select [(ngModel)]="filterGroup" class="form-control">
+        <option value="">Todos los grupos</option>
+        <option *ngFor="let group of groups" [value]="group._id">{{ group.name }}</option>
+      </select>
+      
+      <button class="btn btn-secondary" (click)="clearFilters()">
+        Limpiar Filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Lista de lecciones -->
+  <div *ngIf="!loading && filteredLessons.length > 0" class="lessons-grid">
+    <div *ngFor="let lesson of filteredLessons" class="lesson-card">
+      <div class="lesson-header">
+        <h3>{{ lesson.title }}</h3>
+        <div class="lesson-actions">
+          <button class="btn btn-sm btn-outline-primary" (click)="viewLessonDetails(lesson._id)">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button *ngIf="canEdit(lesson)" class="btn btn-sm btn-outline-secondary" (click)="editLesson(lesson)">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button *ngIf="canDelete(lesson)" class="btn btn-sm btn-outline-danger" (click)="deleteLesson(lesson._id)">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="lesson-content">
+        <p class="lesson-resume">{{ lesson.resume }}</p>
+        
+        <div class="lesson-info">
+          <div class="info-item">
+            <i class="fas fa-user"></i>
+            <span>{{ lesson.author || 'Autor' }}</span>
+          </div>
+          
+          <div class="info-item">
+            <i class="fas fa-users"></i>
+            <span>{{ lesson.academicGroup || 'Grupo' }}</span>
+          </div>
+          
+          <div class="info-item">
+            <i class="fas fa-graduation-cap"></i>
+            <span>{{ getLevelLabel(lesson.level?.[0] || '') }}</span>
+          </div>
+        </div>
+        
+        <div class="lesson-status">
+          <span class="badge" [ngClass]="getStatusBadgeClass(lesson.status)">
+            {{ getStatusLabel(lesson.status) }}
+          </span>
+          
+          <div *ngIf="lesson.grade" class="grade-info">
+            <i class="fas fa-star"></i>
+            <span>Calificación: {{ lesson.grade }}/5</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="lesson-footer">
+        <div class="lesson-meta">
+          <small class="text-muted">
+            Creada: {{ lesson.createdAt | date:'short' }}
+          </small>
+          <small *ngIf="lesson.updatedAt" class="text-muted">
+            Actualizada: {{ lesson.updatedAt | date:'short' }}
+          </small>
+        </div>
+        
+        <!-- Acciones específicas del rol -->
+        <div class="role-actions" *ngIf="userRole === 'teacher'">
+          <button *ngIf="canApprove(lesson)" class="btn btn-sm btn-success" (click)="approveLesson(lesson._id)">
+            <i class="fas fa-check"></i> Aprobar
+          </button>
+          <button *ngIf="canApprove(lesson)" class="btn btn-sm btn-danger" (click)="rejectLesson(lesson._id)">
+            <i class="fas fa-times"></i> Rechazar
+          </button>
+          <button *ngIf="canGrade(lesson)" class="btn btn-sm btn-warning" (click)="gradeLesson(lesson._id)">
+            <i class="fas fa-star"></i> Calificar
+          </button>
+          <button *ngIf="canExport(lesson)" class="btn btn-sm btn-info" (click)="exportToMain(lesson._id)">
+            <i class="fas fa-upload"></i> Exportar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje cuando no hay lecciones -->
+  <div *ngIf="!loading && filteredLessons.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-book"></i>
+    </div>
+    <h3>No hay lecciones disponibles</h3>
+    <p *ngIf="searchTerm || filterStatus || filterGroup">
+      No se encontraron lecciones con los filtros aplicados.
+    </p>
+    <p *ngIf="!searchTerm && !filterStatus && !filterGroup && userRole === 'student'">
+      Comienza creando tu primera lección académica.
+    </p>
+    <p *ngIf="!searchTerm && !filterStatus && !filterGroup && userRole === 'teacher'">
+      No hay lecciones asignadas a tus grupos.
+    </p>
+    <button *ngIf="userRole === 'student'" class="btn btn-primary" (click)="createNewLesson()">
+      Crear Primera Lección
+    </button>
+  </div>
+</div>

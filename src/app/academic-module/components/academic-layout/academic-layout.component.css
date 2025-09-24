@@ -1,0 +1,59 @@
+.fixed-academic-header {
+  position: sticky;
+  top: 56px; /* debajo del header principal de la app cuando logueado */
+  z-index: 1010;
+}
+
+@media (min-width: 992px) {
+  .fixed-academic-header {
+    top: 63px; /* compensación en pantallas grandes */
+  }
+}
+
+/* Fondo del header sutil que se desvanece, sin banda blanca */
+.dashboard-header {
+  background: linear-gradient(
+    180deg,
+    rgba(102, 126, 234, 0.25) 0%,
+    rgba(118, 75, 162, 0.18) 45%,
+    rgba(118, 75, 162, 0.00) 100%
+  );
+  color: white;
+  padding: 1rem 0; /* antes 2rem */
+  margin-bottom: 0.5rem; /* antes 1rem */
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@media (min-width: 992px) {
+  .dashboard-header { padding: 1.25rem 0; }
+}
+
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content h1 {
+  margin: 0;
+  font-size: 2.2rem; /* reducir altura visual */
+  font-weight: 800;
+}
+
+@media (max-width: 575.98px) {
+  .header-content h1 { font-size: 1.8rem; }
+}
+
+.layout-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  /* Deja espacio bajo el header fijo para que el contenido no se solape */
+  padding-top: 12px;
+}
+
+

@@ -1,0 +1,140 @@
+<div class="group-management-container">
+  <div class="header">
+    <h2>Gestión de Grupos Académicos</h2>
+    <button class="btn btn-primary" (click)="createNewGroup()">
+      <i class="fas fa-plus"></i> Crear Nuevo Grupo
+    </button>
+  </div>
+
+  <!-- Filtros y búsqueda -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        placeholder="Buscar grupos..." 
+        [(ngModel)]="searchTerm"
+        class="form-control">
+    </div>
+    
+    <div class="filter-controls">
+      <select [(ngModel)]="filterLevel" class="form-control">
+        <option value="">Todos los niveles</option>
+        <option value="Colegio">Colegio</option>
+        <option value="Universidad">Universidad</option>
+      </select>
+      
+      <select [(ngModel)]="filterGrade" class="form-control">
+        <option value="">Todos los grados</option>
+        <option value="Sexto">Sexto</option>
+        <option value="Séptimo">Séptimo</option>
+        <option value="Octavo">Octavo</option>
+        <option value="Noveno">Noveno</option>
+        <option value="Décimo">Décimo</option>
+        <option value="Once">Once</option>
+        <option value="1 Semestre">1 Semestre</option>
+        <option value="2 Semestre">2 Semestre</option>
+        <option value="3 Semestre">3 Semestre</option>
+        <option value="4 Semestre">4 Semestre</option>
+        <option value="5 Semestre">5 Semestre</option>
+        <option value="6 Semestre">6 Semestre</option>
+        <option value="7 Semestre">7 Semestre</option>
+        <option value="8 Semestre">8 Semestre</option>
+        <option value="9 Semestre">9 Semestre</option>
+        <option value="10 Semestre">10 Semestre</option>
+      </select>
+      
+      <button class="btn btn-secondary" (click)="clearFilters()">
+        Limpiar Filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Lista de grupos -->
+  <div *ngIf="!loading && getFilteredGroups().length > 0" class="groups-grid">
+    <div *ngFor="let group of getFilteredGroups()" class="group-card">
+      <div class="group-header">
+        <h3>{{ group.name }}</h3>
+        <div class="group-actions">
+          <button class="btn btn-sm btn-outline-primary" (click)="viewGroupDetails(group._id)">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" (click)="editGroup(group)">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger" (click)="deleteGroup(group._id)">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="group-content">
+        <p class="group-description">{{ group.description }}</p>
+        
+        <div class="group-info">
+          <div class="info-item">
+            <i class="fas fa-users"></i>
+            <span>{{ getStudentCount(group) }} estudiantes</span>
+          </div>
+          
+          <div class="info-item">
+            <i class="fas fa-graduation-cap"></i>
+            <span>{{ getAcademicLevelLabel(group.academicLevel) }} - {{ group.grade }}</span>
+          </div>
+          
+          <div class="info-item">
+            <i class="fas fa-calendar"></i>
+            <span>{{ group.academicYear }}</span>
+          </div>
+        </div>
+        
+        <div class="group-stats">
+          <div class="stat-item">
+            <span class="stat-label">Lecciones:</span>
+            <span class="stat-value">{{ group.lessonsCount || 0 }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Activo:</span>
+            <span class="stat-value" [class.active]="group.isActive">
+              {{ group.isActive ? 'Sí' : 'No' }}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="group-footer">
+        <small class="text-muted">
+          Creado: {{ group.createdAt | date:'short' }}
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje cuando no hay grupos -->
+  <div *ngIf="!loading && getFilteredGroups().length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-users"></i>
+    </div>
+    <h3>No hay grupos disponibles</h3>
+    <p *ngIf="searchTerm || filterLevel || filterGrade">
+      No se encontraron grupos con los filtros aplicados.
+    </p>
+    <p *ngIf="!searchTerm && !filterLevel && !filterGrade">
+      Comienza creando tu primer grupo académico.
+    </p>
+    <button class="btn btn-primary" (click)="createNewGroup()">
+      Crear Primer Grupo
+    </button>
+  </div>
+</div>

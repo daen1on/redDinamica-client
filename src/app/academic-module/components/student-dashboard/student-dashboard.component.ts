@@ -51,8 +51,10 @@ export class StudentDashboardComponent implements OnInit {
           this.groups = (response.data || []).map((g: any) => {
             // Normalizar campo teacher para evitar [object Object]
             const teacher = g?.teacher;
+            console.log(teacher);
             if (teacher && typeof teacher === 'object') {
               const name = [teacher.name, teacher.surname].filter(Boolean).join(' ').trim();
+              console.log(name);
               return { ...g, teacher: name || teacher._id || teacher.id || 'Docente' } as any;
             }
             return g;

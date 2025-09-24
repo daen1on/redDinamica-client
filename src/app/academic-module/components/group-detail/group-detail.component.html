@@ -1,0 +1,201 @@
+<div class="group-detail-container">
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Group details -->
+  <div *ngIf="!loading && group" class="group-content">
+    <!-- Header -->
+    <div class="group-header">
+      <div class="group-info">
+        <h1>{{ group.name }}</h1>
+        <p class="group-description">{{ group.description }}</p>
+        <div class="group-meta">
+          <span class="badge bg-primary">{{ getAcademicLevelLabel(group.academicLevel) }}</span>
+          <span class="badge bg-secondary">{{ group.grade }}</span>
+          <span class="badge bg-info text-dark">{{ group.academicYear }}</span>
+          <span class="badge" [ngClass]="group.isActive ? 'bg-success' : 'bg-danger'">
+            {{ group.isActive ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="group-actions" *ngIf="canEditGroup()">
+        <button class="btn btn-primary" (click)="editGroup()">
+          <i class="fas fa-edit"></i> Editar
+        </button>
+        <button class="btn btn-danger" (click)="deleteGroup()">
+          <i class="fas fa-trash"></i> Eliminar
+        </button>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="statistics-section">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ students.length }}</h3>
+          <p>Estudiantes</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-book"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ lessons.length }}</h3>
+          <p>Lecciones</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ group.maxStudents }}</h3>
+          <p>Capacidad Máxima</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-section">
+      <ul class="nav nav-tabs" id="groupTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="lessons-tab" data-bs-toggle="tab" data-bs-target="#lessons" type="button" role="tab">
+            <i class="fas fa-book"></i> Lecciones
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab">
+            <i class="fas fa-users"></i> Estudiantes
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="groupTabsContent">
+        <!-- Lessons Tab -->
+        <div class="tab-pane fade show active" id="lessons" role="tabpanel">
+          <div class="tab-header">
+            <h3>Lecciones del Grupo</h3>
+            <button *ngIf="canCreateLesson()" class="btn btn-primary" (click)="createLesson()">
+              <i class="fas fa-plus"></i> Crear Lección
+            </button>
+          </div>
+
+          <div *ngIf="lessons.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-book"></i>
+            </div>
+            <h4>No hay lecciones</h4>
+            <p>Este grupo aún no tiene lecciones creadas.</p>
+            <button *ngIf="canCreateLesson()" class="btn btn-primary" (click)="createLesson()">
+              Crear Primera Lección
+            </button>
+          </div>
+
+          <div *ngIf="lessons.length > 0" class="lessons-grid">
+            <div *ngFor="let lesson of lessons" class="lesson-card">
+              <div class="lesson-header">
+                <h4>{{ lesson.title }}</h4>
+                <span class="badge" [ngClass]="getStatusBadgeClass(lesson.status)">
+                  {{ getStatusLabel(lesson.status) }}
+                </span>
+              </div>
+              
+              <div class="lesson-content">
+                <p>{{ lesson.resume }}</p>
+                <div class="lesson-meta">
+                  <small><i class="fas fa-user"></i> {{ getAuthorName(lesson) }}</small>
+                </div>
+              </div>
+              
+              <div class="lesson-actions">
+                <button class="btn btn-sm btn-outline-primary" (click)="viewLesson(lesson._id)">
+                  <i class="fas fa-eye"></i> Ver
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Students Tab -->
+        <div class="tab-pane fade" id="students" role="tabpanel">
+          <div class="tab-header d-flex align-items-center justify-content-between">
+            <h3 class="m-0">Estudiantes del Grupo</h3>
+            <div *ngIf="canAddStudents()" class="d-flex align-items-center gap-2 position-relative" style="max-width: 560px;">
+              <div class="input-group w-100">
+                <span class="input-group-text"><i class="fas fa-user-plus"></i></span>
+                <input [(ngModel)]="newStudentEmail" (input)="onSearchTermChange()" name="newStudentEmail" type="text" class="form-control" placeholder="Agregar participantes por nombre o correo" />
+                <button class="btn btn-success" (click)="addOrInvite()">
+                  Agregar
+                </button>
+              </div>
+              <div *ngIf="showSuggestions" class="list-group position-absolute w-100" style="top: 110%; z-index: 10;">
+                <button type="button" class="list-group-item list-group-item-action d-flex align-items-center" *ngFor="let u of filteredUsers" (click)="selectUserToAdd(u)">
+                  <img *ngIf="u.picture" [src]="url + 'get-image-user/' + u.picture" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:8px;" />
+                  <i *ngIf="!u.picture" class="fas fa-user-circle me-2" style="font-size: 1.2rem;"></i>
+                  <div class="d-flex flex-column text-start">
+                    <span>{{ u.name }}</span>
+                    <small class="text-muted">{{ u.email }} · {{ u.role }}</small>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="students.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <h4>No hay estudiantes</h4>
+            <p>Este grupo aún no tiene estudiantes asignados.</p>
+            <div *ngIf="canAddStudents()" class="d-flex align-items-center justify-content-center mt-2">
+              <div class="input-group" style="max-width: 560px;">
+                <span class="input-group-text"><i class="fas fa-user-plus"></i></span>
+                <input [(ngModel)]="newStudentEmail" (input)="onSearchTermChange()" name="newStudentEmailEmpty" type="text" class="form-control" placeholder="Agregar participantes por nombre o correo" />
+                <button class="btn btn-success" (click)="addOrInvite()">Agregar</button>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="students.length > 0" class="students-grid">
+            <div *ngFor="let student of students" class="student-card">
+              <div class="student-avatar">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              
+              <div class="student-info">
+                <h5>{{ student.name }}</h5>
+                <p>{{ student.email }}</p>
+                <div class="student-stats">
+                  <small>Lecciones: {{ student.lessonsCount || 0 }}</small>
+                  <small>Promedio: {{ student.averageGrade || 'N/A' }}</small>
+                </div>
+              </div>
+              
+              <div class="student-actions" *ngIf="canRemoveStudents()">
+                <button class="btn btn-sm btn-outline-danger" (click)="removeStudent(student._id)">
+                  <i class="fas fa-user-minus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

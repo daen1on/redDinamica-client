@@ -1,0 +1,355 @@
+<div class="create-lesson-container">
+  <div class="header bg-primary text-white">
+    <h2><i class="fas fa-lightbulb me-2"></i>Crear Nueva Lección Académica</h2>
+    <button class="btn btn-light" (click)="cancel()">
+      <i class="fas fa-arrow-left"></i> Volver
+    </button>
+  </div>
+
+  <!-- Mensajes de éxito y error -->
+  <div *ngIf="successMessage && showSuccessActions" class="alert alert-success fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    {{ successMessage }}
+    
+    <!-- Opciones después del éxito -->
+    <div class="mt-3 d-flex justify-content-center gap-2">
+      <button type="button" class="btn btn-primary" (click)="createAnotherLesson()">
+        <i class="fas fa-plus me-1"></i> Crear Otra Lección
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="closeAndReturn()">
+        <i class="fas fa-times me-1"></i> Volver al Grupo
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger fade show" role="alert">
+    <i class="fas fa-times-circle me-2"></i>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Información introductoria -->
+  <div class="alert alert-info mb-4" [ngStyle]="{'display': showSuccessActions ? 'none' : 'block'}">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>¿Cómo funciona?</strong>
+    <p class="mb-1 mt-2">Aquí puedes crear una nueva lección académica colaborativa para tu grupo.</p>
+    <p class="mb-0">Una vez creada, podrás invitar a otros estudiantes a participar, compartir recursos y trabajar en equipo hasta completar la lección.</p>
+  </div>
+
+  <!-- Formulario principal -->
+  <div class="form-container" [ngStyle]="{'display': showSuccessActions ? 'none' : 'block'}">
+    <form [formGroup]="lessonForm" (ngSubmit)="onSubmit()" class="lesson-form">
+      
+      <!-- Campos básicos -->
+      <div class="row">
+        <div class="col-md-12">
+          <!-- Título de la lección -->
+          <div class="mb-3">
+            <label for="title" class="form-label">
+              <strong>Título de la Lección<span class="text-danger">*</span></strong>
+            </label>
+            <input 
+              type="text" 
+              id="title"
+              formControlName="title"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('title')"
+              placeholder="Ingresa el título de la lección"
+              autocomplete="off">
+            <div *ngIf="isFieldInvalid('title')" class="invalid-feedback">
+              {{ getErrorMessage('title') }}
+            </div>
+          </div>
+
+          <!-- Resumen -->
+          <div class="mb-3">
+            <label for="resume" class="form-label">
+              <strong>Resumen<span class="text-danger">*</span></strong>
+            </label>
+            <textarea 
+              id="resume"
+              formControlName="resume"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('resume')"
+              rows="3"
+              placeholder="Describe brevemente el contenido y objetivos de la lección..."></textarea>
+            <div *ngIf="isFieldInvalid('resume')" class="invalid-feedback">
+              {{ getErrorMessage('resume') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Áreas de Conocimiento con Autocompletado -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label class="form-label">
+              <strong>Áreas de Conocimiento<span class="text-danger">*</span></strong>
+            </label>
+            
+            <!-- Chips de áreas seleccionadas -->
+            <div class="selected-items-container mb-2" *ngIf="selectedKnowledgeAreas.length > 0">
+              <span *ngFor="let area of selectedKnowledgeAreas" 
+                    class="badge bg-primary me-1 mb-1 selected-chip">
+                {{area.name}}
+                <button type="button" 
+                        class="btn-close btn-close-white ms-1" 
+                        (click)="removeKnowledgeArea(area)"
+                        aria-label="Eliminar">
+                </button>
+              </span>
+            </div>
+
+            <!-- Input de autocompletado -->
+            <div class="knowledge-area-autocomplete position-relative">
+              <input type="text" 
+                     class="form-control" 
+                     [(ngModel)]="knowledgeAreaInput"
+                     [ngModelOptions]="{standalone: true}"
+                     (input)="onKnowledgeAreaInputChange()"
+                     (keyup.enter)="addNewKnowledgeAreaFromInput()"
+                     [ngClass]="{'is-invalid': submitted && f['knowledge_area'].errors}"
+                     placeholder="Escribe para buscar o agregar área de conocimiento..."
+                     autocomplete="off">
+              
+              <!-- Dropdown de sugerencias -->
+              <div *ngIf="showKnowledgeAreaDropdown" 
+                   class="dropdown-menu show position-absolute w-100 mt-1" 
+                   style="z-index: 1050; max-height: 200px; overflow-y: auto;">
+                
+                <!-- Áreas existentes -->
+                <button *ngFor="let area of filteredKnowledgeAreas" 
+                        type="button"
+                        class="dropdown-item" 
+                        (click)="selectKnowledgeArea(area)">
+                  <i class="fas fa-tag me-2"></i>
+                  {{area.name}}
+                </button>
+                
+                <!-- Opción para crear nueva área -->
+                <div *ngIf="knowledgeAreaInput.trim() && filteredKnowledgeAreas.length === 0" 
+                     class="dropdown-divider"></div>
+                <button *ngIf="knowledgeAreaInput.trim() && filteredKnowledgeAreas.length === 0" 
+                        type="button"
+                        class="dropdown-item text-success" 
+                        (click)="addNewKnowledgeAreaFromInput()">
+                  <i class="fas fa-plus me-2"></i>
+                  Crear "{{knowledgeAreaInput}}"
+                </button>
+              </div>
+            </div>
+
+            <small class="form-text text-muted">
+              Escribe para buscar áreas existentes o crear nuevas
+            </small>
+
+            <div *ngIf="submitted && f['knowledge_area'].errors" class="invalid-feedback d-block">
+              <div *ngIf="f['knowledge_area'].errors['required']">
+                Debes seleccionar al menos un área de conocimiento.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Etiquetas -->
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="tags" class="form-label">
+              <strong>Etiquetas <small class="text-muted">(Opcional)</small></strong>
+            </label>
+            <input 
+              type="text" 
+              id="tags"
+              formControlName="tags"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('tags')"
+              placeholder="Ej: dinámica de sistemas, modelado, simulación"
+              autocomplete="off">
+            <div *ngIf="isFieldInvalid('tags')" class="invalid-feedback">
+              {{ getErrorMessage('tags') }}
+            </div>
+            <small class="form-text text-muted">
+              Separa las etiquetas con comas
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metodología -->
+      <div class="mb-3">
+        <label for="methodology" class="form-label">
+          <strong>Metodología<span class="text-danger">*</span></strong>
+        </label>
+        <textarea 
+          id="methodology"
+          formControlName="methodology"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('methodology')"
+          rows="4"
+          placeholder="¿Cómo se desarrollará la lección? Describe el enfoque pedagógico y las actividades principales..."></textarea>
+        <div *ngIf="isFieldInvalid('methodology')" class="invalid-feedback">
+          {{ getErrorMessage('methodology') }}
+        </div>
+      </div>
+
+      <!-- Objetivos de aprendizaje -->
+      <div class="mb-3">
+        <label for="objectives" class="form-label">
+          <strong>Objetivos de Aprendizaje<span class="text-danger">*</span></strong>
+        </label>
+        <textarea 
+          id="objectives"
+          formControlName="objectives"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('objectives')"
+          rows="3"
+          placeholder="¿Qué aprenderán los estudiantes con esta lección? Define las competencias y conocimientos que se adquirirán..."></textarea>
+        <div *ngIf="isFieldInvalid('objectives')" class="invalid-feedback">
+          {{ getErrorMessage('objectives') }}
+        </div>
+      </div>
+
+      <!-- Resumen de selección -->
+      <div class="card bg-light" *ngIf="selectedKnowledgeAreas.length > 0">
+        <div class="card-body">
+          <h6 class="card-title">
+            <i class="fas fa-eye me-2"></i>
+            Resumen de tu lección
+          </h6>
+          
+          <div *ngIf="selectedKnowledgeAreas.length > 0" class="mb-2">
+            <strong>Áreas seleccionadas:</strong>
+            <div class="mt-1">
+              <span *ngFor="let area of selectedKnowledgeAreas; let last = last" 
+                    class="badge bg-primary me-1">
+                {{area.name}}
+              </span>
+            </div>
+          </div>
+          
+          <div *ngIf="lessonForm.get('tags')?.value" class="mb-0">
+            <strong>Etiquetas:</strong>
+            <span class="badge bg-info ms-1">
+              {{lessonForm.get('tags')?.value}}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="form-actions mt-4">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="cancel()"
+          [disabled]="loading">
+          <i class="fas fa-times me-1"></i>
+          Cancelar
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-success"
+          [disabled]="loading || lessonForm.invalid">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          <i *ngIf="!loading" class="fas fa-paper-plane me-1"></i>
+          {{ loading ? 'Creando...' : 'Crear Lección' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Información adicional -->
+  <div class="info-section" [ngStyle]="{'display': showSuccessActions ? 'none' : 'block'}">
+    <div class="info-card">
+      <h4><i class="fas fa-info-circle"></i> Información de la Lección</h4>
+      <ul>
+        <li>La lección se creará como borrador y podrás colaborar con otros estudiantes</li>
+        <li>Podrás invitar participantes, compartir recursos y usar el chat del equipo</li>
+        <li>Tu profesor revisará la lección y te dará retroalimentación</li>
+        <li>Las mejores lecciones pueden ser migradas a RedDinámica principal</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Estilos CSS adicionales -->
+<style>
+.selected-chip {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.5rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.selected-chip .btn-close {
+    font-size: 0.7rem;
+    width: 0.8rem;
+    height: 0.8rem;
+}
+
+.selected-items-container {
+    min-height: 2rem;
+    padding: 0.375rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+}
+
+.dropdown-menu.show {
+    display: block;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.dropdown-item:hover {
+    background-color: #e9ecef;
+}
+
+.knowledge-area-autocomplete .dropdown-menu {
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+}
+
+.header {
+    padding: 20px 30px;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.form-container {
+    padding: 30px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+}
+
+.info-section {
+    padding: 20px 30px;
+    background-color: #f8f9fa;
+    border-radius: 0 0 10px 10px;
+}
+
+.info-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.create-lesson-container {
+    max-width: 900px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+</style>
