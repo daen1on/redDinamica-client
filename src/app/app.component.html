@@ -91,6 +91,11 @@
     <div class="collapse navbar-collapse" id="navbarColor02">
       <!-- Changed ml-auto to ms-auto -->
       <ul class="navbar-nav ms-auto">
+        <li class="nav-item d-flex align-items-center me-2">
+          <button class="btn btn-sm btn-outline-light" (click)="toggleTheme()">
+            <i class="fas" [ngClass]="{ 'fa-moon': !isDarkMode, 'fa-sun': isDarkMode }"></i>
+          </button>
+        </li>
         <li [routerLink]="['/perfil', identity?._id]" class="nav-item" style="cursor: pointer">
             <a class="nav-link d-flex align-items-center">
               <div class="profile-picture-container me-2">
@@ -120,7 +125,7 @@
         <li class="nav-item d-flex align-items-center">
           <a
             [routerLink]="['/mensajes']"
-            class="nav-link btn btn-primary d-flex align-items-center"
+            class="nav-link btn  d-flex align-items-center"
           >
             <i class="fas fa-envelope" style="font-size: 1.5em"></i>
             <span class="mx-1">Mensajes</span>
@@ -147,7 +152,7 @@
             <!-- mx-1 remains the same -->
           </a>
         </li>
-        <li class="nav-item dropdown d-flex align-items-center">
+        <li class="nav-item dropdown d-flex align-items-center" style="position: relative;">
           <a
             class="nav-link d-flex align-items-center position-relative"
             href="#"
@@ -166,9 +171,9 @@
             >
           </a>
           <!-- Dropdown menu para notificaciones -->
-          <div class="dropdown-menu dropdown-menu-end p-0 shadow-lg border-0" 
+          <div class="dropdown-menu p-0 shadow-lg border-0" 
                aria-labelledby="notificationDropdown"
-               style="min-width: 380px; max-width: 400px; max-height: 70vh; overflow-y: auto; border-radius: 12px; margin-top: 8px;">
+               style="min-width: 380px; max-width: 400px; max-height: 70vh; overflow-y: auto; border-radius: 12px; margin-top: 8px; left: -350px !important; right: auto !important;">
             <app-notifications></app-notifications>
           </div>
         </li>

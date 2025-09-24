@@ -20,6 +20,7 @@ const routes: Routes = [
   { path: 'mensajes', loadChildren: () => import('./message-module/message.module').then(m => m.MessageModule), canActivate: [authGuard] },
   { path: 'leccion', loadChildren: () => import('./lesson-module/lesson.module').then(m => m.LessonModule), canActivate: [authGuard] },
   { path: 'admin', loadChildren: () => import('./admin-module/admin.module').then(m => m.AdminModule), canActivate: [authGuard] },
+  { path: 'academia', loadChildren: () => import('./academic-module/academic.module').then(m => m.AcademicModule), canActivate: [authGuard] },
   { path: '**', loadChildren: () => import('./components/landing/landing.module').then(m => m.LandingModule), canActivate: [landingGuard] }
 ];
 

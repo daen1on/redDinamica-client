@@ -1,0 +1,168 @@
+<div class="student-dashboard">
+  <div class="dashboard-header">
+    <h2><i class="fas fa-user-graduate"></i> Panel de Estudiante</h2>
+    <p class="text-muted">Gestiona tus grupos académicos y lecciones</p>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-3">Cargando datos del dashboard...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!loading && !errorMessage" class="dashboard-content">
+    <!-- Estadísticas generales -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ totalGroups }}</h3>
+          <p>Grupos Inscritos</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-book"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ totalLessons }}</h3>
+          <p>Mis Lecciones</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ lessonsByStatus['completed'] || 0 }}</h3>
+          <p>Lecciones Completadas</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ averageGrade.toFixed(1) }}</h3>
+          <p>Promedio General</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mis grupos -->
+    <div class="section">
+      <div class="section-header">
+        <h3><i class="fas fa-layer-group"></i> Mis Grupos Académicos</h3>
+      </div>
+
+      <div *ngIf="groups.length === 0" class="empty-state">
+        <i class="fas fa-users fa-3x text-muted"></i>
+        <h4>No estás inscrito en ningún grupo</h4>
+        <p>Contacta a tu docente para ser agregado a un grupo académico</p>
+      </div>
+
+      <div *ngIf="groups.length > 0" class="groups-grid">
+        <div *ngFor="let group of groups" class="group-card" [routerLink]="['/academia/groups', group._id]">
+          <div class="group-header">
+            <h4>{{ group.name }}</h4>
+            <span class="badge" [ngClass]="group.isActive ? 'bg-success' : 'bg-secondary'">
+              {{ group.isActive ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+          <p class="group-description">{{ group.description }}</p>
+          <div class="group-details">
+            <div class="detail-item">
+              <i class="fas fa-chalkboard-teacher"></i>
+              <span>Docente: {{ (group as any).teacher?.name || (group as any).teacher?.surname ? ((group as any).teacher?.name + ' ' + (group as any).teacher?.surname) : (group as any).teacher?.toString?.() || group.teacher }}</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-graduation-cap"></i>
+              <span>{{ group.academicLevel }} - {{ group.grade }}</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-book"></i>
+              <span>{{ group.subjects ? group.subjects.join(', ') : 'Sin asignaturas' }}</span>
+            </div>
+          </div>
+          <div class="group-stats">
+            <div class="stat">
+              <small>Lecciones</small>
+              <strong>{{ group.lessons ? group.lessons.length : 0 }}</strong>
+            </div>
+            <div class="stat">
+              <small>Activas</small>
+              <strong>0</strong>
+            </div>
+            <div class="stat">
+              <small>Completadas</small>
+              <strong>0</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mis lecciones -->
+    <div class="section">
+      <div class="section-header">
+        <h3><i class="fas fa-book"></i> Mis Lecciones</h3>
+        <button *ngIf="canCreateLessonsInAnyGroup()" class="btn btn-primary" (click)="showGroupSelection()">
+          <i class="fas fa-plus"></i> Crear Nueva Lección
+        </button>
+        <div *ngIf="!canCreateLessonsInAnyGroup()" class="permission-notice">
+          <i class="fas fa-info-circle"></i>
+          <span>No tienes permisos para crear lecciones en ningún grupo</span>
+        </div>
+      </div>
+
+      <div *ngIf="myLessons.length === 0" class="empty-state">
+        <i class="fas fa-book fa-3x text-muted"></i>
+        <h4>No tienes lecciones creadas</h4>
+        <p>Crea tu primera lección para comenzar a aprender</p>
+        <button *ngIf="canCreateLessonsInAnyGroup()" class="btn btn-primary" (click)="showGroupSelection()">
+          <i class="fas fa-plus"></i> Crear Primera Lección
+        </button>
+        <div *ngIf="!canCreateLessonsInAnyGroup()" class="permission-notice">
+          <i class="fas fa-info-circle"></i>
+          <span>Contacta al docente de tu grupo para habilitar la creación de lecciones</span>
+        </div>
+      </div>
+
+      <div *ngIf="myLessons.length > 0" class="lessons-grid">
+        <div *ngFor="let lesson of myLessons" class="lesson-card" [routerLink]="['/academia/lessons', lesson._id]">
+          <div class="lesson-header">
+            <h4>{{ lesson.title }}</h4>
+            <span class="badge" [ngClass]="getStateBadgeClass(lesson.status)">
+              {{ getStateLabel(lesson.status) }}
+            </span>
+          </div>
+          <p class="lesson-description">{{ lesson.resume }}</p>
+          <div class="lesson-details">
+            <div class="detail-item">
+              <i class="fas fa-layer-group"></i>
+              <span>{{ lesson.academicGroup }}</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-calendar"></i>
+              <span>{{ lesson.createdAt | date:'short' }}</span>
+            </div>
+            <div class="detail-item" *ngIf="lesson.grade">
+              <i class="fas fa-star"></i>
+              <span>Calificación: {{ lesson.grade }}/5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

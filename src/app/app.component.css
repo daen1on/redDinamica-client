@@ -1,3 +1,35 @@
+/* --- Header Fixed Position --- */
+#header, #header-home {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1030 !important;
+    width: 100% !important;
+}
+
+/* --- Body padding for fixed header --- */
+body {
+    padding-top: 76px; /* Altura aproximada del navbar */
+}
+
+/* Ajuste para cuando no hay usuario logueado */
+body:has(#header) {
+    padding-top: 76px;
+}
+
+/* Ajuste para cuando hay usuario logueado */
+body:has(#header-home) {
+    padding-top: 92px ;
+}
+
+/* Compensación específica para la vista Academia cuando el usuario está logueado */
+@media (min-width: 992px) {
+    body:has(#header-home):has(.academic-dashboard) {
+        padding-top: 86px !important; /* evita solapamiento con el navbar fijo */
+    }
+}
+
 /* --- Base Image Styles --- */
 /* Use max-width for flexibility, height: auto maintains aspect ratio */
 #header img {
@@ -14,6 +46,17 @@
 img {
     height: auto;
     max-width: 100%; /* Prevent images from overflowing their containers */
+}
+
+
+/* --- Compensación de sidebar en Home para el header --- */
+@media (min-width: 992px) {
+    /* Cuando existe el sidebar (.home-sidebar), desplazamos el contenido del header
+       para que los menús queden dentro del margen oscuro y alineados con el feed */
+    body:has(.home-sidebar) #header-home .container,
+    body:has(.accordion#menu) #header-home .container {
+        padding-left: 283px !important; /* 15px (offset) + 253px (sidebar) + 15px (separación) */
+    }
 }
 
 
@@ -224,14 +267,6 @@ img {
     border-radius: 2px;
 }
 
-
-/* --- Remove Fixed Button Height --- */
-/* REMOVED - Let Bootstrap handle button height via padding for better adaptability */
-/*
-button .dropdown-toggle {
-    height: 42px;
-}
-*/
 
 
 /* --- Media Queries for Responsiveness --- */

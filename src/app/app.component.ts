@@ -20,6 +20,7 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
     public unreadCount = 0;
     public unviewMessages;
     public profilePicVersion: number; // For cache-busting
+    public isDarkMode: boolean = false;
 
     private identitySubscription: Subscription;
     private profilePicUpdateSubscription: Subscription;
@@ -38,6 +39,10 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
     }
 
     ngOnInit(): void {
+        // Aplicar tema inicial desde localStorage
+        const storedTheme = localStorage.getItem('rd_theme');
+        this.isDarkMode = storedTheme === 'dark';
+        this.applyThemeClass();
         this.token = this._userService.getToken();
         this.identity = this._userService.getIdentity(); // Get initial identity
 
@@ -142,6 +147,19 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
         this._userService.clearIdentityAndToken(); // Use service method to clear identity and token
         // The identitySubscription will automatically set this.identity and this.token to null
         this._router.navigate(['']);
+    }
+    toggleTheme(): void {
+        this.isDarkMode = !this.isDarkMode;
+        localStorage.setItem('rd_theme', this.isDarkMode ? 'dark' : 'light');
+        this.applyThemeClass();
+    }
+    private applyThemeClass(): void {
+        const root = document.documentElement;
+        if (this.isDarkMode) {
+            root.classList.add('theme-dark');
+        } else {
+            root.classList.remove('theme-dark');
+        }
     }
     openP(){
         let url ="https://forms.gle/n7jGyGgAM9ERfK4d9";

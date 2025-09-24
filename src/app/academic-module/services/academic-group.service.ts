@@ -1,0 +1,92 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { GLOBAL } from '../../services/global';
+
+import { 
+  AcademicGroup, 
+  CreateAcademicGroupRequest, 
+  UpdateAcademicGroupRequest, 
+  ValidGradesResponse,
+  UpdateGroupPermissionsRequest,
+  CanCreateLessonsResponse
+} from '../models/academic-group.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AcademicGroupService {
+  private apiUrl = `${GLOBAL.url}academic-groups`;
+
+  constructor(private http: HttpClient) { }
+
+  // Crear un nuevo grupo académico
+  createGroup(groupData: CreateAcademicGroupRequest): Observable<{status: string, message: string, data: AcademicGroup}> {
+    return this.http.post<{status: string, message: string, data: AcademicGroup}>(this.apiUrl, groupData);
+  }
+
+  // Obtener grupos del docente
+  getTeacherGroups(): Observable<{status: string, data: AcademicGroup[]}> {
+    return this.http.get<{status: string, data: AcademicGroup[]}>(`${this.apiUrl}/teacher`);
+  }
+
+  // Obtener grupos del estudiante
+  getStudentGroups(): Observable<{status: string, data: AcademicGroup[]}> {
+    return this.http.get<{status: string, data: AcademicGroup[]}>(`${this.apiUrl}/student`);
+  }
+
+  // Obtener grupo por ID
+  getGroupById(id: string): Observable<{status: string, data: AcademicGroup}> {
+    return this.http.get<{status: string, data: AcademicGroup}>(`${this.apiUrl}/${id}`);
+  }
+
+  // Actualizar grupo
+  updateGroup(id: string, groupData: UpdateAcademicGroupRequest): Observable<{status: string, message: string, data: AcademicGroup}> {
+    return this.http.put<{status: string, message: string, data: AcademicGroup}>(`${this.apiUrl}/${id}`, groupData);
+  }
+
+  // Eliminar grupo
+  deleteGroup(id: string): Observable<{status: string, message: string}> {
+    return this.http.delete<{status: string, message: string}>(`${this.apiUrl}/${id}`);
+  }
+
+  // Agregar estudiante al grupo
+  addStudentToGroup(groupId: string, studentId: string): Observable<{status: string, message: string}> {
+    return this.http.post<{status: string, message: string}>(`${this.apiUrl}/${groupId}/students/${studentId}`, {});
+  }
+
+  // Remover estudiante del grupo
+  removeStudentFromGroup(groupId: string, studentId: string): Observable<{status: string, message: string}> {
+    return this.http.delete<{status: string, message: string}>(`${this.apiUrl}/${groupId}/students/${studentId}`);
+  }
+
+  // Obtener estudiantes del grupo
+  getGroupStudents(groupId: string): Observable<{status: string, data: any[]}> {
+    return this.http.get<{status: string, data: any[]}>(`${this.apiUrl}/${groupId}/students`);
+  }
+
+  // Invitar/agregar estudiante por email
+  inviteStudentByEmail(groupId: string, email: string): Observable<{status: string, message: string, data?: any}> {
+    return this.http.post<{status: string, message: string, data?: any}>(`${this.apiUrl}/${groupId}/invite`, { email });
+  }
+
+  // Obtener estadísticas del grupo
+  getGroupStatistics(groupId: string): Observable<{status: string, data: any}> {
+    return this.http.get<{status: string, data: any}>(`${this.apiUrl}/${groupId}/statistics`);
+  }
+
+  // Obtener grados válidos por nivel académico
+  getValidGrades(academicLevel: string): Observable<ValidGradesResponse> {
+    return this.http.get<ValidGradesResponse>(`${this.apiUrl}/valid-grades/${academicLevel}`);
+  }
+
+  // Actualizar permisos del grupo
+  updateGroupPermissions(groupId: string, permissions: UpdateGroupPermissionsRequest): Observable<{status: string, message: string, data: {group: AcademicGroup, permissions: any}}> {
+    return this.http.put<{status: string, message: string, data: {group: AcademicGroup, permissions: any}}>(`${this.apiUrl}/${groupId}/permissions`, permissions);
+  }
+
+  // Verificar si un estudiante puede crear lecciones en un grupo
+  canStudentCreateLessons(groupId: string): Observable<CanCreateLessonsResponse> {
+    return this.http.get<CanCreateLessonsResponse>(`${this.apiUrl}/${groupId}/can-create-lessons`);
+  }
+}
