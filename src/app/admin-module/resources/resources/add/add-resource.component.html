@@ -1,12 +1,12 @@
-<!-- Resources suggest modal-->
-<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="add" aria-hidden="true" data-keyboard="false" data-backdrop="static" >
-    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+<!-- Resources add modal-->
+<div class="modal fade" id="add" tabindex="-1" aria-labelledby="addTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <form [formGroup]="addForm" (ngSubmit)="onSubmit()" class="modal-content" enctype="multipart/form-data"
             (input)="onChanges()">
             <!-- modal-header -->
             <div class="modal-header">
                 <h5 class="modal-title" id="addTitle">Agregar un recurso</h5>
-                <button type="button" class="buttonClose" id="closeBtn" data-bs-dismiss="modal" style="display: none;"> Close</button>
+                <button type="button" class="buttonClose" #closeBtn data-bs-dismiss="modal" style="display: none;"> Close</button>
                 <button type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#cancelModal"  aria-label="Close" >
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -40,7 +40,7 @@
                 </div>  
 
 
-                <div *ngFor="let field of fields" class="form-group row">
+                <div *ngFor="let field of fields" class="mb-3 row">
 
                     <label for="{{field.id}}" class="col-3 col-form-label">
                         <strong>{{field.label}}<span *ngIf="field.required">*</span></strong>
@@ -97,7 +97,7 @@
                 <button type="submit" [disabled]="loading" class="btn btn-success">
                     <span *ngIf="loading && !addForm.invalid" class="spinner-border spinner-border-sm" role="status"
                            aria-hidden="true"></span>
-                    <span class="sr-only">Guardar</span>
+                    <span class="visually-hidden">Guardar</span>
                         Guardar
                 </button>
             </div>

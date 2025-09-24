@@ -1,6 +1,6 @@
-<!-- Resources suggest modal-->
-<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="delete" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+<!-- Resources delete modal-->
+<div class="modal fade" id="delete" tabindex="-1" aria-labelledby="deleteTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
         <!-- modal-header -->
         <div class="modal-header">
@@ -20,7 +20,7 @@
 
         <!-- modal-footer -->
         <div class="modal-footer">
-            <button class=" btn btn-danger" data-bs-dismiss="modal" (click)="delete()">Sí</button>
+            <button class="btn btn-danger" (click)="delete()">Sí</button>
             <button class="btn btn-primary text-white" data-bs-dismiss="modal">No</button>
         </div>
         <!-- /modal-footer -->

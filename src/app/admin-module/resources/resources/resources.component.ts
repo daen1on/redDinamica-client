@@ -92,7 +92,7 @@ export class ResourcesComponent implements OnInit {
         let filteredResources = [];
         let orderBy = this.setOrder();
 
-        this._resourceService.getAllResources(this.token, orderBy).subscribe(
+        this._resourceService.getAllResources(this.token, orderBy, false).subscribe(
             response => {                
                 if (response.resources) {
                     this.allResources = response.resources;
@@ -115,7 +115,7 @@ export class ResourcesComponent implements OnInit {
 
     getResources(page = 1) {        
 
-        this._resourceService.getResources(this.token, page).subscribe(
+        this._resourceService.getResources(this.token, page, false).subscribe(
             response => {               
                 
                 if (response.resources) {
@@ -222,8 +222,133 @@ export class ResourcesComponent implements OnInit {
         this.deleteResourceId = resourceId;
     }
 
+    // Método alternativo para eliminar con confirmación nativa
+    deleteResourceConfirm(resourceId) {
+        if (confirm('¿Está seguro que desea eliminar este recurso?')) {
+            this._resourceService.deleteResource(this.token, resourceId).subscribe(
+                response => {
+                    if(response && response.resource){
+                        this.getResources(this.page);
+                    }
+                },
+                error => {
+                    console.log(<any>error);
+                }
+            );
+        }
+    }
+
     public needReloadData;
     setNeedReload(event){
         this.needReloadData = true;
+    }
+
+    // Métodos para abrir modales con manejo correcto del DOM
+    openAddModal() {
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('add');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de agregar:', error);
+            }
+        }, 0);
+    }
+
+    openDetailsModal(resource) {
+        this.setDetailResource(resource);
+        
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('details');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de detalles:', error);
+                // Fallback: mostrar detalles en alert
+                alert(`Detalles del recurso: ${resource.name}\nDescripción: ${resource.description}`);
+            }
+        }, 0);
+    }
+
+    openEditModal(resource) {
+        this.setEditResource(resource);
+        
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('edit');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de editar:', error);
+            }
+        }, 0);
+    }
+
+    openDeleteModal(resourceId) {
+        this.setDeleteResource(resourceId);
+        
+        // Esperar a que Angular actualice el DOM
+        setTimeout(() => {
+            try {
+                const modal = document.getElementById('delete');
+                if (modal) {
+                    // Limpiar cualquier instancia previa
+                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                    if (existingInstance) {
+                        existingInstance.dispose();
+                    }
+                    
+                    // Crear nueva instancia
+                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    bootstrapModal.show();
+                }
+            } catch (error) {
+                console.log('Error al abrir modal de eliminar:', error);
+            }
+        }, 0);
     }
 }

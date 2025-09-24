@@ -1,5 +1,5 @@
 <!-- Resources suggest modal-->
-<div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true" data-keyboard="false" data-backdrop="static" >
+<div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="edit" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
         <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="modal-content" enctype="multipart/form-data"
             (input)="onChanges()">
@@ -32,7 +32,7 @@
                     {{successMsg}}
                 </div>
 
-                <div class="form-group row">
+                <div class="mb-3 row">
                     <label for="name" class="col-3 col-form-label">
                         <strong>Nombre*</strong>
                     </label>
@@ -48,7 +48,7 @@
                     </div>
                 </div>
 
-                <div class="form-group row">
+                <div class="mb-3 row">
                     <label for="description" class="col-3 col-form-label">
                         <strong>Descripción*</strong>
                     </label>
@@ -68,7 +68,7 @@
                     </div>
                 </div>
 
-                <div class="form-group row">
+                <div class="mb-3 row">
                     <label for="type" class="col-3 col-form-label">
                         <strong>Tipo*</strong>
                     </label>
@@ -89,7 +89,7 @@
                     </div>
                 </div>
 
-                <div *ngIf="resource.type == 'link'" class="form-group row">
+                <div *ngIf="resource.type == 'link'" class="mb-3 row">
                     <label for="url" class="col-3 col-form-label">
                         <strong>Enlace*</strong>
                     </label>
@@ -105,7 +105,7 @@
                     </div>
                 </div>
 
-                <div *ngIf="resource.type != 'link'" class="form-group row">
+                <div *ngIf="resource.type != 'link'" class="mb-3 row">
                     <label for="type" class="col-3 col-form-label">
                         <strong>Archivo actual*</strong>
                     </label>
@@ -117,7 +117,7 @@
                     </div>
                 </div>
 
-                <div *ngIf="resource.type != 'link'" class="form-group row">
+                <div *ngIf="resource.type != 'link'" class="mb-3 row">
                     <label for="type" class="col-3 col-form-label">
                         <strong>Nuevo archivo</strong>
                     </label>
@@ -140,7 +140,7 @@
                     </div>
                 </div>
 
-                <div class="form-group row">
+                <div class="mb-3 row">
                     <label for="source" class="col-3 col-form-label">
                         <strong>Fuente*</strong>
                     </label>
@@ -172,7 +172,7 @@
                 <button type= "submit"  [disabled]="loading" class="btn btn-success">
                         <span *ngIf="loading && !editForm.invalid" class="spinner-border spinner-border-sm" role="status"
                             aria-hidden="true"></span>
-                        <span class="sr-only">Guardar</span>
+                        <span class="visually-hidden">Guardar</span>
                         Guardar
                 </button>
                 

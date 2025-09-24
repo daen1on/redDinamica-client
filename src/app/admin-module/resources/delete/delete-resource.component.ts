@@ -46,7 +46,15 @@ export class DeleteResourceComponent implements OnInit {
         this._resourceService.deleteResource(this.token, this.resourceId).subscribe(
             response => {
                 if(response && response.resource){
-                    this.deleted.emit();                    
+                    this.deleted.emit();
+                    // Cerrar el modal manualmente después de la eliminación exitosa
+                    const modal = document.getElementById('delete');
+                    if (modal) {
+                        const bootstrapModal = (window as any).bootstrap?.Modal?.getInstance(modal);
+                        if (bootstrapModal) {
+                            bootstrapModal.hide();
+                        }
+                    }
                 }
             },
             error =>{

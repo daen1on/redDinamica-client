@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, ViewChild,ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 
 import { Validators, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { Resource } from 'src/app/models/resource.model';
@@ -21,7 +21,7 @@ import { of } from 'rxjs';
     standalone: false
 })
 
-export class AddResourceComponent implements OnInit {
+export class AddResourceComponent implements OnInit, AfterViewInit {
     public title;
     public identity;
     public token;
@@ -85,8 +85,15 @@ export class AddResourceComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.closeBtn.nativeElement.click();
+        // Inicialización del componente
+    }
 
+    ngAfterViewInit(): void {
+        // Acceder a elementos del DOM después de que la vista esté inicializada
+        if (this.closeBtn && this.closeBtn.nativeElement) {
+            // Solo hacer click si es necesario
+            // this.closeBtn.nativeElement.click();
+        }
     }
 
     get f() { return this.addForm.controls; }
@@ -103,10 +110,11 @@ export class AddResourceComponent implements OnInit {
         this.submitted = false;
         this.maxSizeError = false;
         this.barWidth = '0%';
-        if (this.loading ==false || this.loading == null){
+        if (this.loading == false || this.loading == null) {
             console.log(this.closeBtn);
-            this.closeBtn.nativeElement.click();
-            //data-dismiss="modal";
+            if (this.closeBtn && this.closeBtn.nativeElement) {
+                this.closeBtn.nativeElement.click();
+            }
         }
     }
     getValue(){
