@@ -8,7 +8,7 @@ describe('AdminReportsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ViewErrorsComponent]
+      declarations: [ViewErrorsComponent]
     })
     .compileComponents();
     

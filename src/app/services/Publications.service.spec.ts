@@ -25,8 +25,8 @@ describe('PublicationService', () => {
   // Aquí es donde escribiremos nuestras pruebas
   it('should retrieve publications from the API via GET', () => {
     const dummyPublications: Publication[] = [
-      { _id: '1', text: 'Publication 1', user: 'User 1', comments: [], file: null, created_at: new Date() },
-      { _id: '2', text: 'Publication 2', user: 'User 2', comments: [], file: null, created_at: new Date() },
+      { _id: '1', text: 'Publication 1', user: 'User 1', comments: [], file: null, created_at: new Date(), likes: [], likesCount: 0 },
+      { _id: '2', text: 'Publication 2', user: 'User 2', comments: [], file: null, created_at: new Date(), likes: [], likesCount: 0 },
     ];
   
     service.getPublications(1).subscribe(publications => {
@@ -34,7 +34,7 @@ describe('PublicationService', () => {
       expect(publications).toEqual(dummyPublications);
     });
   
-    const request = httpMock.expectOne(`${service.url}/publications/1`);
+    const request = httpMock.expectOne((req) => req.url.includes('/publications/1'));
   
     expect(request.request.method).toBe('GET');
   

@@ -2,13 +2,22 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { of, throwError } from 'rxjs';
+import { Pipe, PipeTransform } from '@angular/core';
 
 import { LessonsComponent } from './lessons.component';
 import { LessonService } from 'src/app/services/lesson.service';
 import { UserService } from 'src/app/services/user.service';
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { Router, ActivatedRoute } from '@angular/router';
+
+@Pipe({ name: 'filter', standalone: true })
+class FilterPipeStub implements PipeTransform {
+  transform(value: any, ...args: any[]): any {
+    return value;
+  }
+}
 
 describe('LessonsComponent', () => {
   let component: LessonsComponent;
@@ -66,9 +75,11 @@ describe('LessonsComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [LessonsComponent],
       imports: [
+        CommonModule,
         RouterTestingModule,
         HttpClientTestingModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        FilterPipeStub
       ],
       providers: [
         { provide: LessonService, useValue: lessonServiceSpy },
@@ -84,23 +95,26 @@ describe('LessonsComponent', () => {
         }
       ]
     }).compileComponents();
-
-    fixture = TestBed.createComponent(LessonsComponent);
-    component = fixture.componentInstance;
+    
+    // Prepare spies BEFORE component creation so constructor reads correct values
     lessonService = TestBed.inject(LessonService) as jasmine.SpyObj<LessonService>;
     userService = TestBed.inject(UserService) as jasmine.SpyObj<UserService>;
     basicDataService = TestBed.inject(BasicDataService) as jasmine.SpyObj<BasicDataService>;
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
 
-    // Setup default spy returns
     userService.getToken.and.returnValue(mockToken);
-    userService.getIdentity.and.returnValue(mockIdentity);
+    userService.getIdentity.and.returnValue(mockIdentity as any);
     lessonService.getAllLessons.and.returnValue(of(mockLessonsResponse));
-    basicDataService.getAllKnowledgeAreas.and.returnValue(of({ areas: mockAreas }));
+    // ensure editLesson exists to avoid TypeError in increaseViews
+    (lessonService as any).editLesson = jasmine.createSpy('editLesson').and.returnValue(of({ lesson: { ...mockLesson } }));
+    basicDataService.getAllKnowledgeAreas.and.returnValue(of({ areas: mockAreas.map(area => ({ ...area, used: false })) }));
 
     // Mock localStorage
     spyOn(localStorage, 'getItem').and.returnValue(null);
     spyOn(localStorage, 'setItem');
+
+    fixture = TestBed.createComponent(LessonsComponent);
+    component = fixture.componentInstance;
   });
 
   it('should create', () => {
@@ -176,8 +190,8 @@ describe('LessonsComponent', () => {
       component.selectedLevels = ['garden'];
       const mockLessonsWithLevels = {
         lessons: [
-          { ...mockLesson, development_level: 'garden' },
-          { ...mockLesson, _id: '2', development_level: 'school' }
+          { ...mockLesson, level: 'garden' },
+          { ...mockLesson, _id: '2', level: 'school' }
         ]
       };
       lessonService.getAllLessons.and.returnValue(of(mockLessonsWithLevels));
@@ -185,7 +199,7 @@ describe('LessonsComponent', () => {
       component.getAllLessons();
 
       expect(component.allLessons.length).toBe(1);
-      expect(component.allLessons[0].development_level).toBe('garden');
+      expect(component.allLessons[0].level).toBe('garden');
     });
   });
 
@@ -205,8 +219,9 @@ describe('LessonsComponent', () => {
       component.getAllAreas();
 
       expect(basicDataService.getAllKnowledgeAreas).toHaveBeenCalled();
-      expect(component.areas).toEqual(mockAreas);
-      expect(localStorage.setItem).toHaveBeenCalledWith('areas', JSON.stringify(mockAreas));
+      // En el componente se guarda con { used: false }
+      expect(component.areas).toEqual(mockAreas.map(a => ({ ...a, used: false })));
+      expect(localStorage.setItem).toHaveBeenCalledWith('areas', JSON.stringify(mockAreas.map(a => ({ ...a, used: false }))));
     });
 
     it('should handle error when fetching areas fails', () => {

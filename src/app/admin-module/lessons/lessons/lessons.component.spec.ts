@@ -2,7 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Pipe, PipeTransform } from '@angular/core';
 import { of, throwError, Subject } from 'rxjs';
 
 import { LessonsComponent } from './lessons.component';
@@ -10,6 +11,13 @@ import { LessonService } from 'src/app/services/lesson.service';
 import { UserService } from 'src/app/services/user.service';
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { Router, ActivatedRoute } from '@angular/router';
+
+@Pipe({ name: 'filter', standalone: true })
+class FilterPipeStub implements PipeTransform {
+  transform(value: any, ...args: any[]): any {
+    return value;
+  }
+}
 
 describe('Admin LessonsComponent', () => {
   let component: LessonsComponent;
@@ -81,9 +89,11 @@ describe('Admin LessonsComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [LessonsComponent],
       imports: [
+        CommonModule,
         RouterTestingModule,
         HttpClientTestingModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        FilterPipeStub
       ],
       providers: [
         { provide: LessonService, useValue: lessonServiceSpy },
@@ -94,25 +104,27 @@ describe('Admin LessonsComponent', () => {
         { provide: ChangeDetectorRef, useValue: changeDetectorRefSpy }
       ]
     }).compileComponents();
-
-    fixture = TestBed.createComponent(LessonsComponent);
-    component = fixture.componentInstance;
+    
+    // Prepare spies BEFORE creating component so constructor reads correct values
     lessonService = TestBed.inject(LessonService) as jasmine.SpyObj<LessonService>;
     userService = TestBed.inject(UserService) as jasmine.SpyObj<UserService>;
     basicDataService = TestBed.inject(BasicDataService) as jasmine.SpyObj<BasicDataService>;
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     changeDetectorRef = TestBed.inject(ChangeDetectorRef) as jasmine.SpyObj<ChangeDetectorRef>;
 
-    // Setup default spy returns
     userService.getToken.and.returnValue(mockToken);
-    userService.getIdentity.and.returnValue(mockIdentity);
+    userService.getIdentity.and.returnValue(mockIdentity as any);
     lessonService.getAllLessons.and.returnValue(of(mockLessonsResponse));
     lessonService.getLessons.and.returnValue(of(mockLessonsResponse));
-    basicDataService.getAllKnowledgeAreas.and.returnValue(of({ areas: mockAreas }));
+    lessonService.editLesson.and.returnValue(of({ lesson: { ...mockLesson } }));
+    basicDataService.getAllKnowledgeAreas.and.returnValue(of({ areas: mockAreas.map(area => ({ ...area, used: false })) }));
 
     // Mock localStorage
     spyOn(localStorage, 'getItem').and.returnValue(JSON.stringify(mockAreas));
     spyOn(localStorage, 'setItem');
+
+    fixture = TestBed.createComponent(LessonsComponent);
+    component = fixture.componentInstance;
   });
 
   afterEach(() => {

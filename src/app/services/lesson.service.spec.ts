@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { of } from 'rxjs';
 import { LessonService } from './lesson.service';
 import { Lesson } from '../models/lesson.model';
 import { GLOBAL } from './global';
@@ -40,7 +41,8 @@ describe('LessonService', () => {
     son_lesson: null,
     version: 1,
     justification: 'Test justification',
-    class: 'suggest'
+    class: 'suggest',
+    suggested_facilitator: null
   };
 
   const mockLessonsResponse = {
@@ -292,30 +294,30 @@ describe('LessonService', () => {
 
   describe('getExperiences', () => {
     it('should get experiences by calling getAllLessons with correct parameters', () => {
-      spyOn(service, 'getAllLessons').and.returnValue(service.getAllLessons(mockToken, 'created_at', false));
+      const getAllLessonsSpy = spyOn(service, 'getAllLessons').and.returnValue(of(mockLessonsResponse));
 
       service.getExperiences(mockToken).subscribe();
 
-      expect(service.getAllLessons).toHaveBeenCalledWith(mockToken, 'created_at', false);
+      expect(getAllLessonsSpy).toHaveBeenCalledWith(mockToken, 'created_at', false);
     });
 
     it('should get experiences with custom page parameter (ignored)', () => {
-      spyOn(service, 'getAllLessons').and.returnValue(service.getAllLessons(mockToken, 'created_at', false));
+      const getAllLessonsSpy = spyOn(service, 'getAllLessons').and.returnValue(of(mockLessonsResponse));
 
       service.getExperiences(mockToken, 5).subscribe();
 
-      expect(service.getAllLessons).toHaveBeenCalledWith(mockToken, 'created_at', false);
+      expect(getAllLessonsSpy).toHaveBeenCalledWith(mockToken, 'created_at', false);
     });
   });
 
   describe('getSuggestedLesson', () => {
     it('should get suggested lessons by calling getLessons with correct parameters', () => {
       const page = 2;
-      spyOn(service, 'getLessons').and.returnValue(service.getLessons(mockToken, page, false));
+      const getLessonsSpy = spyOn(service, 'getLessons').and.returnValue(of(mockLessonsResponse));
 
       service.getSuggestedLesson(mockToken, page).subscribe();
 
-      expect(service.getLessons).toHaveBeenCalledWith(mockToken, page, false);
+      expect(getLessonsSpy).toHaveBeenCalledWith(mockToken, page, false);
     });
   });
 

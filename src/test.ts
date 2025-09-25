@@ -15,3 +15,5 @@ getTestBed().initTestEnvironment(
     teardown: { destroyAfterEach: false }
 }
 );
+
+// Load tests manually - this will be handled by Angular CLI automatically

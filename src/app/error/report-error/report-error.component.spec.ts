@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ReactiveFormsModule } from '@angular/forms';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ReportErrorComponent } from './report-error.component';
+import { ErrorService } from '../../services/error.service';
 
 describe('ReportErrorComponent', () => {
   let component: ReportErrorComponent;
@@ -8,7 +11,15 @@ describe('ReportErrorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ReportErrorComponent]
+      declarations: [ReportErrorComponent],
+      imports: [
+        ReactiveFormsModule
+      ],
+      providers: [
+        ErrorService,
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
     
