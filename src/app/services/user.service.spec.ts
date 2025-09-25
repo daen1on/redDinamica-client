@@ -93,9 +93,6 @@ describe('UserService', () => {
       // Simular estar en una ruta protegida (mock simplificado)
       // Nota: En un entorno real, esto se manejaría con Angular Router
       
-      // Mock de window.location.href para capturar redirección
-      // Nota: Este mock se omite debido a limitaciones del entorno de testing
-      
       const alertSpy = spyOn(window, 'alert');
       
       // Act: Borrar localStorage (simulando sesión expirada)
