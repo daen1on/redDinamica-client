@@ -32,31 +32,29 @@ export class CommentService {
         return new HttpHeaders(headers);
     }
 
-    addComment(token, comment):Observable<any>{
+    addComment(token, comment: Comment | any):Observable<any>{
         // Verificar si hay token antes de hacer la petición
         if (!token || token.trim() === '') {
-            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+            return throwError(() => 'No hay token de autenticación. Por favor, inicie sesión nuevamente.');
         }
         
-        let params = JSON.stringify(comment);
-        let headers = this.createSafeHeaders(token);
-
-        return this._http.post(this.url + 'comment', params, {headers:headers});
+        // Enviar objeto directamente; HttpClient serializa automáticamente
+        const headers = this.createSafeHeaders(token);
+        return this._http.post(this.url + 'comment', comment, { headers });
     }
 
-    updateComment(token, commentId):Observable<any>{
+    updateComment(token, commentId: string | number, body: Partial<Comment> = {}):Observable<any>{
         if (!token || token.trim() === '') {
-            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+            return throwError(() => 'No hay token de autenticación. Por favor, inicie sesión nuevamente.');
         }
         
-        let headers = this.createSafeHeaders(token);
-
-        return this._http.put(this.url+'comment/' + commentId, {headers:headers});
+        const headers = this.createSafeHeaders(token);
+        return this._http.put(this.url+'comment/' + commentId, body, { headers });
     }
    
     removeComment(token, commentId):Observable<any>{
         if (!token || token.trim() === '') {
-            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+            return throwError(() => 'No hay token de autenticación. Por favor, inicie sesión nuevamente.');
         }
         
         let headers = this.createSafeHeaders(token);
@@ -67,7 +65,7 @@ export class CommentService {
     // Métodos para likes en comentarios
     toggleLikeComment(token, commentId):Observable<any>{
         if (!token || token.trim() === '') {
-            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+            return throwError(() => 'No hay token de autenticación. Por favor, inicie sesión nuevamente.');
         }
         
         let headers = this.createSafeHeaders(token);
@@ -77,7 +75,7 @@ export class CommentService {
 
     getCommentLikes(token, commentId):Observable<any>{
         if (!token || token.trim() === '') {
-            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+            return throwError(() => 'No hay token de autenticación. Por favor, inicie sesión nuevamente.');
         }
         
         let headers = this.createSafeHeaders(token);
@@ -86,20 +84,18 @@ export class CommentService {
     }
 
     // Métodos para respuestas anidadas
-    addReply(token, parentCommentId, reply):Observable<any>{
+    addReply(token, parentCommentId, reply: any):Observable<any>{
         if (!token || token.trim() === '') {
-            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+            return throwError(() => 'No hay token de autenticación. Por favor, inicie sesión nuevamente.');
         }
         
-        let params = JSON.stringify(reply);
-        let headers = this.createSafeHeaders(token);
-
-        return this._http.post(this.url + 'comment/' + parentCommentId + '/reply', params, {headers:headers});
+        const headers = this.createSafeHeaders(token);
+        return this._http.post(this.url + 'comment/' + parentCommentId + '/reply', reply, { headers });
     }
 
     getReplies(token, commentId):Observable<any>{
         if (!token || token.trim() === '') {
-            return throwError('No hay token de autenticación. Por favor, inicie sesión nuevamente.');
+            return throwError(() => 'No hay token de autenticación. Por favor, inicie sesión nuevamente.');
         }
         
         let headers = this.createSafeHeaders(token);
