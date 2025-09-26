@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter} from '@angular/core';
 import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of } from 'rxjs';
+import { tap, map, catchError } from 'rxjs/operators';
 
 import { GLOBAL } from './global';
 import { User } from '../models/user.model';
@@ -151,6 +151,17 @@ export class UserService {
         return this._http.get(this.url + 'all-users/', {headers:headers});
     }
 
+
+    // Búsqueda paginada para typeahead
+    searchUsers(q: string, limit: number = 8): Observable<any> {
+        let headers = new HttpHeaders({
+            'Content-Type':'application/json', 
+            'Authorization': this.getToken() || ''
+        });
+        const params = `?q=${encodeURIComponent(q)}&limit=${limit}`;
+        return this._http.get(this.url + 'users/search' + params, {headers:headers});
+    }
+
     getNewUsers(page = null):Observable<any>{
         let headers = new HttpHeaders({
             'Content-Type':'application/json', 
@@ -218,10 +229,52 @@ private loadTokenFromStorage(): string | null {
 }
 
 getIdentity(): User | null {
+    // Verificar si localStorage y cache están sincronizados
+    const localStorageIdentity = localStorage.getItem('identity');
+    
+    // Si localStorage está vacío pero cache tiene identity, limpiar cache
+    if (!localStorageIdentity && this._identity) {
+        this._identity = null;
+        this.identityChanged.next(null);
+        return null;
+    }
+    
+    // Si localStorage tiene identity pero cache no, actualizar cache
+    if (localStorageIdentity && !this._identity) {
+        try {
+            this._identity = JSON.parse(localStorageIdentity);
+            this.identityChanged.next(this._identity);
+        } catch (error) {
+            console.error('Error parsing identity from localStorage:', error);
+            localStorage.removeItem('identity');
+            this._identity = null;
+            this.identityChanged.next(null);
+        }
+    }
+    
     return this._identity;
 }
 
 getToken(): string | null {
+    // Verificar si localStorage y cache están sincronizados
+    const localStorageToken = localStorage.getItem('token');
+    
+    // Si localStorage está vacío pero cache tiene token, limpiar cache
+    if (!localStorageToken && this._token) {
+        this._token = null;
+        this._identity = null;
+        this.identityChanged.next(null);
+        
+        // Disparar redirección inmediatamente 
+        setTimeout(() => this.checkAndRedirectIfNeeded(), 100);
+        return null;
+    }
+    
+    // Si localStorage tiene token pero cache no, actualizar cache
+    if (localStorageToken && !this._token) {
+        this._token = localStorageToken;
+    }
+    
     return this._token;
 }
 setIdentity(identity: User | null): void {
@@ -263,7 +316,7 @@ setToken(token: string | null): void {
 // --- Profile Picture Upload ---
 uploadProfileImage(userId: string, file: File): Observable<any> {
     const formData: FormData = new FormData();
-    formData.append('image', file, file.name); // 'image' should match your multer field name in user.routes.js
+    formData.append('image', file, file.name); 
 
     let headers = new HttpHeaders({
         'Authorization': this.getToken() || '' // Multer needs the token for auth.ensureAuth
@@ -276,6 +329,78 @@ uploadProfileImage(userId: string, file: File): Observable<any> {
                 this.profilePictureUpdated.emit(); // Emit event for components
             }
         })
+        );
+    }
+
+    // Método para verificar si el token es válido sin necesidad de hacer una petición específica
+    isTokenValid(): boolean {
+        const token = this.getToken();
+        const identity = this.getIdentity();
+        
+        if (!token || !identity) {
+            return false;
+        }
+
+        // Verificaciones básicas del token
+        if (token.length < 20) { // Tokens muy cortos probablemente sean inválidos
+            return false;
+        }
+
+        return true;
+    }
+
+    // Método para verificar si se necesita redirección cuando no hay token
+    private checkAndRedirectIfNeeded(): void {
+        const currentUrl = window.location.pathname;
+        
+        // Lista de rutas que requieren autenticación
+        const protectedRoutes = ['/admin', '/perfil', '/home', '/lecciones', '/mensajes'];
+        
+        const isProtectedRoute = protectedRoutes.some(route => currentUrl.startsWith(route));
+        
+        if (isProtectedRoute) {
+            this.handleExpiredSession('Su sesión ha expirado. Por favor, inicie sesión nuevamente.');
+        }
+    }
+
+    // Método para manejar sesiones expiradas de forma centralizada
+    handleExpiredSession(message?: string): void {
+        const defaultMessage = 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.';
+        const finalMessage = message || defaultMessage;
+        
+        // Limpiar datos de sesión
+        this.clearIdentityAndToken();
+        sessionStorage.clear();
+        localStorage.clear();
+
+        alert(finalMessage);
+        // Redirigir al login
+        window.location.href = '/login';
+    }
+
+    // Método para verificar proactivamente el estado del token
+    checkTokenStatus(): Observable<boolean> {
+        if (!this.isTokenValid()) {
+            return of(false);
+        }
+
+        // Hacer una petición ligera para verificar si el token sigue siendo válido
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Authorization': this.getToken() || ''
+        });
+
+        return this._http.get(`${this.url}verify-token`, { headers: headers }).pipe(
+            map((response: any) => {
+                return response && response.valid === true;
+            }),
+            catchError((error) => {
+                console.log('Token verification failed:', error);
+                if (error.status === 401 || error.status === 403) {
+                    this.handleExpiredSession();
+                }
+                return of(false);
+            })
         );
     }
 }

@@ -42,7 +42,7 @@ export class AuthInterceptor implements HttpInterceptor {
         console.log('🚨 AuthInterceptor: Error', err.status, 'on', request.url);
         
         // Detectar errores de autenticación (incluyendo cuando status es undefined/null)
-        const isAuthError = err.status === 401 || err.status === 403 || 
+        const isAuthError = err.status === 401 || 
                            (err.error && err.error.message && 
                             (err.error.message.includes('authorization header') || 
                              err.error.message.includes('Authorization') ||
@@ -51,7 +51,13 @@ export class AuthInterceptor implements HttpInterceptor {
                            (err.message && err.message.includes('No hay token de autenticación')) ||
                            (typeof err === 'string' && err.includes('No hay token de autenticación'));
         
-        if (isAuthError) {
+        // Considerar 403 como error de autenticación solo si viene con códigos explícitos de token
+        const isForcedAuth403 = err.status === 403 && (
+          (err.error && (err.error.code === 'TOKEN_INVALIDATED' || err.error.code === 'TOKEN_OUTDATED')) ||
+          (err.error && err.error.message && (err.error.message.toLowerCase().includes('token') || err.error.message.toLowerCase().includes('authorization')))
+        );
+
+        if (isAuthError || isForcedAuth403) {
           if (!this.isTokenExpiredPopupDisplayed) {
             this.isTokenExpiredPopupDisplayed = true;
 
@@ -65,6 +71,8 @@ export class AuthInterceptor implements HttpInterceptor {
                 message = 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.';
               } else if (err.error.message.includes('invalid')) {
                 message = 'Token de sesión inválido. Por favor, inicie sesión nuevamente.';
+              } else if (err.error.message.includes('null')) {
+                message = 'Sesión no válida. Por favor, inicie sesión nuevamente.';
               }
             }
             
@@ -101,7 +109,7 @@ export class AuthInterceptor implements HttpInterceptor {
                      (err.message ? err.message : 
                      (err.statusText ? err.statusText : 'Error desconocido'));
         
-        return throwError(error);
+        return throwError(() => error);
       })
     );
   }
