@@ -64,7 +64,7 @@ export class MessageService {
         return this._http.get(this.url + 'unviewed-messages', { headers: headers }).pipe(
             catchError(error => {
                 console.error('Error in getUnviewMessages:', error);
-                return throwError(()=>error);
+                return throwError(() => error);
             })
         );
      }

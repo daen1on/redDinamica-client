@@ -72,7 +72,7 @@ describe('EditErrorComponent', () => {
 
   it('should show error message on update error', () => {
     const errorMessage = 'Error de actualización';
-    mockErrorService.updateErrorReport.and.returnValue(throwError({ error: { message: errorMessage } }));
+    mockErrorService.updateErrorReport.and.returnValue(throwError(() => ({ error: { message: errorMessage } })));
 
     component.onSubmit();
 

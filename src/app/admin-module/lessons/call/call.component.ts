@@ -250,6 +250,18 @@ export class CallComponent implements OnInit {
                     this.status = 'success';
                     this.assigned.emit();
                     console.log("Lección asignada exitosamente");
+
+                    // Crear conversación General por defecto con un primer mensaje
+                    const initialText = 'comienza a hablar';
+                    this._lessonService.addLessonMessage(this.token, this.lesson._id, { text: initialText, conversationTitle: 'General' })
+                        .subscribe({
+                            next: () => {
+                                console.log('Conversación General creada automáticamente');
+                            },
+                            error: (err) => {
+                                console.error('No se pudo crear la conversación General por defecto:', err);
+                            }
+                        });
                 } else {
                     this.status = 'error';
                     console.error("Respuesta inválida del servidor");

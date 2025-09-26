@@ -1,1 +1,14 @@
 .disable{ pointer-events: none; opacity: 2.0;}
+
+.resource-edit,
+.resource-delete{
+    cursor: pointer;
+}
+
+.resource-edit:hover{
+    color: #0d6efd; /* bootstrap primary */
+}
+
+.resource-delete:hover{
+    color: #dc3545; /* bootstrap danger */
+}

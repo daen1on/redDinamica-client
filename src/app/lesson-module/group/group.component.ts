@@ -149,49 +149,86 @@ export class GroupComponent implements OnInit {
 
     //asks if the expert belongs to the lesson, if not, it will add him/her. 
     belongsTo(expert):void{
-        let found = this.lesson.development_group.find(item => {
-            
-            return item._id == expert._id; 
-        });
-        //console.log("found",found);
-        if (!found){
-
-            this.lesson.development_group.push(expert);
-            this.groupForm.patchValue({
-                members: this.lesson.development_group
-            });
-        }    
-        else{
-            console.log("ya pertenece al grupo");
+        // Asegurar que development_group existe
+        if (!this.lesson.development_group) {
+            this.lesson.development_group = [];
         }
 
+        let found = this.lesson.development_group.find(item => {
+            return item._id == expert._id; 
+        });
+        
+        if (!found){
+            // Verificación adicional para evitar duplicados
+            const isDuplicate = this.lesson.development_group.some(member => 
+                member._id === expert._id
+            );
+            
+            if (!isDuplicate) {
+                this.lesson.development_group.push(expert);
+                this.groupForm.patchValue({
+                    members: this.lesson.development_group
+                });
+                console.log("Experto agregado al grupo de desarrollo");
+            }
+        } else {
+            console.log("ya pertenece al grupo");
+        }
     }
     onSubmit() {
         this.submitted = true;
+
+        // Validar que los campos requeridos estén completos
+        if (!this.groupForm.value.expert || !this.groupForm.value.members || this.groupForm.value.members.length === 0) {
+            this.status = 'error';
+            this.errorMsg = 'Debes seleccionar un experto y al menos un miembro del grupo.';
+            return;
+        }
+
+        // Asegurar que development_group existe
+        if (!this.lesson.development_group) {
+            this.lesson.development_group = [];
+        }
 
         this.lesson.development_group = this.groupForm.value.members;
         this.lesson.expert = this.groupForm.value.expert._id;
         this.lesson.leader = this.groupForm.value.leader;
         this.belongsTo(this.groupForm.value.expert);
-        //console.log(this.lesson.expert);
-        this._lessonService.editLesson(this.token, this.lesson).subscribe(
-            response => {
+        
+        console.log("Enviando actualización de lección:", {
+            id: this.lesson._id,
+            development_group: this.lesson.development_group,
+            expert: this.lesson.expert,
+            leader: this.lesson.leader
+        });
 
+        this._lessonService.editLesson(this.token, this.lesson).subscribe({
+            next: response => {
                 if (response.lesson && response.lesson._id) {
                     this.status = 'success';
                     this.submitted = false;
-
+                    console.log("Lección actualizada exitosamente");
                 } else {
                     this.status = 'error';
+                    this.errorMsg = 'Error al actualizar la lección. Respuesta inválida del servidor.';
                 }
             },
-            error => {
-                if (error != null) {
-                    this.status = 'error';
-                    console.error(<any>error);
+            error: error => {
+                this.status = 'error';
+                console.error('Error updating lesson:', error);
+                
+                // Manejo específico de errores
+                if (error.status === 500) {
+                    this.errorMsg = 'Error interno del servidor. Por favor, verifica que todos los campos estén correctamente completados.';
+                } else if (error.status === 400) {
+                    this.errorMsg = error.error?.message || 'Datos inválidos. Por favor, revisa los campos del formulario.';
+                } else if (error.status === 404) {
+                    this.errorMsg = 'La lección no fue encontrada.';
+                } else {
+                    this.errorMsg = error.error?.message || 'Hubo un error agregando el grupo de desarrollo a la lección. Inténtalo de nuevo más tarde.';
                 }
             }
-        );
+        });
 
         document.scrollingElement.scrollTop = 0;
     }

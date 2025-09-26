@@ -231,7 +231,7 @@
                     <div class="col">
                       <div
                         class="text-center p-2 py-3 rounded-lg border border-ligth text-center bg-{{
-                          lesson_states[lesson.state].class
+                          lesson_states[lesson.state || 'proposed']?.class || 'secondary'
                         }}"
                         style="width: 80px; height: 80px; overflow: hidden"
                       >
@@ -293,15 +293,15 @@
                       <h5>
                         <span
                           class="badge bg-{{
-                            lesson_states[lesson.state].class
+                            lesson_states[lesson.state || 'proposed']?.class || 'secondary'
                           }} me-1"
                         >
-                          {{ lesson_states[lesson.state].label }}
+                          {{ lesson_states[lesson.state || 'proposed']?.label || (lesson.state || 'proposed') }}
                         </span>
                       </h5>
                       <p
                         *ngFor="
-                          let text of lesson.resume.split('\n');
+                          let text of (lesson.resume ? lesson.resume.split('\n') : []);
                           let i = index
                         "
                         class="text-justify"
@@ -399,7 +399,7 @@
 
                   <div
                     *ngIf="
-                      lesson.development_group.length > 0 &&
+                      (lesson.development_group?.length > 0) &&
                       lesson.state == 'completed'
                     "
                     class="row"
@@ -449,7 +449,7 @@
 
                   <div
                     *ngIf="
-                      lesson.development_group.length <= 0 ||
+                      (!lesson.development_group || lesson.development_group.length <= 0) ||
                       lesson.state == 'proposed'
                     "
                     class="row"
@@ -600,7 +600,7 @@
                     <div class="col">
                       <div
                         class="text-center p-2 py-3 rounded-lg border border-ligth text-center bg-{{
-                          lesson_states[lesson.state].class
+                          lesson_states[lesson.state || 'proposed']?.class || 'secondary'
                         }}"
                         style="width: 80px; height: 80px; overflow: hidden"
                       >
@@ -662,15 +662,15 @@
                       <h5>
                         <span
                           class="badge bg-{{
-                            lesson_states[lesson.state].class
+                            lesson_states[lesson.state || 'proposed']?.class || 'secondary'
                           }} me-1"
                         >
-                          {{ lesson_states[lesson.state].label }}
+                          {{ lesson_states[lesson.state || 'proposed']?.label || (lesson.state || 'proposed') }}
                         </span>
                       </h5>
                       <p
                         *ngFor="
-                          let text of lesson.resume.split('\n');
+                          let text of (lesson.resume ? lesson.resume.split('\n') : []);
                           let i = index
                         "
                         class="text-justify"
@@ -770,7 +770,7 @@
                     </div>
                   </div>
 
-                  <div *ngIf="lesson.development_group.length > 0" class="row">
+                  <div *ngIf="lesson.development_group?.length > 0" class="row">
                     <div class="col">
                       <div class="row">
                         <div class="col">

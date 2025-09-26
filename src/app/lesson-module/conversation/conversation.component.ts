@@ -45,7 +45,7 @@ export class ConversationComponent implements OnInit {
     public MAX_FILE_SIZE = MAX_FILE_SIZE;
     public maxSize = MAX_FILE_SIZE * 1024 * 1024;
     public maxSizeError = false;
-    public loading = true;
+    public loading = false;
 
     constructor(
         private _userService: UserService,
@@ -106,7 +106,10 @@ export class ConversationComponent implements OnInit {
     //pensar como traer los mensajes una vez se envian o una vez llegan 
     //probar a crear un nuevo servicio que traiga los mensajes 
     ngDoCheck(){
-        this.getMessages(this.selectedGroup);
+        // Evitar recálculo constante si no hay grupo seleccionado
+        if (this.selectedGroup) {
+            this.getMessages(this.selectedGroup);
+        }
     }
 
     
@@ -252,10 +255,11 @@ export class ConversationComponent implements OnInit {
     }
 
     editLesson(lesson) {
+        // Mostrar loading mientras se persiste el cambio
+        this.loading = true;
 
-        this._lessonService.editLesson(this.token, lesson).subscribe(
-            response => {
-
+        this._lessonService.editLesson(this.token, lesson).subscribe({
+            next: response => {
                 if (response.lesson && response.lesson._id) {
                     this.lesson = response.lesson;
                     if (this.filesToUpload.length === 0){
@@ -266,7 +270,7 @@ export class ConversationComponent implements OnInit {
                         this.message.reset();
                         this.getGroups();
                         this.disableForm(false);
-
+                        this.loading = false;
                     }
                     
                     else{ 
@@ -295,6 +299,7 @@ export class ConversationComponent implements OnInit {
                             this.getGroups();
                             this.status ='success';
                             this.barWidth ='0%';
+                            this.loading = false;
                             }
                         }, error=>{
 
@@ -302,6 +307,7 @@ export class ConversationComponent implements OnInit {
                             this.status = 'error';
                             this.barWidth ='0%';
                             this.submitted = false;
+                            this.loading = false;
                             console.log(<any>error);
 
                         });
@@ -310,29 +316,35 @@ export class ConversationComponent implements OnInit {
                             
                             this.status = 'error';
                             this.submitted =false;
+                            this.loading = false;
                         }
 
                     }
-                } 
-                else {
+                } else {
                     this.status = 'error';
-                    this.submitted =false;
-
-
+                    this.submitted = false;
+                    this.loading = false;
+                    this.errorMsg = 'Error al actualizar la lección. Respuesta inválida del servidor.';
                 }
             },
-            error => {
-                if (error != null) {
-                    this.status = 'error';
-                    this.submitted = false;
-                    console.log(<any>error);
-                }
-                else{
-                    this.status = 'error';
-                    this.submitted = false;
+            error: error => {
+                this.status = 'error';
+                this.submitted = false;
+                this.loading = false;
+                console.error('Error updating lesson conversation:', error);
+                
+                // Manejo específico de errores
+                if (error.status === 500) {
+                    this.errorMsg = 'Error interno del servidor. Por favor, verifica que todos los campos estén correctamente completados.';
+                } else if (error.status === 400) {
+                    this.errorMsg = error.error?.message || 'Datos inválidos. Por favor, revisa los campos del formulario.';
+                } else if (error.status === 404) {
+                    this.errorMsg = 'La lección no fue encontrada.';
+                } else {
+                    this.errorMsg = error.error?.message || 'Hubo un error creando la conversación. Inténtalo de nuevo más tarde.';
                 }
             }
-        );
+        });
 
     }
 }

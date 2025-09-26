@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { MomentModule } from 'ngx-moment';
 
 import { LessonComponent } from './lesson.component';
@@ -35,14 +35,17 @@ import { LinkyModule } from 'ngx-linky';
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        HttpClientModule,
         RouterModule,
         NgSelectModule,
         MomentModule,
-        LinkyModule
+        LinkyModule,
+        NgbModule
     ],
     exports: [
-        LessonComponent
+        LessonComponent,
+        ConversationComponent,
+        ResourcesComponent,
+        LessonDetailsComponent
     ],
     providers: [
    ],

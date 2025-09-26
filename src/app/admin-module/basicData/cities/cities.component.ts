@@ -117,7 +117,7 @@ export class CitiesComponent {
                     this.status = 'error';
                     console.log(<any>error);
                 }
-                return throwError(error);
+                return throwError(() => error);
             })
         ).subscribe();
     }

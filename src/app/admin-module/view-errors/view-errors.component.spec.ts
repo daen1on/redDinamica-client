@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { ViewErrorsComponent } from './view-errors.component';
 
@@ -8,7 +10,11 @@ describe('AdminReportsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ViewErrorsComponent]
+      declarations: [ViewErrorsComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
     .compileComponents();
     

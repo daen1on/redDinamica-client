@@ -80,7 +80,7 @@ describe('ResetPasswordComponent', () => {
 
   it('should display error message on password reset failure', () => {
     component.resetPasswordForm.setValue({ newPassword: 'password123', confirmPassword: 'password123' });
-    userService.resetPassword.and.returnValue(throwError({ error: 'Error' }));
+    userService.resetPassword.and.returnValue(throwError(() => ({ error: 'Error' })));
 
     component.onSubmit();
     fixture.detectChanges();

@@ -161,7 +161,7 @@ describe('LessonsComponent', () => {
     });
 
     it('should handle error when getting lessons fails', () => {
-      lessonService.getAllLessons.and.returnValue(throwError('Error'));
+      lessonService.getAllLessons.and.returnValue(throwError(() => 'Error'));
       spyOn(console, 'log');
 
       component.getAllLessons();
@@ -226,7 +226,7 @@ describe('LessonsComponent', () => {
 
     it('should handle error when fetching areas fails', () => {
       localStorage.getItem = jasmine.createSpy().and.returnValue(null);
-      basicDataService.getAllKnowledgeAreas.and.returnValue(throwError('Error'));
+      basicDataService.getAllKnowledgeAreas.and.returnValue(throwError(() => 'Error'));
       spyOn(console, 'log');
 
       component.getAllAreas();
@@ -306,7 +306,7 @@ describe('LessonsComponent', () => {
     });
 
     it('should handle error when getting lessons fails', () => {
-      lessonService.getLessons.and.returnValue(throwError('Error'));
+      lessonService.getLessons.and.returnValue(throwError(() => 'Error'));
       spyOn(console, 'log');
 
       component.getLessons();

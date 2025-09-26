@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'; 
 import { AppComponent } from './app.component';
@@ -38,7 +38,6 @@ import { NotificationsModule } from './notifications-module/notifications-module
     BrowserModule,
     FormsModule,
     ReactiveFormsModule,
-    HttpClientModule,
     NgSelectModule,
     HomeModule,
     AdminModule,
@@ -58,7 +57,8 @@ import { NotificationsModule } from './notifications-module/notifications-module
     CommentService,
     ResourceService,
     LessonService,
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    provideHttpClient(withInterceptorsFromDi())
   ],
   bootstrap: [AppComponent]
 })

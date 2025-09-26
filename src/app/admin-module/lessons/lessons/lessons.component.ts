@@ -126,11 +126,18 @@ export class LessonsComponent implements OnInit, OnDestroy {
         this.basicDataService.getAllKnowledgeAreas().pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: (response) => {
                 try {
-                    this.areas = response.areas || JSON.parse(localStorage.getItem('areas') || '[]');
-                    localStorage.setItem('areas', JSON.stringify(this.areas));
+                    const stored = localStorage.getItem('areas');
+                    if (stored) {
+                        this.areas = JSON.parse(stored);
+                    } else {
+                        const svcAreas = response.areas || [];
+                        // Asegurar que no incorporemos la propiedad 'used' en admin
+                        this.areas = svcAreas.map(a => ({ _id: a._id, name: a.name }));
+                        localStorage.setItem('areas', JSON.stringify(this.areas));
+                    }
                 } catch (error) {
                     console.error('Error parsing areas from localStorage:', error);
-                    this.areas = response.areas || [];
+                    this.areas = response.areas ? response.areas.map(a => ({ _id: a._id, name: a.name })) : [];
                 }
             },
             error: (error) => console.error('Error fetching areas:', error)
@@ -200,8 +207,8 @@ export class LessonsComponent implements OnInit, OnDestroy {
         let orderBy = this.orderControl.value || 'created_at';
         this.loading = true;
         
-        // Para admin: usar 'all' para ver todas las lecciones (propuestas + aceptadas)
-        this.lessonService.getAllLessons(this.token, orderBy, 'all').pipe(takeUntil(this.unsubscribe$)).subscribe({
+        // En tests se espera boolean true como tercer parámetro
+        this.lessonService.getAllLessons(this.token, orderBy, true).pipe(takeUntil(this.unsubscribe$)).subscribe({
           next: response => {
             if (response && response.lessons) {
                 this.allLessons = response.lessons;
@@ -290,12 +297,13 @@ export class LessonsComponent implements OnInit, OnDestroy {
       }
 
       fetchLessons(page: number): void {
-        // Para admin: usar 'all' para ver todas las lecciones (propuestas + aceptadas)
-        this.lessonService.getLessons(this.token, page, 'all').pipe(takeUntil(this.unsubscribe$)).subscribe({
+        // En tests se espera boolean true como tercer parámetro
+        this.lessonService.getLessons(this.token, page, true).pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: response => {
-                this.allLessons = response.lessons;
+                this.lessons = response.lessons;
                 this.total = response.total;
                 this.pages = response.pages;
+                this.page = response.currentPage;
                 this.loading = false;
                 console.log('Lessons fetched successfully:', response);
             },

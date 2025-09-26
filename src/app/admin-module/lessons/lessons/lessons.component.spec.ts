@@ -205,7 +205,7 @@ describe('Admin LessonsComponent', () => {
     });
 
     it('should handle error when fetching areas', () => {
-      basicDataService.getAllKnowledgeAreas.and.returnValue(throwError('Error'));
+      basicDataService.getAllKnowledgeAreas.and.returnValue(throwError(() => 'Error'));
       spyOn(console, 'error');
 
       component.loadInitialData();
@@ -236,7 +236,7 @@ describe('Admin LessonsComponent', () => {
     });
 
     it('should handle error when fetching lessons fails', () => {
-      lessonService.getAllLessons.and.returnValue(throwError('Error'));
+      lessonService.getAllLessons.and.returnValue(throwError(() => 'Error'));
       spyOn(console, 'error');
 
       component.fetchAllLessons();
@@ -259,7 +259,7 @@ describe('Admin LessonsComponent', () => {
     });
 
     it('should handle error when fetching lessons fails', () => {
-      lessonService.getLessons.and.returnValue(throwError('Error'));
+      lessonService.getLessons.and.returnValue(throwError(() => 'Error'));
       spyOn(console, 'error');
 
       component.fetchLessons(1);

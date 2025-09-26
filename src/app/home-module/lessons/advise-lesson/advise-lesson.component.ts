@@ -318,13 +318,13 @@ export class AdviseLessonComponent implements OnInit {
             return;
         }
 
-        if (confirm(`¿Estás seguro de que quieres avalar la lección "${lesson.title}" y abrir la convocatoria? Esta acción notificará al líder para que gestione la participación.`)) {
+        if (confirm(`¿Estás seguro de que quieres avalar la lección "${lesson.title}" ? Esta acción notificará al líder para que abra la convocatoria.`)) {
             console.log('Aprobando lección:', lesson._id);
             
             this._lessonService.approveFacilitatorSuggestion(this.token, lesson._id).subscribe({
                 next: response => {
                     console.log('Lección aprobada exitosamente:', response);
-                    alert('¡Lección aprobada exitosamente! El líder ha sido notificado para gestionar la convocatoria.');
+                    alert('¡Lección aprobada exitosamente! El líder ha sido notificado para abrir la convocatoria.');
                     
                     // Cerrar modal si está abierto
                     this.closePreviewModal();
@@ -381,8 +381,10 @@ export class AdviseLessonComponent implements OnInit {
                     // Cerrar modal
                     this.closePreviewModal();
                     
-                    // Redirigir de vuelta a la lista general
-                    this._router.navigate(['/inicio/asesorar-lecciones']);
+                    // Redirigir de vuelta a la lista general y recargar la página
+                    this._router.navigate(['/inicio/asesorar-lecciones']).then(() => {
+                        window.location.reload();
+                    });
                 },
                 error: error => {
                     console.error('Error rechazando lección:', error);

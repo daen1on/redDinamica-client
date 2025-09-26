@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -70,7 +69,6 @@ import { EditErrorComponent } from './edit-error/edit-error.component';
     imports: [
         CommonModule,
         FormsModule,
-        HttpClientModule,
         ReactiveFormsModule,
         NgSelectModule,
         AdminRoutingModule,

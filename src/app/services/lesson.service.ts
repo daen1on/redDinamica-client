@@ -40,7 +40,7 @@ export class LessonService {
         return this._http.get(`${this.url}lesson/${lessonId}`, { headers: headers });
     }
 
-    getLessons(token: string, page: number = 1, visibleOnes: boolean = true): Observable<any> {
+    getLessons(token: string, page: number = 1, visibleOnes: boolean | string = true): Observable<any> {
         console.log("entered get lesson");
 
         let headers = new HttpHeaders({
@@ -48,8 +48,15 @@ export class LessonService {
             'Authorization': token
         });
 
-        // Convertir boolean a string para la URL
-        const visibleParam = visibleOnes ? 'true' : 'false';
+        // Manejar tanto boolean como string
+        let visibleParam: string;
+        if (typeof visibleOnes === 'string') {
+            visibleParam = visibleOnes; // 'all', 'true', 'false'
+        } else {
+            visibleParam = visibleOnes ? 'true' : 'false';
+        }
+
+        console.log('getLessons - Using visibleParam:', visibleParam);
 
         return this._http.get(`${this.url}lessons/${visibleParam}/${page}`, { headers: headers })
         .pipe(
@@ -64,15 +71,22 @@ export class LessonService {
         );
     }
 
-    getAllLessons(token: string, orderBy: string = 'created_at', visibleOnes: boolean = true): Observable<any> {
+    getAllLessons(token: string, orderBy: string = 'created_at', visibleOnes: boolean | string = true): Observable<any> {
         console.log("entered all lesson");
         let headers = new HttpHeaders({
             'Content-Type': 'application/json',
             'Authorization': token
         });
 
-        // Convertir boolean a string para la URL
-        const visibleParam = visibleOnes ? 'true' : 'false';
+        // Manejar tanto boolean como string
+        let visibleParam: string;
+        if (typeof visibleOnes === 'string') {
+            visibleParam = visibleOnes; // 'all', 'true', 'false'
+        } else {
+            visibleParam = visibleOnes ? 'true' : 'false';
+        }
+
+        console.log('getAllLessons - Using visibleParam:', visibleParam);
 
         return this._http.get(`${this.url}all-lessons/${visibleParam}/${orderBy}`, { headers: headers })
         .pipe(
@@ -141,6 +155,16 @@ export class LessonService {
         return this._http.get(`${this.url}all-calls`, { headers: headers });
     }
 
+    // Crear o actualizar convocatoria (solo líder/autor y en estado approved_by_expert)
+    createCall(token: string, lessonId: string, payload: { text: string; visible?: boolean }): Observable<any> {
+        let headers = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Authorization': token
+        });
+
+        return this._http.post(`${this.url}lesson/${lessonId}/call`, JSON.stringify(payload), { headers });
+    }
+
   
 
     getExperiences(token: string, page: number = 1): Observable<any> {
@@ -151,6 +175,12 @@ export class LessonService {
         let headers = new HttpHeaders().set('Content-Type', 'application/json')
                                         .set('Authorization', token);
         return this._http.put(this.url + 'lesson/' + lesson._id, JSON.stringify(lesson), { headers: headers });
+    }
+
+    // Crear mensaje en conversación (API soporta insertion directa al array de conversations)
+    addLessonMessage(token: string, lessonId: string, payload: { text: string; conversationTitle?: string }): Observable<any> {
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': token });
+        return this._http.post(`${this.url}lesson/${lessonId}/message`, JSON.stringify(payload), { headers });
     }
     
     getSuggestedLesson(token: string, page: number): Observable<any> {
@@ -165,5 +195,35 @@ export class LessonService {
         });
 
         return this._http.delete(this.url + 'lesson/' + lessonId, { headers: headers });
+    }
+
+    // ===== NUEVOS MÉTODOS PARA FACILITADOR SUGERIDO =====
+
+    approveFacilitatorSuggestion(token: string, lessonId: string): Observable<any> {
+        let headers = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Authorization': token
+        });
+
+        return this._http.put(this.url + 'lesson/' + lessonId + '/approve-facilitator', {}, { headers: headers });
+    }
+
+    rejectFacilitatorSuggestion(token: string, lessonId: string, reason: string): Observable<any> {
+        let params = JSON.stringify({ reason: reason });
+        let headers = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Authorization': token
+        });
+
+        return this._http.put(this.url + 'lesson/' + lessonId + '/reject-facilitator', params, { headers: headers });
+    }
+
+    getFacilitatorInvitations(token: string): Observable<any> {
+        let headers = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Authorization': token
+        });
+
+        return this._http.get(this.url + 'facilitator/invitations', { headers: headers });
     }
 }

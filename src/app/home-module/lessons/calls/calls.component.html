@@ -124,9 +124,16 @@
                                                     {{ (lesson.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LL' }}
                                                 </small>
                                             </p>
-                                            <p *ngFor="let text of lesson.call.text.split('\n')" class="text-break">
-                                                {{text}}
-                                            </p>
+                                            <ng-container *ngIf="lesson.call?.text; else noCallYet">
+                                                <p *ngFor="let text of lesson.call.text.split('\n')" class="text-break">
+                                                    {{text}}
+                                                </p>
+                                            </ng-container>
+                                            <ng-template #noCallYet>
+                                                <p class="text-muted" *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)">
+                                                    Aún no has abierto la convocatoria. Completa el formulario a la derecha para publicarla.
+                                                </p>
+                                            </ng-template>
                                         </div>
 
                                     </div>
@@ -219,14 +226,36 @@
                                                 </span>
                                             </ng-container>
 
-                                            <!-- Botón de activación - solo visible para líder en estado 'approved_by_expert' -->
-                                            <button *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)"
-                                                class="btn btn-warning me-2" 
-                                                (click)="activateLesson(lesson)"
-                                                [title]="'Activar Lección (' + getParticipantCount(lesson) + ' participantes)'">
-                                                <i class="fas fa-play-circle me-1"></i>
-                                                Activar Lección
-                                            </button>
+                                            <!-- Formulario de apertura/edición de convocatoria para el líder -->
+                                            <div *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)" class="mb-2">
+                                                <div class="card border-info">
+                                                    <div class="card-body p-2">
+                                                        <label class="form-label fw-bold mb-1">Descripción de la convocatoria</label>
+                                                        <textarea class="form-control mb-2" rows="3"
+                                                            [ngModel]="getCallDraftText(lesson)"
+                                                            (ngModelChange)="setCallDraftText(lesson, $event)"
+                                                            placeholder="Escribe una breve descripción..."></textarea>
+                                                        <div class="form-check form-switch mb-2" *ngIf="lesson.call?.text">
+                                                            <input class="form-check-input" type="checkbox" id="visible_{{lesson._id}}"
+                                                                [ngModel]="getCallDraftVisible(lesson)"
+                                                                (ngModelChange)="setCallDraftVisible(lesson, $event)">
+                                                            <label class="form-check-label" for="visible_{{lesson._id}}">Visible públicamente</label>
+                                                        </div>
+                                                        <div class="d-flex gap-2">
+                                                            <button class="btn btn-success" *ngIf="!lesson.call?.text || getCallDraftVisible(lesson) === false" [disabled]="isSavingCall[lesson._id]" (click)="submitCall(lesson)">
+                                                                <i class="fas fa-bullhorn me-1"></i>Abrir Convocatoria
+                                                            </button>
+                                                            <button class="btn btn-success" *ngIf="lesson.call?.text && getCallDraftVisible(lesson) !== false" [disabled]="isSavingCall[lesson._id]" (click)="submitCall(lesson)">
+                                                                <i class="fas fa-save me-1"></i>Guardar
+                                                            </button>
+                                                            <button class="btn btn-warning" [disabled]="isSavingCall[lesson._id]" 
+                                                                (click)="activateLesson(lesson)"
+                                                                [title]="'Asignar Lección (' + getParticipantCount(lesson) + ' participantes)'"><i class="fas fa-play-circle me-1"></i>Asignar Lección
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                         </div>
                                         
@@ -295,9 +324,16 @@
                                                 <p><small class=" text-muted">
                                                         {{ (lesson.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LL' }}
                                                     </small></p>
-                                                <p *ngFor="let text of lesson.call.text.split('\n')" class="text-break">
-                                                    {{text}}
-                                                </p>
+                                                <ng-container *ngIf="lesson.call?.text; else noCallYet2">
+                                                    <p *ngFor="let text of lesson.call.text.split('\n')" class="text-break">
+                                                        {{text}}
+                                                    </p>
+                                                </ng-container>
+                                                <ng-template #noCallYet2>
+                                                    <p class="text-muted" *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)">
+                                                        Aún no has abierto la convocatoria. Completa el formulario a la derecha para publicarla.
+                                                    </p>
+                                                </ng-template>
                                             </div>
 
                                         </div>
@@ -390,14 +426,36 @@
                                                     </span>
                                                 </ng-container>
 
-                                                <!-- Botón de activación - solo visible para líder en estado 'approved_by_expert' -->
-                                                <button *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)"
-                                                    class="btn btn-warning me-2" 
-                                                    (click)="activateLesson(lesson)"
-                                                    [title]="'Activar Lección (' + getParticipantCount(lesson) + ' participantes)'">
-                                                    <i class="fas fa-play-circle me-1"></i>
-                                                    Activar Lección
-                                                </button>
+                                                <!-- Formulario de apertura/edición de convocatoria para el líder -->
+                                                <div *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)" class="mb-2">
+                                                    <div class="card border-info">
+                                                        <div class="card-body p-2">
+                                                            <label class="form-label fw-bold mb-1">Descripción de la convocatoria</label>
+                                                            <textarea class="form-control mb-2" rows="3"
+                                                                [ngModel]="getCallDraftText(lesson)"
+                                                                (ngModelChange)="setCallDraftText(lesson, $event)"
+                                                                placeholder="Escribe una breve descripción..."></textarea>
+                                                            <div class="form-check form-switch mb-2" *ngIf="lesson.call?.text">
+                                                                <input class="form-check-input" type="checkbox" id="visible2_{{lesson._id}}"
+                                                                    [ngModel]="getCallDraftVisible(lesson)"
+                                                                    (ngModelChange)="setCallDraftVisible(lesson, $event)">
+                                                                <label class="form-check-label" for="visible2_{{lesson._id}}">Visible públicamente</label>
+                                                            </div>
+                                                            <div class="d-flex gap-2">
+                                                                <button class="btn btn-success" *ngIf="!lesson.call?.text || getCallDraftVisible(lesson) === false" [disabled]="isSavingCall[lesson._id]" (click)="submitCall(lesson)">
+                                                                    <i class="fas fa-bullhorn me-1"></i>Abrir Convocatoria
+                                                                </button>
+                                                                <button class="btn btn-success" *ngIf="lesson.call?.text && getCallDraftVisible(lesson) !== false" [disabled]="isSavingCall[lesson._id]" (click)="submitCall(lesson)">
+                                                                    <i class="fas fa-save me-1"></i>Guardar
+                                                                </button>
+                                                                <button class="btn btn-warning" [disabled]="isSavingCall[lesson._id]" 
+                                                                    (click)="activateLesson(lesson)"
+                                                                    [title]="'Asignar Lección (' + getParticipantCount(lesson) + ' participantes)'"><i class="fas fa-play-circle me-1"></i>Asignar Lección
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
                                             </div>
                                             

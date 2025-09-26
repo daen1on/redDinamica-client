@@ -1,14 +1,12 @@
-<!-- rating -->
-<div class="modal fade" id="rating" tabindex="-1" role="dialog" aria-labelledby="rating" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+<!-- rating modal -->
+<div class="modal fade" id="rating" tabindex="-1" aria-labelledby="ratingTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <form [formGroup]="ratingForm" (ngSubmit)="onSubmit()" class="modal-content">
 
             <!-- modal-header -->
             <div class="modal-header">
                 <h5 class="modal-title" id="ratingTitle">{{title}}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="restartValues()">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="restartValues()"></button>
             </div>
             <!-- /modal-header -->
 

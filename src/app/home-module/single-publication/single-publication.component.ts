@@ -116,10 +116,35 @@ export class SinglePublicationComponent implements OnInit, OnDestroy {
   }
 
   onDeletePublication(publicationId: string): void {
-    // Redirigir a inicio después de eliminar
-    this._router.navigate(['/inicio'], {
-      queryParams: { message: 'Publicación eliminada exitosamente' }
-    });
+    if (!publicationId) {
+      this.onError('ID de publicación inválido');
+      return;
+    }
+
+    const token = this._userService.getToken();
+    if (!token) {
+      this._router.navigate(['/login']);
+      return;
+    }
+
+    this.loading = true;
+    this._publicationService.removePost(token, publicationId)
+      .pipe(
+        takeUntil(this.unsubscribe$),
+        catchError(error => {
+          console.error('Error deleting publication:', error);
+          this.loading = false;
+          this.onError('No se pudo eliminar la publicación. Inténtalo nuevamente.');
+          return of(null);
+        })
+      )
+      .subscribe(response => {
+        // Independientemente del payload, si el request no falló, navegamos
+        this.loading = false;
+        this._router.navigate(['/inicio'], {
+          queryParams: { message: 'Publicación eliminada exitosamente' }
+        });
+      });
   }
 
   onDeleteComment(commentId: string): void {

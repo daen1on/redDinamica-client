@@ -11,6 +11,17 @@ export const PROFILE_MENU = [
         "subOptions": []
     },
     {
+        "id": "lessons",
+        "name": "Lecciones",
+        "value": "lecciones",
+        "icon": "fas fa-book",
+        "buttonClass": "btn-primary",
+        "iconClass": "fa-book",
+        "spanContent": "Lecciones",
+        "routerLink": "/perfil/*id*/lecciones",
+        "subOptions": []
+    },
+    {
         "id": "red",
         "name": "Red",
         "value": "red",
@@ -84,7 +95,7 @@ export const FIELDS_FORM = [
         label: "Postgrados",
         type: "textarea",
         attr: "postgraduate",
-        placeholder: "Postgrados"   
+        placeholder: "Describe tus estudios de postgrado, especializaciones, maestrías, doctorados, etc."   
     },
     {
         id: "contactNumber",

@@ -188,11 +188,15 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   private handleFollowNotification(notification: Notification): void {
-    if (notification.from) {
-      this.router.navigate(['/perfil', notification.from]);
-    } else if (notification.link) {
+    // Priorizar el link si existe (formato correcto: /perfil/{id}/publicaciones)
+    if (notification.link) {
+      console.log('Using follow notification link:', notification.link);
       this.router.navigateByUrl(notification.link);
+    } else if (notification.from) {
+      console.log('Using fallback follow navigation:', notification.from);
+      this.router.navigate(['/perfil', notification.from, 'publicaciones']);
     } else {
+      console.log('Using default follow navigation');
       this.router.navigate(['/inicio']);
     }
   }
@@ -208,11 +212,15 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   private handleLessonNotification(notification: Notification): void {
-    if (notification.relatedId) {
-      this.router.navigate(['/inicio/leccion', notification.relatedId]);
-    } else if (notification.link) {
+    // Priorizar el link si existe (para casos específicos como invitaciones de facilitador)
+    if (notification.link) {
+      console.log('Using notification link:', notification.link);
       this.router.navigateByUrl(notification.link);
+    } else if (notification.relatedId) {
+      console.log('Using fallback lesson route:', notification.relatedId);
+      this.router.navigate(['/inicio/leccion', notification.relatedId]);
     } else {
+      console.log('Using default lessons route');
       this.router.navigate(['/inicio/lecciones']);
     }
   }

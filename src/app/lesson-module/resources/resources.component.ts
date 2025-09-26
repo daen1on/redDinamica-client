@@ -59,6 +59,7 @@ export class ResourcesComponent implements OnInit {
     public maxSizeError = false;
     public barWidth: string = "0%";
     public unsaved = [];
+    public addingNewGroup: boolean = false;
     constructor(
         private _userService: UserService,
         private _lessonService: LessonService,
@@ -117,7 +118,13 @@ export class ResourcesComponent implements OnInit {
         this.files.reset();
         this.files.setValidators(Validators.required);
         this.getGroups();
+        this.addingNewGroup = false;
 
+    }
+
+    startAddGroup(): void {
+        this.restartValues(null);
+        this.addingNewGroup = true;
     }
 
     disableForm(command:Boolean):void{
@@ -146,6 +153,19 @@ export class ResourcesComponent implements OnInit {
 
        // this.editLesson(this.lesson,'deletedF'); no lo tiene que enviar todavía pq no se ha guardado, 
 
+       // If no files remain, keep UI stable by focusing add group panel
+       if (this.lesson.files.length === 0) {
+           this.addingNewGroup = true;
+       }
+    }
+
+    confirmDeleteFile(id, fileName?: string): void {
+        const message = fileName
+            ? `¿Deseas eliminar el archivo "${fileName}"? Los cambios se aplicarán al guardar.`
+            : '¿Deseas eliminar este archivo? Los cambios se aplicarán al guardar.';
+        if (window.confirm(message)) {
+            this.deleteFile(id);
+        }
     }
 
     getfiles(group) {
@@ -192,6 +212,11 @@ export class ResourcesComponent implements OnInit {
 
         this.groups.splice(this.groups.indexOf(group), 1);
 
+        // If no groups/files left, switch to add group panel for clarity
+        if (this.lesson.files.length === 0) {
+            this.addingNewGroup = true;
+        }
+
         this.editLesson(this.lesson, 'deleted');
     }
 
@@ -202,6 +227,15 @@ export class ResourcesComponent implements OnInit {
         this.name.setValue(group);
 
         this.files.clearValidators();
+        this.files.updateValueAndValidity();
+    }
+
+    confirmDeleteGroup(event: Event, group: string): void {
+        event.stopPropagation();
+        const message = `¿Deseas eliminar  el grupo de recursos"${group}" y todos sus archivos?`;
+        if (window.confirm(message)) {
+            this.deleteGroup(group);
+        }
     }
 
     public filesUploaded = [];
@@ -219,6 +253,7 @@ export class ResourcesComponent implements OnInit {
         this.submitted = true;
 
         if (this.name.invalid || this.files.invalid || this.maxSizeError) {
+            this.loading = false;
             return;
         }
 
@@ -314,6 +349,10 @@ export class ResourcesComponent implements OnInit {
                     this.files.reset();
                     this.submitted = false;
                     this.getGroups();
+                    // Si no se subieron archivos, ocultar loading
+                    if (this.filesToUpload.length === 0) {
+                        this.loading = false;
+                    }
     
                     if (this.editMode === true) {
                         this.editMode = false;

@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { ProfileRoutingModule } from './profile.routing';
 import { MomentModule } from 'ngx-moment';
 import { ProfileComponent } from './profile.component';
@@ -29,7 +28,6 @@ import { UserLessonsService } from '../services/user-lessons.service';
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        HttpClientModule,
         ProfileRoutingModule,
         NgSelectModule,
         MomentModule,

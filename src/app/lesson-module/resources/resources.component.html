@@ -44,25 +44,29 @@
             <div class="border rounded nav flex-column nav-pills" id="v-pills-tab" role="tablist"
                 aria-orientation="vertical">
 
-                <div *ngFor="let group of groups, let ix = index" class="nav-link" [ngClass]="{'active': ix == 0}"
+                <div *ngFor="let group of groups, let ix = index" class="nav-link" [ngClass]="{'active': ix == 0 && !addingNewGroup}"
                     id="{{removeSpaces(group)}}-tab" data-bs-toggle="pill" attr.href="#{{removeSpaces(group)}}" role="tab"
                     attr.aria-controls="{{removeSpaces(group)}}" aria-selected="true"
                     [ngClass]="{disable: loading}"
                     (click)="restartValues(group)">
                     {{group}}
                     <section *ngIf="selectedGroup == group && showResources()" class="float-right">
-                        <a class="resource-edit me-1" title="Editar grupo"><i class="fas fa-edit"
+                        <a class="resource-edit me-1" title="Editar grupo (cambiar nombre o archivos)" aria-label="Editar grupo"
+                           data-bs-toggle="tooltip" data-bs-placement="top"
+                        ><i class="fas fa-edit"
                                 (click)="initEditGroup($event, group)"></i></a>
-                        <a class="resource-delete ms-1" title="Eliminar grupo"><i class="fas fa-trash"
-                                (click)="deleteGroup(group)"></i></a>
+                        <a class="resource-delete ms-1" title="Eliminar grupo (se borrarán sus archivos)" aria-label="Eliminar grupo"
+                           data-bs-toggle="tooltip" data-bs-placement="top"
+                        ><i class="fas fa-trash"
+                                (click)="confirmDeleteGroup($event, group)"></i></a>
                     </section>
                 </div>
 
 
                 <div *ngIf="showResources()" class="nav-link" style="cursor: pointer;" 
-                    [ngClass]="{'show active': lesson.files.length == 0}" id="addGroup-tab" data-bs-toggle="pill"
+                    [ngClass]="{'show active': lesson.files.length == 0 || addingNewGroup}" id="addGroup-tab" data-bs-toggle="pill"
                     [ngClass]="{disable: loading}" href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
-                    (click)="restartValues(this)">
+                    (click)="startAddGroup()">
                     <i class="fas fa-plus"></i> Agregar grupo de recursos
                 </div>
 
@@ -75,7 +79,7 @@
 
             <div class="tab-content" id="v-pills-tabContent">
                 <div *ngFor="let group of groups, let ix = index" class="tab-pane fade"
-                    [ngClass]="{'show active': ix == 0}" id="{{removeSpaces(group)}}" role="tabpanel"
+                    [ngClass]="{'show active': ix == 0 && !addingNewGroup && groups.length > 0}" id="{{removeSpaces(group)}}" role="tabpanel"
                     attr.aria-labelledby="{{removeSpaces(group)}}-tab">
 
                     <div class="row">
@@ -157,8 +161,9 @@
                                             {{file.fileName}}
                                         </a>
                                         <a *ngIf="editMode && showResources()"
-                                            class="resource-delete mx-1 float-right text-muted" title="Eliminar archivo"
-                                            (click)="deleteFile(file._id)"><i class="fas fa-trash"></i></a>
+                                            class="resource-delete mx-1 float-right text-muted" title="Eliminar recurso"
+                                            aria-label="Eliminar recurso" data-bs-toggle="tooltip" data-bs-placement="top"
+                                            (click)="confirmDeleteFile(file._id, file.fileName)"><i class="fas fa-trash"></i></a>
                                     </p>
                                 </div>
                             </div>
@@ -177,6 +182,12 @@
                         <div class="col">
                             <div class="card">
                                 <div class="card-body">
+                                    <div *ngIf="addingNewGroup" class="alert alert-info d-flex align-items-center" role="alert">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <div>
+                                            Estás creando un <strong>nuevo grupo de recursos</strong>. 1) Escribe el <strong>Nombre</strong> del grupo. 2) Selecciona uno o más <strong>Archivos</strong>. 3) Presiona <strong>Guardar</strong>.
+                                        </div>
+                                    </div>
 
                                     <div *ngIf="status === 'error'; successMessage"
                                         class="alert alert-danger fade show text-center" role="alert">
@@ -204,7 +215,7 @@
                                             <label for="name"><strong>Nombre*</strong></label>
                                             <input type="text" class="form-control" id="name" [formControl]="name"
                                                 [ngClass]="{ 'is-invalid': submitted && name.errors}"
-                                                autocomplete="off" (change)="onChanges()" (input)="onChanges()">
+                                                autocomplete="off" placeholder="Ej: Primer modelo de lección" (change)="onChanges()" (input)="onChanges()">
                                             <div *ngIf="submitted && name.errors" class="invalid-feedback">
                                                 <div *ngIf="name.errors.required">
                                                     El campo nombre es obligatorio.
@@ -219,6 +230,7 @@
                                                 id="resourcesFiles" enctype="multipart/form-data"
                                                 (change)="fileChangeEvent($event)" [formControl]="files"
                                                 [ngClass]="{ 'is-invalid': submitted && files.errors || maxSizeError}">
+                                            <small class="form-text text-muted">Puedes seleccionar varios archivos a la vez.</small>
                                             <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
                                                     <div #progress  class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width]="barWidth"
                                                      aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>

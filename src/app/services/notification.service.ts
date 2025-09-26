@@ -64,4 +64,10 @@ export class NotificationService {
     const headers = this.getHeaders();
     return this.http.delete(`${this.url}notifications/${notificationId}`, { headers });
   }
+
+  createNotification(notificationData: any): Observable<any> {
+    const headers = this.getHeaders();
+    const params = JSON.stringify(notificationData);
+    return this.http.post(`${this.url}notifications`, params, { headers });
+  }
 } 

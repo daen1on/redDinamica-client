@@ -77,6 +77,10 @@ export class CallsComponent implements OnInit {
     public showFocusedLesson = false;
     public isLeaderManagement = false;
 
+    // Borradores de convocatoria por lección
+    private callDraftByLessonId: { [lessonId: string]: { text: string; visible: boolean } } = {};
+    public isSavingCall: { [lessonId: string]: boolean } = {};
+
     constructor(
         private _userService: UserService,
         private _lessonService: LessonService,
@@ -103,22 +107,21 @@ export class CallsComponent implements OnInit {
         this._route.queryParams.subscribe(params => {
             this.focusedLessonId = params['lesson'] || null;
             this.actionType = params['action'] || null;
-            
+
             if (this.focusedLessonId && this.actionType === 'manage') {
                 console.log('Enfocando convocatoria desde notificación:', this.focusedLessonId);
                 this.showFocusedLesson = true;
                 this.isLeaderManagement = true;
                 this.title = 'Gestionar Convocatoria - Lección Aprobada';
+                this.loadFocusedLesson();
+            } else {
+                this.showFocusedLesson = false;
+                this.isLeaderManagement = false;
+                this.title = 'Convocatorias';
+                this.loadInitialData();
             }
         });
 
-        // Si hay una lección enfocada, cargar solo esa lección
-        if (this.showFocusedLesson && this.focusedLessonId) {
-            this.loadFocusedLesson();
-        } else {
-            this.loadInitialData();
-        }
-        
         this.getAllAreas();
     }
 
@@ -415,6 +418,11 @@ export class CallsComponent implements OnInit {
                 if (response.lesson) {
                     // Crear un array con solo la lección enfocada
                     this.lessons = [response.lesson];
+                    // Inicializar borrador si aplica
+                    const lesson = response.lesson;
+                    if (this.isLessonLeader(lesson) && this.isApprovedByFacilitator(lesson)) {
+                        this.ensureCallDraft(lesson);
+                    }
                     this.loading = false;
                     console.log('Convocatoria enfocada cargada:', response.lesson.title);
                 } else {
@@ -442,9 +450,83 @@ export class CallsComponent implements OnInit {
         return authorId === this.identity._id || leaderId === this.identity._id;
     }
 
-    // Verificar si la lección está en estado 'approved_by_expert'
+    // Verificar si la lección está avalada por facilitador (accepted=true) o estado approved_by_expert
     isApprovedByFacilitator(lesson: any): boolean {
-        return lesson.state === 'approved_by_expert';
+        return lesson?.accepted === true || lesson?.state === 'approved_by_expert';
+    }
+
+    // -------- Formulario para abrir/editar convocatoria --------
+    private ensureCallDraft(lesson: any): void {
+        const id = lesson._id;
+        if (!this.callDraftByLessonId[id]) {
+            const baseText = lesson.call?.text || this.generateDefaultCallText(lesson);
+            this.callDraftByLessonId[id] = { text: baseText, visible: true };
+        }
+    }
+
+    getCallDraftText(lesson: any): string {
+        this.ensureCallDraft(lesson);
+        return this.callDraftByLessonId[lesson._id].text;
+    }
+
+    setCallDraftText(lesson: any, value: string): void {
+        this.ensureCallDraft(lesson);
+        this.callDraftByLessonId[lesson._id].text = value;
+    }
+
+    getCallDraftVisible(lesson: any): boolean {
+        this.ensureCallDraft(lesson);
+        return this.callDraftByLessonId[lesson._id].visible;
+    }
+
+    setCallDraftVisible(lesson: any, value: boolean): void {
+        this.ensureCallDraft(lesson);
+        this.callDraftByLessonId[lesson._id].visible = value;
+    }
+
+    generateDefaultCallText(lesson: any): string {
+        const areas = (lesson.knowledge_area || []).map(a => a.name).join(', ');
+        const levels = (lesson.level || []).join(', ');
+        const lines = [
+            `El facilitador ha aprobado esta lección. ¡Abrimos convocatoria para el desarrollo!`,
+            `Título: ${lesson.title}`,
+            areas ? `Áreas: ${areas}` : '',
+            levels ? `Niveles: ${levels}` : '',
+            `Si te interesa participar, únete al grupo desde esta convocatoria.`
+        ].filter(Boolean);
+        return lines.join('\n');
+    }
+
+    submitCall(lesson: any): void {
+        if (!this.isLessonLeader(lesson) || !this.isApprovedByFacilitator(lesson)) {
+            alert('Solo el líder puede abrir/editar la convocatoria en este estado.');
+            return;
+        }
+        const draft = this.callDraftByLessonId[lesson._id];
+        if (!draft?.text || draft.text.trim().length < 10) {
+            alert('La descripción de la convocatoria es muy corta. Añade más detalles.');
+            return;
+        }
+        this.isSavingCall[lesson._id] = true;
+        this._lessonService.createCall(this.token, lesson._id, { text: draft.text, visible: draft.visible })
+            .subscribe({
+                next: (response: any) => {
+                    if (response?.lesson) {
+                        // Actualizar la lección en la vista
+                        const ix = this.lessons.findIndex(l => l._id === lesson._id);
+                        if (ix >= 0) {
+                            this.lessons[ix] = response.lesson;
+                        }
+                        alert('Convocatoria guardada correctamente.');
+                    }
+                    this.isSavingCall[lesson._id] = false;
+                },
+                error: (err) => {
+                    console.error('Error al guardar convocatoria', err);
+                    this.isSavingCall[lesson._id] = false;
+                    alert('No se pudo guardar la convocatoria.');
+                }
+            });
     }
 
     // Activar lección (cambiar estado de approved_by_expert a assigned)
@@ -467,8 +549,20 @@ export class CallsComponent implements OnInit {
             this._lessonService.editLesson(this.token, updatedLesson).subscribe({
                 next: response => {
                     console.log('Lección activada exitosamente:', response);
-                    alert('¡Lección activada exitosamente! Todos los participantes han sido notificados.');
-                    
+
+                    // Crear conversación General por defecto con un primer mensaje
+                    const initialText = 'comienza a hablar';
+                    this._lessonService.addLessonMessage(this.token, lesson._id, { text: initialText, conversationTitle: 'General' })
+                        .subscribe({
+                            next: () => {
+                                alert('¡Lección activada! Se creó el chat General automáticamente.');
+                            },
+                            error: (err) => {
+                                console.error('No se pudo crear la conversación General por defecto:', err);
+                                alert('Lección activada, pero hubo un problema creando el chat General.');
+                            }
+                        });
+
                     // Actualizar la lección en la vista actual
                     const lessonIndex = this.lessons.findIndex(l => l._id === lesson._id);
                     if (lessonIndex !== -1) {

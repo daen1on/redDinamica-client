@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { MessageComponent } from './message.component';
 import { MessageRoutingModule } from './message.routing';
 import { NewMessageComponent } from './new-message/new-message.component';
@@ -30,7 +29,6 @@ import { LinkyModule } from 'ngx-linky';
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        HttpClientModule,
         MessageRoutingModule,
         NgSelectModule,
         MomentModule,
