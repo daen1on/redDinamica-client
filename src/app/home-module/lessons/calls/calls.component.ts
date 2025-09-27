@@ -359,6 +359,8 @@ export class CallsComponent implements OnInit {
                     // Notificar al líder cuando alguien se une
                     if (action === 'add') {
                         this.notifyLeaderUserJoined(lesson);
+                    } else if (action === 'remove') {
+                        this.notifyLeaderUserLeft(lesson);
                     }
                 }
             },
@@ -403,6 +405,40 @@ export class CallsComponent implements OnInit {
             });
         } catch (err) {
             console.warn('Error preparando notificación al líder:', err);
+        }
+    }
+
+    private notifyLeaderUserLeft(lesson: any): void {
+        try {
+            const leaderId = (lesson.leader && (lesson.leader._id || lesson.leader)) ||
+                             (lesson.author && (lesson.author._id || lesson.author));
+
+            if (!leaderId) {
+                console.warn('No se pudo determinar el líder para notificar salida.');
+                return;
+            }
+            if (leaderId === this.identity?._id) {
+                return;
+            }
+
+            const notificationPayload = {
+                user: leaderId,
+                type: 'lesson',
+                title: 'Un participante se retiró de tu convocatoria',
+                content: `${this.identity?.name || 'Alguien'} ${this.identity?.surname || ''} se retiró de la convocatoria "${lesson.title}"`,
+                link: `/inicio/convocatorias?lesson=${lesson._id}&action=manage`,
+                relatedId: lesson._id,
+                relatedModel: 'Lesson',
+                from: this.identity?._id,
+                priority: 'low'
+            };
+
+            this.notificationService.createNotification(notificationPayload).subscribe({
+                next: () => console.log('Notificación enviada al líder por retiro de participante'),
+                error: (err) => console.warn('No se pudo enviar la notificación de retiro al líder:', err)
+            });
+        } catch (err) {
+            console.warn('Error preparando notificación de retiro al líder:', err);
         }
     }
 
