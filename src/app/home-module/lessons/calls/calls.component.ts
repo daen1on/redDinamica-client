@@ -4,6 +4,7 @@ import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { NotificationService } from 'src/app/services/notification.service';
 import { GLOBAL } from 'src/app/services/global';
 
 @Component({
@@ -86,7 +87,8 @@ export class CallsComponent implements OnInit {
         private _lessonService: LessonService,
         private _bDService: BasicDataService,
         private _router: Router,
-        private _route: ActivatedRoute
+        private _route: ActivatedRoute,
+        private notificationService: NotificationService
     ) {
         this.title = 'Convocatorias';
         this.url = GLOBAL.url;
@@ -353,6 +355,11 @@ export class CallsComponent implements OnInit {
                     // Mostrar mensaje de confirmación
                     const actionText = action === 'add' ? 'unido a' : 'retirado de';
                     console.log(`Te has ${actionText} la convocatoria "${lesson.title}"`);
+
+                    // Notificar al líder cuando alguien se une
+                    if (action === 'add') {
+                        this.notifyLeaderUserJoined(lesson);
+                    }
                 }
             },
             error => {
@@ -361,6 +368,42 @@ export class CallsComponent implements OnInit {
                 alert(`Hubo un error al ${actionText} la convocatoria. Por favor, inténtalo de nuevo.`);
             }
         );
+    }
+
+    private notifyLeaderUserJoined(lesson: any): void {
+        try {
+            // Resolver ID del líder (preferir leader, luego author)
+            const leaderId = (lesson.leader && (lesson.leader._id || lesson.leader)) ||
+                             (lesson.author && (lesson.author._id || lesson.author));
+
+            if (!leaderId) {
+                console.warn('No se pudo determinar el líder para notificar.');
+                return;
+            }
+            // Evitar auto-notificación si quien se une es el líder
+            if (leaderId === this.identity?._id) {
+                return;
+            }
+
+            const notificationPayload = {
+                user: leaderId,
+                type: 'lesson',
+                title: 'Nuevo participante en tu convocatoria',
+                content: `${this.identity?.name || 'Alguien'} ${this.identity?.surname || ''} se ha unido a la convocatoria "${lesson.title}"`,
+                link: `/inicio/convocatorias?lesson=${lesson._id}&action=manage`,
+                relatedId: lesson._id,
+                relatedModel: 'Lesson',
+                from: this.identity?._id,
+                priority: 'medium'
+            };
+
+            this.notificationService.createNotification(notificationPayload).subscribe({
+                next: () => console.log('Notificación enviada al líder por nuevo participante'),
+                error: (err) => console.warn('No se pudo enviar la notificación al líder:', err)
+            });
+        } catch (err) {
+            console.warn('Error preparando notificación al líder:', err);
+        }
     }
 
     public callLesson;
@@ -375,6 +418,10 @@ export class CallsComponent implements OnInit {
                         existingInstance.dispose();
                     }
                     const bootstrapModal = new (window as any).bootstrap.Modal(modal);
+                    modal.addEventListener('hidden.bs.modal', () => {
+                        // limpiar lección enfocada al cerrar
+                        this.callLesson = null;
+                    }, { once: true });
                     bootstrapModal.show();
                 }
             } catch (error) {
