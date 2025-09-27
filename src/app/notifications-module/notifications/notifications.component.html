@@ -1,12 +1,14 @@
-<div class="notifications-container">
+<div class="notifications-container" [ngClass]="{'is-page': isPageView}">
   <!-- Header de notificaciones -->
   <div class="notifications-header d-flex justify-content-between align-items-center px-3 py-2 bg-light border-bottom">
     <h6 class="mb-0 fw-bold text-dark">
-      <i class="fas fa-bell me-2 text-primary"></i>Notificaciones
+      <a href="#" (click)="goToAllNotifications(); $event.preventDefault(); $event.stopPropagation()" class="text-decoration-none text-dark">
+        <i class="fas fa-bell me-2 text-primary"></i>Notificaciones
+      </a>
       <span *ngIf="unreadCount > 0" class="badge bg-danger ms-2 rounded-pill">{{unreadCount}}</span>
     </h6>
-    <div class="dropdown">
-      <button class="btn btn-sm btn-outline-secondary dropdown-toggle border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <div class="dropdown" data-bs-auto-close="outside">
+      <button class="btn btn-sm btn-outline-secondary dropdown-toggle border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" (click)="$event.stopPropagation()">
         <i class="fas fa-cog"></i>
       </button>
       <ul class="dropdown-menu dropdown-menu-end shadow">
@@ -45,7 +47,7 @@
   </div>
 
   <!-- Notifications list -->
-  <div *ngIf="!loading && !error && notifications.length > 0" class="notifications-list" style="max-height: 400px; overflow-y: auto;">
+  <div *ngIf="!loading && !error && notifications.length > 0" class="notifications-list" (scroll)="onListScroll($event)">
     <div *ngFor="let notification of notifications; trackBy: trackByNotificationId" 
          class="notification-item d-flex px-3 py-2 border-bottom position-relative hover-bg-light"
          [class.bg-light]="!notification.read"
@@ -55,8 +57,7 @@
       
       <!-- Notification icon -->
       <div class="notification-icon me-2 flex-shrink-0" style="width: 30px;">
-        <i [class]="getNotificationIcon(notification.type)" 
-           [class]="getNotificationColor(notification.type)"
+        <i [ngClass]="[getNotificationIcon(notification.type), getNotificationColor(notification.type)]"
            style="font-size: 1.1em;"></i>
       </div>
 
@@ -67,7 +68,7 @@
           {{notification.title}}
         </div>
         <div class="notification-text text-muted small" 
-             style="line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+             style="line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;">
           {{notification.content}}
         </div>
         <div class="notification-time text-muted small mt-1" style="font-size: 0.75em;">
@@ -110,27 +111,27 @@
 
   <!-- Footer -->
   <div *ngIf="notifications.length > 0" class="notifications-footer p-2 text-center border-top bg-light">
-    <button *ngIf="hasMoreNotifications" 
-            class="btn btn-sm btn-outline-primary" 
-            (click)="loadMoreNotifications(); $event.stopPropagation()"
-            [disabled]="loadingMore">
-      <span *ngIf="!loadingMore">
-        <i class="fas fa-plus me-1"></i>Cargar más notificaciones
-      </span>
-      <span *ngIf="loadingMore">
-        <div class="spinner-border spinner-border-sm me-1" role="status">
-          <span class="visually-hidden">Cargando...</span>
-        </div>
-        Cargando más...
-      </span>
-    </button>
-    
-    <button *ngIf="!hasMoreNotifications && notifications.length > 0" 
-            class="btn btn-sm btn-outline-secondary" 
-            disabled>
-      <i class="fas fa-check me-1"></i>No hay más notificaciones
-    </button>
-    
+    <ng-container *ngIf="isPageView; else seeAll">
+      <button *ngIf="hasMoreNotifications" 
+              class="btn btn-sm btn-outline-primary" 
+              (click)="loadMoreNotifications(); $event.stopPropagation()"
+              [disabled]="loadingMore">
+        <span *ngIf="!loadingMore">
+          <i class="fas fa-plus me-1"></i>Cargar más
+        </span>
+        <span *ngIf="loadingMore">
+          <div class="spinner-border spinner-border-sm me-1" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          Cargando más...
+        </span>
+      </button>
+    </ng-container>
+    <ng-template #seeAll>
+      <button class="btn btn-sm btn-outline-primary" (click)="goToAllNotifications(); $event.stopPropagation()">
+        <i class="fas fa-external-link-alt me-1"></i>Ver todas las notificaciones
+      </button>
+    </ng-template>
     <button class="btn btn-sm btn-outline-success ms-2" 
             (click)="refreshNotifications(); $event.stopPropagation()"
             [disabled]="loading">

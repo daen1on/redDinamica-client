@@ -25,6 +25,7 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
     private identitySubscription: Subscription;
     private profilePicUpdateSubscription: Subscription;
     private notificationUpdateSubscription: Subscription;
+    private bellLastTap = 0;
 
 
     constructor(
@@ -80,6 +81,19 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
         });
                       
     }
+
+    onBellClick(event: MouseEvent): void {
+        const now = Date.now();
+        // doble tap/click en menos de 350ms
+        if (now - this.bellLastTap < 350) {
+            event.preventDefault();
+            event.stopPropagation();
+            // navegar a la página de todas las notificaciones
+            (event.currentTarget as HTMLElement)?.closest('.dropdown')?.classList.remove('show');
+            this._router.navigate(['/notificaciones']);
+        }
+        this.bellLastTap = now;
+    }
     
     ngDoCheck(): void {  
       
@@ -109,22 +123,11 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
             return;
         }
         
-        this.notificationService.getNotifications().subscribe({
+        this.notificationService.getUnreadCount().subscribe({
             next: (data: any) => {
-                if (data && data.notifications) {
-                    this.unreadCount = data.notifications.filter(notification => !notification.read).length;
-                }
+                this.unreadCount = (data && typeof data.unreadCount === 'number') ? data.unreadCount : 0;
             },
-            error: (error) => {
-                console.log('Error loading notifications count:', error);
-                // Si es un error de autenticación, no mostrar mensaje de error
-                if (error.includes && error.includes('autenticado')) {
-                    console.log('Token inválido o expirado, limpiando sesión');
-                    this._userService.clearIdentityAndToken();
-                    this._router.navigate(['/login']);
-                } else {
-                    console.log('Error técnico en notificaciones:', error);
-                }
+            error: () => {
                 this.unreadCount = 0;
             }
         });
@@ -147,6 +150,10 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
         this._userService.clearIdentityAndToken(); // Use service method to clear identity and token
         // The identitySubscription will automatically set this.identity and this.token to null
         this._router.navigate(['']);
+    }
+    
+    get unreadCountDisplay(): string {
+        return this.unreadCount > 99 ? '99+' : String(this.unreadCount);
     }
     toggleTheme(): void {
         this.isDarkMode = !this.isDarkMode;

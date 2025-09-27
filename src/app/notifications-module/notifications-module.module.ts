@@ -7,7 +7,9 @@ import { NotificationsComponent } from './notifications/notifications.component'
   declarations: [NotificationsComponent],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule.forChild([
+      { path: '', component: NotificationsComponent }
+    ])
   ],
   exports: [NotificationsComponent]
 })

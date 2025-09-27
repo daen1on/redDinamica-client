@@ -161,19 +161,19 @@
             data-bs-toggle="dropdown"
             aria-expanded="false"
             style="cursor: pointer;"
+            (click)="onBellClick($event)"
           >
             <i class="fas fa-bell" style="font-size: 1.5em"></i>
             <span
               *ngIf="unreadCount > 0"
-              class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle"
-              style="font-size: 0.7em; min-width: 1.2em; height: 1.2em; display: flex; align-items: center; justify-content: center;"
-              >{{ unreadCount }}</span
-            >
+              class="badge rounded-pill bg-danger text-white fw-bold position-absolute top-0 start-100"
+              style="font-size: 0.7rem; width: 1.6em; height: 1.6em; display: inline-flex; align-items: center; justify-content: center; border: 2px solid #fff; border-radius: 999px; transform: translate(-85%, -35%);"
+              >{{ unreadCountDisplay }}</span>
           </a>
           <!-- Dropdown menu para notificaciones -->
           <div class="dropdown-menu p-0 shadow-lg border-0" 
                aria-labelledby="notificationDropdown"
-               style="min-width: 380px; max-width: 400px; max-height: 70vh; overflow-y: auto; border-radius: 12px; margin-top: 8px; left: -350px !important; right: auto !important;">
+               style="min-width: 380px; max-width: 400px; border-radius: 12px; margin-top: 8px; left: -350px !important; right: auto !important;">
             <app-notifications></app-notifications>
           </div>
         </li>
@@ -195,18 +195,15 @@
             aria-labelledby="navbarDropdown"
           >
             <a class="dropdown-item" [routerLink]="['/seguridad']">
-              <!-- Changed me-2 to me-2 -->
               <i class="fas fa-shield-alt me-2"></i> Opciones de seguridad
             </a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" [routerLink]="['/error/report-error']">
-              <!-- Changed me-2 to me-2 -->
               <i class="fas fa-exclamation-circle me-2"></i> Reportar un
-              problema
+              problema o sugerencia
             </a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" [routerLink]="['/']" (click)="logout()">
-              <!-- Changed me-2 to me-2 -->
               <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
             </a>
           </div>

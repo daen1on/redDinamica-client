@@ -20,6 +20,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   public error: string = '';
   public currentPage: number = 1;
   public hasMoreNotifications: boolean = true;
+  public isPageView: boolean = false;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -29,6 +30,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.isPageView = this.router.url.startsWith('/notificaciones');
     setTimeout(() => {
       this.loadNotifications();
       this.loadUnreadCount();
@@ -108,6 +110,21 @@ export class NotificationsComponent implements OnInit, OnDestroy {
           this.loadingMore = false;
         }
       });
+  }
+
+  onListScroll(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (!target) return;
+    const threshold = 60; // px antes del final
+    const reachedBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - threshold;
+    if (reachedBottom) {
+      this.loadMoreNotifications();
+    }
+  }
+
+  goToAllNotifications(): void {
+    this.closeDropdown();
+    this.router.navigate(['/notificaciones']);
   }
 
   loadUnreadCount(): void {
@@ -318,6 +335,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       case 'message': return 'fas fa-envelope';
       case 'resource': return 'fas fa-file-alt';
       case 'system': return 'fas fa-cog';
+      case 'publication': return 'fas fa-newspaper';
       default: return 'fas fa-bell';
     }
   }
@@ -330,6 +348,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       case 'message': return 'text-info';
       case 'resource': return 'text-secondary';
       case 'system': return 'text-danger';
+      case 'publication': return 'text-primary';
       default: return 'text-muted';
     }
   }
