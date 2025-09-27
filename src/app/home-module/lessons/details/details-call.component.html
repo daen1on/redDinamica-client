@@ -24,7 +24,7 @@
                     </div>
                 </div>
 
-                <div *ngIf="lesson.call.interested.length > 0" class="row">
+                <div *ngIf="lesson?.call?.interested?.length > 0" class="row">
                     <div class="col">
                         <div class="row">
                             <div class="col">
@@ -80,7 +80,7 @@
                     </button>
                 </ng-container>
                 <ng-template #leaveGroup>
-                    <button class="btn btn-danger me-2" title="Retirarse" data-bs-toggle="modal" data-bs-target="#leftconvo" 
+                    <button class="btn btn-danger me-2" title="Retirarse" data-bs-toggle="modal" data-bs-target="#leftconvo_details" 
                     (click)="getLesson(lesson)">
                         <i class="fas fa-user-minus"></i> Retirarse
                     </button>
@@ -94,8 +94,8 @@
 </div>
 <!-- /lesson call modal-->
 
-<!-- Modal warning left group -->
-<div class="modal fade" id="leftconvo" tabindex="-1" role="dialog" aria-labelledby="leaveGroup" aria-hidden="true">
+<!-- Modal warning left group (scoped to details component) -->
+<div class="modal fade" id="leftconvo_details" tabindex="-1" role="dialog" aria-labelledby="leaveGroup" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
