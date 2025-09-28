@@ -121,10 +121,10 @@
                                             <!-- Botón de aprobación - solo visible para facilitador sugerido en estado 'proposed' -->
                                             <button *ngIf="isSuggestedFacilitator(lesson) && isProposedLesson(lesson)"
                                                 class="btn btn-success ms-2" 
-                                                (click)="approveLessonAndCreateCall(lesson)"
-                                                title="Avalar Lección y Abrir Convocatoria">
+                                                (click)="approveLesson(lesson)"
+                                                title="Avalar Lección ">
                                                 <i class="fas fa-check-circle me-1"></i>
-                                                Avalar y Abrir Convocatoria
+                                                Avalar Convocatoria
                                             </button>
                                             <!-- /buttons -->
 
@@ -281,10 +281,10 @@
                                             <!-- Botón de aprobación - solo visible para facilitador sugerido en estado 'proposed' -->
                                             <button *ngIf="isSuggestedFacilitator(lesson) && isProposedLesson(lesson)"
                                                 class="btn btn-success ms-2" 
-                                                (click)="approveLessonAndCreateCall(lesson)"
-                                                title="Avalar Lección y Abrir Convocatoria">
+                                                (click)="approveLesson(lesson)"
+                                                title="Avalar lección">
                                                 <i class="fas fa-check-circle me-1"></i>
-                                                Avalar y Abrir Convocatoria
+                                                Avalar Convocatoria
                                             </button>
                                             <!-- /buttons -->
 
@@ -507,9 +507,9 @@
                             <i class="fas fa-times me-1"></i>
                             Rechazar Lección
                         </button>
-                        <button type="button" class="btn btn-success" (click)="approveLessonAndCreateCall(selectedLessonForPreview)">
+                        <button type="button" class="btn btn-success" (click)="approveLesson(selectedLessonForPreview)">
                             <i class="fas fa-check-circle me-1"></i>
-                            Avalar y Abrir Convocatoria
+                            Avalar Convocatoria
                         </button>
                     </div>
                     <button type="button" class="btn btn-secondary" (click)="closePreviewModal()">
