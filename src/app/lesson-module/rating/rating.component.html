@@ -17,7 +17,7 @@
         <div class="col-5">
             <div class="card">
                 <div class="card-body text-center">
-                    <form [formGroup]="ratingForm" (ngSubmit)="onSubmit()" (input)="onChanges()">
+                    <form [formGroup]="ratingForm" (ngSubmit)="onSubmit()">
                         <div *ngIf="status === 'error' || userAlreadyCommented"
                             class="alert alert-danger fade show text-center" role="alert">
                             <small *ngIf="status === 'error'">
