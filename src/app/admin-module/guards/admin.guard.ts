@@ -15,7 +15,7 @@ export class AdminGuard {
         let identity = this._userService.getIdentity();
         let token = this._userService.getToken();
 
-        if(identity && (identity.role == 'admin' || identity.role == 'delegated_admin')){
+        if(identity && (identity.role == 'admin' || identity.role == 'delegated_admin' || identity.role == 'lesson_manager')){
             return true;
         }else{
             if(token){

@@ -46,8 +46,11 @@ export class LessonComponent implements OnInit {
         this.getUsers();
         this.getAllAreas();
         
-        this._route.parent.url.subscribe(value => {
-            this.parentUrl = value[0].path;
+        this._route.parent?.url.subscribe(segments => {
+            const first = (segments && segments.length > 0) ? segments[0] : null;
+            this.parentUrl = (first && first.path)
+                || this._route.parent?.snapshot?.routeConfig?.path?.split('/')?.[0]
+                || '';
         });
     }
 
@@ -105,8 +108,16 @@ export class LessonComponent implements OnInit {
     }
     
     setSelectedOption(selectedOption){
+        // Si estamos en la vista de recursos, intentemos respetar su guardado/bloqueo
+        if (this.selectedOption === 'resources') {
+            try {
+                const resourcesCmpEl = document.querySelector('resources') as any;
+                const ngCmp = (resourcesCmpEl as any) ? (resourcesCmpEl as any).__ngContext__ : null;
+                // Fallback: simplemente cambiamos. La protección real la hace el guard y beforeunload
+            } catch (e) {}
+        }
+
         this.selectedOption = selectedOption;
-        
         this.needReloadData = true;
     }
 
@@ -132,27 +143,39 @@ export class LessonComponent implements OnInit {
     }
 
     showCommentsOrConversations(){
-        let response = this.isInTheDevelopmentGroup();
-        
-        if(response || this.parentUrl == 'admin'){
-            response = true;
-        }else{
-            response = false;
+        // Si la lección está terminada, sólo permitir desde panel admin y con rol autorizado
+        if (this.lesson?.state === 'completed') {
+            return this.isAdminPanelViewerAllowed();
         }
 
-        if(response && this.lesson.state != 'proposed'){
-            response = true;
-        }else{
-            response = false;
-        }
+        // Para otros estados, permitir a grupo de desarrollo o vista admin
+        const baseAccess = this.isInTheDevelopmentGroup() || this.isInAdminContext();
+        if (!baseAccess) { return false; }
 
-        if(response && this.lesson.expert && this.lesson.leader){
-            response = true;
-        }else{
-            response = false;
-        }
+        // Bloquear en estado 'proposed'
+        if (this.lesson?.state === 'proposed') { return false; }
 
-        return response;        
+        // Requiere asignación de experto y líder
+        return !!(this.lesson?.expert && this.lesson?.leader);
+    }
+
+    private isAdminPanelViewerAllowed(): boolean {
+        const role = this.identity?.role || '';
+        const allowedRoles = ['admin', 'delegated_admin', 'lesson_manager'];
+        return this.isInAdminContext() && allowedRoles.includes(role);
+    }
+
+    private isInAdminContext(): boolean {
+        try {
+            const currentUrl = this._router.url || '';
+            if (currentUrl.startsWith('/admin')) { return true; }
+            const paths = (this._route.snapshot.pathFromRoot || [])
+                .map(r => r.routeConfig?.path)
+                .filter(Boolean) as string[];
+            return paths.some(p => p.startsWith('admin'));
+        } catch (e) {
+            return false;
+        }
     }
 
     showEdit(){

@@ -16,6 +16,38 @@ export const ADMIN_MENU = [
         ]
     },
     {
+        "id": "academic",
+        "buttonClass": "btn-success",
+        "iconClass": "fa-graduation-cap",
+        "spanContent": "RedDinámica académica",
+        "subOptions": [
+            {
+                "text": "Grupos académicos",
+                "routerLink": "/admin/academico/grupos"
+            },
+            {
+                "text": "Lecciones académicas",
+                "routerLink": "/admin/academico/lecciones"
+            },
+            {
+                "text": "Mejores lecciones",
+                "routerLink": "/admin/academico/destacadas"
+            }
+        ]
+    },
+    {
+        "id": "tasks",
+        "buttonClass": "btn-secondary",
+        "iconClass": "fa-tasks",
+        "spanContent": "Gestión académica y tareas",
+        "subOptions": [
+            {
+                "text": "Tareas",
+                "routerLink": "/admin/tareas"
+            }
+        ]
+    },
+    {
         "id": "lessons",
         "buttonClass": "btn-warning",
         "iconClass": "fa-file-alt",

@@ -15,10 +15,11 @@ import { ProposedResourceComponent } from './resources/proposed/proposed-resourc
 import { ViewErrorsComponent } from './view-errors/view-errors.component';
 import { AdminGuard } from './guards/admin.guard';
 import { LessonComponent } from '../lesson-module/lesson.component';
+import { FeaturedLessonsComponent } from './tasks/views/featured-lessons.component';
 
 const adminRoutes: Routes = [
   {
-    path: 'admin',
+    path: '',
     component: AdminComponent,
     canActivate: [AdminGuard],
     children: [
@@ -47,6 +48,12 @@ const adminRoutes: Routes = [
       { path: 'profesiones', component: ProfessionsComponent },
       { path: 'profesiones/:page', component: ProfessionsComponent },
       { path: 'view-errors', component: ViewErrorsComponent },
+      // Tareas consolidadas en una sola vista
+      { path: 'tareas', loadComponent: () => import('./tasks/views/pending-tasks.component').then(m => m.PendingTasksComponent) },
+      // Gestión RedDinámica académica
+      { path: 'academico/grupos', loadComponent: () => import('../academic-module/components/group-management/group-management.component').then(m => m.GroupManagementComponent) },
+      { path: 'academico/lecciones', loadComponent: () => import('../academic-module/components/lesson-management/lesson-management.component').then(m => m.LessonManagementComponent) },
+      { path: 'academico/destacadas', component: FeaturedLessonsComponent },
       { path: '**', component: NewUsersComponent }
     ]
   }

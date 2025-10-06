@@ -9,7 +9,8 @@ import { FIELDS_FORM, LABEL_PROFILE} from 'src/app/profile-module/services/profi
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, switchMap, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 
 
@@ -50,6 +51,13 @@ export class NewUsersComponent {
     }
 
     ngOnInit(): void {        
+        const identity = this._UserService.getIdentity?.();
+        const role = identity?.role;
+        if(role === 'lesson_manager'){
+            // Evitar solicitudes y redirigir a sección permitida
+            this._router.navigate(['/admin/lecciones']);
+            return;
+        }
         this.actualPage();
     }
     ngOnDestroy() {
@@ -98,8 +106,18 @@ export class NewUsersComponent {
     }
     
     removeUser(userId: string) {
-        this._UserService.deleteUser(userId)
-          .pipe(takeUntil(this.unsubscribe$))
+        // Primero forzar logout del usuario para invalidar su token
+        this._UserService.forceUserLogout(userId)
+          .pipe(
+            takeUntil(this.unsubscribe$),
+            // Continuar con la eliminación independientemente del resultado del logout
+            catchError((error) => {
+              console.log('Error al forzar logout (continuando con eliminación):', error);
+              return of(null); // Continuar el flujo
+            }),
+            // Eliminar el usuario después de forzar el logout
+            switchMap(() => this._UserService.deleteUser(userId))
+          )
           .subscribe({
             next: (response) => {
               if (response.user) {
@@ -111,7 +129,8 @@ export class NewUsersComponent {
               }
             },
             error: (error) => {
-              console.error(error);
+              console.error('Error al eliminar usuario:', error);
+              alert('Error al eliminar el usuario. Por favor, intenta nuevamente.');
             }
           });
     }

@@ -141,6 +141,10 @@ export const CATEGORIES_ADMIN = [
     {
         label: "Administrador delegado",
         value: "delegated_admin",
+    },
+    {
+        label: "Gestor de lecciones",
+        value: "lesson_manager",
     }                 
 ];
 
@@ -168,6 +172,10 @@ export const LABEL_PROFILE = {
     delegated_admin: {
         label:"Administrador",
         class:"badge-green"
+    },
+    lesson_manager: {
+        label:"Gestor de lecciones",
+        class:"badge-pink"
     }
 };    
 

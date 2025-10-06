@@ -175,7 +175,6 @@ export class AddCallComponent implements OnInit, AfterViewInit {
         this.status = null;
         this.submitted = false;
         this.check = true;
-        this.lesson._id = null;
         this.selectedLevels = [];
         this.levelInput = '';
         this.showLevelDropdown = false;

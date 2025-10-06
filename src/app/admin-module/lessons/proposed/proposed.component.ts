@@ -42,7 +42,22 @@ export class ProposedComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.actualPage();
+        // Enfoque por query param ?lesson=... para abrir detalle
+        this._route.queryParams.subscribe(params => {
+            const focusedId = params['lesson'];
+            if (focusedId) {
+                // Cargar página inicial y luego hacer scroll al ítem
+                this.actualPage();
+                setTimeout(() => {
+                    try {
+                        const el = document.querySelector(`#lesson-${focusedId}`);
+                        if (el) { (el as any).scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                    } catch {}
+                }, 300);
+            } else {
+                this.actualPage();
+            }
+        });
     }
 
     ngDoCheck(): void {

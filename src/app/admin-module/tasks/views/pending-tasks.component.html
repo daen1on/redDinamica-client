@@ -1,0 +1,243 @@
+<div class="container-fluid mt-4">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="mb-3">Gestión académica y tareas</h2>
+      <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+          <a class="nav-link" [ngClass]="{'active': activeTab === 'convocatorias'}" (click)="setActiveTab('convocatorias')" style="cursor: pointer;">
+            Convocatorias por gestionar
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [ngClass]="{'active': activeTab === 'sugerencias'}" (click)="setActiveTab('sugerencias')" style="cursor: pointer;">
+            Sugerencias de lecciones
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [ngClass]="{'active': activeTab === 'recursos'}" (click)="setActiveTab('recursos')" style="cursor: pointer;">
+            Recursos por aprobar
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Contenido según pestaña activa -->
+  <div class="row" [ngSwitch]="activeTab">
+    
+    <!-- Convocatorias por gestionar: incluye por abrir y por asignar -->
+    <div *ngSwitchCase="'convocatorias'" class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-bullhorn me-2"></i>Convocatorias por abrir
+          </h5>
+          <button class="btn btn-sm btn-light" (click)="reloadConvocatorias()">
+            <i class="fas fa-sync-alt"></i> Recargar
+          </button>
+        </div>
+        <div class="card-body">
+          <div *ngIf="convocatorias.length === 0" class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>No hay convocatorias pendientes por abrir.
+          </div>
+          <div *ngIf="convocatorias.length > 0" class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Título de lección</th>
+                  <th>Versión</th>
+                  <th>Interesados</th>
+                  <th>Líder</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let c of convocatorias">
+                  <td>{{c.title}}</td>
+                  <td>
+                    <span class="badge bg-secondary" *ngIf="c.version !== undefined">
+                      v{{c.version.toFixed(1)}}
+                    </span>
+                    <span *ngIf="c.version === undefined" class="text-muted">-</span>
+                    <span class="ms-1 text-muted" *ngIf="c.version !== undefined && c.state === 'completed'">
+                      → Nueva: v{{(c.version + 1).toFixed(1)}}
+                    </span>
+                    <span class="ms-1 text-muted" *ngIf="c.state === 'proposed'">
+                      V1
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge bg-info">{{ getInterestedCount(c) }}</span>
+                  </td>
+                  <td>
+                    <span *ngIf="c.leader">{{c.leader.name}} {{c.leader.surname}}</span>
+                    <span *ngIf="!c.leader" class="text-muted">Sin líder asignado</span>
+                  </td>
+                  <td class="text-end">
+                    <a [routerLink]="['/admin/lecciones']" [queryParams]="{ lesson: c._id, action: 'openAddCall' }" 
+                       class="btn btn-sm btn-outline-primary" title="Abrir convocatoria para nueva versión">
+                      <i class="fas fa-bullhorn me-1"></i>
+                      <span *ngIf="c.state === 'proposed'">Abrir convocatoria</span>
+                      <span *ngIf="c.state === 'completed'">Abrir V{{(c.version + 1).toFixed(1)}}</span>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Convocatorias por asignar -->
+      <div class="card shadow-sm mt-4">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-user-check me-2"></i>Convocatorias por asignar
+          </h5>
+          <button class="btn btn-sm btn-light" (click)="reloadConvocatoriasAbiertas()">
+            <i class="fas fa-sync-alt"></i> Recargar
+          </button>
+        </div>
+        <div class="card-body">
+          <div *ngIf="convocatoriasAbiertas.length === 0" class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>No hay convocatorias abiertas pendientes por asignar.
+          </div>
+          <div *ngIf="convocatoriasAbiertas.length > 0" class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Título de lección</th>
+                  <th>Versión</th>
+                  <th>Interesados</th>
+                  <th>Líder</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let a of convocatoriasAbiertas">
+                  <td>{{a.title}}</td>
+                  <td>
+                    <span class="badge bg-secondary" *ngIf="a.version !== undefined">v{{a.version}}</span>
+                    <span *ngIf="a.version === undefined" class="text-muted">-</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-info">{{ getInterestedCount(a) }}</span>
+                  </td>
+                  <td>
+                    <span *ngIf="a.leader">{{a.leader.name}} {{a.leader.surname}}</span>
+                    <span *ngIf="!a.leader" class="text-muted">Sin líder asignado</span>
+                  </td>
+                  <td class="text-end">
+                    <a [routerLink]="['/admin/lecciones']" [queryParams]="{ lesson: a._id, action: 'openCall' }" 
+                       class="btn btn-sm btn-outline-success" title="Ver convocatoria">
+                      <i class="fas fa-eye me-1"></i>Ver convocatoria
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sugerencias de lecciones -->
+    <div *ngSwitchCase="'sugerencias'" class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-lightbulb me-2"></i>Sugerencias de lecciones
+          </h5>
+          <button class="btn btn-sm btn-light" (click)="reloadSugerencias()">
+            <i class="fas fa-sync-alt"></i> Recargar
+          </button>
+        </div>
+        <div class="card-body">
+          <div *ngIf="sugerencias.length === 0" class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>No hay sugerencias de lecciones pendientes.
+          </div>
+          <div *ngIf="sugerencias.length > 0" class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Autor</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let s of sugerencias">
+                  <td>{{s.title}}</td>
+                  <td>
+                    <span *ngIf="s.author">{{s.author.name}} {{s.author.surname}}</span>
+                    <span *ngIf="!s.author" class="text-muted">Sin autor</span>
+                  </td>
+                  <td class="text-end">
+                    <a [routerLink]="['/admin/lecciones-propuestas']" [queryParams]="{ lesson: s._id }" 
+                       class="btn btn-sm btn-outline-info" title="Ver propuesta">
+                      <i class="fas fa-eye me-1"></i>Ver propuesta
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recursos por aprobar -->
+    <div *ngSwitchCase="'recursos'" class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-file-alt me-2"></i>Recursos por aprobar
+          </h5>
+          <button class="btn btn-sm btn-dark" (click)="reloadRecursos()">
+            <i class="fas fa-sync-alt"></i> Recargar
+          </button>
+        </div>
+        <div class="card-body">
+          <div *ngIf="recursos.length === 0" class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>No hay recursos pendientes por aprobar.
+          </div>
+          <div *ngIf="recursos.length > 0" class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Autor</th>
+                  <th>Tipo</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let r of recursos">
+                  <td>{{r.name}}</td>
+                  <td>
+                    <span *ngIf="r.author">{{r.author.name}} {{r.author.surname}}</span>
+                    <span *ngIf="!r.author" class="text-muted">Sin autor</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-secondary">{{r.type}}</span>
+                  </td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-success me-2" (click)="aprobar(r._id)" title="Aprobar recurso">
+                      <i class="fas fa-check me-1"></i>Aprobar
+                    </button>
+                    <button class="btn btn-sm btn-danger" (click)="rechazar(r._id)" title="Rechazar recurso">
+                      <i class="fas fa-times me-1"></i>Rechazar
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+

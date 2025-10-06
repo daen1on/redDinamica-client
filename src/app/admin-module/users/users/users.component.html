@@ -47,9 +47,28 @@
                         <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-warning btn-sm m-1" data-bs-toggle="modal" data-bs-target="#edit" (click)="setEdit(user)">
                             <i class="fas fa-pen-square"></i> <span class="ms-2">Editar</span>
                         </button>
-                        <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-danger btn-sm m-1" (click)="removeUser(user._id)">
+                        <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-danger btn-sm m-1" data-bs-toggle="modal" [attr.data-bs-target]="'\#confirmDelete' + user._id">
                             <i class="fas fa-user-times"></i> <span class="ms-2">Eliminar</span>
                         </button>
+                    </div>
+                </div>
+                <div class="modal fade" id="confirmDelete{{user._id}}" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteTitle{{user._id}}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="confirmDeleteTitle{{user._id}}">Confirmar eliminación</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ¿Seguro que deseas eliminar al usuario {{ user.name }} {{ user.surname }}? Esta acción no se puede deshacer.
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="removeUser(user._id)">
+                                    <i class="fas fa-user-times"></i> <span class="ms-2">Eliminar</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -73,9 +92,28 @@
                         <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-warning btn-sm m-1" data-bs-toggle="modal" data-bs-target="#edit" (click)="setEdit(user)">
                             <i class="fas fa-pen-square"></i> <span class="ms-2">Editar</span>
                         </button>
-                        <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-danger btn-sm m-1" (click)="removeUser(user._id)">
+                        <button *ngIf="identity._id !== user._id && user.role !== 'admin'" type="button" class="btn btn-danger btn-sm m-1" data-bs-toggle="modal" [attr.data-bs-target]="'\#confirmDelete' + user._id">
                             <i class="fas fa-user-times"></i> <span class="ms-2">Eliminar</span>
                         </button>
+                    </div>
+                </div>
+                <div class="modal fade" id="confirmDelete{{user._id}}" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteTitle{{user._id}}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="confirmDeleteTitle{{user._id}}">Confirmar eliminación</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ¿Seguro que deseas eliminar al usuario {{ user.name }} {{ user.surname }}? Esta acción no se puede deshacer.
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="removeUser(user._id)">
+                                    <i class="fas fa-user-times"></i> <span class="ms-2">Eliminar</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

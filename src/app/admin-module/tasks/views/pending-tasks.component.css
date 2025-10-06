@@ -1,0 +1,62 @@
+.nav-tabs .nav-link {
+  color: #6c757d;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+}
+.nav-tabs .nav-link:hover {
+  border-bottom-color: #dee2e6;
+  background-color: transparent;
+}
+.nav-tabs .nav-link.active {
+  color: #0d6efd;
+  border-bottom-color: #0d6efd;
+  background-color: transparent;
+  font-weight: 600;
+}
+.card {
+  border: none;
+  border-radius: 8px;
+}
+.card-header {
+  border-radius: 8px 8px 0 0 !important;
+  padding: 1rem 1.5rem;
+}
+.table th {
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+/* ===== Modo oscuro ===== */
+.theme-dark .nav-tabs .nav-link {
+  color: var(--rd-muted) !important;
+  border-bottom-color: transparent !important;
+}
+.theme-dark .nav-tabs .nav-link:hover {
+  border-bottom-color: #2a2f36 !important;
+  color: var(--rd-text) !important;
+}
+.theme-dark .nav-tabs .nav-link.active {
+  color: var(--rd-primary) !important;
+  border-bottom-color: var(--rd-primary) !important;
+}
+
+.theme-dark .table th {
+  color: var(--rd-text) !important;
+  border-bottom-color: #2a2f36 !important;
+}
+
+.theme-dark .btn-outline-primary,
+.theme-dark .btn-outline-success,
+.theme-dark .btn-light {
+  color: var(--rd-text) !important;
+  border-color: #2a2f36 !important;
+  background-color: transparent !important;
+}
+.theme-dark .btn-light:hover {
+  background-color: #1f2937 !important;
+}
+
+
