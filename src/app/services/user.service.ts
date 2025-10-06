@@ -294,6 +294,9 @@ setToken(token: string | null): void {
     } else {
         localStorage.removeItem('token');
     }
+    // Emitir cambio de identidad cuando se actualiza el token
+    // Esto asegura que los componentes se actualicen correctamente
+    this.identityChanged.next(this._identity);
 }
 
     clearIdentityAndToken(): void {

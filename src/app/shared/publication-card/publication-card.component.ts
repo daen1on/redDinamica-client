@@ -12,6 +12,7 @@ import { UserService } from 'src/app/services/user.service';
 import { PublicationService } from 'src/app/services/publication.service';
 import { CommentService } from 'src/app/services/comment.service';
 import { ViewportDetectionService } from 'src/app/services/viewport-detection.service';
+import { GdprRestrictionsService } from 'src/app/services/gdpr-restrictions.service';
 import { GLOBAL } from 'src/app/services/global';
 import { Comment } from 'src/app/models/comment.model';
 
@@ -64,6 +65,12 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
   public isContentExpanded: boolean = false;
   public readonly MAX_CONTENT_LENGTH: number = 300; // Caracteres máximos antes de mostrar "Ver más"
 
+  // Control de truncado/expansión para comentarios y respuestas
+  public expandedComments: { [commentId: string]: boolean } = {};
+  public expandedReplies: { [replyId: string]: boolean } = {};
+  public readonly MAX_COMMENT_DISPLAY_LENGTH: number = 150; // Límite visual para mostrar botón
+  public readonly MAX_INPUT_LENGTH: number = 2000; // Límite de caracteres para inputs
+
   constructor(
     private _userService: UserService,
     private _publicationService: PublicationService,
@@ -71,10 +78,16 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
     private _router: Router,
     private fb: FormBuilder,
     private elementRef: ElementRef,
-    private viewportService: ViewportDetectionService
+    private viewportService: ViewportDetectionService,
+    public gdprRestrictions: GdprRestrictionsService
   ) {
     this.url = GLOBAL.url;
     this.createForms();
+  }
+  
+  // Método para verificar si el usuario puede comentar (GDPR)
+  canUserComment(): boolean {
+    return this.gdprRestrictions.canComment();
   }
 
   ngOnInit(): void {
@@ -547,10 +560,10 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
 
   createForms() {
     this.commentForm = this.fb.group({
-      text: ['', Validators.required]
+      text: ['', [Validators.required, Validators.maxLength(this.MAX_INPUT_LENGTH)]]
     });
     this.replyForm = this.fb.group({
-      text: ['', Validators.required]
+      text: ['', [Validators.required, Validators.maxLength(this.MAX_INPUT_LENGTH)]]
     });
   }
 
@@ -776,6 +789,12 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
     if (!this.commentForm.valid || !publicationId || !this.identity) {
       return;
     }
+    
+    // Protección GDPR: Verificar que el usuario esté activado
+    if (!this.canUserComment()) {
+      this.onError.emit('Tu cuenta aún no ha sido activada. No puedes comentar hasta que un administrador apruebe tu cuenta (protección de datos GDPR).');
+      return;
+    }
 
     const commentToAdd = new Comment(this.commentForm.value.text, this.identity._id, publicationId);
 
@@ -938,6 +957,12 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
 
   onReplySubmit(commentId: string, publicationId: string) {
     if (!this.replyForm.valid) {
+      return;
+    }
+    
+    // Protección GDPR: Verificar que el usuario esté activado
+    if (!this.canUserComment()) {
+      this.onError.emit('Tu cuenta aún no ha sido activada. No puedes responder comentarios hasta que un administrador apruebe tu cuenta (protección de datos GDPR).');
       return;
     }
 
@@ -1117,8 +1142,8 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
     this.replyingTo[commentId] = null;
   }
 
-  // Eliminar publicación
-  deletePublication() {
+  // Solicitar eliminación (emitir al padre y que abra su modal global)
+  requestDelete() {
     this.onDelete.emit(this.publication._id);
   }
 
@@ -1201,6 +1226,46 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
     
     //console.log('Final result:', result);
     return result;
+  }
+
+  // =============================
+  // Truncado/expansión Comentarios
+  // =============================
+  shouldShowCommentExpand(comment: any): boolean {
+    return !!(comment && comment.text && comment.text.length > this.MAX_COMMENT_DISPLAY_LENGTH);
+  }
+
+  getDisplayCommentText(comment: any): string {
+    if (!comment || !comment.text) return '';
+    const isExpanded = this.expandedComments[comment._id];
+    if (isExpanded || comment.text.length <= this.MAX_COMMENT_DISPLAY_LENGTH) {
+      return comment.text;
+    }
+    return comment.text.substring(0, this.MAX_COMMENT_DISPLAY_LENGTH) + '...';
+  }
+
+  toggleCommentExpansion(commentId: string): void {
+    this.expandedComments[commentId] = !this.expandedComments[commentId];
+  }
+
+  // ==========================
+  // Truncado/expansión Respuestas
+  // ==========================
+  shouldShowReplyExpand(reply: any): boolean {
+    return !!(reply && reply.text && reply.text.length > this.MAX_COMMENT_DISPLAY_LENGTH);
+  }
+
+  getDisplayReplyText(reply: any): string {
+    if (!reply || !reply.text) return '';
+    const isExpanded = this.expandedReplies[reply._id];
+    if (isExpanded || reply.text.length <= this.MAX_COMMENT_DISPLAY_LENGTH) {
+      return reply.text;
+    }
+    return reply.text.substring(0, this.MAX_COMMENT_DISPLAY_LENGTH) + '...';
+  }
+
+  toggleReplyExpansion(replyId: string): void {
+    this.expandedReplies[replyId] = !this.expandedReplies[replyId];
   }
 
   // Método auxiliar para buscar usuario por nombre completo
