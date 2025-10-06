@@ -233,7 +233,7 @@
                         class="text-center p-2 py-3 rounded-lg border border-ligth text-center bg-{{
                           lesson_states[lesson.state || 'proposed']?.class || 'secondary'
                         }}"
-                        style="width: 80px; height: 80px; overflow: hidden"
+                        style="width: 184px; height: 80px; overflow: hidden"
                       >
                         <i
                           class="text-white fas fa-chalkboard-teacher"
@@ -351,11 +351,16 @@
                       <div class="row">
                         <div class="col">
                           <p>
-                            <span
+                            <ng-container
                               *ngIf="lesson.level && lesson.level.length > 0; else notAssigned"
                             >
-                              {{ lesson.level.join(', ') }}
-                            </span>
+                              <span
+                                *ngFor="let lv of lesson.level"
+                                class="badge bg-info me-1 mb-1 d-inline-flex align-items-center"
+                              >
+                                {{ academic_level[lv] || lv }}
+                              </span>
+                            </ng-container>
                             <ng-template #notAssigned>
                               <small class="text-muted"
                                 >No se ha asignado</small
@@ -602,7 +607,7 @@
                         class="text-center p-2 py-3 rounded-lg border border-ligth text-center bg-{{
                           lesson_states[lesson.state || 'proposed']?.class || 'secondary'
                         }}"
-                        style="width: 80px; height: 80px; overflow: hidden"
+                        style="width: 184px; height: 80px; overflow: hidden"
                       >
                         <i
                           class="text-white fas fa-chalkboard-teacher"
@@ -720,14 +725,19 @@
                       <div class="row">
                         <div class="col">
                           <p>
-                            <span
+                            <ng-container
                               *ngIf="
                                 lesson.level && lesson.level.length > 0;
                                 else notAssigned
                               "
                             >
-                              {{ getAcademicLevels(lesson.level) }}
-                            </span>
+                              <span
+                                *ngFor="let lv of lesson.level"
+                                class="badge bg-info me-1 mb-1 d-inline-flex align-items-center"
+                              >
+                                {{ academic_level[lv] || lv }}
+                              </span>
+                            </ng-container>
                             <ng-template #notAssigned>
                               <small class="text-muted"
                                 >No se ha asignado</small

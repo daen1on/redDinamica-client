@@ -91,9 +91,9 @@ export class LessonsComponent implements OnInit, OnDestroy {
         this.route.queryParams.subscribe(params => {
             this.focusedLessonId = params['lesson'] || null;
             this.actionType = params['action'] || null;
-            
-            if (this.focusedLessonId && (this.actionType === 'review' || this.actionType === 'manage')) {
-                console.log('Enfocando lección desde notificación (Admin):', this.focusedLessonId);
+
+            if (this.focusedLessonId && (this.actionType === 'review' || this.actionType === 'manage' || this.actionType === 'openAddCall' || this.actionType === 'openCall')) {
+                console.log('Enfocando lección desde parámetros (Admin):', this.focusedLessonId, this.actionType);
                 this.showFocusedLesson = true;
                 this.title = this.actionType === 'review' ? 'Revisar Nueva Lección' : 'Gestionar Lección';
             }
@@ -548,6 +548,17 @@ export class LessonsComponent implements OnInit, OnDestroy {
                     
                     console.log('Lección enfocada cargada para admin:', response.lesson.title);
                     
+                    // Abrir modal según actionType
+                    if (this.actionType === 'openAddCall') {
+                        const openNextVersion = response.lesson?.state === 'completed';
+                        setTimeout(() => this.openAddCallModal(response.lesson, openNextVersion), 100);
+                    } else if (this.actionType === 'openCall') {
+                        setTimeout(() => this.openCallModal(response.lesson), 100);
+                    } else if (response.lesson.call && response.lesson.call.visible) {
+                        // Compatibilidad previa: si está visible, abrir modal de convocatoria
+                        setTimeout(() => this.openCallModal(response.lesson), 100);
+                    }
+
                     // Scroll suave hacia la lección si es necesario
                     setTimeout(() => {
                         const lessonElement = document.querySelector('.card-lesson');
