@@ -92,7 +92,7 @@
             </div>
 
             <div class="col-4">
-                <div *ngIf="identity.role == 'admin'" class="card mb-3">
+                <div *ngIf="identity.role == 'admin' || identity.role == 'delegated_admin' || identity.role == 'lesson_manager'" class="card mb-3">
                     <div class="card-body text-center">
                         <h6 class="card-title mb-1">
                             <strong>Estado</strong>
