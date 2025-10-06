@@ -1,6 +1,6 @@
 export class Comment {
     public _id: string;
-    public rating: Number;
+    public score: number;
     public created_at: Date;
     public likes: string[] = []; // Array de IDs de usuarios que dieron like
     public likesCount: number = 0;
