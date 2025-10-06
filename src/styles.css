@@ -443,6 +443,12 @@ body {
   color: white !important;
 }
 
+.badge-pink, .badge-lesson-manager {
+  background: linear-gradient(135deg, #e91e63, #c2185b) !important;
+  border-color: #e91e63 !important;
+  color: white !important;
+}
+
 /* Modo oscuro para badges globales */
 .theme-dark .badge-info, .theme-dark .badge-student {
   background: linear-gradient(135deg, #20c997, #17a2b8) !important;
@@ -467,6 +473,11 @@ body {
 .theme-dark .badge-green, .theme-dark .badge-admin {
   background: linear-gradient(135deg, #ef4444, #dc2626) !important;
   border-color: #ef4444 !important;
+}
+
+.theme-dark .badge-pink, .theme-dark .badge-lesson-manager {
+  background: linear-gradient(135deg, #ec4899, #db2777) !important;
+  border-color: #ec4899 !important;
 }
 
 /* ===== BOTÓN FLOTANTE - MODO OSCURO ===== */
@@ -885,6 +896,64 @@ body {
   background-color: var(--rd-surface) !important;
   color: var(--rd-text) !important;
   border-color: #2a2f36 !important;
+}
+
+/* ===== Tablas y elementos de tabla en modo oscuro ===== */
+.theme-dark .table {
+  color: var(--rd-text) !important;
+  /* Hacer la tabla transparente y controlar colores vía variables BS */
+  --bs-table-color: var(--rd-text);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: #2a2f36;
+  --bs-table-striped-bg: #151a20;
+  --bs-table-hover-bg: rgba(138, 180, 255, 0.08);
+  background-color: transparent !important;
+}
+.theme-dark .table th,
+.theme-dark .table td {
+  border-color: #2a2f36 !important;
+}
+.theme-dark .table thead th {
+  color: var(--rd-text) !important;
+  border-bottom-color: #2a2f36 !important;
+}
+.theme-dark .table-hover tbody tr:hover {
+  background-color: rgba(138, 180, 255, 0.08) !important;
+}
+.theme-dark .table-striped tbody tr:nth-of-type(odd) {
+  background-color: #151a20 !important;
+}
+
+/* ===== Nav tabs en modo oscuro ===== */
+.theme-dark .nav-tabs .nav-link {
+  color: var(--rd-muted) !important;
+  border-bottom-color: transparent !important;
+}
+.theme-dark .nav-tabs .nav-link:hover {
+  border-bottom-color: #2a2f36 !important;
+  background-color: transparent !important;
+  color: var(--rd-text) !important;
+}
+.theme-dark .nav-tabs .nav-link.active {
+  color: var(--rd-primary) !important;
+  border-bottom-color: var(--rd-primary) !important;
+}
+
+/* ===== Headers de cards con fondos de estado en modo oscuro ===== */
+.theme-dark .card-header.bg-primary,
+.theme-dark .card-header.bg-success,
+.theme-dark .card-header.bg-info,
+.theme-dark .card-header.bg-warning {
+  background-color: #1a1f24 !important;
+  color: var(--rd-text) !important;
+  border-bottom-color: #2a2f36 !important;
+}
+
+/* Alerts mejor legibles en oscuro */
+.theme-dark .alert-info {
+  background-color: #0f172a !important;
+  color: var(--rd-text) !important;
+  border-color: #1f2937 !important;
 }
 
 .theme-dark .text-muted { color: var(--rd-muted) !important; }
@@ -1465,6 +1534,10 @@ body {
 }
 
 /* Badges y chips en oscuro (mejor contraste) */
+.theme-dark .badge,
+.theme-dark small.badge {
+  color: #ffffff !important;
+}
 .theme-dark .badge.bg-warning { color: #111 !important; }
 
 /* --- Estilos modernos para menú lateral (inspirados en Academic Dashboard) --- */

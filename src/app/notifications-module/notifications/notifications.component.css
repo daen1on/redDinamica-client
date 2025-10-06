@@ -265,6 +265,52 @@
   overflow: hidden;
 }
 
+/* ===== Modo oscuro ===== */
+.theme-dark .notifications-container {
+  background: rgba(26, 31, 36, 0.95) !important;
+  color: var(--rd-text);
+  border: 1px solid #2a2f36;
+}
+.theme-dark .notifications-header,
+.theme-dark .notifications-footer {
+  background: transparent !important; /* deja ver el fondo del contenedor */
+  border-color: #2a2f36 !important;
+}
+.theme-dark .notifications-header.bg-light,
+.theme-dark .notifications-footer.bg-light {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+/* Aumentar especificidad dentro del contenedor por si hay overrides globales */
+.theme-dark .notifications-container .notifications-header,
+.theme-dark .notifications-container .notifications-footer {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Forzar utilidades Bootstrap dentro del contenedor de notificaciones */
+.theme-dark .notifications-container .bg-light { background-color: transparent !important; }
+.theme-dark .notifications-container .bg-white { background-color: transparent !important; }
+
+/* Mantener contraste en items leídos/no leídos en oscuro */
+.theme-dark .notification-item.bg-light { background-color: #121821 !important; }
+.theme-dark .notification-item.bg-white { background-color: #0f1420 !important; }
+
+/* Forzar texto en header cuando hay utilidades Bootstrap como .text-dark */
+.theme-dark .notifications-header .text-dark,
+.theme-dark .notifications-header a.text-dark {
+  color: var(--rd-text) !important;
+}
+.theme-dark .notifications-header h6,
+.theme-dark .notification-title { color: var(--rd-text) !important; }
+.theme-dark .notification-text,
+.theme-dark .notification-time { color: var(--rd-muted) !important; }
+.theme-dark .notification-item:hover { background-color: rgba(138, 180, 255, 0.06) !important; }
+.theme-dark .notification-actions .btn-ghost:hover { background: #1f2937 !important; color: var(--rd-text) !important; }
+.theme-dark .dropdown-menu { background: var(--rd-surface) !important; color: var(--rd-text) !important; }
+.theme-dark .dropdown-item { color: var(--rd-text) !important; }
+.theme-dark .dropdown-item:hover { background-color: rgba(138, 180, 255, 0.1) !important; }
+
 .dropdown-item {
   padding: 8px 16px;
   font-size: 0.85rem;
