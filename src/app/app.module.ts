@@ -1,16 +1,19 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap'; 
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+
+// Registrar el locale español
+registerLocaleData(localeEs, 'es'); 
 import { AppComponent } from './app.component';
 import { FooterComponent } from './components/footer/footer.component';
 
-import { HomeModule } from './home-module/home.module';
-import { AdminModule } from './admin-module/admin.module';
-import { ProfileModule } from './profile-module/profile.module';
-import { MessageModule } from './message-module/message.module';
+// Importación de módulos de características removida del AppModule
+// Estos módulos ya se cargan de forma perezosa vía AppRoutingModule
 
 import { UserService } from './services/user.service';
 import { UploadService } from './services/upload.service';
@@ -26,7 +29,8 @@ import { FilterPipe } from './pipes/filter.pipe';
 
 import { AppRoutingModule } from './app.routing'; // Asegúrate de que esto esté correcto
 import { AuthInterceptor } from './AuthInterceptor'; // Asegúrate de que esto esté correcto
-import { NotificationsModule } from './notifications-module/notifications-module.module';
+// El módulo de notificaciones se carga por lazy-load en '/notificaciones'
+import { NotificationsComponent } from './notifications-module/notifications/notifications.component';
 
 @NgModule({
   declarations: [
@@ -39,11 +43,7 @@ import { NotificationsModule } from './notifications-module/notifications-module
     FormsModule,
     ReactiveFormsModule,
     NgSelectModule,
-    HomeModule,
-    AdminModule,
-    ProfileModule,
-    MessageModule,
-    NotificationsModule,
+    NotificationsComponent,
     AppRoutingModule,
     NgbModule
   ],
@@ -58,6 +58,7 @@ import { NotificationsModule } from './notifications-module/notifications-module
     ResourceService,
     LessonService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: LOCALE_ID, useValue: 'es' },
     provideHttpClient(withInterceptorsFromDi())
   ],
   bootstrap: [AppComponent]

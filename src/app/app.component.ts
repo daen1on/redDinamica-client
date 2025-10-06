@@ -3,6 +3,7 @@ import { UserService } from './services/user.service';
 import { Router } from '@angular/router';
 import { GLOBAL } from './services/global';
 import { NotificationService } from './services/notification.service';
+import { MessageService } from './services/message.service';
 import { Subscription, interval } from 'rxjs';
 
 
@@ -18,20 +19,22 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
     public identity;    
     public token;    
     public unreadCount = 0;
-    public unviewMessages;
+    public unviewMessages = 0;
     public profilePicVersion: number; // For cache-busting
     public isDarkMode: boolean = false;
 
     private identitySubscription: Subscription;
     private profilePicUpdateSubscription: Subscription;
     private notificationUpdateSubscription: Subscription;
+    private messageUpdateSubscription: Subscription;
     private bellLastTap = 0;
 
 
     constructor(
         private _userService: UserService,        
         private _router: Router,
-        private notificationService: NotificationService 
+        private notificationService: NotificationService,
+        private _messageService: MessageService
 
     ){
         this.profilePicVersion = new Date().getTime(); // Initialize with current time
@@ -47,10 +50,12 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
         this.token = this._userService.getToken();
         this.identity = this._userService.getIdentity(); // Get initial identity
 
-        // Solo cargar notificaciones si tanto identity como token existen
+        // Solo cargar notificaciones y mensajes si tanto identity como token existen
         if (this.identity && this.token) {
             this.loadNotifications();
+            this.loadUnreadMessages();
             this.startNotificationPolling();
+            this.startMessagePolling();
         }
         
         // Subscribe to identity changes from the service (more reactive than ngDoCheck)
@@ -63,11 +68,15 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
                     // Agregar un pequeño delay para asegurar que todo esté sincronizado
                     setTimeout(() => {
                         this.loadNotifications();
+                        this.loadUnreadMessages();
                         this.startNotificationPolling();
+                        this.startMessagePolling();
                     }, 100);
                 } else {
                     this.unreadCount = 0;
+                    this.unviewMessages = 0;
                     this.stopNotificationPolling();
+                    this.stopMessagePolling();
                 }
             }
         );
@@ -96,9 +105,26 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
     }
     
     ngDoCheck(): void {  
-      
-        this.unviewMessages = localStorage.getItem('unviewedMessages');
-
+        // Sincronizar identity y token en cada ciclo de detección de cambios
+        const currentIdentity = this._userService.getIdentity();
+        const currentToken = this._userService.getToken();
+        
+        // Actualizar solo si hay cambios reales
+        if (currentIdentity !== this.identity) {
+            this.identity = currentIdentity;
+        }
+        
+        if (currentToken !== this.token) {
+            this.token = currentToken;
+            
+            // Si ahora tenemos token e identity, cargar notificaciones y mensajes
+            if (this.identity && this.token && !this.notificationUpdateSubscription) {
+                this.loadNotifications();
+                this.loadUnreadMessages();
+                this.startNotificationPolling();
+                this.startMessagePolling();
+            }
+        }
     }
     
     loadNotifications(): void {
@@ -133,6 +159,41 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
         });
     }
     
+    loadUnreadMessages(): void {
+        // Verificar que tanto identity como token existan
+        if (!this.identity) {
+            console.log('No hay identity disponible para cargar mensajes');
+            this.unviewMessages = 0;
+            return;
+        }
+        
+        const token = this._userService.getToken();
+        if (!token) {
+            console.log('No hay token disponible para cargar mensajes');
+            this.unviewMessages = 0;
+            return;
+        }
+        
+        // Verificar que el usuario esté activado
+        if (!this.identity.actived) {
+            console.log('Usuario no activado, no se cargan mensajes');
+            this.unviewMessages = 0;
+            return;
+        }
+        
+        this._messageService.getUnviewMessages(token).subscribe({
+            next: (data: any) => {
+                this.unviewMessages = (data && typeof data.unviewed === 'number') ? data.unviewed : 0;
+                // También actualizar localStorage para compatibilidad con código existente
+                localStorage.setItem('unviewedMessages', String(this.unviewMessages));
+            },
+            error: (err) => {
+                console.error('Error al cargar mensajes no leídos:', err);
+                this.unviewMessages = 0;
+            }
+        });
+    }
+    
     startNotificationPolling(): void {
         // Actualizar notificaciones cada 30 segundos
         this.notificationUpdateSubscription = interval(30000).subscribe(() => {
@@ -140,9 +201,22 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
         });
     }
     
+    startMessagePolling(): void {
+        // Actualizar mensajes no leídos cada 30 segundos
+        this.messageUpdateSubscription = interval(30000).subscribe(() => {
+            this.loadUnreadMessages();
+        });
+    }
+    
     stopNotificationPolling(): void {
         if (this.notificationUpdateSubscription) {
             this.notificationUpdateSubscription.unsubscribe();
+        }
+    }
+    
+    stopMessagePolling(): void {
+        if (this.messageUpdateSubscription) {
+            this.messageUpdateSubscription.unsubscribe();
         }
     }
     
@@ -181,6 +255,9 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
             }
             if (this.notificationUpdateSubscription) {
                 this.notificationUpdateSubscription.unsubscribe();
+            }
+            if (this.messageUpdateSubscription) {
+                this.messageUpdateSubscription.unsubscribe();
             }
     }   
     

@@ -1,6 +1,6 @@
 <!-- Header -->
 <nav
-  *ngIf="!identity"
+  *ngIf="!(identity && token)"
   id="header"
   class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top fixed-top"
 >
@@ -60,7 +60,7 @@
 <!-- Header user logged -->
 <!-- Changed ID for collapse target to be unique -->
 <nav
-  *ngIf="identity"
+  *ngIf="identity && token"
   id="header-home"
   class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top fixed-top py-0"
 >
@@ -140,7 +140,7 @@
           </a>
         </li>
         <li
-          *ngIf="['admin', 'delegated_admin'].includes(identity.role)"
+          *ngIf="['admin', 'delegated_admin', 'lesson_manager'].includes(identity.role)"
           class="nav-item d-flex align-items-center"
         >
           <a
@@ -214,4 +214,4 @@
 </nav>
 
 <router-outlet></router-outlet>
-<footer_rd *ngIf="!identity"></footer_rd>
+<footer_rd *ngIf="!(identity && token)"></footer_rd>
