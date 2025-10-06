@@ -32,7 +32,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="col-md-6">
+              <!-- <div class="col-md-6">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" 
                                [(ngModel)]="privacySettings.allowCollaborationRequests"
@@ -42,7 +42,7 @@
                             Permitir solicitudes de colaboración
                         </label>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -305,9 +305,10 @@
                                             [class.btn-warning]="isLessonHidden(lesson.id)"
                                             (click)="toggleLessonVisibility(lesson.id)"
                                             [title]="isLessonHidden(lesson.id) ? 'Mostrar en perfil' : 'Ocultar del perfil'">
-                                        <i class="fas" 
-                                           [class.fa-eye-slash]="isLessonHidden(lesson.id)"
-                                           [class.fa-eye]="!isLessonHidden(lesson.id)"></i>
+                                        <i class="fas me-1"
+                                           [class.fa-eye]="isLessonHidden(lesson.id)"
+                                           [class.fa-eye-slash]="!isLessonHidden(lesson.id)"></i>
+                                        <span>{{ isLessonHidden(lesson.id) ? 'Mostrar' : 'Ocultar' }}</span>
                                     </button>
                                 </div>
                             </div>

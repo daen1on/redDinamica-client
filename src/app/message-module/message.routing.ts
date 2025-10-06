@@ -9,7 +9,7 @@ import { MessageGuard } from './guards/message.guard';
 
 const messageRoutes: Routes = [
     {
-        path: 'mensajes',
+        path: '',
         component: MessageComponent,
         canActivate: [MessageGuard],
         children: [

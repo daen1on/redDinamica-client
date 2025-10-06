@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../services/notification.service';
 import { Notification } from '../../models/notification.model';
@@ -10,7 +11,8 @@ import { takeUntil } from 'rxjs/operators';
     selector: 'app-notifications',
     templateUrl: './notifications.component.html',
     styleUrls: ['./notifications.component.css'],
-    standalone: false
+    standalone: true,
+    imports: [CommonModule]
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
   public notifications: Notification[] = [];

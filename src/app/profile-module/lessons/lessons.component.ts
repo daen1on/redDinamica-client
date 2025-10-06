@@ -226,7 +226,9 @@ export class LessonsComponent implements OnInit, OnDestroy {
             .subscribe({
                 next: () => {
                     console.log(`Lesson ${lessonId} visibility toggled`);
-                    this.loadLessonsData(); // Recargar datos
+                    setTimeout(() => {
+                        this.loadLessonsData(); // Recargar datos tras breve demora para mostrar mensaje
+                    }, 2500);
                 },
                 error: error => {
                     console.error('Error toggling lesson visibility:', error);
@@ -346,6 +348,6 @@ export class LessonsComponent implements OnInit, OnDestroy {
      * Navegación a lección
      */
     goToLesson(lessonId: string): void {
-        this._router.navigate(['/leccion', lessonId]);
+        this._router.navigate(['/inicio/leccion', lessonId]);
     }
 }
