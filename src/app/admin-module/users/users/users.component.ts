@@ -9,7 +9,8 @@ import { City } from 'src/app/models/city.model';
 import { Profession } from 'src/app/models/profession.model';
 import { Institution } from 'src/app/models/institution.model';
 import { GLOBAL } from 'src/app/services/global';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
 
 @Component({
@@ -439,20 +440,32 @@ export class UsersComponent implements OnInit {
     }
     
     removeUser(userId) {
-        this._userService.deleteUser(userId).subscribe({
-            next: (response) => {
-                if (response.user) {
-                    this.users = this.users.filter((item) => {
-                        return item._id != response.user._id;
-                    });
-                    this.getUsers(this.page);
-                    this.getAllUsers();
+        // Primero forzar logout del usuario para invalidar su token
+        this._userService.forceUserLogout(userId)
+            .pipe(
+                // Continuar con la eliminación independientemente del resultado del logout
+                catchError((error) => {
+                    console.log('Error al forzar logout (continuando con eliminación):', error);
+                    return of(null); // Continuar el flujo
+                }),
+                // Eliminar el usuario después de forzar el logout
+                switchMap(() => this._userService.deleteUser(userId))
+            )
+            .subscribe({
+                next: (response) => {
+                    if (response.user) {
+                        this.users = this.users.filter((item) => {
+                            return item._id != response.user._id;
+                        });
+                        this.getUsers(this.page);
+                        this.getAllUsers();
+                    }
+                },
+                error: (error) => {
+                    console.log(<any>error);
+                    alert('Error al eliminar el usuario. Por favor, intenta nuevamente.');
                 }
-            },
-            error: (error) => {
-                console.log(<any>error);
-            }
-        });
+            });
     }
     addToOpenItem(userId) {
         this.openItem = userId;
