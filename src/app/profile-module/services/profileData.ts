@@ -200,5 +200,9 @@ export const LABEL_PROFILE = {
     delegated_admin: {
         label:"Administrador",
         class:"badge-green"
+    },
+    lesson_manager: {
+        label:"Gestor de lecciones",
+        class:"badge-pink"
     }
 };    
