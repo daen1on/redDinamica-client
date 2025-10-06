@@ -28,3 +28,35 @@
     margin-bottom: 0.5rem;
   }
 }
+
+/* ===== Mejoras modo oscuro para ver errores ===== */
+.theme-dark .container h2,
+.theme-dark .card h5,
+.theme-dark .table th,
+.theme-dark .table td {
+  color: var(--rd-text) !important;
+}
+.theme-dark .accordion .card,
+.theme-dark .accordion .card-header,
+.theme-dark .card,
+.theme-dark .card-header,
+.theme-dark .card-body {
+  background-color: var(--rd-surface) !important;
+  color: var(--rd-text) !important;
+  border-color: #2a2f36 !important;
+}
+.theme-dark .btn.btn-link,
+.theme-dark .form-check-label,
+.theme-dark .form-group label {
+  color: var(--rd-text) !important;
+}
+.theme-dark .form-check-input {
+  background-color: #11161a !important;
+  border-color: #2a2f36 !important;
+}
+.theme-dark .form-check-input:checked {
+  background-color: var(--rd-primary) !important;
+  border-color: var(--rd-primary) !important;
+}
+.theme-dark a { color: #9ec1ff; }
+.theme-dark a:hover { color: #c5d9ff; }

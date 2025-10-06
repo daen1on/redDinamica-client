@@ -59,9 +59,15 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let report of errorReports">
+        <tr *ngFor="let report of errorReports; let i = index">
           <td>{{ report.type }}</td>
-          <td>{{ report.module }}</td>
+          <td>
+            <ng-container [ngSwitch]="report.category">
+              <span *ngSwitchCase="'publication'">Publicaciones</span>
+              <span *ngSwitchCase="'user'">Perfil</span>
+              <span *ngSwitchDefault>{{ report.module || 'N/A' }}</span>
+            </ng-container>
+          </td>
           <td>{{ report.description }}</td>
           <td>{{ report.steps }}</td>
           <td>
@@ -71,6 +77,11 @@
             <ng-template #noAttachment>No hay adjunto</ng-template>
           </td>
           <td>
+            <button class="btn btn-secondary btn-sm me-2"
+                    data-bs-toggle="modal"
+                    [attr.data-bs-target]="'#reportDetailsModal-' + (report._id || i)">
+              <i class="fas fa-eye"></i>
+            </button>
             <button class="btn btn-info btn-sm me-2" (click)="openEditModal(report)">Editar</button>
             <button class="btn btn-danger btn-sm" (click)="confirmDeleteReport(report)">Eliminar</button>
           </td>
@@ -80,6 +91,41 @@
     <div class="pagination-controls">
       <button class="btn btn-secondary me-2" (click)="previousPage()" [disabled]="currentPage === 1">Anterior</button>
       <button class="btn btn-secondary" (click)="nextPage()" [disabled]="currentPage === totalPages">Siguiente</button>
+    </div>
+    
+    <!-- Modales de detalle por reporte -->
+    <div *ngFor="let report of errorReports; let i = index">
+      <div class="modal fade" id="reportDetailsModal-{{report._id || i}}" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Detalle del reporte</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-2"><strong>Categoría:</strong> {{ report.category === 'publication' ? 'Denuncia de publicación' : (report.category === 'user' ? 'Denuncia de usuario' : 'Reporte técnico') }}</div>
+              <div class="mb-2"><strong>Tipo:</strong> {{ report.type }}</div>
+              <div class="mb-2"><strong>Módulo:</strong> <span *ngIf="report.category === 'publication'">Publicaciones</span><span *ngIf="report.category === 'user'">Perfil</span><span *ngIf="report.category !== 'publication' && report.category !== 'user'">{{ report.module || 'N/A' }}</span></div>
+              <div class="mb-2" *ngIf="report.publicationId"><strong>ID Publicación:</strong> {{ report.publicationId }}</div>
+              <div class="mb-2" *ngIf="report.reportedUserId"><strong>Usuario denunciado:</strong> {{ report.reportedUserId }}</div>
+              <div class="mb-2"><strong>Descripción:</strong><br>{{ report.description }}</div>
+              <div class="mb-2"><strong>Pasos:</strong><br>{{ report.steps || 'N/A' }}</div>
+              <div class="mb-2">
+                <strong>Adjuntos:</strong>
+                <ng-container *ngIf="report.attachment && report.attachment.length > 0; else noAttachmentModal">
+                  <div>
+                    <a (click)="getFile(report.attachment[0].fileName)" style="cursor: pointer; color: blue;">{{ report.attachment[0].originalName }}</a>
+                  </div>
+                </ng-container>
+                <ng-template #noAttachmentModal>No hay adjunto</ng-template>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

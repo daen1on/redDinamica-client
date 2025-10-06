@@ -1,10 +1,37 @@
+/* Encabezado de la página */
+.page-header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    margin: 12px 0 30px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+}
+
+.page-subtitle {
+    font-size: 16px;
+    margin: 0;
+    opacity: 0.95;
+}
+
+:host-context(.theme-dark) .page-header {
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+}
+
 .container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 30px;
+    max-width: 700px;
+    margin: 0 auto 40px;
+    padding: 35px;
     background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* Modo oscuro para el contenedor */
@@ -127,14 +154,109 @@ button.btn:disabled {
     color: #8ab4ff;
 }
 
+/* Estilos adicionales */
+.required {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+:host-context(.theme-dark) .required {
+    color: #ff6b6b;
+}
+
+.form-text {
+    display: block;
+    margin-top: 5px;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+:host-context(.theme-dark) .form-text {
+    color: #9ca3af;
+}
+
+.form-actions {
+    margin-top: 30px;
+}
+
+/* Alert danger en modo oscuro */
+:host-context(.theme-dark) .alert-danger {
+    background-color: rgba(220, 53, 69, 0.2);
+    border-color: rgba(220, 53, 69, 0.3);
+    color: #f5a7a7;
+}
+
+/* Mejoras para inputs */
+input.form-control {
+    font-size: 14px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+:host-context(.theme-dark) input.form-control {
+    background-color: #11161a;
+    color: #f1f5f9;
+    border: 1px solid #2a2f36;
+}
+
+:host-context(.theme-dark) input.form-control:focus {
+    background-color: #11161a;
+    color: #f1f5f9;
+    border-color: #8ab4ff;
+    box-shadow: 0 0 0 0.2rem rgba(138, 180, 255, 0.15);
+}
+
+/* Mejoras select y textarea */
+select.form-control,
+textarea.form-control {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+select.form-control:focus,
+textarea.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Spinner pequeño en botón */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
 @media (max-width: 768px) {
+    .page-header {
+        padding: 50px 15px 30px;
+        margin-top: 8px;
+    }
+    
+    .page-title {
+        font-size: 24px;
+    }
+    
+    .page-subtitle {
+        font-size: 14px;
+    }
+
     .container {
-        padding: 15px;
+        padding: 20px 15px;
+        margin-bottom: 20px;
     }
 
     label,
     select.form-control,
     textarea.form-control,
+    input.form-control,
     input.form-control-file,
     button.btn {
         font-size: 14px;

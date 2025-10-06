@@ -1,62 +1,157 @@
+<div class="page-header">
+  <h2 class="page-title">Centro de Reportes y Denuncias</h2>
+  <p class="page-subtitle">Ayúdanos a mejorar RedDinámica reportando errores o denunciando contenido inapropiado</p>
+</div>
+
 <div class="container">
   <form [formGroup]="reportErrorForm" (ngSubmit)="onSubmit()">
+    <!-- Categoría Principal -->
     <div class="form-group">
-      <label for="type">Tipo de No Conformidad</label>
-      <select formControlName="type" class="form-control" [ngClass]="{'is-invalid': submitted && f.type.errors}">
-        <option value="">Seleccione</option>
-        <option value="Fallo / Bug">Fallo / Bug</option>
-        <option value="Característica deseada">Característica deseada</option>
-        <option value="Mejora">Mejora</option>
+      <label for="category">Categoría <span class="required">*</span></label>
+      <select formControlName="category" class="form-control" [ngClass]="{'is-invalid': submitted && f.category.errors}" (change)="onCategoryChange()">
+        <option value="">Seleccione una categoría</option>
+        <option value="technical">Reporte Técnico (Errores/Bugs/Mejoras)</option>
+        <option value="publication">Denuncia de Publicación</option>
+        <option value="user">Denuncia de Usuario</option>
       </select>
-      <div *ngIf="submitted && f.type.errors" class="invalid-feedback">
-        <div *ngIf="f.type.errors.required">El campo es obligatorio.</div>
+      <div *ngIf="submitted && f.category.errors" class="invalid-feedback">
+        <div *ngIf="f.category.errors.required">Debe seleccionar una categoría.</div>
       </div>
     </div>
 
-    <div class="form-group">
-      <label for="module">Módulo o Componente</label>
-      <select formControlName="module" class="form-control" [ngClass]="{'is-invalid': submitted && f.module.errors}">
-        <option value="">Seleccione</option>
-        <option value="Modulo Inicio">Modulo Inicio</option>
-        <option value="Modulo Lecciones">Modulo Lecciones</option>
-        <option value="Repositorio">Repositorio</option>
-        <option value="Publicaciones">Publicaciones</option>
-        <option value="Perfil">Perfil</option>
-        <option value="Mensajes">Mensajes</option>
-      </select>
-      <div *ngIf="submitted && f.module.errors" class="invalid-feedback">
-        <div *ngIf="f.module.errors.required">El campo es obligatorio.</div>
+    <!-- Campos para Reportes Técnicos -->
+    <div *ngIf="f.category.value === 'technical'">
+      <div class="form-group">
+        <label for="type">Tipo de Reporte <span class="required">*</span></label>
+        <select formControlName="type" class="form-control" [ngClass]="{'is-invalid': submitted && f.type.errors}">
+          <option value="">Seleccione</option>
+          <option value="Fallo / Bug">Fallo / Bug</option>
+          <option value="Característica deseada">Característica deseada</option>
+          <option value="Mejora">Mejora</option>
+        </select>
+        <div *ngIf="submitted && f.type.errors" class="invalid-feedback">
+          <div *ngIf="f.type.errors.required">El campo es obligatorio.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="module">Módulo o Componente <span class="required">*</span></label>
+        <select formControlName="module" class="form-control" [ngClass]="{'is-invalid': submitted && f.module.errors}">
+          <option value="">Seleccione</option>
+          <option value="Modulo Inicio">Módulo Inicio</option>
+          <option value="Modulo Lecciones">Módulo Lecciones</option>
+          <option value="Repositorio">Repositorio</option>
+          <option value="Publicaciones">Publicaciones</option>
+          <option value="Perfil">Perfil</option>
+          <option value="Mensajes">Mensajes</option>
+          <option value="Administración">Administración</option>
+          <option value="Otro">Otro</option>
+        </select>
+        <div *ngIf="submitted && f.module.errors" class="invalid-feedback">
+          <div *ngIf="f.module.errors.required">El campo es obligatorio.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="steps">Pasos para Reproducir <span class="required">*</span></label>
+        <textarea formControlName="steps" class="form-control" rows="4" placeholder="Describa los pasos para reproducir el problema..." [ngClass]="{'is-invalid': submitted && f.steps.errors}"></textarea>
+        <div *ngIf="submitted && f.steps.errors" class="invalid-feedback">
+          <div *ngIf="f.steps.errors.required">El campo es obligatorio.</div>
+        </div>
       </div>
     </div>
 
-    <div class="form-group">
-      <label for="description">Descripción</label>
-      <textarea formControlName="description" class="form-control" rows="5" [ngClass]="{'is-invalid': submitted && f.description.errors}"></textarea>
+    <!-- Campos para Denuncias de Publicaciones -->
+    <div *ngIf="f.category.value === 'publication'">
+      <div class="form-group">
+        <label for="publicationId">ID de la Publicación <span class="required">*</span></label>
+        <input type="text" formControlName="publicationId" class="form-control" placeholder="Ingrese el ID de la publicación" [readonly]="lockPublicationId" [ngClass]="{'is-invalid': submitted && f.publicationId?.errors}">
+        <small class="form-text" *ngIf="!lockPublicationId">Puede encontrar el ID en la URL de la publicación o en su defecto enviar enlace del perfil donde se creo la publicación</small>
+        <small class="form-text" *ngIf="lockPublicationId">Este ID fue prellenado desde la publicación que acabas de denunciar y no se puede modificar.</small>
+        <div *ngIf="submitted && f.publicationId?.errors" class="invalid-feedback">
+          <div *ngIf="f.publicationId?.errors.required">El campo es obligatorio.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="type">Motivo de la Denuncia <span class="required">*</span></label>
+        <select formControlName="type" class="form-control" [ngClass]="{'is-invalid': submitted && f.type.errors}">
+          <option value="">Seleccione</option>
+          <option value="Contenido ofensivo">Contenido ofensivo o inapropiado</option>
+          <option value="Spam">Spam o publicidad no deseada</option>
+          <option value="Información falsa">Información falsa o engañosa</option>
+          <option value="Plagio">Plagio o violación de derechos de autor</option>
+          <option value="Acoso">Acoso o intimidación</option>
+          <option value="Otro">Otro</option>
+        </select>
+        <div *ngIf="submitted && f.type.errors" class="invalid-feedback">
+          <div *ngIf="f.type.errors.required">El campo es obligatorio.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campos para Denuncias de Usuarios -->
+    <div *ngIf="f.category.value === 'user'">
+      <div class="form-group">
+        <label for="reportedUserId">ID o Nombre del Usuario <span class="required">*</span></label>
+        <input type="text" formControlName="reportedUserId" class="form-control" placeholder="Ingrese el ID o nombre de usuario" [ngClass]="{'is-invalid': submitted && f.reportedUserId?.errors}">
+        <small class="form-text">Ingrese el nombre de usuario o ID del perfil denunciado</small>
+        <div *ngIf="submitted && f.reportedUserId?.errors" class="invalid-feedback">
+          <div *ngIf="f.reportedUserId?.errors.required">El campo es obligatorio.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="type">Motivo de la Denuncia <span class="required">*</span></label>
+        <select formControlName="type" class="form-control" [ngClass]="{'is-invalid': submitted && f.type.errors}">
+          <option value="">Seleccione</option>
+          <option value="Comportamiento inapropiado">Comportamiento inapropiado</option>
+          <option value="Acoso">Acoso o intimidación</option>
+          <option value="Suplantación">Suplantación de identidad</option>
+          <option value="Spam">Spam o comportamiento abusivo</option>
+          <option value="Contenido ofensivo">Publicación de contenido ofensivo</option>
+          <option value="Otro">Otro</option>
+        </select>
+        <div *ngIf="submitted && f.type.errors" class="invalid-feedback">
+          <div *ngIf="f.type.errors.required">El campo es obligatorio.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Descripción (común para todos) -->
+    <div class="form-group" *ngIf="f.category.value">
+      <label for="description">Descripción Detallada <span class="required">*</span></label>
+      <textarea formControlName="description" class="form-control" rows="5" placeholder="Proporcione una descripción detallada..." [ngClass]="{'is-invalid': submitted && f.description.errors}"></textarea>
+      <small class="form-text">{{ 2000 - (f.description.value?.length || 0) }} caracteres restantes</small>
       <div *ngIf="submitted && f.description.errors" class="invalid-feedback">
         <div *ngIf="f.description.errors.required">El campo es obligatorio.</div>
         <div *ngIf="f.description.errors.maxlength">Máximo 2000 caracteres.</div>
       </div>
     </div>
 
-    <div class="form-group">
-      <label for="steps">Pasos para Reproducir</label>
-      <textarea formControlName="steps" class="form-control" rows="5" [ngClass]="{'is-invalid': submitted && f.steps.errors}"></textarea>
-      <div *ngIf="submitted && f.steps.errors" class="invalid-feedback">
-        <div *ngIf="f.steps.errors.required">El campo es obligatorio.</div>
-      </div>
+    <!-- Archivo adjunto (opcional para todos) -->
+    <div class="form-group" *ngIf="f.category.value">
+      <label for="file">Adjuntar Evidencia (opcional)</label>
+      <input type="file" formControlName="file" class="form-control" (change)="onFileChange($event)" accept="image/*,.pdf,.doc,.docx">
+      <small class="form-text">Puede adjuntar capturas de pantalla u otros archivos como evidencia</small>
     </div>
 
-    <div class="form-group">
-      <label for="file">Adjuntar Archivo</label>
-                      <input type="file" formControlName="file" class="form-control" (change)="onFileChange($event)">
+    <div class="form-actions" *ngIf="f.category.value">
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        <span *ngIf="!loading">Enviar Reporte</span>
+        <span *ngIf="loading">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Enviando...
+        </span>
+      </button>
     </div>
 
-    <button type="submit" class="btn btn-primary" [disabled]="loading">Enviar</button>
-    <div *ngIf="loading" class="spinner-border" role="status">
-      <span class="sr-only">Loading...</span>
-    </div>
     <div *ngIf="successMessage" class="alert alert-success mt-3">
-      {{ successMessage }}
+      <strong>¡Éxito!</strong> {{ successMessage }}
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+      <strong>Error:</strong> {{ errorMessage }}
     </div>
   </form>
 </div>
