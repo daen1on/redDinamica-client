@@ -48,7 +48,7 @@
                     id="{{removeSpaces(group)}}-tab" data-bs-toggle="pill" attr.href="#{{removeSpaces(group)}}" role="tab"
                     attr.aria-controls="{{removeSpaces(group)}}" aria-selected="true"
                     [ngClass]="{disable: loading}"
-                    (click)="restartValues(group)">
+                    (click)="handleTabClick($event, group)">
                     {{group}}
                     <section *ngIf="selectedGroup == group && showResources()" class="float-right">
                         <a class="resource-edit me-1" title="Editar grupo (cambiar nombre o archivos)" aria-label="Editar grupo"
@@ -66,7 +66,7 @@
                 <div *ngIf="showResources()" class="nav-link" style="cursor: pointer;" 
                     [ngClass]="{'show active': lesson.files.length == 0 || addingNewGroup}" id="addGroup-tab" data-bs-toggle="pill"
                     [ngClass]="{disable: loading}" href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
-                    (click)="startAddGroup()">
+                    (click)="handleAddGroupTabClick($event)">
                     <i class="fas fa-plus"></i> Agregar grupo de recursos
                 </div>
 
@@ -111,7 +111,7 @@
 
                                         <div class="form-group">
                                             <label for="name"><strong>Nombre*</strong></label>
-                                            <input type="text" class="form-control" id="name" [formControl]="name"
+                                            <input type="text" class="form-control" id="name" [formControl]="name" [disabled]="loading"
                                                 [ngClass]="{ 'is-invalid': submitted && name.errors}"
                                                 autocomplete="off" (change)="onChanges()">
                                             <div *ngIf="submitted && name.errors" class="invalid-feedback">
@@ -126,11 +126,11 @@
                                     <section *ngIf="editMode && showResources()">
                                         <div class="form-group">
                                             <label for="resourcesFiles"><strong>Archivos</strong></label>
-                                            <input multiple type="file" class="form-control" name="files"
+                                            <input multiple type="file" class="form-control" name="files" [disabled]="loading"
                                                 id="resourcesFiles" enctype="multipart/form-data"
                                                 (change)="fileChangeEvent($event)" [formControl]="files"
                                                 [ngClass]="{ 'is-invalid': submitted && files.errors || maxSizeError}">
-                                            <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
+                                            <div class="progress" *ngIf="loading || barWidth!='0%'">
                                                     <div #progress  class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width]="barWidth"
                                                      aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
                                                 </div>
@@ -173,7 +173,7 @@
                 </div>
                 <!--need to pop up a modal once it abruptly exits-->
                 <div *ngIf="showResources()" class="tab-pane fade"
-                    [ngClass]="{'show active': lesson.files.length == 0}" id="addGroup" role="tabpanel"
+                    [ngClass]="{'show active': lesson.files.length == 0 || addingNewGroup}" id="addGroup" role="tabpanel"
                     aria-labelledby="addGroup-tab">
 
 
@@ -213,7 +213,7 @@
                                     <form>
                                         <div class="form-group">
                                             <label for="name"><strong>Nombre*</strong></label>
-                                            <input type="text" class="form-control" id="name" [formControl]="name"
+                                            <input type="text" class="form-control" id="name" [formControl]="name" [disabled]="loading"
                                                 [ngClass]="{ 'is-invalid': submitted && name.errors}"
                                                 autocomplete="off" placeholder="Ej: Primer modelo de lección" (change)="onChanges()" (input)="onChanges()">
                                             <div *ngIf="submitted && name.errors" class="invalid-feedback">
@@ -226,12 +226,12 @@
 
                                         <div class="form-group" >
                                             <label for="resourcesFiles"><strong>Archivos</strong></label>
-                                            <input multiple type="file" class="form-control" name="files"
+                                            <input multiple type="file" class="form-control" name="files" [disabled]="loading"
                                                 id="resourcesFiles" enctype="multipart/form-data"
                                                 (change)="fileChangeEvent($event)" [formControl]="files"
                                                 [ngClass]="{ 'is-invalid': submitted && files.errors || maxSizeError}">
                                             <small class="form-text text-muted">Puedes seleccionar varios archivos a la vez.</small>
-                                            <div class="progress" *ngIf="(filesToUpload != null || barWidth!='0%')">
+                                            <div class="progress" *ngIf="loading || barWidth!='0%'">
                                                     <div #progress  class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width]="barWidth"
                                                      aria-valuenow="barWidth" aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
                                             </div>
@@ -281,3 +281,24 @@
     </div>
 </div>
 <!-- /resources -->
+<!-- Modal Confirmar Salida durante carga/cambios -->
+<div class="modal fade" id="confirmLeaveModal" tabindex="-1" aria-labelledby="confirmLeaveTitle" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmLeaveTitle">¿Salir de esta página?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning mb-0" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {{ confirmLeaveMessage || 'Tienes cambios sin guardar o una carga en progreso. Si sales ahora, podrías perder los cambios o cancelar la carga.' }}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-cancel>Cancelar</button>
+                <button type="button" class="btn btn-primary" data-confirm>Salir</button>
+            </div>
+        </div>
+    </div>
+</div>

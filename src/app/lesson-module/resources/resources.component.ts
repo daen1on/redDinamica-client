@@ -60,6 +60,7 @@ export class ResourcesComponent implements OnInit {
     public barWidth: string = "0%";
     public unsaved = [];
     public addingNewGroup: boolean = false;
+    public confirmLeaveMessage: string = '';
     constructor(
         private _userService: UserService,
         private _lessonService: LessonService,
@@ -88,8 +89,11 @@ export class ResourcesComponent implements OnInit {
         this.getGroups();
         this.selectedGroup = this.groups[0];
 
-        this._route.parent.url.subscribe(value => {
-            this.parentUrl = value[0].path;
+        this._route.parent?.url.subscribe(segments => {
+            const first = (segments && segments.length > 0) ? segments[0] : null;
+            this.parentUrl = (first && first.path)
+                || this._route.parent?.snapshot?.routeConfig?.path?.split('/')?.[0]
+                || '';
         });
     }
 
@@ -309,9 +313,8 @@ export class ResourcesComponent implements OnInit {
             next: (response) => {
                 if (response.lesson && response.lesson._id) {
                     this.lesson = response.lesson;
-                    if (!this.editMode) { //prevents page from getting outside the group edited once saved.
-                        this.name.reset();
-                    }
+                    // No limpiar el formulario aquí: si hay carga de archivos queremos
+                    // mantener el nombre y los campos visibles junto con la barra de progreso
     
                     if (this.filesToUpload.length > 0) {
                         //Upload profile image
@@ -333,6 +336,10 @@ export class ResourcesComponent implements OnInit {
                                         this.status = statusE;
                                         this.barWidth = '0%';
                                         this.files.reset();
+                                        this.filesToUpload = [];
+                                        if (!this.editMode) {
+                                            this.name.reset();
+                                        }
                                         this.loading = false;
                                         break;
                                 }
@@ -346,12 +353,16 @@ export class ResourcesComponent implements OnInit {
                         });
                     }
     
-                    this.files.reset();
-                    this.submitted = false;
-                    this.getGroups();
-                    // Si no se subieron archivos, ocultar loading
+                    // Si no hay archivos para subir, cerrar ciclo de guardado aquí
                     if (this.filesToUpload.length === 0) {
+                        this.files.reset();
+                        this.submitted = false;
+                        this.getGroups();
                         this.loading = false;
+                        this.status = statusE;
+                        if (!this.editMode) {
+                            this.name.reset();
+                        }
                     }
     
                     if (this.editMode === true) {
@@ -392,27 +403,15 @@ export class ResourcesComponent implements OnInit {
     }
     
     
-    @HostListener('window:beforeunload')
-    canDeactivate(): Observable<boolean> | boolean {
-    // insert logic to check if there are pending changes here;
-    // returning true will navigate without confirmation
-    // returning false will show a confirm dialog before navigating away
-    if ( this.name.value !='' || this.files.length > 0 ){
-        console.log("falseName or file: ",this.name.value);
-        return false;
-    }
-    else  if (this.editMode == true){
-        console.log("edit ");
-        return false;
-
-    }else if (this.submitted == true){
-        console.log("submitted");
-        return false;
-    }
-    else
-    {
-        return true;
-    }
+    // Aviso nativo del navegador si se intenta cerrar/recargar con una carga en progreso
+    @HostListener('window:beforeunload', ['$event'])
+    handleBeforeUnload(event: BeforeUnloadEvent): void {
+        const hasPendingUpload = this.loading || this.barWidth !== '0%';
+        const hasUnsaved = (this.name?.value && this.name.value !== '') || (this.filesToUpload && this.filesToUpload.length > 0) || this.editMode || this.submitted;
+        if (hasPendingUpload || hasUnsaved) {
+            event.preventDefault();
+            event.returnValue = '';
+        }
     }
     
     showResources(){
@@ -440,6 +439,108 @@ export class ResourcesComponent implements OnInit {
             }
         });
         
+    }
+
+    // Modal programático de confirmación al intentar salir
+    openConfirmLeave(message: string): Promise<boolean> {
+        this.confirmLeaveMessage = message;
+        return new Promise<boolean>((resolve) => {
+            // Espera a que Angular pinte el modal en el DOM
+            setTimeout(() => {
+                try {
+                    const modalEl = document.getElementById('confirmLeaveModal');
+                    if (!modalEl) {
+                        // Fallback
+                        const confirmed = window.confirm(message);
+                        resolve(confirmed);
+                        return;
+                    }
+
+                    let instance = (window as any).bootstrap?.Modal?.getInstance(modalEl);
+                    if (!instance) {
+                        instance = new (window as any).bootstrap.Modal(modalEl, {
+                            backdrop: 'static',
+                            keyboard: false
+                        });
+                    }
+
+                    const confirmBtn = modalEl.querySelector('[data-confirm]') as HTMLElement | null;
+                    const cancelBtn = modalEl.querySelector('[data-cancel]') as HTMLElement | null;
+
+                    const cleanup = () => {
+                        confirmBtn?.removeEventListener('click', onConfirm);
+                        cancelBtn?.removeEventListener('click', onCancel);
+                        modalEl.removeEventListener('hidden.bs.modal', onCancel as any);
+                    };
+
+                    const onConfirm = () => {
+                        cleanup();
+                        resolve(true);
+                        instance.hide();
+                    };
+                    const onCancel = () => {
+                        cleanup();
+                        resolve(false);
+                    };
+
+                    confirmBtn?.addEventListener('click', onConfirm);
+                    cancelBtn?.addEventListener('click', onCancel);
+                    // Si el usuario cierra el modal con la X
+                    modalEl.addEventListener('hidden.bs.modal', onCancel as any);
+
+                    instance.show();
+                } catch (error) {
+                    console.error('Error al abrir modal de confirmación de salida:', error);
+                    const confirmed = window.confirm(message);
+                    resolve(confirmed);
+                }
+            }, 0);
+        });
+    }
+
+    // Intercepta clic en pestaña de grupo
+    handleTabClick(event: Event, group: string): void {
+        const uploadInProgress = this.loading || this.barWidth !== '0%';
+        const hasDraft = (this.name?.value && this.name.value !== '') || (this.filesToUpload && this.filesToUpload.length > 0) || this.editMode || this.submitted;
+        if (uploadInProgress || hasDraft) {
+            event.preventDefault();
+            event.stopPropagation();
+            const message = uploadInProgress
+                ? 'Hay una carga de archivos en progreso. Si cambias de pestaña se cancelará. ¿Deseas continuar?'
+                : 'Tienes cambios sin guardar. ¿Deseas descartar y continuar?';
+            this.openConfirmLeave(message).then(confirmed => {
+                if (confirmed) {
+                    this.restartValues(group);
+                }
+            });
+            return;
+        }
+        this.restartValues(group);
+    }
+
+    // Intercepta clic en pestaña "Agregar grupo"
+    handleAddGroupTabClick(event: Event): void {
+        const uploadInProgress = this.loading || this.barWidth !== '0%';
+        const hasDraft = (this.name?.value && this.name.value !== '') || (this.filesToUpload && this.filesToUpload.length > 0) || this.editMode || this.submitted;
+        if (uploadInProgress || hasDraft) {
+            event.preventDefault();
+            event.stopPropagation();
+            const message = uploadInProgress
+                ? 'Hay una carga de archivos en progreso. Si cambias de pestaña se cancelará. ¿Deseas continuar?'
+                : 'Tienes cambios sin guardar. ¿Deseas descartar y continuar?';
+            this.openConfirmLeave(message).then(confirmed => {
+                if (confirmed) {
+                    // Restaurar el estado previo si había ediciones sin guardar
+                    if (this.editMode) {
+                        this.lesson.files = this.unsaved;
+                        this.editMode = false;
+                    }
+                    this.startAddGroup();
+                }
+            });
+            return;
+        }
+        this.startAddGroup();
     }
 
 }
