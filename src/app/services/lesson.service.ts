@@ -178,9 +178,20 @@ export class LessonService {
     }
 
     // Crear mensaje en conversación (API soporta insertion directa al array de conversations)
-    addLessonMessage(token: string, lessonId: string, payload: { text: string; conversationTitle?: string }): Observable<any> {
+    addLessonMessage(token: string, lessonId: string, payload: { text: string; conversationTitle?: string; file?: any }): Observable<any> {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': token });
         return this._http.post(`${this.url}lesson/${lessonId}/message`, JSON.stringify(payload), { headers });
+    }
+
+    editLessonMessage(token: string, lessonId: string, messageId: string, payload: { text: string; scope: 'conversations' | 'expert_comments' }): Observable<any> {
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': token });
+        return this._http.put(`${this.url}lesson/${lessonId}/message/${messageId}`, JSON.stringify(payload), { headers });
+    }
+
+    // Agregar comentario de experto/facilitador con notificaciones
+    addExpertComment(token: string, lessonId: string, payload: { text: string; conversationTitle?: string; file?: any }): Observable<any> {
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': token });
+        return this._http.post(`${this.url}lesson/${lessonId}/expert-comment`, JSON.stringify(payload), { headers });
     }
     
     getSuggestedLesson(token: string, page: number): Observable<any> {

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, HostListener, OnDestroy } from '@angular/core';
 import { LESSON_STATES, ICON_STYLE, MAX_FILE_SIZE } from 'src/app/services/DATA';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
@@ -17,7 +17,7 @@ import { ActivatedRoute } from '@angular/router';
     styleUrls: ['./review.component.css'],
     standalone: false
 })
-export class ReviewComponent implements OnInit {
+export class ReviewComponent implements OnInit, OnDestroy {
     public title: string;
     public identity;
     public token;
@@ -50,6 +50,11 @@ export class ReviewComponent implements OnInit {
     public maxSizeError = false;
     public parentUrl;
     readonly deletedMsg = 'Se ha eliminado la conversación';
+    // Edición de mensajes
+    public editingMessage: any = null;
+    public editingText = new UntypedFormControl('');
+    // Polling
+    private pollingHandle: any = null;
 
     constructor(
         private _userService: UserService,
@@ -76,9 +81,13 @@ export class ReviewComponent implements OnInit {
     ngOnInit(): void {
         this.getGroups();
         this.selectedGroup = this.groups[0];
-        this._route.parent.url.subscribe(value => {
-            this.parentUrl = value[0].path;
+        this._route.parent?.url.subscribe(segments => {
+            const first = (segments && segments.length > 0) ? segments[0] : null;
+            this.parentUrl = (first && first.path)
+                || this._route.parent?.snapshot?.routeConfig?.path?.split('/')?.[0]
+                || '';
         });
+        this.startPolling();
     }
 
     disableForm(command:Boolean):void{
@@ -221,13 +230,37 @@ export class ReviewComponent implements OnInit {
 
         }
 
-        tempMessage.created_at = Math.floor(Date.now() / 1000);
+        tempMessage.created_at = new Date();
         tempMessage.file = tempFile;
-        tempMessage.author = this.identity._id;
 
-        this.lesson.expert_comments = this.lesson.expert_comments.concat(tempMessage);
-
-        this.editLesson(this.lesson);
+        // Usar el nuevo endpoint addExpertComment que envía notificaciones automáticamente
+        this._lessonService.addExpertComment(this.token, this.lesson._id, {
+            text: this.message.value,
+            conversationTitle: tempMessage.conversationTitle,
+            file: tempFile || null
+        }).subscribe({
+            next: (response) => {
+                if (response && response.lesson && response.lesson._id) {
+                    this.lesson = response.lesson;
+                    this.status = 'success';
+                    this.submitted = false;
+                    this.name.reset();
+                    this.files.reset();
+                    this.message.reset();
+                    this.getGroups();
+                    this.disableForm(false);
+                } else {
+                    this.status = 'error';
+                    this.submitted = false;
+                    this.disableForm(false);
+                }
+            },
+            error: () => {
+                this.status = 'error';
+                this.submitted = false;
+                this.disableForm(false);
+            }
+        });
 
     }
 
@@ -244,6 +277,80 @@ export class ReviewComponent implements OnInit {
         }
         //console.log(response);
         return response;
+    }
+
+    // ===== Helpers de edición de mensajes =====
+    canEditMessage(message: any): boolean {
+        const isOwner = message?.author && (message.author._id === this.identity._id);
+        const isAdmin = this.parentUrl === 'admin';
+        return !!(isOwner || isAdmin);
+    }
+
+    startEditMessage(message: any): void {
+        if (!this.canEditMessage(message)) return;
+        this.editingMessage = message;
+        this.editingText.setValue(message.text || '');
+    }
+
+    cancelEditMessage(): void {
+        this.editingMessage = null;
+        this.editingText.reset('');
+    }
+
+    saveEditMessage(): void {
+        if (!this.editingMessage) return;
+        const newText = (this.editingText.value || '').toString().trim();
+        if (!newText) return;
+        // Para expert_comments, reutilizamos endpoint de edición con scope
+        const messageId = this.editingMessage._id;
+        this._lessonService.editLessonMessage(this.token, this.lesson._id, messageId, { text: newText, scope: 'expert_comments' }).subscribe({
+            next: (response) => {
+                if (response?.lesson?._id) {
+                    this.lesson = response.lesson;
+                    this.getGroups();
+                }
+                this.editingMessage = null;
+                this.editingText.reset('');
+            },
+            error: () => {
+                this.editingMessage = null;
+                this.editingText.reset('');
+            }
+        });
+    }
+
+    deleteMessage(message: any): void {
+        if (!this.canEditMessage(message)) return;
+        const idx = this.lesson.expert_comments.findIndex((m: any) => m === message);
+        if (idx >= 0) {
+            this.lesson.expert_comments.splice(idx, 1);
+            this.editLesson(this.lesson);
+        }
+    }
+
+    // ===== Polling para refresco en tiempo real =====
+    private startPolling(): void {
+        if (this.pollingHandle) return;
+        this.pollingHandle = setInterval(() => {
+            if (this.submitted || this.editingMessage) return;
+            if (!this.lesson?._id) return;
+            this._lessonService.getLesson(this.token, this.lesson._id).subscribe({
+                next: (response) => {
+                    if (response?.lesson?._id) {
+                        this.lesson = response.lesson;
+                        this.getGroups();
+                    }
+                },
+                error: () => {}
+            });
+        }, 10000);
+    }
+
+    ngOnDestroy(): void {
+        if (this.pollingHandle) {
+            clearInterval(this.pollingHandle);
+            this.pollingHandle = null;
+        }
     }
     editLesson(lesson) {
         this._lessonService.editLesson(this.token, lesson).subscribe(
