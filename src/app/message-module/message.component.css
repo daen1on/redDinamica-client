@@ -11,7 +11,13 @@
   /* Desplazar la columna de contenido para no solaparse con el sidebar */
   .container > .row > .col-9.ps-0 {
     padding-left: 15px !important;
+    padding-top: 88px !important; /* separa el título del header fijo */
   }
+}
+
+/* Separación vertical por defecto para móviles/tablets */
+.col-9.ps-0 {
+  padding-top: 72px; /* fallback cuando cambia el layout */
 }
 
 
