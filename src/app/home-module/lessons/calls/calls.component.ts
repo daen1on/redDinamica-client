@@ -488,6 +488,14 @@ export class CallsComponent implements OnInit {
     public needReloadData;
     setNeedReload(event){
         this.needReloadData = true;
+        // Fuerza una recarga completa cuando la acción lo requiere
+        try {
+            if (event === 'forceReload') {
+                (window as any).location?.reload();
+            }
+        } catch (e) {
+            console.warn('No se pudo forzar la recarga:', e);
+        }
     }
 
     // NUEVOS MÉTODOS PARA FLUJO AUTÓNOMO
@@ -543,7 +551,8 @@ export class CallsComponent implements OnInit {
         const id = lesson._id;
         if (!this.callDraftByLessonId[id]) {
             const baseText = lesson.call?.text || this.generateDefaultCallText(lesson);
-            this.callDraftByLessonId[id] = { text: baseText, visible: true };
+            const baseVisible = (lesson.call && typeof lesson.call.visible === 'boolean') ? lesson.call.visible : true;
+            this.callDraftByLessonId[id] = { text: baseText, visible: baseVisible };
         }
     }
 
@@ -565,6 +574,27 @@ export class CallsComponent implements OnInit {
     setCallDraftVisible(lesson: any, value: boolean): void {
         this.ensureCallDraft(lesson);
         this.callDraftByLessonId[lesson._id].visible = value;
+        // Si se desactiva la visibilidad, guardar inmediatamente y recargar
+        if (value === false) {
+            this.submitCall(lesson, { forceReload: true });
+        } else if (value === true && !lesson.call?.text) {
+            // Si se habilita visibilidad y aún no existe convocatoria: crearla automáticamente
+            const draft = this.callDraftByLessonId[lesson._id];
+            if (!draft.text || draft.text.trim().length < 10) {
+                // Generar texto por defecto si el borrador es muy corto
+                draft.text = this.generateDefaultCallText(lesson);
+            }
+            this.submitCall(lesson);
+        }
+    }
+
+    // Compara si el borrador es idéntico a lo guardado (solo descripción)
+    isDraftSameAsSaved(lesson: any): boolean {
+        this.ensureCallDraft(lesson);
+        const normalize = (s: string) => (s || '').replace(/\r\n/g, '\n').trim();
+        const savedText = normalize(lesson?.call?.text || '');
+        const draftText = normalize(this.callDraftByLessonId[lesson._id]?.text || '');
+        return savedText === draftText;
     }
 
     generateDefaultCallText(lesson: any): string {
@@ -580,7 +610,7 @@ export class CallsComponent implements OnInit {
         return lines.join('\n');
     }
 
-    submitCall(lesson: any): void {
+    submitCall(lesson: any, options?: { forceReload?: boolean }): void {
         if (!this.isLessonLeader(lesson) || !this.isApprovedByFacilitator(lesson)) {
             alert('Solo el líder puede abrir/editar la convocatoria en este estado.');
             return;
@@ -595,19 +625,81 @@ export class CallsComponent implements OnInit {
             .subscribe({
                 next: (response: any) => {
                     if (response?.lesson) {
-                        // Actualizar la lección en la vista
+                        // Actualizar la lección en la vista preservando campos no populados
                         const ix = this.lessons.findIndex(l => l._id === lesson._id);
                         if (ix >= 0) {
-                            this.lessons[ix] = response.lesson;
+                            const previous = this.lessons[ix];
+                            const incoming = response.lesson;
+
+                            // Si el backend no retornó áreas/levels populados, conservar los existentes
+                            const incomingAreas = Array.isArray(incoming?.knowledge_area) ? incoming.knowledge_area : [];
+                            const areasAreObjects = incomingAreas.length > 0 && typeof incomingAreas[0] === 'object';
+                            const mergedAreas = areasAreObjects && incomingAreas?.length ? incomingAreas : previous?.knowledge_area;
+
+                            const mergedLevels = (incoming?.level && incoming.level.length) ? incoming.level : previous?.level;
+
+                            this.lessons[ix] = {
+                                ...previous,
+                                ...incoming,
+                                knowledge_area: mergedAreas,
+                                level: mergedLevels,
+                                call: incoming.call ?? previous.call
+                            };
                         }
                         alert('Convocatoria guardada correctamente.');
                     }
                     this.isSavingCall[lesson._id] = false;
+                    // Recargar si se desactivó visibilidad o si se solicitó forzar
+                    if (draft.visible === false || options?.forceReload) {
+                        try { (window as any).location?.reload(); } catch {}
+                    }
                 },
                 error: (err) => {
                     console.error('Error al guardar convocatoria', err);
                     this.isSavingCall[lesson._id] = false;
                     alert('No se pudo guardar la convocatoria.');
+                }
+            });
+    }
+
+    // Forzar abrir convocatoria: visible = true (manteniendo/creando el texto)
+    openCall(lesson: any): void {
+        if (!this.isLessonLeader(lesson) || !this.isApprovedByFacilitator(lesson)) {
+            alert('Solo el líder puede abrir la convocatoria en este estado.');
+            return;
+        }
+
+        this.ensureCallDraft(lesson);
+        const draft = this.callDraftByLessonId[lesson._id];
+        if (!draft.text || draft.text.trim().length < 10) {
+            draft.text = this.generateDefaultCallText(lesson);
+        }
+        draft.visible = true;
+
+        this.isSavingCall[lesson._id] = true;
+        this._lessonService.createCall(this.token, lesson._id, { text: draft.text, visible: true })
+            .subscribe({
+                next: (response: any) => {
+                    this.isSavingCall[lesson._id] = false;
+                    if (response?.lesson) {
+                        // Actualiza la lección local con call.visible=true
+                        const ix = this.lessons.findIndex(l => l._id === lesson._id);
+                        if (ix >= 0) {
+                            const previous = this.lessons[ix];
+                            const incoming = response.lesson;
+                            this.lessons[ix] = {
+                                ...previous,
+                                ...incoming,
+                                call: { ...(incoming.call || previous.call || {}), text: draft.text, visible: true }
+                            };
+                        }
+                        alert('Convocatoria abierta correctamente.');
+                    }
+                },
+                error: (err) => {
+                    console.error('Error al abrir convocatoria', err);
+                    this.isSavingCall[lesson._id] = false;
+                    alert('No se pudo abrir la convocatoria.');
                 }
             });
     }
@@ -656,6 +748,8 @@ export class CallsComponent implements OnInit {
                     if (this.showFocusedLesson) {
                         this._router.navigate(['/inicio/mis-lecciones']);
                     }
+                    // Forzar recarga para reflejar cambios en todas las vistas
+                    try { (window as any).location?.reload(); } catch {}
                 },
                 error: error => {
                     console.error('Error activando lección:', error);
