@@ -18,7 +18,7 @@
             </div>
             <div class="flex-grow-1">
                 <div class="d-flex justify-content-between align-items-start">
-                    <div>
+                    <div class="d-flex align-items-start">
                         <h6 class="mb-1">
                             <a class="text-primary text-decoration-none fw-bold" 
                                [routerLink]="['/perfil', publication.user?._id || publication.user]">
@@ -34,10 +34,16 @@
                             {{ (publication.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL' }}
                         </small>
                     </div>
-                    <div *ngIf="showDeleteButton && identity._id == (publication.user?._id || publication.user)">
-                        <button class="btn btn-link p-1 text-secondary" 
-                                data-bs-toggle="modal" 
-                                [attr.data-bs-target]="'#deleteModal-' + publication._id"
+                    <div class="d-flex align-items-center">
+                        <a class="btn btn-link p-1 text-warning"
+                           [routerLink]="['/error','report-error']"
+                           [queryParams]="{ category: 'publication', publicationId: publication._id }"
+                           title="Denunciar publicación">
+                            <i class="fas fa-exclamation-circle fa-sm"></i>
+                        </a>
+                        <button *ngIf="showDeleteButton && identity._id == (publication.user?._id || publication.user)"
+                                class="btn btn-link p-1 text-secondary" 
+                                (click)="requestDelete()"
                                 title="Eliminar publicación">
                             <i class="fas fa-trash fa-sm"></i>
                         </button>
@@ -89,11 +95,16 @@
         </div>
 
         <!-- Formulario de comentario -->
+        <div *ngIf="!canUserComment()" class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+            <i class="fas fa-lock me-2"></i>
+            <small>Tu cuenta está en proceso de activación. No puedes comentar hasta que un administrador apruebe tu cuenta (protección de datos GDPR).</small>
+        </div>
+        
         <form [formGroup]="commentForm" 
               (ngSubmit)="onCommentSubmit(publication._id)" 
               id="comments-form-{{publication._id}}"
               class="comment-form mb-3">
-            <div class="d-flex align-items-start">
+            <div class="d-flex align-items-start" [class.opacity-50]="!canUserComment()">
                 <div class="flex-shrink-0 me-2">
                     <div class="comment-avatar">
                         <img *ngIf="!identity.picture" 
@@ -111,11 +122,13 @@
                         <textarea class="form-control form-control-sm" 
                                   formControlName="text" 
                                   rows="2"
-                                  placeholder="Escribe un comentario..."
+                                  [placeholder]="canUserComment() ? 'Escribe un comentario...' : 'Comentarios deshabilitados'"
+                                  [disabled]="!canUserComment()"
+                                  [attr.maxlength]="MAX_INPUT_LENGTH"
                                   (focus)="setFocusPublication(publication._id)"></textarea>
                         <button type="submit" 
                                 class="btn btn-primary btn-sm"
-                                [disabled]="!commentForm.valid || focusPublication != publication._id">
+                                [disabled]="!commentForm.valid || focusPublication != publication._id || !canUserComment()">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
@@ -189,7 +202,14 @@
                                 </small>
                             </div>
                             <div class="comment-text">
-                                <p class="mb-1" [innerHTML]="formatTextWithMentions(comment.text)"></p>
+                                <p class="mb-1" [innerHTML]="formatTextWithMentions(getDisplayCommentText(comment))"></p>
+                                <div *ngIf="shouldShowCommentExpand(comment)" class="mt-1">
+                                    <button class="btn btn-link btn-sm p-0 text-primary" (click)="toggleCommentExpansion(comment._id)">
+                                        <i class="fas" [class.fa-chevron-down]="!expandedComments[comment._id]" [class.fa-chevron-up]="expandedComments[comment._id]"></i>
+                                        <span *ngIf="!expandedComments[comment._id]">Mostrar más</span>
+                                        <span *ngIf="expandedComments[comment._id]">Mostrar menos</span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="comment-actions d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
@@ -247,6 +267,7 @@
                                                   rows="2"
                                                   placeholder="Escribe una respuesta..."
                                                   style="font-size: 13px;"
+                                                  [attr.maxlength]="MAX_INPUT_LENGTH"
                                                   [id]="'reply-textarea-' + comment._id"></textarea>
                                         <button type="submit" 
                                                 class="btn btn-primary btn-sm"
@@ -318,7 +339,14 @@
                                                 </small>
                                             </div>
                                             <div class="reply-text">
-                                                <p class="mb-1" [innerHTML]="formatTextWithMentions(reply.text)"></p>
+                                                <p class="mb-1" [innerHTML]="formatTextWithMentions(getDisplayReplyText(reply))"></p>
+                                                <div *ngIf="shouldShowReplyExpand(reply)" class="mt-1">
+                                                    <button class="btn btn-link btn-sm p-0 text-primary" (click)="toggleReplyExpansion(reply._id)">
+                                                        <i class="fas" [class.fa-chevron-down]="!expandedReplies[reply._id]" [class.fa-chevron-up]="expandedReplies[reply._id]"></i>
+                                                        <span *ngIf="!expandedReplies[reply._id]">Mostrar más</span>
+                                                        <span *ngIf="expandedReplies[reply._id]">Mostrar menos</span>
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="reply-actions d-flex justify-content-between align-items-center">
                                                 <div class="d-flex align-items-center">
@@ -417,24 +445,4 @@
     </div>
 </div>
 
-<!-- Modal de eliminación -->
-<div class="modal fade" id="deleteModal-{{publication._id}}" tabindex="-1" role="dialog" [attr.aria-labelledby]="'deleteModalLabel-' + publication._id" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel-{{publication._id}}">Eliminar publicación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-warning mb-0" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    ¿Estás seguro que deseas eliminar esta publicación? Esta acción no se puede deshacer.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="deletePublication()">Eliminar</button>
-            </div>
-        </div>
-    </div>
-</div>
+ 

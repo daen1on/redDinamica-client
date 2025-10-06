@@ -331,12 +331,26 @@ export class PublicationsComponent implements OnInit, OnDestroy, AfterViewInit {
     public tempPublicationId;    
     setDelete(publicationId) {
         this.tempPublicationId = publicationId;
+        // Abrir modal de confirmación local
+        const modalElement = document.getElementById('delete');
+        if (modalElement) {
+            const modal = new (window as any).bootstrap.Modal(modalElement);
+            modal.show();
+        }
     }
 
     deletePost() {
         this._publicationService.removePost(this.token, this.tempPublicationId).pipe(takeUntil(this.unsubscribe$)).subscribe(
             response => {
-                this.getUserPublications(1);
+                // Remover publicación localmente para feedback inmediato
+                const index = this.publications.findIndex((p: any) => p && (p._id === (response?.publication?._id || this.tempPublicationId)));
+                if (index !== -1) {
+                    this.publications.splice(index, 1);
+                } else {
+                    // Fallback: recargar si no se encuentra
+                    this.getUserPublications(1);
+                }
+                this.tempPublicationId = null;
             },
             error => {
                 console.log(<any>error);

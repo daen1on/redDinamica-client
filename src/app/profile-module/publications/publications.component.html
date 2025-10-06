@@ -135,12 +135,12 @@
 
 
 <!-- Modal warning  delete-->
-<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="delete" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
+<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="delete" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <h5 class="modal-title" id="deleteTitle">Eliminar publicación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="$event.stopPropagation()"></button>
             </div>
 
             <div class="modal-body">
@@ -150,8 +150,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-danger" data-bs-dismiss="modal" (click)="deletePost()">Sí</button>
-                <button class="btn btn-primary text-white" data-bs-dismiss="modal">No</button>
+                <button class="btn btn-danger" data-bs-dismiss="modal" (click)="$event.stopPropagation(); deletePost()">Sí</button>
+                <button class="btn btn-primary text-white" data-bs-dismiss="modal" (click)="$event.stopPropagation()">No</button>
             </div>
 
         </div>

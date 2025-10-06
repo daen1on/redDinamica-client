@@ -342,8 +342,9 @@ export class MainComponent {
                 if (!response.publication) {
                     throw new Error('Failed to delete the publication');
                 }
+                // Remover publicación del arreglo local para reflejarlo en UI sin recargar
+                this.removePublicationFromList(response.publication._id || this.tempPublicationId);
                 this.tempPublicationId = null;
-                this.getPublications(this.page);
                 this.clearErrorMessage();
             }),
             catchError(error => {
@@ -356,6 +357,17 @@ export class MainComponent {
                 console.error('Deletion failed', error);
             }
         });
+    }
+
+    // Eliminar publicación por id del arreglo local
+    private removePublicationFromList(publicationId: string): void {
+        if (!publicationId || !Array.isArray(this.publications)) {
+            return;
+        }
+        const index = this.publications.findIndex((p: any) => p && p._id === publicationId);
+        if (index !== -1) {
+            this.publications.splice(index, 1);
+        }
     }
     
     setErrorMessage(message: string) {
@@ -395,8 +407,9 @@ export class MainComponent {
                 if (!response.comment) {
                     throw new Error('Failed to delete the comment');
                 }
+                // Eliminar del arreglo local para reflejarlo en UI sin recargar
+                this.removeCommentFromPublications(this.tempCommentId);
                 this.tempCommentId = null;
-                this.getPublications(this.page);
             }),
             catchError(error => {
                 console.error(error);
@@ -411,6 +424,45 @@ export class MainComponent {
                 console.error('Deletion of comment failed', error);
             }
         });
+    }
+
+    // Eliminar un comentario/respuesta por id dentro de las publicaciones cargadas
+    private removeCommentFromPublications(commentId: string): void {
+        if (!commentId || !Array.isArray(this.publications)) {
+            return;
+        }
+        for (const publication of this.publications) {
+            if (publication?.comments && Array.isArray(publication.comments)) {
+                const removed = this.removeCommentFromList(publication.comments, commentId);
+                if (removed) {
+                    break;
+                }
+            }
+        }
+    }
+
+    // Borrado recursivo en lista de comentarios y sus respuestas
+    private removeCommentFromList(comments: any[], commentId: string): boolean {
+        if (!Array.isArray(comments) || !commentId) {
+            return false;
+        }
+
+        const index = comments.findIndex((c: any) => c && c._id === commentId);
+        if (index !== -1) {
+            comments.splice(index, 1);
+            return true;
+        }
+
+        for (const comment of comments) {
+            if (comment?.replies && Array.isArray(comment.replies)) {
+                const removed = this.removeCommentFromList(comment.replies, commentId);
+                if (removed) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     viewMore() {
