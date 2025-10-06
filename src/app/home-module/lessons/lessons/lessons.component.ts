@@ -119,7 +119,7 @@ export class LessonsComponent implements OnInit {
     ngOnInit(): void {
         this.getAllLessons();        
         this.getAllAreas();
-      //  this.actualPage();
+        this.actualPage();
     }
 
     setArea(selectedArea) {
@@ -176,6 +176,11 @@ export class LessonsComponent implements OnInit {
                 if (response && response.lessons) {
                     this.allLessons = response.lessons;
 
+                    // Base filter: only completed and visible lessons
+                    this.allLessons = this.allLessons.filter((lesson) =>
+                        lesson?.state === 'completed' && lesson?.visible === true
+                    );
+
                     // Filter by area
                     if (this.selectedAreas.length > 0) {
                         this.selectedAreas.forEach((area) => {
@@ -199,16 +204,22 @@ export class LessonsComponent implements OnInit {
                         filteredLessons = [];
                     }
 
-        // Filter by level (aceptar tanto level como development_level)
+        // Filter by level (aceptar tanto level como development_level, arrays o string)
                     if (this.selectedLevels.length > 0) {
                         this.selectedLevels.forEach((level) => {
                             filteredLessons = filteredLessons.concat(this.allLessons.filter((lesson) => {
-                                const lessonLevel = (lesson.level ?? lesson.development_level);
-                                return lessonLevel == level;
+                                const levelArray = Array.isArray(lesson?.level)
+                                    ? lesson.level
+                                    : (lesson?.level ? [lesson.level] : []);
+                                const devLevelArray = Array.isArray(lesson?.development_level)
+                                    ? lesson.development_level
+                                    : (lesson?.development_level ? [lesson.development_level] : []);
+                                const combinedLevels = levelArray.concat(devLevelArray);
+                                return combinedLevels.includes(level);
                             }));
                         });
 
-                        this.allLessons = filteredLessons;
+                        this.allLessons = Array.from(new Set(filteredLessons));
                         filteredLessons = [];
                     }
                     
@@ -232,7 +243,10 @@ export class LessonsComponent implements OnInit {
         this._lessonService.getLessons(this.token, page, true).subscribe({
             next: (response) => {
                 if (response.lessons) {
-                    this.lessons = response.lessons;
+                    // Base filter: only completed and visible lessons
+                    this.lessons = response.lessons.filter((lesson) =>
+                        lesson?.state === 'completed' && lesson?.visible === true
+                    );
                     this.total = response.total;
                     this.pages = response.pages;  
                     this.page = response.currentPage; 
@@ -383,5 +397,52 @@ export class LessonsComponent implements OnInit {
                 console.log('Error al abrir modal de enviar experiencia:', error);
             }
         }, 0);
+    }
+
+    // Normaliza y obtiene los niveles (level y development_level) como arreglo de claves
+    public extractLevels(lesson): string[] {
+        const collectedValues: string[] = [];
+
+        const collect = (value: any) => {
+            if (value === null || value === undefined || value === '') {
+                return;
+            }
+            collectedValues.push(String(value));
+        };
+
+        if (Array.isArray(lesson?.level)) {
+            lesson.level.forEach(collect);
+        } else {
+            collect(lesson?.level);
+        }
+
+        if (Array.isArray(lesson?.development_level)) {
+            lesson.development_level.forEach(collect);
+        } else {
+            collect(lesson?.development_level);
+        }
+
+        const normalized = collectedValues
+            .map((v) => this.mapLevelKey(v))
+            .filter((v) => !!v);
+
+        return Array.from(new Set(normalized));
+    }
+
+    private mapLevelKey(value: string): string {
+        const upper = String(value).toUpperCase().trim();
+        const aliasMap: { [key: string]: string } = {
+            'GARDEN': 'GARDEN',
+            'PRESCHOOL': 'GARDEN',
+            'PREESCOLAR': 'GARDEN',
+            'SCHOOL': 'SCHOOL',
+            'PRIMARIA': 'SCHOOL',
+            'HIGHSCHOOL': 'HIGHSCHOOL',
+            'SECUNDARIA': 'HIGHSCHOOL',
+            'UNIVERSITY': 'GRADUATE',
+            'UNIVERSITARIO': 'GRADUATE',
+            'GRADUATE': 'GRADUATE'
+        };
+        return aliasMap[upper] || upper;
     }
 }
