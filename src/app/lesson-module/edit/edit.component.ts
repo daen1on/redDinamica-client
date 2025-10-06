@@ -1,9 +1,10 @@
-import { Component, Input, OnInit, Output, EventEmitter, AfterViewInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, AfterViewInit, ViewChild, TemplateRef } from '@angular/core';
 import { GLOBAL } from 'src/app/services/global';
 import { LESSON_STATES, ACADEMIC_LEVEL } from 'src/app/services/DATA';
 import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 
 @Component({
@@ -39,9 +40,13 @@ export class EditComponent implements OnInit, AfterViewInit {
     public selectedLevels: any[] = [];
     public showLevelDropdown = false;
 
+    @ViewChild('confirmCompletedTpl') confirmCompletedTpl: TemplateRef<any>;
+    public confirmedCompleted: boolean = false;
+
     constructor(
         private _userService: UserService,
         private _lessonService: LessonService,
+        private modalService: NgbModal,
     ) {
         this.title = "Editar lección";
         this.url = GLOBAL.url;
@@ -217,7 +222,8 @@ export class EditComponent implements OnInit, AfterViewInit {
         this.lesson.justification = this.lessonForm.value.justification;
         
         // Logging específico para el estado
-        console.log("Estado anterior:", this.lesson.state);
+        const previousState = this.lesson.state;
+        console.log("Estado anterior:", previousState);
         console.log("Estado del formulario:", this.lessonForm.value.state);
         this.lesson.state = this.lessonForm.value.state;
         console.log("Estado asignado:", this.lesson.state);
@@ -232,6 +238,29 @@ export class EditComponent implements OnInit, AfterViewInit {
             state: this.lesson.state
         });
 
+        // Confirmar si se cambia a terminada
+        if (previousState !== 'completed' && this.lesson.state === 'completed' && !this.confirmedCompleted) {
+            this.modalService.open(this.confirmCompletedTpl, { size: 'md', backdrop: 'static', keyboard: false });
+            return;
+        }
+
+        this.saveLesson();
+
+        document.scrollingElement.scrollTop = 0;
+    }
+
+    confirmCompletedAndSave(): void {
+        this.confirmedCompleted = true;
+        this.modalService.dismissAll();
+        this.saveLesson();
+    }
+
+    cancelCompleted(): void {
+        this.confirmedCompleted = false;
+        this.modalService.dismissAll();
+    }
+
+    private saveLesson(): void {
         // Agregar timeout y loading state
         this.submitted = true;
         const startTime = Date.now();
@@ -240,23 +269,20 @@ export class EditComponent implements OnInit, AfterViewInit {
             next: response => {
                 const responseTime = Date.now() - startTime;
                 console.log(`Respuesta del servidor recibida en ${responseTime}ms:`, response);
-                
+
                 if (response && (response.lesson || response._id)) {
-                    // Aceptar tanto response.lesson como response directo
                     const lessonData = response.lesson || response;
-                    
+
                     if (lessonData && (lessonData._id || lessonData.id)) {
                         this.status = 'success';
                         this.submitted = false;
                         this.edited.emit();
                         console.log("Lección editada exitosamente:", lessonData._id || lessonData.id);
-                        
-                        // Actualizar los datos locales con la respuesta
+
                         if (response.lesson) {
                             Object.assign(this.lesson, response.lesson);
                         }
-                        
-                        // Mostrar mensaje de éxito temporal
+
                         setTimeout(() => {
                             if (this.status === 'success') {
                                 this.status = null;
@@ -278,10 +304,8 @@ export class EditComponent implements OnInit, AfterViewInit {
                 console.error('Error updating lesson:', error);
                 console.error('Error status:', error.status);
                 console.error('Error body:', error.error);
-                
-                // Manejo específico de errores
+
                 if (error.status === 500) {
-                    // Para errores 500, verificar si los datos se guardaron
                     console.warn('Error 500 detectado. Los datos podrían haberse guardado correctamente.');
                     this.errorMsg = 'Hubo un problema con la respuesta del servidor, pero los cambios podrían haberse guardado. Por favor, refresca la página para verificar.';
                 } else if (error.status === 400) {
@@ -293,12 +317,13 @@ export class EditComponent implements OnInit, AfterViewInit {
                 } else {
                     this.errorMsg = error.error?.message || 'Hubo un error editando la lección. Inténtalo de nuevo más tarde.';
                 }
-                
+
                 console.error("Error message:", this.errorMsg);
             }
         });
 
-        document.scrollingElement.scrollTop = 0;
+        // Reset de confirmación para siguientes envíos
+        this.confirmedCompleted = false;
     }
 
     onChanges() {

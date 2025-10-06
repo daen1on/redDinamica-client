@@ -258,6 +258,27 @@
                 <div class="form-group">
                     <button type="submit" class="btn btn-success w-100">Guardar cambios</button>
                 </div>
+
+                <!-- Modal confirmación para estado completado -->
+                <ng-template #confirmCompletedTpl let-modal>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirmar envío para publicación</h5>
+                        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cancelCompleted()"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">
+                            Vas a marcar esta lección como <strong>Terminada</strong> y enviar para su publicación.
+                        </p>
+                        <ul class="mb-0">
+                            <li>Una vez enviada para ser publicada, <strong>no podrás editar</strong> la lección.</li>
+                            <li>El líder ni los integrantes <strong>no tendrán acceso</strong> a Conversación ni a Comentarios del facilitador.</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" (click)="cancelCompleted()">Cancelar</button>
+                        <button type="button" class="btn btn-primary" (click)="confirmCompletedAndSave()">Entiendo, continuar</button>
+                    </div>
+                </ng-template>
             </div>
 
 
