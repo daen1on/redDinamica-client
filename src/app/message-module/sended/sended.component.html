@@ -46,7 +46,9 @@
                                         <strong>
                                             {{message.receiver.name}} {{message.receiver.surname}}
                                         </strong>
-                                        <small>({{categories[message.receiver.role].label}})</small>
+                                        <small *ngIf="message.receiver && message.receiver.role">
+                                            ({{ categories[message.receiver.role]?.label || message.receiver.role || 'Usuario' }})
+                                        </small>
                                     </a>
                                     <br>
                                     <small class=" text-muted">Enviado el:

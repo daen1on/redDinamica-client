@@ -55,8 +55,11 @@ export class ReceivedComponent {
         this.actualPage();
         let unviewedMessage = parseInt(localStorage.getItem('unviewedMessages'));
         if(unviewedMessage && unviewedMessage > 0){            
-            setInterval(() => this.setviewed(), 1000);
-            localStorage.setItem('unviewedMessages', "0");
+            setTimeout(() => {
+                this.setviewed();
+                // Actualizar localStorage inmediatamente
+                localStorage.setItem('unviewedMessages', "0");
+            }, 1000);
         }
     }
 

@@ -121,10 +121,16 @@ export class NewMessageComponent {
     }
 
     customSearchFn(term: string, item: User) {
-        let userRole = LABEL_ROLE[<string> item.role].label;
+        if (!item) { return false; }
 
-        term = term.toLocaleLowerCase();
+        const roleKey = (item as any)?.role as string | undefined;
+        const userRoleLabel = (roleKey && LABEL_ROLE[roleKey]?.label) ? LABEL_ROLE[roleKey].label : (roleKey || '');
 
-        return item.name.toLocaleLowerCase().indexOf(term) > -1 || item.surname.toLocaleLowerCase().includes(term) || userRole.toLocaleLowerCase().includes(term)        
+        term = (term || '').toLocaleLowerCase();
+        const name = (item.name || '').toLocaleLowerCase();
+        const surname = (item.surname || '').toLocaleLowerCase();
+        const roleLabel = userRoleLabel.toLocaleLowerCase();
+
+        return name.indexOf(term) > -1 || surname.includes(term) || roleLabel.includes(term);
     }
 }

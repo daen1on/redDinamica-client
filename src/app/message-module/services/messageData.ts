@@ -58,5 +58,9 @@ export const LABEL_ROLE = {
     delegated_admin: {
         label:"Administrador",
         class:"badge-green"
+    },
+    lesson_manager: {
+        label:"Gestor de Lecciones",
+        class:"badge-primary"
     }
 };    

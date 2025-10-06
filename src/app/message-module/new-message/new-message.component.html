@@ -41,7 +41,7 @@
 
                             </div>
                             {{item.name}} {{item.surname}} <br>
-                            <small>{{categories[item.role].label}}</small>
+                            <small>{{ categories[item.role]?.label || (item.role || 'Rol no definido') }}</small>
                         </ng-template>
                     </ng-select>
                     <div *ngIf="submitted && f.to.errors">
