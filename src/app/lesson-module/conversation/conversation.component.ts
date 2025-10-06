@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { LESSON_STATES, ICON_STYLE, MAX_FILE_SIZE } from 'src/app/services/DATA';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
@@ -16,7 +16,7 @@ import { HttpEvent, HttpEventType } from '@angular/common/http';
     styleUrls: ['./conversation.component.css'],
     standalone: false
 })
-export class ConversationComponent implements OnInit {
+export class ConversationComponent implements OnInit, OnDestroy {
     public title: string;
     public identity;
     public token;
@@ -46,6 +46,11 @@ export class ConversationComponent implements OnInit {
     public maxSize = MAX_FILE_SIZE * 1024 * 1024;
     public maxSizeError = false;
     public loading = false;
+    // Edición de mensajes
+    public editingMessage: any = null;
+    public editingText = new UntypedFormControl('');
+    // Polling
+    private pollingHandle: any = null;
 
     constructor(
         private _userService: UserService,
@@ -73,9 +78,14 @@ export class ConversationComponent implements OnInit {
     ngOnInit(): void {
         this.getGroups();
         this.selectedGroup = this.groups[0];
-        this._route.parent.url.subscribe(value => {
-            this.parentUrl = value[0].path;
+        this._route.parent?.url.subscribe(segments => {
+            const first = (segments && segments.length > 0) ? segments[0] : null;
+            this.parentUrl = (first && first.path)
+                || this._route.parent?.snapshot?.routeConfig?.path?.split('/')?.[0]
+                || '';
         });
+        // Iniciar polling de la lección para refresco en tiempo real
+        this.startPolling();
     }
     
   
@@ -227,14 +237,36 @@ export class ConversationComponent implements OnInit {
 
         }
 
-        tempMessage.created_at = Math.floor(Date.now() / 1000);
+        tempMessage.created_at = new Date();
         tempMessage.file = tempFile;
-
-        tempMessage.author = this.identity._id;
-        
-        this.lesson.conversations = this.lesson.conversations.concat(tempMessage);
-
-        this.editLesson(this.lesson);
+        // Enviar vía endpoint específico para evitar condiciones de carrera
+        this._lessonService.addLessonMessage(this.token, this.lesson._id, {
+            text: this.message.value,
+            conversationTitle: tempMessage.conversationTitle,
+            file: tempFile || null
+        }).subscribe({
+            next: (response) => {
+                if (response && response.lesson && response.lesson._id) {
+                    this.lesson = response.lesson;
+                    this.status = 'success';
+                    this.submitted = false;
+                    this.name.reset();
+                    this.files.reset();
+                    this.message.reset();
+                    this.getGroups();
+                    this.disableForm(false);
+                } else {
+                    this.status = 'error';
+                    this.submitted = false;
+                    this.disableForm(false);
+                }
+            },
+            error: () => {
+                this.status = 'error';
+                this.submitted = false;
+                this.disableForm(false);
+            }
+        });
 
     }
 
@@ -346,5 +378,80 @@ export class ConversationComponent implements OnInit {
             }
         });
 
+    }
+
+    // ===== Helpers de edición de mensajes =====
+    canEditMessage(message: any): boolean {
+        const isOwner = message?.author && (message.author._id === this.identity._id);
+        const isAdmin = this.parentUrl === 'admin';
+        return !!(isOwner || isAdmin);
+    }
+
+    startEditMessage(message: any): void {
+        if (!this.canEditMessage(message)) return;
+        this.editingMessage = message;
+        this.editingText.setValue(message.text || '');
+    }
+
+    cancelEditMessage(): void {
+        this.editingMessage = null;
+        this.editingText.reset('');
+    }
+
+    saveEditMessage(group: string): void {
+        if (!this.editingMessage) return;
+        const newText = (this.editingText.value || '').toString().trim();
+        if (!newText) return;
+
+        const messageId = this.editingMessage._id;
+        this._lessonService.editLessonMessage(this.token, this.lesson._id, messageId, { text: newText, scope: 'conversations' }).subscribe({
+            next: (response) => {
+                if (response?.lesson?._id) {
+                    this.lesson = response.lesson;
+                    this.getGroups();
+                }
+                this.editingMessage = null;
+                this.editingText.reset('');
+            },
+            error: () => {
+                this.editingMessage = null;
+                this.editingText.reset('');
+            }
+        });
+    }
+
+    deleteMessage(message: any): void {
+        if (!this.canEditMessage(message)) return;
+        const idx = this.lesson.conversations.findIndex((m: any) => m === message);
+        if (idx >= 0) {
+            this.lesson.conversations.splice(idx, 1);
+            this.editLesson(this.lesson);
+        }
+    }
+
+    // ===== Polling para refresco en tiempo real =====
+    private startPolling(): void {
+        if (this.pollingHandle) return;
+        // Poll cada 10s si no estamos enviando ni editando
+        this.pollingHandle = setInterval(() => {
+            if (this.submitted || this.loading || this.editingMessage) return;
+            if (!this.lesson?._id) return;
+            this._lessonService.getLesson(this.token, this.lesson._id).subscribe({
+                next: (response) => {
+                    if (response?.lesson?._id) {
+                        this.lesson = response.lesson;
+                        this.getGroups();
+                    }
+                },
+                error: () => {}
+            });
+        }, 10000);
+    }
+
+    ngOnDestroy(): void {
+        if (this.pollingHandle) {
+            clearInterval(this.pollingHandle);
+            this.pollingHandle = null;
+        }
     }
 }

@@ -89,17 +89,39 @@
                                                     </strong>
                                                 </a> <br>
                                                 <small class=" text-muted">
-                                                    {{ (message.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL' }}
+                                                    {{ (message.created_at | amDateFormat:'LLL') || ((message.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL') }}
+                                                    <span *ngIf="message.edited" class="text-muted"> · editado</span>
                                                 </small>
                                             </h6>
 
-                                            <p class="card-text" innerHTML="{{message.text | linky}}"></p>
-                                            <a *ngIf=" message.file" title="Descargar : {{message.file.fileName}}"
-                                                href="{{this.url + 'get-lesson/' + message.file.fileName}}"
-                                                target="_blank">
-                                                <i class="fas fa-paperclip"></i>
-                                                {{message.file.fileName}}
-                                            </a>
+                                            <div *ngIf="editingMessage !== message; else editForm">
+                                                <p class="card-text" innerHTML="{{message.text | linky}}"></p>
+                                                <a *ngIf=" message.file" title="Descargar : {{message.file.fileName}}"
+                                                    href="{{this.url + 'get-lesson/' + message.file.fileName}}"
+                                                    target="_blank">
+                                                    <i class="fas fa-paperclip"></i>
+                                                    {{message.file.fileName}}
+                                                </a>
+                                                <div *ngIf="canEditMessage(message)" class="mt-2">
+                                                    <button class="btn btn-sm btn-outline-primary me-2" (click)="startEditMessage(message)">
+                                                        <i class="fas fa-edit"></i> Editar
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" (click)="deleteMessage(message)">
+                                                        <i class="fas fa-trash"></i> Eliminar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <ng-template #editForm>
+                                                <textarea class="form-control mb-2" rows="2" [formControl]="editingText"></textarea>
+                                                <div>
+                                                    <button class="btn btn-sm btn-success me-2" (click)="saveEditMessage(group)">
+                                                        <i class="fas fa-save"></i> Guardar
+                                                    </button>
+                                                    <button class="btn btn-sm btn-secondary" (click)="cancelEditMessage()">
+                                                        Cancelar
+                                                    </button>
+                                                </div>
+                                            </ng-template>
                                         </div>
                                     </div>
 
