@@ -46,7 +46,7 @@
                     <li subclass="nav-item">
                       <a class="nav-link dropdown-item text-start" [routerLink]="['/inicio/mis-lecciones']" routerLinkActive="active">Mis lecciones</a>
                     </li>
-                    <li *ngIf="identity.role == 'expert' || identity.canAdvise || identity.role == 'admin' || identity.role == 'delegated_admin'" subclass="nav-item">
+                    <li *ngIf="identity.role == 'expert' || identity.canAdvise || identity.role == 'admin' || identity.role == 'delegated_admin' || identity.role == 'lesson_manager'" subclass="nav-item">
                       <a class="nav-link dropdown-item text-start" [routerLink]="['/inicio/asesorar-lecciones']" routerLinkActive="active">Asesorar lecciones</a>
                     </li>
                   </ul>
