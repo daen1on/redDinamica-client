@@ -182,6 +182,7 @@ export class AdviseLessonComponent implements OnInit {
                         console.log(`- ${lesson.title} (state: ${lesson.state}) - suggested_facilitator: ${lesson.suggested_facilitator?._id} - expert: ${lesson.expert?._id}`);
                     });
 
+                 
                     // Filter by state
                     if (this.selectedStates.length > 0) {
                         console.log('Filtering by selected states:', this.selectedStates);
@@ -312,7 +313,7 @@ export class AdviseLessonComponent implements OnInit {
     }
 
     // Aprobar lección como facilitador y crear convocatoria automáticamente
-    approveLessonAndCreateCall(lesson: any) {
+    approveLesson(lesson: any) {
         if (!this.isSuggestedFacilitator(lesson) || !this.isProposedLesson(lesson)) {
             console.error('No tienes permisos para aprobar esta lección');
             return;
@@ -329,8 +330,10 @@ export class AdviseLessonComponent implements OnInit {
                     // Cerrar modal si está abierto
                     this.closePreviewModal();
                     
-                    // Redirigir de vuelta a la lista general
-                    this._router.navigate(['/inicio/asesorar-lecciones']);
+                    // Redirigir de vuelta a la lista general y recargar
+                    this._router.navigate(['/inicio/asesorar-lecciones']).then(() => {
+                        try { (window as any).location?.reload(); } catch {}
+                    });
                 },
                 error: error => {
                     console.error('Error aprobando lección:', error);
@@ -370,13 +373,27 @@ export class AdviseLessonComponent implements OnInit {
             return;
         }
 
-        if (confirm(`¿Estás seguro de que quieres rechazar la lección "${lesson.title}"? Esta acción notificará al autor que debe buscar otro facilitador.`)) {
-            console.log('Rechazando lección:', lesson._id);
+        // Determinar mensaje según si la lección ya fue aceptada por admin
+        const isAccepted = lesson.accepted === true;
+        const confirmMessage = isAccepted 
+            ? `¿Estás seguro de que quieres retirarte de la lección "${lesson.title}"? La lección ya fue aceptada, por lo que un administrador deberá asignar un nuevo facilitador.`
+            : `¿Estás seguro de que quieres rechazar la lección "${lesson.title}"? Esta acción notificará al autor que debe buscar otro facilitador.`;
+
+        if (confirm(confirmMessage)) {
+            console.log('Rechazando/Retirándose de lección:', lesson._id);
             
-            this._lessonService.rejectFacilitatorSuggestion(this.token, lesson._id, 'El facilitador ha decidido no participar en esta lección.').subscribe({
+            const reason = prompt('Por favor, indica el motivo (opcional):') || 'El facilitador ha decidido no participar en esta lección.';
+            
+            this._lessonService.rejectFacilitatorSuggestion(this.token, lesson._id, reason).subscribe({
                 next: response => {
-                    console.log('Lección rechazada exitosamente:', response);
-                    alert('Lección rechazada. El autor ha sido notificado para que busque otro facilitador.');
+                    console.log('Respuesta del servidor:', response);
+                    
+                    // Verificar si fue retiro (lección ya aceptada) o rechazo completo
+                    if (response.withdrawn) {
+                        alert('Te has retirado de la lección exitosamente. Un administrador asignará un nuevo facilitador.');
+                    } else {
+                        alert('Lección rechazada. El autor ha sido notificado para que busque otro facilitador.');
+                    }
                     
                     // Cerrar modal
                     this.closePreviewModal();
@@ -388,7 +405,7 @@ export class AdviseLessonComponent implements OnInit {
                 },
                 error: error => {
                     console.error('Error rechazando lección:', error);
-                    alert('Hubo un error al rechazar la lección. Por favor, inténtalo de nuevo.');
+                    alert('Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo.');
                 }
             });
         }
