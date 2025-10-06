@@ -18,10 +18,23 @@ export class ErrorService {
   }
   updateErrorReport(id: string, errorReport: any, file: File | null): Observable<any> {
     const formData = new FormData();
+    formData.append('category', errorReport.category);
     formData.append('type', errorReport.type);
     formData.append('module', errorReport.module);
     formData.append('description', errorReport.description);
     formData.append('steps', errorReport.steps);
+
+    if (errorReport.publicationId) {
+      formData.append('publicationId', errorReport.publicationId);
+    }
+
+    if (errorReport.reportedUserId) {
+      formData.append('reportedUserId', errorReport.reportedUserId);
+    }
+
+    if (errorReport.status) {
+      formData.append('status', errorReport.status);
+    }
   
     if (file) {
       formData.append('file', file);
@@ -37,10 +50,19 @@ export class ErrorService {
 
   addErrorReport(errorReport: any, file: File | null): Observable<any> {
     const formData = new FormData();
+    formData.append('category', errorReport.category);
     formData.append('type', errorReport.type);
     formData.append('module', errorReport.module);
     formData.append('description', errorReport.description);
     formData.append('steps', errorReport.steps);
+
+    if (errorReport.publicationId) {
+      formData.append('publicationId', errorReport.publicationId);
+    }
+
+    if (errorReport.reportedUserId) {
+      formData.append('reportedUserId', errorReport.reportedUserId);
+    }
 
     if (file) {
       formData.append('file', file);
@@ -53,7 +75,7 @@ export class ErrorService {
     return this._http.post(this.url + 'error-report', formData, { headers: headers });
   }
 
-  getErrorReports(page: number, pageSize: number, type: string, module: string): Observable<any> {
+  getErrorReports(page: number, pageSize: number, type?: string, module?: string, category?: string, status?: string): Observable<any> {
     let headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': this.getToken() || ''
@@ -62,8 +84,10 @@ export class ErrorService {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
+    if (category) params = params.set('category', category);
     if (type) params = params.set('type', type);
     if (module) params = params.set('module', module);
+    if (status) params = params.set('status', status);
 
     return this._http.get<any>(`${this.url}/error-reports`, { params, headers: headers });
   }
