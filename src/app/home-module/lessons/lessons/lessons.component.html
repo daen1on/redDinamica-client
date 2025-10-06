@@ -142,7 +142,7 @@
                                         <div class="col">
                                             <div class="text-center p-2 py-3 rounded-lg border border-ligth text-center bg-{{lesson_states[lesson.state].class}}"
                                                 [routerLink]="['/inicio','leccion', lesson._id]"
-                                                style="width: 80px; height: 80px; overflow: hidden;cursor: pointer;">
+                                                style="width: 100%; height: 80px; overflow: hidden;cursor: pointer;">
                                                 <i class="text-white fas fa-chalkboard-teacher"
                                                     style="font-size:50px"></i>
 
@@ -216,10 +216,12 @@
                                             <div class="row">
                                                 <div class="col">
                                                     <p>
-                                                        <span
-                                                            *ngIf="academic_level.hasOwnProperty(lesson.level); else notAssigned">
-                                                            {{academic_level[lesson.level]}}
-                                                        </span>
+                                                        <ng-container *ngIf="extractLevels(lesson).length > 0; else notAssigned">
+                                                            <span *ngFor="let lv of extractLevels(lesson)"
+                                                                class="badge bg-info me-1 mb-1 d-inline-flex align-items-center">
+                                                                {{ academic_level[lv] || lv }}
+                                                            </span>
+                                                        </ng-container>
                                                         <ng-template #notAssigned>
                                                             <small class="text-muted">No se ha asignado</small>
                                                         </ng-template>
@@ -242,10 +244,10 @@
                                             <div class="row">
                                                 <div class="col">
                                                     <div *ngIf="lesson.knowledge_area.length > 0; else notAssigned"
-                                                        style="display: flex; flex-wrap: wrap;">
-                                                        <small *ngFor="let area of lesson.knowledge_area"
-                                                            class="badge bg-info text-dark me-1 mb-1 text-truncate"
-                                                            title="{{area.name}}">{{area.name}}</small>
+                                                        class="selected-items-container mb-2">
+                                                        <span *ngFor="let area of lesson.knowledge_area"
+                                                            class="badge bg-info me-1 mb-1 d-inline-flex align-items-center"
+                                                            title="{{area.name}}">{{area.name}}</span>
                                                     </div>
 
                                                     <ng-template #notAssigned>
@@ -370,7 +372,7 @@
                                             <div class="text-center p-2 py-3 rounded-lg border border-ligth text-center bg-{{lesson_states[lesson.state].class}}"
                                                 
                                                 [routerLink]="['/inicio','leccion', lesson._id]"
-                                                style="width: 80px; height: 80px; overflow: hidden;cursor: pointer;">
+                                                style="width: 100%; height: 80px; overflow: hidden;cursor: pointer;">
                                                 <i class="text-white fas fa-chalkboard-teacher"
                                                     style="font-size:50px"></i>
 
@@ -445,10 +447,12 @@
                                             <div class="row">
                                                 <div class="col">
                                                     <p>
-                                                        <span
-                                                            *ngIf="academic_level.hasOwnProperty(lesson.level); else notAssigned">
-                                                            {{academic_level[lesson.level]}}
-                                                        </span>
+                                                        <ng-container *ngIf="extractLevels(lesson).length > 0; else notAssigned">
+                                                            <span *ngFor="let lv of extractLevels(lesson)"
+                                                                class="badge bg-info me-1 mb-1 d-inline-flex align-items-center">
+                                                                {{ academic_level[lv] || lv }}
+                                                            </span>
+                                                        </ng-container>
                                                         <ng-template #notAssigned>
                                                             <small class="text-muted">No se ha asignado</small>
                                                         </ng-template>
@@ -472,10 +476,10 @@
                                                 <div class="col">
 
                                                     <div *ngIf="lesson.knowledge_area.length > 0; else notAssigned"
-                                                        style="display: flex; flex-wrap: wrap;">
-                                                        <small *ngFor="let area of lesson.knowledge_area"
-                                                            class="badge bg-info text-dark me-1 mb-1 text-truncate"
-                                                            title="{{area.name}}">{{area.name}}</small>
+                                                        class="selected-items-container mb-2">
+                                                        <span *ngFor="let area of lesson.knowledge_area"
+                                                            class="badge bg-info me-1 mb-1 d-inline-flex align-items-center"
+                                                            title="{{area.name}}">{{area.name}}</span>
                                                     </div>
                                                     <ng-template #notAssigned>
                                                         <small class="text-muted">No se ha asignado</small>

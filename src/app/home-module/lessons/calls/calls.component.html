@@ -99,7 +99,7 @@
                                     <div class="row">
                                         <div class="col">
                                             <div class="text-center p-2 py-3 rounded-lg border border-ligth text-center bg-warning"
-                                                style="width: 80px; height: 80px; overflow: hidden;">
+                                                style="width: 120px; height: 80px; overflow: hidden;">
                                                 <i class="text-white fas fa-bullhorn" style="font-size:50px"></i>
                                             </div>
                                         </div>
@@ -175,9 +175,9 @@
                                             <div class="row">
                                                 <div class="col">
 
-                                                    <div *ngIf="lesson.knowledge_area.length > 0; else notAssigned">
+                                                    <div *ngIf="lesson.knowledge_area && lesson.knowledge_area.length > 0; else notAssigned">
                                                         <small *ngFor="let area of lesson.knowledge_area"
-                                                            class="badge bg-info text-dark me-1 text-truncate">{{area.name}}</small>
+                                                            class="badge badge-info me-1 text-truncate">{{area.name}}</small>
                                                     </div>
                                                     <ng-template #notAssigned>
                                                         <small class="text-muted">No se ha asignado</small>
@@ -235,17 +235,17 @@
                                                             [ngModel]="getCallDraftText(lesson)"
                                                             (ngModelChange)="setCallDraftText(lesson, $event)"
                                                             placeholder="Escribe una breve descripción..."></textarea>
-                                                        <div class="form-check form-switch mb-2" *ngIf="lesson.call?.text">
+                                                        <div class="form-check form-switch mb-2">
                                                             <input class="form-check-input" type="checkbox" id="visible_{{lesson._id}}"
                                                                 [ngModel]="getCallDraftVisible(lesson)"
                                                                 (ngModelChange)="setCallDraftVisible(lesson, $event)">
                                                             <label class="form-check-label" for="visible_{{lesson._id}}">Visible públicamente</label>
                                                         </div>
                                                         <div class="d-flex gap-2">
-                                                            <button class="btn btn-success" *ngIf="!lesson.call?.text || getCallDraftVisible(lesson) === false" [disabled]="isSavingCall[lesson._id]" (click)="submitCall(lesson)">
+                                                           <button class="btn btn-success" *ngIf="!lesson.call?.text || getCallDraftVisible(lesson) === false" [disabled]="isSavingCall[lesson._id]" (click)="openCall(lesson)">
                                                                 <i class="fas fa-bullhorn me-1"></i>Abrir Convocatoria
                                                             </button>
-                                                            <button class="btn btn-success" *ngIf="lesson.call?.text && getCallDraftVisible(lesson) !== false" [disabled]="isSavingCall[lesson._id]" (click)="submitCall(lesson)">
+                                                            <button class="btn btn-success" *ngIf="lesson.call?.text && getCallDraftVisible(lesson) !== false" [disabled]="isSavingCall[lesson._id] || isDraftSameAsSaved(lesson)" (click)="submitCall(lesson)">
                                                                 <i class="fas fa-save me-1"></i>Guardar
                                                             </button>
                                                             <button class="btn btn-warning" [disabled]="isSavingCall[lesson._id]" 
@@ -301,7 +301,7 @@
                                         <div class="row">
                                             <div class="col">
                                                 <div class="text-center p-2 py-3 rounded-lg border border-ligth text-center bg-warning"
-                                                    style="width: 80px; height: 80px; overflow: hidden;">
+                                                    style="width: 120px; height: 80px; overflow: hidden;">
                                                     <i class="text-white fas fa-bullhorn" style="font-size:50px"></i>
                                                 </div>
                                             </div>
@@ -375,9 +375,9 @@
                                                 <div class="row">
                                                     <div class="col">
 
-                                                        <div *ngIf="lesson.knowledge_area.length > 0; else notAssigned">
+                                                        <div *ngIf="lesson.knowledge_area && lesson.knowledge_area.length > 0; else notAssigned">
                                                             <small *ngFor="let area of lesson.knowledge_area"
-                                                                class="badge bg-info text-primary me-1 text-truncate">{{area.name}}</small>
+                                                                class="badge badge-info me-1 text-truncate">{{area.name}}</small>
                                                         </div>
                                                         <ng-template #notAssigned>
                                                             <small class="text-muted">No se ha asignado</small>
@@ -435,7 +435,7 @@
                                                                 [ngModel]="getCallDraftText(lesson)"
                                                                 (ngModelChange)="setCallDraftText(lesson, $event)"
                                                                 placeholder="Escribe una breve descripción..."></textarea>
-                                                            <div class="form-check form-switch mb-2" *ngIf="lesson.call?.text">
+                                                            <div class="form-check form-switch mb-2">
                                                                 <input class="form-check-input" type="checkbox" id="visible2_{{lesson._id}}"
                                                                     [ngModel]="getCallDraftVisible(lesson)"
                                                                     (ngModelChange)="setCallDraftVisible(lesson, $event)">
@@ -445,7 +445,7 @@
                                                                 <button class="btn btn-success" *ngIf="!lesson.call?.text || getCallDraftVisible(lesson) === false" [disabled]="isSavingCall[lesson._id]" (click)="submitCall(lesson)">
                                                                     <i class="fas fa-bullhorn me-1"></i>Abrir Convocatoria
                                                                 </button>
-                                                                <button class="btn btn-success" *ngIf="lesson.call?.text && getCallDraftVisible(lesson) !== false" [disabled]="isSavingCall[lesson._id]" (click)="submitCall(lesson)">
+                                                                <button class="btn btn-success" *ngIf="lesson.call?.text && getCallDraftVisible(lesson) !== false" [disabled]="isSavingCall[lesson._id] || isDraftSameAsSaved(lesson)" (click)="submitCall(lesson)">
                                                                     <i class="fas fa-save me-1"></i>Guardar
                                                                 </button>
                                                                 <button class="btn btn-warning" [disabled]="isSavingCall[lesson._id]" 
