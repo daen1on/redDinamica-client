@@ -12,11 +12,12 @@ import { CallsComponent } from './lessons/calls/calls.component';
 import { LessonComponent } from '../lesson-module/lesson.component';
 import { AdviseLessonComponent } from './lessons/advise-lesson/advise-lesson.component';
 import { homeGuard } from './guards/home.guard';
+import { activatedUserGuard } from './guards/activated-user.guard';
 
 
 const homeRoutes: Routes = [
     {
-        path: 'inicio',
+        path: '',
         component: HomeComponent,
         canActivate: [homeGuard],
         children: [
@@ -27,17 +28,18 @@ const homeRoutes: Routes = [
             { path: 'publicacion/:id', component: SinglePublicationComponent },
             { path: 'usuarios', component: UsersComponent },
             { path: 'usuarios/:page', component: UsersComponent },
-            { path: 'lecciones', component: LessonsComponent },
-            { path: 'lecciones/:page', component: LessonsComponent },
-            { path: 'leccion/:id', component: LessonComponent },
-            { path: 'mis-lecciones', component: MyLessonsComponent },
-            { path: 'mis-lecciones/:page', component: MyLessonsComponent },
-            { path: 'asesorar-lecciones', component: AdviseLessonComponent },
-            { path: 'asesorar-lecciones/:page', component: AdviseLessonComponent },
-            { path: 'convocatorias', component: CallsComponent },
-            { path: 'convocatorias/:page', component: CallsComponent },
-            { path: 'recursos', component: ResourcesComponent },
-            { path: 'recursos/:page', component: ResourcesComponent },
+            // Rutas protegidas por GDPR - solo usuarios activados
+            { path: 'lecciones', component: LessonsComponent, canActivate: [activatedUserGuard] },
+            { path: 'lecciones/:page', component: LessonsComponent, canActivate: [activatedUserGuard] },
+            { path: 'leccion/:id', component: LessonComponent, canActivate: [activatedUserGuard] },
+            { path: 'mis-lecciones', component: MyLessonsComponent, canActivate: [activatedUserGuard] },
+            { path: 'mis-lecciones/:page', component: MyLessonsComponent, canActivate: [activatedUserGuard] },
+            { path: 'asesorar-lecciones', component: AdviseLessonComponent, canActivate: [activatedUserGuard] },
+            { path: 'asesorar-lecciones/:page', component: AdviseLessonComponent, canActivate: [activatedUserGuard] },
+            { path: 'convocatorias', component: CallsComponent, canActivate: [activatedUserGuard] },
+            { path: 'convocatorias/:page', component: CallsComponent, canActivate: [activatedUserGuard] },
+            { path: 'recursos', component: ResourcesComponent, canActivate: [activatedUserGuard] },
+            { path: 'recursos/:page', component: ResourcesComponent, canActivate: [activatedUserGuard] },
             { path: '**', component: MainComponent }
         ]
     }
