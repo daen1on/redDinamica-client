@@ -1,204 +1,453 @@
 <div class="lesson-detail-container">
   <!-- Loading spinner -->
   <div *ngIf="loading" class="loading-container">
-    <div class="spinner-border" role="status">
+    <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Cargando...</span>
     </div>
   </div>
 
-  <!-- Error message -->
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>{{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = ''" aria-label="Close"></button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i>{{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
   </div>
 
   <!-- Lesson details -->
-  <div *ngIf="!loading && lesson" class="lesson-content">
-    <!-- Header -->
-    <div class="lesson-header">
-      <div class="lesson-info">
-        <h1>{{ lesson.title }}</h1>
-        <p class="lesson-resume">{{ lesson.resume }}</p>
-        <div class="lesson-meta">
-          <span class="badge" [ngClass]="getStatusBadgeClass(lesson.status)">
-            {{ getStatusLabel(lesson.status) }}
-          </span>
-          <span class="badge bg-primary">{{ lesson.level }}</span>
-          <span class="badge bg-secondary">{{ getDifficultyLabel(lesson.difficulty) }}</span>
-          <span class="badge bg-info text-dark">{{ getDurationLabel(lesson.duration) }}</span>
-          <span *ngIf="lesson.isExported" class="badge bg-success">
-            <i class="fas fa-upload"></i> Exportada
-          </span>
-        </div>
-      </div>
-      
-      <div class="lesson-actions">
-        <button *ngIf="canEdit()" class="btn btn-primary" (click)="editLesson()">
-          <i class="fas fa-edit"></i> Editar
-        </button>
-        <button *ngIf="canDelete()" class="btn btn-danger" (click)="deleteLesson()">
-          <i class="fas fa-trash"></i> Eliminar
-        </button>
-        <button *ngIf="canApprove()" class="btn btn-success" (click)="approveLesson()">
-          <i class="fas fa-check"></i> Aprobar
-        </button>
-        <button *ngIf="canApprove()" class="btn btn-warning" (click)="rejectLesson()">
-          <i class="fas fa-times"></i> Rechazar
-        </button>
-        <button *ngIf="canGrade()" class="btn btn-info" (click)="gradeLesson()">
-          <i class="fas fa-star"></i> Calificar
-        </button>
-        <button *ngIf="canExport()" class="btn btn-secondary" (click)="exportToMain()">
-          <i class="fas fa-upload"></i> Exportar
-        </button>
-      </div>
-    </div>
-
-    <!-- Content sections -->
-    <div class="lesson-sections">
-      <!-- Basic Information -->
-      <div class="section-card">
-        <h3><i class="fas fa-info-circle"></i> Información Básica</h3>
-        <div class="info-grid">
-          <div class="info-item">
-            <label>Autor:</label>
-            <span>{{ lesson.author || 'N/A' }}</span>
-          </div>
-          <div class="info-item">
-            <label>Grupo:</label>
-            <span>{{ lesson.academicGroup || 'N/A' }}</span>
-          </div>
-          <div class="info-item">
-            <label>Nivel:</label>
-            <span>{{ lesson.level }}</span>
-          </div>
-          <div class="info-item">
-            <label>Dificultad:</label>
-            <span>{{ getDifficultyLabel(lesson.difficulty) }}</span>
-          </div>
-          <div class="info-item">
-            <label>Duración:</label>
-            <span>{{ getDurationLabel(lesson.duration) }}</span>
-          </div>
-          <div class="info-item">
-            <label>Estado:</label>
-            <span class="badge" [ngClass]="getStatusBadgeClass(lesson.status)">
-              {{ getStatusLabel(lesson.status) }}
+  <div *ngIf="!loading && lesson" class="lesson-wrapper">
+    <!-- Header simplificado -->
+    <div class="lesson-header-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div class="flex-grow-1">
+          <h1 class="lesson-title">{{ lesson.title }}</h1>
+          <p class="lesson-description text-muted">{{ lesson.resume }}</p>
+          
+          <!-- Badges de información -->
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <span class="badge" [ngClass]="'bg-' + getStatusColor(lesson.status)">
+              <i class="fas fa-circle-notch me-1"></i>{{ getStatusLabel(lesson.status) }}
+            </span>
+            <span class="badge bg-secondary" *ngIf="lesson.academicSettings?.academicLevel">
+              <i class="fas fa-school me-1"></i>{{ lesson.academicSettings.academicLevel }}
+            </span>
+            <span class="badge bg-info" *ngIf="lesson.academicSettings?.grade">
+              <i class="fas fa-graduation-cap me-1"></i>{{ lesson.academicSettings.grade }}
+            </span>
+            <span class="badge bg-warning text-dark" *ngIf="lesson.grade">
+              <i class="fas fa-star me-1"></i>{{ lesson.grade }}/5
+            </span>
+            <span class="badge bg-success" *ngIf="lesson.isExported">
+              <i class="fas fa-check-circle me-1"></i>Exportada
             </span>
           </div>
         </div>
-      </div>
 
-      <!-- Justification -->
-      <div class="section-card">
-        <h3><i class="fas fa-lightbulb"></i> Justificación de la Lección</h3>
-        
-        <!-- Methodology -->
-        <div class="mb-4">
-          <h5><i class="fas fa-chalkboard-teacher me-2"></i>Metodología</h5>
-          <p>{{ lesson.justification?.methodology }}</p>
-        </div>
-
-        <!-- Objectives -->
-        <div>
-          <h5><i class="fas fa-bullseye me-2"></i>Objetivos de Aprendizaje</h5>
-          <p>{{ lesson.justification?.objectives }}</p>
-        </div>
-      </div>
-
-      <!-- Knowledge Areas -->
-      <div class="section-card" *ngIf="lesson.knowledge_areas && lesson.knowledge_areas.length > 0">
-        <h3><i class="fas fa-tags"></i> Áreas de Conocimiento</h3>
-        <div class="knowledge-areas">
-          <span *ngFor="let area of lesson.knowledge_areas" class="badge bg-primary me-2 mb-2">
-            {{ area.name || area }}
-          </span>
+        <!-- Action buttons -->
+        <div class="action-buttons-group">
+          <button *ngIf="canEdit()" class="btn btn-outline-primary btn-sm" (click)="editLesson()">
+            <i class="fas fa-edit"></i> Editar
+          </button>
+          <button *ngIf="canDelete()" class="btn btn-outline-danger btn-sm" (click)="deleteLesson()">
+            <i class="fas fa-trash"></i> Eliminar
+          </button>
+          <button *ngIf="canApprove()" class="btn btn-success btn-sm" (click)="openApproveModal()">
+            <i class="fas fa-check"></i> Aprobar
+          </button>
+          <button *ngIf="canApprove()" class="btn btn-danger btn-sm" (click)="openRejectModal()">
+            <i class="fas fa-times"></i> Rechazar
+          </button>
+          <button *ngIf="canGrade()" class="btn btn-warning btn-sm" (click)="openGradeModal()">
+            <i class="fas fa-star"></i> Calificar
+          </button>
+          <button *ngIf="canExport()" class="btn btn-info btn-sm" (click)="exportToMain()">
+            <i class="fas fa-upload"></i> Exportar
+          </button>
         </div>
       </div>
 
-      <!-- Tags -->
-      <div class="section-card" *ngIf="lesson.tags && lesson.tags.length > 0">
-        <h3><i class="fas fa-hashtag"></i> Etiquetas</h3>
-        <div class="tags">
-          <span *ngFor="let tag of lesson.tags" class="badge bg-info me-2 mb-2">
-            #{{ tag }}
-          </span>
-        </div>
-      </div>
-
-      <!-- Academic Settings -->
-      <div class="section-card" *ngIf="lesson.academicSettings">
-        <h3><i class="fas fa-graduation-cap"></i> Configuración Académica</h3>
-        <div class="info-grid">
-          <div class="info-item" *ngIf="lesson.academicSettings.grade">
-            <label>Grado:</label>
-            <span class="grade">{{ lesson.academicSettings.grade }}</span>
-          </div>
-          <div class="info-item" *ngIf="lesson.academicSettings.subjects && lesson.academicSettings.subjects.length > 0">
-            <label>Materias:</label>
-            <span>{{ lesson.academicSettings.subjects.join(', ') }}</span>
-          </div>
-          <div class="info-item">
-            <label>Nivel Académico:</label>
-            <span>{{ lesson.academicSettings.academicLevel }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Progress -->
-      <div class="section-card" *ngIf="lesson.progress">
-        <h3><i class="fas fa-chart-line"></i> Progreso</h3>
-        <div class="progress-grid">
-          <div class="progress-item">
-            <label>Completada:</label>
-            <span class="progress-status" [class.completed]="lesson.progress.completed">
-              {{ lesson.progress.completed ? '✓' : '○' }}
-            </span>
-          </div>
-          <div class="progress-item" *ngIf="lesson.progress.completedAt">
-            <label>Fecha de Completado:</label>
-            <span>{{ lesson.progress.completedAt | date:'short' }}</span>
-          </div>
-          <div class="progress-item">
-            <label>Tiempo Invertido:</label>
-            <span>{{ lesson.progress.timeSpent }} minutos</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Files -->
-      <div class="section-card" *ngIf="lesson.files && lesson.files.length > 0">
-        <h3><i class="fas fa-paperclip"></i> Archivos Adjuntos</h3>
-        <div class="files-grid">
-          <div *ngFor="let file of lesson.files" class="file-item">
-            <i class="fas fa-file"></i>
-            <span>{{ file.name }}</span>
-            <small>{{ file.size }} bytes</small>
-          </div>
-        </div>
-      </div>
-
-      <!-- Comments -->
-      <div class="section-card" *ngIf="lesson.comments && lesson.comments.length > 0">
-        <h3><i class="fas fa-comments"></i> Comentarios</h3>
-        <div class="comments-container">
-          <div *ngFor="let comment of lesson.comments" class="comment-item">
-            <div class="comment-header">
-              <strong>{{ comment.author || 'Usuario' }}</strong>
-              <small>{{ comment.timestamp | date:'short' }}</small>
+      <!-- Info rápida -->
+      <div class="quick-info mt-4">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <div class="info-card">
+              <i class="fas fa-user text-primary"></i>
+              <div>
+                <small class="text-muted d-block">Autor</small>
+                <strong>{{ displayUserName(lesson.author) }}</strong>
+              </div>
             </div>
-            <p>{{ comment.content }}</p>
+          </div>
+          <div class="col-md-3">
+            <div class="info-card">
+              <i class="fas fa-users text-success"></i>
+              <div>
+                <small class="text-muted d-block">Grupo</small>
+                <strong>{{ displayGroupName(lesson.academicGroup) }}</strong>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3" *ngIf="lesson.development_group?.length">
+            <div class="info-card">
+              <i class="fas fa-user-friends text-info"></i>
+              <div>
+                <small class="text-muted d-block">Colaboradores</small>
+                <strong>{{ lesson.development_group.length }}</strong>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="info-card">
+              <i class="fas fa-clock text-warning"></i>
+              <div>
+                <small class="text-muted d-block">Actualizada</small>
+                <strong>{{ lesson.updatedAt | date:'short' }}</strong>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Footer -->
-    <div class="lesson-footer">
-      <div class="lesson-meta">
-        <small>Creada: {{ lesson.createdAt | date:'short' }}</small>
-        <small *ngIf="lesson.updatedAt">Actualizada: {{ lesson.updatedAt | date:'short' }}</small>
+    <!-- Tabs navigation -->
+    <ul class="nav nav-tabs lesson-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+          <i class="fas fa-info-circle me-2"></i>Información
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chat" type="button" role="tab">
+          <i class="fas fa-comments me-2"></i>Conversación
+          <span class="badge bg-primary ms-2" *ngIf="lesson.chatMessages?.length">{{ lesson.chatMessages.length }}</span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab">
+          <i class="fas fa-paperclip me-2"></i>Archivos
+          <span class="badge bg-secondary ms-2" *ngIf="lesson.files?.length">{{ lesson.files.length }}</span>
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="team-tab" data-bs-toggle="tab" data-bs-target="#team" type="button" role="tab">
+          <i class="fas fa-user-friends me-2"></i>Equipo
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="feedback-tab" data-bs-toggle="tab" data-bs-target="#feedback" type="button" role="tab">
+          <i class="fas fa-chalkboard-teacher me-2"></i>Retroalimentación
+          <span class="badge bg-info ms-2" *ngIf="lesson.comments?.length">{{ lesson.comments.length }}</span>
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tabs content -->
+    <div class="tab-content lesson-tab-content">
+      <!-- Tab: Información -->
+      <div class="tab-pane fade show active" id="info" role="tabpanel">
+        <div class="row g-4">
+          <div class="col-lg-8">
+            <!-- Justificación -->
+            <div class="content-card">
+              <h5 class="card-title"><i class="fas fa-lightbulb me-2"></i>Justificación de la Lección</h5>
+              
+              <div class="mb-4">
+                <h6 class="text-primary"><i class="fas fa-chalkboard-teacher me-2"></i>Metodología</h6>
+                <p class="text-muted">{{ lesson.justification?.methodology || 'No especificada' }}</p>
+              </div>
+
+              <div>
+                <h6 class="text-primary"><i class="fas fa-bullseye me-2"></i>Objetivos de Aprendizaje</h6>
+                <p class="text-muted">{{ lesson.justification?.objectives || 'No especificados' }}</p>
+              </div>
+            </div>
+
+            <!-- Áreas de conocimiento -->
+            <div class="content-card" *ngIf="lesson.knowledge_areas?.length">
+              <h5 class="card-title"><i class="fas fa-tags me-2"></i>Áreas de Conocimiento</h5>
+              <div class="d-flex flex-wrap gap-2">
+                <span *ngFor="let area of lesson.knowledge_areas" class="badge bg-primary">
+                  {{ area.name || area }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="content-card" *ngIf="lesson.tags?.length">
+              <h5 class="card-title"><i class="fas fa-hashtag me-2"></i>Etiquetas</h5>
+              <div class="d-flex flex-wrap gap-2">
+                <span *ngFor="let tag of lesson.tags" class="badge bg-info">
+                  #{{ tag }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <!-- Configuración académica -->
+            <div class="content-card">
+              <h5 class="card-title"><i class="fas fa-cog me-2"></i>Configuración</h5>
+              <ul class="list-unstyled config-list">
+                <li *ngIf="lesson.academicSettings?.subjects?.length">
+                  <strong>Materias:</strong>
+                  <span class="text-muted">{{ lesson.academicSettings.subjects.join(', ') }}</span>
+                </li>
+                <li *ngIf="lesson.academicSettings?.academicLevel">
+                  <strong>Nivel:</strong>
+                  <span class="text-muted">{{ lesson.academicSettings.academicLevel }}</span>
+                </li>
+                <li>
+                  <strong>Creada:</strong>
+                  <span class="text-muted">{{ lesson.createdAt | date:'short' }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Conversación -->
+      <div class="tab-pane fade" id="chat" role="tabpanel">
+        <div class="content-card">
+          <h5 class="card-title"><i class="fas fa-comments me-2"></i>Chat del Equipo</h5>
+          
+          <div class="chat-container">
+            <div #messagesList class="messages-list" *ngIf="lesson.chatMessages?.length; else noMessages">
+              <div *ngFor="let msg of lesson.chatMessages" class="message-item">
+                <div class="message-avatar">
+                  <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="message-content">
+                  <div class="message-header">
+                    <strong>{{ displayUserName(msg.author) }}</strong>
+                    <small class="text-muted">{{ msg.timestamp | date:'short' }}</small>
+                  </div>
+                  <p class="mb-0">{{ msg.content }}</p>
+                </div>
+              </div>
+            </div>
+            <ng-template #noMessages>
+              <div class="empty-state">
+                <i class="fas fa-comments text-muted"></i>
+                <p class="text-muted mb-0">Aún no hay mensajes en la conversación</p>
+              </div>
+            </ng-template>
+
+            <!-- Form para enviar mensaje -->
+            <div class="chat-input-container" *ngIf="canChat()">
+              <div class="input-group">
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  placeholder="Escribe un mensaje..." 
+                  [(ngModel)]="chatMessage"
+                  (keyup.enter)="sendChatMessage()">
+                <button 
+                  class="btn btn-primary" 
+                  (click)="sendChatMessage()" 
+                  [disabled]="!chatMessage?.trim() || loading">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Archivos -->
+      <div class="tab-pane fade" id="files" role="tabpanel">
+        <div class="content-card">
+          <h5 class="card-title"><i class="fas fa-paperclip me-2"></i>Archivos del Proyecto</h5>
+          
+          <div class="files-grid" *ngIf="lesson.files?.length; else noFiles">
+            <div *ngFor="let file of lesson.files" class="file-card">
+              <div class="file-icon">
+                <i class="fas fa-file-alt"></i>
+              </div>
+              <div class="file-info">
+                <strong class="file-name">{{ file.name }}</strong>
+                <small class="text-muted d-block">{{ (file.size / 1024).toFixed(2) }} KB</small>
+                <small class="text-muted">Subido por: {{ displayUserName(file.uploadedBy) }}</small>
+              </div>
+              <div class="file-actions">
+                <button class="btn btn-sm btn-outline-primary" title="Descargar">
+                  <i class="fas fa-download"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <ng-template #noFiles>
+            <div class="empty-state">
+              <i class="fas fa-file text-muted"></i>
+              <p class="text-muted mb-0">No hay archivos subidos aún</p>
+            </div>
+          </ng-template>
+
+          <!-- Form para subir archivo -->
+          <div class="upload-section" *ngIf="userRole === 'student'">
+            <hr class="my-4">
+            <h6><i class="fas fa-cloud-upload-alt me-2"></i>Subir nuevo archivo</h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <input 
+                  type="file" 
+                  class="form-control" 
+                  (change)="onFileSelected($event)"
+                  [disabled]="uploading">
+              </div>
+              <div class="col-md-4">
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  placeholder="Descripción (opcional)" 
+                  [(ngModel)]="resourceDescription"
+                  [disabled]="uploading">
+              </div>
+              <div class="col-md-2">
+                <button 
+                  class="btn btn-primary w-100" 
+                  (click)="uploadResource()" 
+                  [disabled]="!selectedFile || uploading">
+                  <span *ngIf="!uploading"><i class="fas fa-upload me-2"></i>Subir</span>
+                  <span *ngIf="uploading">
+                    <span class="spinner-border spinner-border-sm me-2"></span>Subiendo...
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Equipo -->
+      <div class="tab-pane fade" id="team" role="tabpanel">
+        <div class="content-card">
+          <h5 class="card-title"><i class="fas fa-user-friends me-2"></i>Equipo de Desarrollo</h5>
+          
+          <!-- Lista de miembros -->
+          <div class="team-list" *ngIf="lesson.development_group?.length; else noTeam">
+            <div *ngFor="let member of lesson.development_group" class="team-member">
+              <div class="member-avatar">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              <div class="member-info">
+                <strong>{{ displayUserName(member.user) }}</strong>
+                <span class="badge bg-secondary ms-2">{{ member.role }}</span>
+                <small class="text-muted d-block">Se unió: {{ member.joinedAt | date:'short' }}</small>
+              </div>
+            </div>
+          </div>
+          <ng-template #noTeam>
+            <div class="empty-state">
+              <i class="fas fa-users text-muted"></i>
+              <p class="text-muted mb-0">Aún no hay miembros en el equipo</p>
+            </div>
+          </ng-template>
+
+          <!-- Invitar colaborador -->
+          <div class="invite-section" *ngIf="userRole === 'student' && canEdit()">
+            <hr class="my-4">
+            <h6><i class="fas fa-user-plus me-2"></i>Invitar compañero</h6>
+            <div class="row g-3">
+              <div class="col-md-5">
+                <input 
+                  type="email" 
+                  class="form-control" 
+                  placeholder="Email del compañero" 
+                  [(ngModel)]="inviteEmail"
+                  [disabled]="loading">
+              </div>
+              <div class="col-md-3">
+                <select class="form-select" [(ngModel)]="inviteRole" [disabled]="loading">
+                  <option value="member">Miembro</option>
+                  <option value="reviewer">Revisor</option>
+                  <option value="contributor">Colaborador</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <div class="input-group">
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    placeholder="Mensaje (opcional)" 
+                    [(ngModel)]="inviteMessage"
+                    [disabled]="loading">
+                  <button 
+                    class="btn btn-primary" 
+                    (click)="inviteCollaborator()" 
+                    [disabled]="!inviteEmail || loading">
+                    <i class="fas fa-paper-plane"></i> Invitar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Retroalimentación -->
+      <div class="tab-pane fade" id="feedback" role="tabpanel">
+        <div class="content-card">
+          <h5 class="card-title"><i class="fas fa-chalkboard-teacher me-2"></i>Retroalimentación del Docente</h5>
+          
+          <div class="feedback-list" *ngIf="lesson.comments?.length; else noFeedback">
+            <div *ngFor="let comment of lesson.comments" class="feedback-item">
+              <div class="feedback-header">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="fas fa-user-circle text-primary"></i>
+                  <strong>{{ displayUserName(comment.author) }}</strong>
+                  <span class="badge" [ngClass]="getCommentTypeBadge(comment.type)">
+                    {{ getCommentTypeLabel(comment.type) }}
+                  </span>
+                </div>
+                <small class="text-muted">{{ comment.timestamp | date:'short' }}</small>
+              </div>
+              <p class="feedback-content">{{ comment.content }}</p>
+            </div>
+          </div>
+          <ng-template #noFeedback>
+            <div class="empty-state">
+              <i class="fas fa-comment-slash text-muted"></i>
+              <p class="text-muted mb-0">Aún no hay retroalimentación del docente</p>
+            </div>
+          </ng-template>
+
+          <!-- Form para agregar comentario (solo docente) -->
+          <div class="feedback-form" *ngIf="userRole === 'teacher'">
+            <hr class="my-4">
+            <h6><i class="fas fa-comment-medical me-2"></i>Agregar retroalimentación</h6>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <select class="form-select" [(ngModel)]="teacherCommentType" [disabled]="loading">
+                  <option value="feedback">Feedback</option>
+                  <option value="suggestion">Sugerencia</option>
+                  <option value="approval">Aprobación</option>
+                  <option value="correction">Corrección</option>
+                </select>
+              </div>
+              <div class="col-md-9">
+                <div class="input-group">
+                  <textarea 
+                    class="form-control" 
+                    rows="2" 
+                    placeholder="Escribe tu comentario..." 
+                    [(ngModel)]="teacherFeedback"
+                    [disabled]="loading"></textarea>
+                  <button 
+                    class="btn btn-primary" 
+                    (click)="addTeacherComment()" 
+                    [disabled]="!teacherFeedback?.trim() || loading">
+                    <i class="fas fa-paper-plane"></i> Enviar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
-

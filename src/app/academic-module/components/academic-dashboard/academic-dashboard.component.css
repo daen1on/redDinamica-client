@@ -429,3 +429,30 @@
     padding: 1.5rem;
   }
 }
+
+/* ===== Modo oscuro ===== */
+.theme-dark .academic-dashboard {
+  background: linear-gradient(135deg, #0b1020 0%, #0e0f1a 100%);
+}
+.theme-dark .dashboard-header {
+  background: rgba(17, 20, 24, 0.6);
+  color: var(--rd-text);
+  border-bottom: 1px solid #2a2f36;
+}
+.theme-dark .sidebar,
+.theme-dark .main-content {
+  background: rgba(26, 31, 36, 0.95);
+  border-color: #2a2f36;
+  color: var(--rd-text);
+}
+.theme-dark .nav-link { color: var(--rd-text); }
+.theme-dark .nav-link:hover { color: var(--rd-primary); }
+.theme-dark .nav-link.active { color: #fff; }
+
+.theme-dark .role-card {
+  background: rgba(26, 31, 36, 0.9);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.35);
+}
+.theme-dark .role-card h3 { color: var(--rd-text); }
+.theme-dark .role-card p { color: var(--rd-muted); }
+.theme-dark .role-card:hover p { color: var(--rd-text); }

@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AcademicLessonService } from '../../services/academic-lesson.service';
-import { AcademicLesson } from '../../models/academic-lesson.model';
+import { AcademicLesson, UserRef } from '../../models/academic-lesson.model';
 
 @Component({
   selector: 'app-lesson-detail',
@@ -16,7 +16,12 @@ import { AcademicLesson } from '../../models/academic-lesson.model';
 export class LessonDetailComponent implements OnInit {
   lesson: AcademicLesson | null = null;
   lessonId: string = '';
+  // Rol contextual usado en la vista (derivado del grupo o del docente)
   userRole: string = '';
+  // Rol proveniente de autenticación (p.ej. 'teacher')
+  authUserRole: string = '';
+  // Id de usuario autenticado
+  currentUserId: string = '';
   loading = false;
   errorMessage = '';
   successMessage = '';
@@ -28,6 +33,21 @@ export class LessonDetailComponent implements OnInit {
   approveData = { feedback: '', grade: 0 };
   rejectReason = '';
   gradeData = { grade: 0, feedback: '' };
+
+  // Colaboración y conversación
+  inviteEmail: string = '';
+  inviteRole: 'member' | 'reviewer' | 'contributor' = 'member';
+  inviteMessage: string = '';
+  chatMessage: string = '';
+  uploading = false;
+  selectedFile: File | null = null;
+  resourceDescription: string = '';
+  resourceCategory: 'document' | 'image' | 'video' | 'audio' | 'link' | 'other' = 'document';
+  teacherFeedback: string = '';
+  teacherCommentType: 'feedback' | 'suggestion' | 'approval' | 'correction' = 'feedback';
+
+  // Referencia al contenedor de mensajes para autoscroll
+  @ViewChild('messagesList') messagesList?: ElementRef<HTMLDivElement>;
 
   constructor(
     private route: ActivatedRoute,
@@ -42,16 +62,37 @@ export class LessonDetailComponent implements OnInit {
   }
 
   loadUserInfo(): void {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    this.userRole = user.role || '';
+    try {
+      const raw = localStorage.getItem('user') || localStorage.getItem('identity') || '{}';
+      const user = JSON.parse(raw);
+      this.currentUserId = String(user._id || user.id || user.uid || '');
+    } catch {
+      this.currentUserId = '';
+    }
   }
 
   loadLesson(): void {
     this.loading = true;
     this.academicLessonService.getLessonById(this.lessonId).subscribe({
       next: (response) => {
-        this.lesson = response.data;
+        // Mapear los mensajes del backend a chatMessages para la vista
+        const data: any = response.data || {};
+        const backendMessages: any[] = Array.isArray(data.messages) ? data.messages : [];
+        const mappedChat = backendMessages.map((m: any) => ({
+          _id: String(m._id || ''),
+          content: String(m.content || ''),
+          author: m.author || '',
+          timestamp: m.timestamp || m.created_at || new Date().toISOString(),
+          edited: !!m.edited,
+          editedAt: m.editedAt,
+          type: 'text'
+        }));
+        this.lesson = { ...(response.data as any), chatMessages: mappedChat } as AcademicLesson;
+        // Actualizar el rol contextual en base a la lección/grupo
+        this.userRole = this.computeContextRole();
         this.loading = false;
+        // Autoscroll al final de la lista de mensajes
+        setTimeout(() => this.scrollMessagesToBottom(), 0);
       },
       error: (error) => {
         this.errorMessage = 'Error al cargar la lección';
@@ -203,23 +244,38 @@ export class LessonDetailComponent implements OnInit {
 
   // Métodos helper para verificar permisos
   canEdit(): boolean {
-    return this.userRole === 'student' && this.lesson?.status === 'draft';
+    if (!this.lesson) return false;
+    // Autor puede editar si es estudiante del grupo, líder o docente del grupo y la lección está en borrador
+    const isAuthor = this.isCurrentUserAuthor();
+    const isMemberOrTeacher = this.isCurrentUserInGroupStudents();
+    return isAuthor && isMemberOrTeacher && (this.lesson.status === 'draft');
   }
 
   canDelete(): boolean {
-    return this.userRole === 'student' && ['draft', 'proposed'].includes(this.lesson?.status || '');
+    if (!this.lesson) return false;
+    const isAuthor = this.isCurrentUserAuthor();
+    const isStudent = this.isCurrentUserInGroupStudents();
+    return isAuthor && isStudent && ['draft', 'proposed'].includes(this.lesson.status || '');
   }
 
   canApprove(): boolean {
-    return this.userRole === 'teacher' && this.lesson?.status === 'proposed';
+    // Docente del grupo o líder pueden aprobar si el estado es 'proposed'
+    if (!this.lesson) return false;
+    const isTeacher = this.getIdFromRef((this.lesson as any)?.academicGroup?.teacher) === this.currentUserId;
+    const isLeader = this.getIdFromRef((this.lesson as any)?.leader) === this.currentUserId;
+    return (isTeacher || isLeader) && this.lesson?.status === 'proposed';
   }
 
   canGrade(): boolean {
-    return this.userRole === 'teacher' && this.lesson?.status === 'completed';
+    if (!this.lesson) return false;
+    const isTeacher = this.getIdFromRef((this.lesson as any)?.academicGroup?.teacher) === this.currentUserId;
+    return isTeacher && this.lesson?.status === 'completed';
   }
 
   canExport(): boolean {
-    return this.userRole === 'teacher' && this.lesson?.status === 'graded' && !this.lesson?.isExported;
+    if (!this.lesson) return false;
+    const isTeacher = this.getIdFromRef((this.lesson as any)?.academicGroup?.teacher) === this.currentUserId;
+    return isTeacher && this.lesson?.status === 'graded' && !this.lesson?.isExported;
   }
 
   getStatusLabel(status: string): string {
@@ -276,6 +332,226 @@ export class LessonDetailComponent implements OnInit {
         return `${hours} hora${hours > 1 ? 's' : ''} ${remainingMinutes} minutos`;
       }
     }
+  }
+
+  // Helpers de identificación y rol contextual
+  private getIdFromRef(ref: any): string {
+    if (!ref) return '';
+    if (typeof ref === 'string') return String(ref);
+    if (typeof ref === 'object') {
+      if (ref._id || ref.id) return String(ref._id || ref.id);
+      // Posibles estructuras anidadas { user: {_id} }
+      if (ref.user && (ref.user._id || ref.user.id)) return String(ref.user._id || ref.user.id);
+    }
+    return '';
+  }
+
+  private isCurrentUserAuthor(): boolean {
+    console.log('isCurrentUserAuthor', this.lesson, this.currentUserId);
+    if (!this.lesson || !this.currentUserId) return false;
+    const authorId = this.getIdFromRef(this.lesson.author);
+    console.log('authorId', authorId, this.currentUserId);
+    return authorId && authorId === this.currentUserId;
+  }
+
+  private isCurrentUserInGroupStudents(): boolean {
+    if (!this.lesson || !this.currentUserId) return false;
+    const group: any = this.lesson.academicGroup as any;
+    const students: any[] = Array.isArray(group?.students) ? group.students : [];
+    const studentIds = students.map((s: any) => this.getIdFromRef(s)).filter((v: string) => !!v);
+    const isStudent = studentIds.includes(this.currentUserId);
+    const teacherId = this.getIdFromRef(group?.teacher);
+    const isTeacher = teacherId && teacherId === this.currentUserId;
+    const leaderId = this.getIdFromRef((this.lesson as any)?.leader);
+    const isLeader = leaderId && leaderId === this.currentUserId;
+    // Considerar también líder y docente como miembros con permisos en edición/chat
+    return isStudent || isTeacher || isLeader;
+  }
+
+  private computeContextRole(): string {
+    // Docente tiene prioridad por autenticación
+    if (this.authUserRole === 'teacher') return 'teacher';
+    // Si el usuario pertenece como estudiante al grupo de la lección, es 'student' en este contexto
+    if (this.isCurrentUserInGroupStudents()) return 'student';
+    return '';
+  }
+
+  // Mostrar nombre del usuario a partir de string o UserRef
+  displayUserName(author: string | UserRef | null | undefined): string {
+    if (!author) return 'Usuario';
+    if (typeof author === 'string') return author;
+    return author.name || 'Usuario';
+  }
+
+  displayGroupName(group: any): string {
+    if (!group) return 'N/A';
+    if (typeof group === 'string') return group;
+    return group.name || 'N/A';
+  }
+
+  getStatusColor(status: string): string {
+    const colors: { [key: string]: string } = {
+      'draft': 'secondary',
+      'proposed': 'warning',
+      'approved': 'success',
+      'rejected': 'danger',
+      'in_development': 'info',
+      'completed': 'primary',
+      'graded': 'dark'
+    };
+    return colors[status] || 'secondary';
+  }
+
+  getCommentTypeLabel(type: string): string {
+    const labels: { [key: string]: string } = {
+      'feedback': 'Retroalimentación',
+      'suggestion': 'Sugerencia',
+      'approval': 'Aprobación',
+      'correction': 'Corrección'
+    };
+    return labels[type] || type;
+  }
+
+  getCommentTypeBadge(type: string): string {
+    const badges: { [key: string]: string } = {
+      'feedback': 'bg-info',
+      'suggestion': 'bg-warning',
+      'approval': 'bg-success',
+      'correction': 'bg-danger'
+    };
+    return badges[type] || 'bg-secondary';
+  }
+
+  // Nueva funcionalidad: Invitaciones a compañeros del mismo grupo
+  inviteCollaborator(): void {
+    if (!this.lesson) return;
+    if (!this.inviteEmail) {
+      this.errorMessage = 'Ingrese el correo del compañero a invitar.';
+      return;
+    }
+    this.loading = true;
+    this.academicLessonService.inviteCollaborator({
+      lessonId: this.lesson._id,
+      userEmail: this.inviteEmail,
+      role: this.inviteRole,
+      message: this.inviteMessage
+    }).subscribe({
+      next: (res) => {
+        this.successMessage = res.message || 'Invitación enviada';
+        this.inviteEmail = '';
+        this.inviteMessage = '';
+        this.loadLesson();
+        this.loading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al invitar colaborador';
+        this.loading = false;
+      }
+    });
+  }
+
+  // Nueva funcionalidad: Enviar mensaje al chat de la lección
+  sendChatMessage(): void {
+    if (!this.lesson) return;
+    const content = (this.chatMessage || '').trim();
+    if (!content) return;
+    this.loading = true;
+    this.academicLessonService.sendChatMessage({
+      lessonId: this.lesson._id,
+      content,
+      type: 'text'
+    }).subscribe({
+      next: (res) => {
+        this.successMessage = res.message || 'Mensaje enviado';
+        this.chatMessage = '';
+        this.loadLesson();
+        this.loading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al enviar mensaje';
+        this.loading = false;
+      }
+    });
+  }
+
+  // Permisos para chatear: autor, estudiante del grupo, docente del grupo o miembro del equipo de desarrollo
+  canChat(): boolean {
+    if (!this.lesson || !this.currentUserId) return false;
+    const isAuthor = this.isCurrentUserAuthor();
+    const isStudent = this.isCurrentUserInGroupStudents();
+    const isTeacher = (() => {
+      const group: any = this.lesson?.academicGroup as any;
+      const teacherId = this.getIdFromRef(group?.teacher);
+      return teacherId && teacherId === this.currentUserId;
+    })();
+    const isDevMember = (() => {
+      const members: any[] = Array.isArray(this.lesson?.development_group) ? (this.lesson as any).development_group : [];
+      const memberIds = members.map((m: any) => this.getIdFromRef(m?.user)).filter((v: string) => !!v);
+      return memberIds.includes(this.currentUserId);
+    })();
+    return isAuthor || isStudent || isTeacher || isDevMember;
+  }
+
+  private scrollMessagesToBottom(): void {
+    try {
+      const el = this.messagesList?.nativeElement;
+      if (el) {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      }
+    } catch {}
+  }
+
+  onFileSelected(event: any): void {
+    const file = event?.target?.files?.[0];
+    this.selectedFile = file || null;
+  }
+
+  // Nueva funcionalidad: Subir archivo/recurso asociado a la lección
+  uploadResource(): void {
+    if (!this.lesson || !this.selectedFile) return;
+    this.uploading = true;
+    this.academicLessonService.uploadResource({
+      lessonId: this.lesson._id,
+      file: this.selectedFile as any,
+      description: this.resourceDescription,
+      category: this.resourceCategory
+    }).subscribe({
+      next: (res) => {
+        this.successMessage = res.message || 'Archivo subido';
+        this.selectedFile = null;
+        this.resourceDescription = '';
+        this.loadLesson();
+        this.uploading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al subir archivo';
+        this.uploading = false;
+      }
+    });
+  }
+
+  // Nueva funcionalidad: Comentarios del docente sobre la lección
+  addTeacherComment(): void {
+    if (!this.lesson) return;
+    const content = (this.teacherFeedback || '').trim();
+    if (!content) return;
+    this.loading = true;
+    this.academicLessonService.addTeacherComment(this.lesson._id, content, this.teacherCommentType).subscribe({
+      next: (res) => {
+        this.successMessage = res.message || 'Comentario agregado';
+        this.teacherFeedback = '';
+        this.loadLesson();
+        this.loading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al agregar comentario';
+        this.loading = false;
+      }
+    });
   }
 }
 

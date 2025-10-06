@@ -21,25 +21,26 @@ export class AcademicDashboardComponent implements OnInit {
     this.loadUserInfo();
   }
 
+  private getStoredRole(): string {
+    const fallbackRaw = localStorage.getItem('user') || localStorage.getItem('identity') || '{}';
+    const fallbackUser = JSON.parse(fallbackRaw);
+    return (fallbackUser.role || fallbackUser.rol || fallbackUser.userRole || '').toString();
+  }
+
   loadUserInfo(): void {
     // Obtener información del usuario desde localStorage o servicio de autenticación
     const storedUserRaw = localStorage.getItem('user') || localStorage.getItem('identity') || '{}';
     const user = JSON.parse(storedUserRaw);
-    
-    const rawRole = (user.role || user.rol || user.userRole || '').toString().toLowerCase();
-    // Normalizar posibles variantes de rol
-    let normalizedRole = rawRole;
-    if (normalizedRole === 'facilitador' || normalizedRole === 'facilitator') normalizedRole = 'expert';
-    if (normalizedRole === 'docente') normalizedRole = 'teacher';
 
-    this.userRole = normalizedRole || '';
-    this.isStudent = !!(user.isStudent || normalizedRole === 'student');
-    this.isTeacher = normalizedRole === 'teacher' || normalizedRole === 'admin' || normalizedRole === 'expert' || (user.teachingGroups?.length > 0);
+    const role = (user.role || user.rol || user.userRole || '').toString();
+    const roleLc = role.toLowerCase();
 
-    // Redirigir automáticamente solo para estudiantes e invitados
-    // Los docentes, facilitadores y admins pueden ser también estudiantes, 
-    // por lo que necesitan ver el dashboard de selección de roles
-    if (this.userRole === 'student' || this.userRole === 'invitado') {
+    this.userRole = role;
+    this.isStudent = !!(user.isStudent || roleLc === 'student');
+    this.isTeacher = ['teacher', 'admin', 'expert', 'lesson_manager', 'delegated_admin'].includes(roleLc) || (user.teachingGroups?.length > 0);
+
+    // Redirigir automáticamente solo para estudiantes
+    if (roleLc === 'student') {
       this.router.navigate(['/academia/student']);
     } else {
       // Mostrar el dashboard con opciones de selección de rol
@@ -48,17 +49,10 @@ export class AcademicDashboardComponent implements OnInit {
 
   // Método para verificar si el usuario puede acceder al panel de docente
   canAccessTeacherPanel(): boolean {
-    // Verificar usando el estado actual y un fallback directo a localStorage por si aún no se inicializó
-    const hasTeacherRole = this.userRole === 'teacher' || this.userRole === 'admin' || this.userRole === 'expert';
-    if (hasTeacherRole) return true;
-    const fallbackRaw = localStorage.getItem('user') || localStorage.getItem('identity') || '{}';
-    const fallbackUser = JSON.parse(fallbackRaw);
-    const fallbackRoleRaw = (fallbackUser.role || fallbackUser.rol || fallbackUser.userRole || '').toString().toLowerCase();
-    let fallbackRole = fallbackRoleRaw;
-    if (fallbackRole === 'facilitador' || fallbackRole === 'facilitator') fallbackRole = 'expert';
-    if (fallbackRole === 'docente') fallbackRole = 'teacher';
-    const fallbackHasAccess = fallbackRole === 'teacher' || fallbackRole === 'admin' || fallbackRole === 'expert';
-    return fallbackHasAccess;
+    const effectiveRoleRaw = this.userRole || this.getStoredRole();
+    const roleLc = (effectiveRoleRaw || '').toString().toLowerCase();
+    if (!roleLc) return false;
+    return ['teacher', 'admin', 'expert', 'lesson_manager', 'delegated_admin'].includes(roleLc);
   }
 
   // Método para manejar el acceso al panel de docente

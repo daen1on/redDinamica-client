@@ -8,7 +8,10 @@ import {
   CreateAcademicLessonRequest, 
   UpdateAcademicLessonRequest, 
   ApproveLessonRequest, 
-  GradeLessonRequest 
+  GradeLessonRequest,
+  InviteCollaboratorRequest,
+  SendChatMessageRequest,
+  UploadResourceRequest
 } from '../models/academic-lesson.model';
 
 @Injectable({
@@ -72,5 +75,31 @@ export class AcademicLessonService {
   // Exportar lección a RedDinámica principal
   exportToMain(lessonId: string): Observable<{status: string, message: string, data: AcademicLesson}> {
     return this.http.post<{status: string, message: string, data: AcademicLesson}>(`${this.apiUrl}/${lessonId}/export`, {});
+  }
+
+  // Invitar colaborador (compañero del mismo grupo)
+  inviteCollaborator(payload: InviteCollaboratorRequest): Observable<{status: string, message: string, data: AcademicLesson}> {
+    const { lessonId, ...body } = payload;
+    return this.http.post<{status: string, message: string, data: AcademicLesson}>(`${this.apiUrl}/${lessonId}/invite`, body);
+  }
+
+  // Enviar mensaje de chat (texto)
+  sendChatMessage(payload: SendChatMessageRequest): Observable<{status: string, message: string, data: AcademicLesson}> {
+    const { lessonId, ...body } = payload;
+    return this.http.post<{status: string, message: string, data: AcademicLesson}>(`${this.apiUrl}/${lessonId}/chat`, body);
+  }
+
+  // Subir recurso/archivo a la lección (FormData)
+  uploadResource(payload: UploadResourceRequest): Observable<{status: string, message: string, data: AcademicLesson}> {
+    const formData = new FormData();
+    formData.append('file', payload.file as unknown as any);
+    if (payload.description) formData.append('description', payload.description);
+    formData.append('category', payload.category);
+    return this.http.post<{status: string, message: string, data: AcademicLesson}>(`${this.apiUrl}/${payload.lessonId}/resources`, formData);
+  }
+
+  // Agregar comentario del docente a la lección
+  addTeacherComment(lessonId: string, content: string, type: 'feedback' | 'suggestion' | 'approval' | 'correction'): Observable<{status: string, message: string, data: AcademicLesson}> {
+    return this.http.post<{status: string, message: string, data: AcademicLesson}>(`${this.apiUrl}/${lessonId}/teacher-comments`, { content, type });
   }
 }

@@ -10,6 +10,7 @@ export interface AcademicGroup {
   maxStudents: number;
   subjects: string[];
   lessons: string[];
+  lessonsCount?: number;
   statistics: {
     totalStudents: number;
     totalLessons: number;

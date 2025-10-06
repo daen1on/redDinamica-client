@@ -1,151 +1,248 @@
 <div class="lesson-management-container">
-  <div class="header">
-    <h2>Gestión de Lecciones Académicas</h2>
-    <button *ngIf="userRole === 'student'" class="btn btn-primary" (click)="createNewLesson()">
-      <i class="fas fa-plus"></i> Crear Nueva Lección
-    </button>
-  </div>
-
-  <!-- Filtros y búsqueda -->
-  <div class="filters-section">
-    <div class="search-box">
-      <input 
-        type="text" 
-        placeholder="Buscar lecciones..." 
-        [(ngModel)]="searchTerm"
-        class="form-control">
-    </div>
-    
-    <div class="filter-controls">
-      <select [(ngModel)]="filterStatus" class="form-control">
-        <option value="">Todos los estados</option>
-        <option value="draft">Borrador</option>
-        <option value="proposed">Propuesta</option>
-        <option value="approved">Aprobada</option>
-        <option value="rejected">Rechazada</option>
-        <option value="completed">Completada</option>
-        <option value="graded">Calificada</option>
-      </select>
-      
-      <select [(ngModel)]="filterGroup" class="form-control">
-        <option value="">Todos los grupos</option>
-        <option *ngFor="let group of groups" [value]="group._id">{{ group.name }}</option>
-      </select>
-      
-      <button class="btn btn-secondary" (click)="clearFilters()">
-        Limpiar Filtros
+  <!-- Header -->
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h1 class="page-title">
+          <i class="fas fa-book-reader me-3"></i>Gestión de Lecciones Académicas
+        </h1>
+        <p class="page-subtitle text-muted">
+          {{ userRole === 'student' ? 'Administra tus lecciones y proyectos colaborativos' : 'Supervisa las lecciones de tus grupos' }}
+        </p>
+      </div>
+      <button *ngIf="userRole === 'student'" class="btn btn-primary btn-lg" (click)="createNewLesson()">
+        <i class="fas fa-plus me-2"></i>Nueva Lección
       </button>
     </div>
   </div>
 
+  <!-- Filtros -->
+  <div class="filters-card">
+    <div class="row g-3">
+      <div class="col-lg-5 col-md-6">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Buscar por título o descripción..." 
+            [(ngModel)]="searchTerm" 
+            (ngModelChange)="applyFilters()">
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <select [(ngModel)]="filterStatus" class="form-select" (change)="applyFilters()">
+          <option value="">📋 Todos los estados</option>
+          <option value="draft">📝 Borrador</option>
+          <option value="proposed">📤 Propuesta</option>
+          <option value="approved">✅ Aprobada</option>
+          <option value="rejected">❌ Rechazada</option>
+          <option value="in_development">🔨 En desarrollo</option>
+          <option value="completed">✔️ Completada</option>
+          <option value="graded">⭐ Calificada</option>
+        </select>
+      </div>
+      <div class="col-lg-3 col-md-6" *ngIf="userRole === 'teacher'">
+        <select [(ngModel)]="filterGroup" class="form-select" (change)="applyFilters()">
+          <option value="">👥 Todos los grupos</option>
+          <option *ngFor="let group of groups" [value]="group._id">{{ group.name }}</option>
+        </select>
+      </div>
+      <div class="col-lg-1 col-md-6">
+        <button class="btn btn-outline-secondary w-100" (click)="clearFilters()" title="Limpiar filtros">
+          <i class="fas fa-redo-alt"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row mt-3" *ngIf="filteredLessons.length > 0">
+      <div class="stat-item">
+        <i class="fas fa-book"></i>
+        <span><strong>{{ filteredLessons.length }}</strong> lecciones</span>
+      </div>
+      <div class="stat-item" *ngIf="searchTerm || filterStatus || filterGroup">
+        <i class="fas fa-filter"></i>
+        <span>Filtros activos</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Mensaje de error -->
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i>{{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
   </div>
 
   <!-- Loading spinner -->
   <div *ngIf="loading" class="loading-container">
-    <div class="spinner-border" role="status">
+    <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Cargando...</span>
     </div>
+    <p class="text-muted mt-3">Cargando lecciones...</p>
   </div>
 
   <!-- Lista de lecciones -->
   <div *ngIf="!loading && filteredLessons.length > 0" class="lessons-grid">
     <div *ngFor="let lesson of filteredLessons" class="lesson-card">
-      <div class="lesson-header">
-        <h3>{{ lesson.title }}</h3>
-        <div class="lesson-actions">
-          <button class="btn btn-sm btn-outline-primary" (click)="viewLessonDetails(lesson._id)">
-            <i class="fas fa-eye"></i>
-          </button>
-          <button *ngIf="canEdit(lesson)" class="btn btn-sm btn-outline-secondary" (click)="editLesson(lesson)">
-            <i class="fas fa-edit"></i>
-          </button>
-          <button *ngIf="canDelete(lesson)" class="btn btn-sm btn-outline-danger" (click)="deleteLesson(lesson._id)">
-            <i class="fas fa-trash"></i>
-          </button>
+      <!-- Card Header -->
+      <div class="lesson-card-header">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            <h3 class="lesson-card-title" (click)="viewLessonDetails(lesson._id)" style="cursor: pointer;">
+              {{ lesson.title }}
+            </h3>
+            <div class="lesson-badges mt-2">
+              <span class="badge" [ngClass]="'badge-' + getStatusColor(lesson.status)">
+                {{ getStatusLabel(lesson.status) }}
+              </span>
+              <span class="badge bg-secondary" *ngIf="lesson.academicSettings?.academicLevel">
+                {{ lesson.academicSettings.academicLevel }}
+              </span>
+              <span class="badge bg-warning text-dark" *ngIf="lesson.grade">
+                <i class="fas fa-star"></i> {{ lesson.grade }}/5
+              </span>
+              <span class="badge bg-success" *ngIf="lesson.isExported">
+                <i class="fas fa-upload"></i> Exportada
+              </span>
+            </div>
+          </div>
+          
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <a class="dropdown-item" (click)="viewLessonDetails(lesson._id)">
+                  <i class="fas fa-eye me-2"></i>Ver detalles
+                </a>
+              </li>
+              <li *ngIf="canEdit(lesson)">
+                <a class="dropdown-item" (click)="editLesson(lesson)">
+                  <i class="fas fa-edit me-2"></i>Editar
+                </a>
+              </li>
+              <li *ngIf="canDelete(lesson)"><hr class="dropdown-divider"></li>
+              <li *ngIf="canDelete(lesson)">
+                <a class="dropdown-item text-danger" (click)="deleteLesson(lesson._id)">
+                  <i class="fas fa-trash me-2"></i>Eliminar
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-      
-      <div class="lesson-content">
-        <p class="lesson-resume">{{ lesson.resume }}</p>
-        
-        <div class="lesson-info">
+
+      <!-- Card Body -->
+      <div class="lesson-card-body">
+        <p class="lesson-description">{{ lesson.resume }}</p>
+
+        <!-- Info Grid -->
+        <div class="lesson-info-grid">
           <div class="info-item">
-            <i class="fas fa-user"></i>
-            <span>{{ lesson.author || 'Autor' }}</span>
+            <i class="fas fa-user text-primary"></i>
+            <div>
+              <small class="text-muted d-block">Autor</small>
+              <strong>{{ displayUserName(lesson.author) }}</strong>
+            </div>
           </div>
-          
           <div class="info-item">
-            <i class="fas fa-users"></i>
-            <span>{{ lesson.academicGroup || 'Grupo' }}</span>
+            <i class="fas fa-users text-success"></i>
+            <div>
+              <small class="text-muted d-block">Grupo</small>
+              <strong>{{ displayGroupName(lesson.academicGroup) }}</strong>
+            </div>
           </div>
-          
+          <div class="info-item" *ngIf="lesson.development_group?.length">
+            <i class="fas fa-user-friends text-info"></i>
+            <div>
+              <small class="text-muted d-block">Colaboradores</small>
+              <strong>{{ lesson.development_group.length }}</strong>
+            </div>
+          </div>
           <div class="info-item">
-            <i class="fas fa-graduation-cap"></i>
-            <span>{{ getLevelLabel(lesson.level?.[0] || '') }}</span>
+            <i class="fas fa-clock text-warning"></i>
+            <div>
+              <small class="text-muted d-block">Actualizada</small>
+              <strong>{{ lesson.updatedAt | date:'short' }}</strong>
+            </div>
           </div>
         </div>
-        
-        <div class="lesson-status">
-          <span class="badge" [ngClass]="getStatusBadgeClass(lesson.status)">
-            {{ getStatusLabel(lesson.status) }}
-          </span>
-          
-          <div *ngIf="lesson.grade" class="grade-info">
-            <i class="fas fa-star"></i>
-            <span>Calificación: {{ lesson.grade }}/5</span>
+
+        <!-- Áreas de conocimiento -->
+          <div class="knowledge-areas mt-3" *ngIf="lesson.knowledge_areas?.length">
+          <small class="text-muted d-block mb-2">Áreas de conocimiento:</small>
+          <div class="d-flex flex-wrap gap-1">
+              <span *ngFor="let area of lesson.knowledge_areas" class="badge bg-light text-dark">
+                {{ area.name || area }}
+              </span>
           </div>
         </div>
       </div>
-      
-      <div class="lesson-footer">
-        <div class="lesson-meta">
-          <small class="text-muted">
-            Creada: {{ lesson.createdAt | date:'short' }}
-          </small>
-          <small *ngIf="lesson.updatedAt" class="text-muted">
-            Actualizada: {{ lesson.updatedAt | date:'short' }}
-          </small>
-        </div>
-        
-        <!-- Acciones específicas del rol -->
-        <div class="role-actions" *ngIf="userRole === 'teacher'">
-          <button *ngIf="canApprove(lesson)" class="btn btn-sm btn-success" (click)="approveLesson(lesson._id)">
-            <i class="fas fa-check"></i> Aprobar
+
+      <!-- Card Footer con acciones del docente -->
+      <div class="lesson-card-footer" *ngIf="userRole === 'teacher'">
+        <div class="d-flex flex-wrap gap-2">
+          <button 
+            *ngIf="canApprove(lesson)" 
+            class="btn btn-sm btn-success" 
+            (click)="approveLesson(lesson._id)">
+            <i class="fas fa-check me-1"></i>Aprobar
           </button>
-          <button *ngIf="canApprove(lesson)" class="btn btn-sm btn-danger" (click)="rejectLesson(lesson._id)">
-            <i class="fas fa-times"></i> Rechazar
+          <button 
+            *ngIf="canApprove(lesson)" 
+            class="btn btn-sm btn-danger" 
+            (click)="rejectLesson(lesson._id)">
+            <i class="fas fa-times me-1"></i>Rechazar
           </button>
-          <button *ngIf="canGrade(lesson)" class="btn btn-sm btn-warning" (click)="gradeLesson(lesson._id)">
-            <i class="fas fa-star"></i> Calificar
+          <button 
+            *ngIf="canGrade(lesson)" 
+            class="btn btn-sm btn-warning" 
+            (click)="gradeLesson(lesson._id)">
+            <i class="fas fa-star me-1"></i>Calificar
           </button>
-          <button *ngIf="canExport(lesson)" class="btn btn-sm btn-info" (click)="exportToMain(lesson._id)">
-            <i class="fas fa-upload"></i> Exportar
+          <button 
+            *ngIf="canExport(lesson)" 
+            class="btn btn-sm btn-info" 
+            (click)="exportToMain(lesson._id)">
+            <i class="fas fa-upload me-1"></i>Exportar
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Mensaje cuando no hay lecciones -->
-  <div *ngIf="!loading && filteredLessons.length === 0" class="empty-state">
-    <div class="empty-icon">
-      <i class="fas fa-book"></i>
+  <!-- Estado vacío -->
+  <div *ngIf="!loading && filteredLessons.length === 0" class="empty-state-card">
+    <div class="empty-state-content">
+      <div class="empty-icon">
+        <i class="fas fa-book-open"></i>
+      </div>
+      <h3>{{ searchTerm || filterStatus || filterGroup ? 'No se encontraron lecciones' : 'No hay lecciones aún' }}</h3>
+      <p class="text-muted">
+        <span *ngIf="searchTerm || filterStatus || filterGroup">
+          Intenta ajustar los filtros para ver más resultados.
+        </span>
+        <span *ngIf="!searchTerm && !filterStatus && !filterGroup && userRole === 'student'">
+          Comienza creando tu primera lección académica colaborativa.
+        </span>
+        <span *ngIf="!searchTerm && !filterStatus && !filterGroup && userRole === 'teacher'">
+          No hay lecciones asignadas a tus grupos académicos.
+        </span>
+      </p>
+      <button 
+        *ngIf="userRole === 'student' && !searchTerm && !filterStatus && !filterGroup" 
+        class="btn btn-primary btn-lg mt-3" 
+        (click)="createNewLesson()">
+        <i class="fas fa-plus me-2"></i>Crear Primera Lección
+      </button>
+      <button 
+        *ngIf="searchTerm || filterStatus || filterGroup" 
+        class="btn btn-outline-secondary mt-3" 
+        (click)="clearFilters()">
+        <i class="fas fa-redo-alt me-2"></i>Limpiar Filtros
+      </button>
     </div>
-    <h3>No hay lecciones disponibles</h3>
-    <p *ngIf="searchTerm || filterStatus || filterGroup">
-      No se encontraron lecciones con los filtros aplicados.
-    </p>
-    <p *ngIf="!searchTerm && !filterStatus && !filterGroup && userRole === 'student'">
-      Comienza creando tu primera lección académica.
-    </p>
-    <p *ngIf="!searchTerm && !filterStatus && !filterGroup && userRole === 'teacher'">
-      No hay lecciones asignadas a tus grupos.
-    </p>
-    <button *ngIf="userRole === 'student'" class="btn btn-primary" (click)="createNewLesson()">
-      Crear Primera Lección
-    </button>
   </div>
 </div>

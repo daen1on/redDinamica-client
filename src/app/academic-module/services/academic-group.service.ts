@@ -30,6 +30,12 @@ export class AcademicGroupService {
     return this.http.get<{status: string, data: AcademicGroup[]}>(`${this.apiUrl}/teacher`);
   }
 
+  // Listar todos los grupos (opcionalmente solo activos)
+  getAllGroups(activeOnly: boolean = false): Observable<{status: string, data: AcademicGroup[]}> {
+    const url = activeOnly ? `${this.apiUrl}?active=true` : this.apiUrl;
+    return this.http.get<{status: string, data: AcademicGroup[]}>(url);
+  }
+
   // Obtener grupos del estudiante
   getStudentGroups(): Observable<{status: string, data: AcademicGroup[]}> {
     return this.http.get<{status: string, data: AcademicGroup[]}>(`${this.apiUrl}/student`);
@@ -88,5 +94,32 @@ export class AcademicGroupService {
   // Verificar si un estudiante puede crear lecciones en un grupo
   canStudentCreateLessons(groupId: string): Observable<CanCreateLessonsResponse> {
     return this.http.get<CanCreateLessonsResponse>(`${this.apiUrl}/${groupId}/can-create-lessons`);
+  }
+
+  // ===== Discusión del grupo =====
+  getDiscussion(groupId: string): Observable<{status: string, data: any[]}> {
+    return this.http.get<{status: string, data: any[]}>(`${this.apiUrl}/${groupId}/discussion`);
+  }
+
+  addDiscussionMessage(groupId: string, content: string): Observable<{status: string, message: string, data: any[]}> {
+    return this.http.post<{status: string, message: string, data: any[]}>(`${this.apiUrl}/${groupId}/discussion`, { content });
+  }
+
+  deleteDiscussionMessage(groupId: string, messageId: string): Observable<{status: string, message: string}> {
+    return this.http.delete<{status: string, message: string}>(`${this.apiUrl}/${groupId}/discussion/${messageId}`);
+  }
+
+  // ===== Recursos del grupo =====
+  getGroupResources(groupId: string): Observable<{status: string, data: any[]}> {
+    return this.http.get<{status: string, data: any[]}>(`${this.apiUrl}/${groupId}/resources`);
+  }
+
+  addGroupResource(groupId: string, resourceId: string): Observable<{status: string, message: string, data: any[]}> {
+    return this.http.post<{status: string, message: string, data: any[]}>(`${this.apiUrl}/${groupId}/resources`, { resourceId });
+    
+  }
+
+  removeGroupResource(groupId: string, resourceId: string): Observable<{status: string, message: string}> {
+    return this.http.delete<{status: string, message: string}>(`${this.apiUrl}/${groupId}/resources/${resourceId}`);
   }
 }

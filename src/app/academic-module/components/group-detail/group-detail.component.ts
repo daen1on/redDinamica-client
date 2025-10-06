@@ -35,6 +35,25 @@ export class GroupDetailComponent implements OnInit {
   selectedUser: any | null = null;
   url: string = GLOBAL.url;
 
+  // Modo edición
+  editMode = false;
+  editedGroup: any = {};
+  validGrades: string[] = [];
+  savingGroup = false;
+
+  // Discusión
+  discussion: any[] = [];
+  newDiscussionText: string = '';
+  loadingDiscussion = false;
+  addingMessage = false;
+
+  // Recursos del grupo
+  groupResources: any[] = [];
+  addingResource = false;
+  selectedResourceId: string = '';
+  resourcesSearchTerm: string = '';
+  allVisibleResources: any[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -52,6 +71,8 @@ export class GroupDetailComponent implements OnInit {
     if (this.userRole === 'teacher') {
       this.loadGroupStudents();
     }
+    this.loadDiscussion();
+    this.loadGroupResources();
   }
 
   determineUserRole(): void {
@@ -63,7 +84,7 @@ export class GroupDetailComponent implements OnInit {
       // Normalizar
       this.currentUserRole = rawRole === 'facilitator' ? 'expert' : rawRole;
       // Roles con privilegios de docente
-      if (['teacher', 'admin', 'expert'].includes(this.currentUserRole)) {
+      if (['teacher', 'admin', 'delegated_admin', 'lesson_manager', 'expert'].includes(this.currentUserRole)) {
         this.userRole = 'teacher';
       } else {
         this.userRole = 'student';
@@ -113,6 +134,84 @@ export class GroupDetailComponent implements OnInit {
     });
   }
 
+  // ===== Discusión =====
+  loadDiscussion(): void {
+    if (!this.groupId) return;
+    this.loadingDiscussion = true;
+    this.academicGroupService.getDiscussion(this.groupId).subscribe({
+      next: (res) => {
+        this.discussion = res.data || [];
+        this.loadingDiscussion = false;
+      },
+      error: () => {
+        this.loadingDiscussion = false;
+      }
+    });
+  }
+
+  canPostDiscussion(): boolean {
+    if (!this.group) return false;
+    const isTeacher = this.userRole === 'teacher';
+    const isStudentInGroup = (this.group.students || []).some((id: any) => (id?.toString?.() || id) === this.currentUserId);
+    return isTeacher || isStudentInGroup;
+  }
+
+  addDiscussion(): void {
+    const content = (this.newDiscussionText || '').trim();
+    if (!content) return;
+    if (!this.canPostDiscussion()) return;
+    this.addingMessage = true;
+    this.academicGroupService.addDiscussionMessage(this.groupId, content).subscribe({
+      next: (res) => {
+        this.discussion = res.data || [];
+        this.newDiscussionText = '';
+        this.addingMessage = false;
+      },
+      error: () => {
+        this.addingMessage = false;
+      }
+    });
+  }
+
+  deleteDiscussionMessage(messageId: string): void {
+    if (!confirm('¿Eliminar este mensaje?')) return;
+    this.academicGroupService.deleteDiscussionMessage(this.groupId, messageId).subscribe({
+      next: () => this.loadDiscussion(),
+      error: () => {}
+    });
+  }
+
+  // ===== Recursos del grupo =====
+  loadGroupResources(): void {
+    if (!this.groupId) return;
+    this.academicGroupService.getGroupResources(this.groupId).subscribe({
+      next: (res) => this.groupResources = res.data || [],
+      error: () => {}
+    });
+  }
+
+  addResourceToGroup(): void {
+    const id = (this.selectedResourceId || '').trim();
+    if (!id) return;
+    this.addingResource = true;
+    this.academicGroupService.addGroupResource(this.groupId, id).subscribe({
+      next: (res) => {
+        this.groupResources = res.data || [];
+        this.selectedResourceId = '';
+        this.addingResource = false;
+      },
+      error: () => { this.addingResource = false; }
+    });
+  }
+
+  removeResourceFromGroup(resourceId: string): void {
+    if (!confirm('¿Remover este recurso del grupo?')) return;
+    this.academicGroupService.removeGroupResource(this.groupId, resourceId).subscribe({
+      next: () => this.loadGroupResources(),
+      error: () => {}
+    });
+  }
+
   loadGroupStudents(): void {
     if (!this.groupId) return;
 
@@ -127,7 +226,49 @@ export class GroupDetailComponent implements OnInit {
   }
 
   editGroup(): void {
-    this.router.navigate(['/academia/group', this.groupId, 'edit']);
+    // Activar modo edición inline
+    this.editMode = true;
+    this.editedGroup = { ...this.group };
+    if (this.editedGroup.academicLevel) {
+      this.loadValidGrades(this.editedGroup.academicLevel);
+    }
+  }
+
+  loadValidGrades(academicLevel: string): void {
+    this.academicGroupService.getValidGrades(academicLevel).subscribe({
+      next: (response) => {
+        this.validGrades = response.data;
+      },
+      error: (error) => {
+        console.error('Error al cargar grados válidos:', error);
+      }
+    });
+  }
+
+  saveGroup(): void {
+    if (!this.editedGroup.name || !this.editedGroup.description || !this.editedGroup.academicLevel || !this.editedGroup.grade) {
+      alert('Por favor completa todos los campos obligatorios');
+      return;
+    }
+    this.savingGroup = true;
+    this.academicGroupService.updateGroup(this.groupId, this.editedGroup).subscribe({
+      next: () => {
+        this.loadGroupDetails();
+        this.editMode = false;
+        this.savingGroup = false;
+        alert('Grupo actualizado exitosamente');
+      },
+      error: (error) => {
+        console.error('Error al actualizar grupo:', error);
+        alert(error.error?.message || 'Error al actualizar el grupo');
+        this.savingGroup = false;
+      }
+    });
+  }
+
+  cancelEdit(): void {
+    this.editMode = false;
+    this.editedGroup = {};
   }
 
   deleteGroup(): void {
@@ -294,25 +435,25 @@ export class GroupDetailComponent implements OnInit {
   }
 
   canEditGroup(): boolean {
-    return this.userRole === 'teacher';
+    return this.userRole === 'teacher' || ['admin', 'delegated_admin', 'lesson_manager'].includes(this.currentUserRole);
   }
 
   canDeleteGroup(): boolean {
-    return this.userRole === 'teacher';
+    return this.userRole === 'teacher' || ['admin', 'delegated_admin', 'lesson_manager'].includes(this.currentUserRole);
   }
 
   canAddStudents(): boolean {
-    return this.userRole === 'teacher';
+    return this.userRole === 'teacher' || ['admin', 'delegated_admin', 'lesson_manager'].includes(this.currentUserRole);
   }
 
   canRemoveStudents(): boolean {
-    return this.userRole === 'teacher';
+    return this.userRole === 'teacher' || ['admin', 'delegated_admin', 'lesson_manager'].includes(this.currentUserRole);
   }
 
   canCreateLesson(): boolean {
     // Tanto estudiantes como docentes pueden crear lecciones
     // Los estudiantes necesitan permisos del grupo, los docentes siempre pueden
-    if (this.userRole === 'teacher') {
+    if (this.userRole === 'teacher' || ['admin', 'delegated_admin', 'lesson_manager'].includes(this.currentUserRole)) {
       return true;
     }
     console.log(this.group?.permissions?.studentsCanCreateLessons);

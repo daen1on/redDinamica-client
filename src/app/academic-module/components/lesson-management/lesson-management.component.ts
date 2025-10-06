@@ -223,6 +223,32 @@ export class LessonManagementComponent implements OnInit {
     return user._id || '';
   }
 
+  // Mostrar nombre seguro sin [object Object]
+  displayUserName(user: any): string {
+    if (!user) return 'Autor';
+    if (typeof user === 'string') return user;
+    return user.name || user.surname ? `${user.name || ''} ${user.surname || ''}`.trim() : (user.email || 'Autor');
+  }
+
+  displayGroupName(group: any): string {
+    if (!group) return 'Grupo';
+    if (typeof group === 'string') return group;
+    return group.name || 'Grupo';
+  }
+
+  getStatusColor(status: string): string {
+    const colors: { [key: string]: string } = {
+      'draft': 'draft',
+      'proposed': 'proposed',
+      'approved': 'approved',
+      'rejected': 'rejected',
+      'in_development': 'in_development',
+      'completed': 'completed',
+      'graded': 'graded'
+    };
+    return colors[status] || 'draft';
+  }
+
   getStatusLabel(status: string): string {
     const statusLabels: { [key: string]: string } = {
       'draft': 'Borrador',

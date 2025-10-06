@@ -50,10 +50,7 @@ export class TeacherDashboardComponent implements OnInit {
     const user = JSON.parse(raw);
     const rolesArray: string[] = Array.isArray(user.roles) ? user.roles.map((r: any) => String(r).toLowerCase()) : [];
     let role = (user.role || user.rol || user.userRole || '').toString().toLowerCase();
-    if (role === 'facilitador' || role === 'facilitator') role = 'expert';
-    if (role === 'docente') role = 'teacher';
-
-    const hasAccess = role === 'teacher' || role === 'admin' || role === 'expert' 
+    const hasAccess = role === 'teacher' || role === 'admin' || role === 'expert' || role === 'lesson_manager' 
       || rolesArray.includes('teacher') || rolesArray.includes('admin') || rolesArray.includes('expert');
     return hasAccess;
   }

@@ -13,8 +13,8 @@
 
   <!-- Group details -->
   <div *ngIf="!loading && group" class="group-content">
-    <!-- Header -->
-    <div class="group-header">
+    <!-- Header (Modo visualización) -->
+    <div class="group-header" *ngIf="!editMode">
       <div class="group-info">
         <h1>{{ group.name }}</h1>
         <p class="group-description">{{ group.description }}</p>
@@ -35,6 +35,53 @@
         <button class="btn btn-danger" (click)="deleteGroup()">
           <i class="fas fa-trash"></i> Eliminar
         </button>
+      </div>
+    </div>
+
+    <!-- Header (Modo edición) -->
+    <div class="group-header" *ngIf="editMode">
+      <div class="group-info w-100">
+        <h3 class="mb-3">Editar Grupo</h3>
+        <div class="mb-3">
+          <label class="form-label">Nombre del Grupo *</label>
+          <input type="text" class="form-control" [(ngModel)]="editedGroup.name" placeholder="Nombre del grupo" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Descripción *</label>
+          <textarea class="form-control" rows="3" [(ngModel)]="editedGroup.description" placeholder="Descripción del grupo"></textarea>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Nivel Académico *</label>
+            <select class="form-control" [(ngModel)]="editedGroup.academicLevel" (change)="loadValidGrades(editedGroup.academicLevel)">
+              <option value="">Seleccionar nivel</option>
+              <option value="Colegio">Colegio</option>
+              <option value="Universidad">Universidad</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Grado *</label>
+            <select class="form-control" [(ngModel)]="editedGroup.grade">
+              <option value="">Seleccionar grado</option>
+              <option *ngFor="let grade of validGrades" [value]="grade">{{ grade }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Máximo de Estudiantes</label>
+          <input type="number" class="form-control" [(ngModel)]="editedGroup.maxStudents" min="1" max="100" />
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-success" [disabled]="savingGroup" (click)="saveGroup()">
+            <span *ngIf="savingGroup" class="spinner-border spinner-border-sm me-2"></span>
+            <i class="fas fa-save" *ngIf="!savingGroup"></i>
+            Guardar Cambios
+          </button>
+          <button class="btn btn-secondary" (click)="cancelEdit()">
+            <i class="fas fa-times"></i>
+            Cancelar
+          </button>
+        </div>
       </div>
     </div>
 
@@ -82,6 +129,16 @@
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab">
             <i class="fas fa-users"></i> Estudiantes
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="discussion-tab" data-bs-toggle="tab" data-bs-target="#discussion" type="button" role="tab">
+            <i class="fas fa-comments"></i> Discusión
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="resources-tab" data-bs-toggle="tab" data-bs-target="#resources" type="button" role="tab">
+            <i class="fas fa-folder-open"></i> Recursos
           </button>
         </li>
       </ul>
@@ -191,6 +248,89 @@
                 <button class="btn btn-sm btn-outline-danger" (click)="removeStudent(student._id)">
                   <i class="fas fa-user-minus"></i>
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Discussion Tab -->
+        <div class="tab-pane fade" id="discussion" role="tabpanel">
+          <div class="tab-header d-flex align-items-center justify-content-between">
+            <h3 class="m-0">Discusión del Grupo</h3>
+          </div>
+          <div class="mb-3" *ngIf="canPostDiscussion()">
+            <div class="input-group">
+              <textarea [(ngModel)]="newDiscussionText" class="form-control" rows="2" placeholder="Escribe un mensaje..."></textarea>
+              <button class="btn btn-primary" [disabled]="addingMessage || !newDiscussionText" (click)="addDiscussion()">
+                <span *ngIf="addingMessage" class="spinner-border spinner-border-sm me-2"></span>
+                Publicar
+              </button>
+            </div>
+          </div>
+          <div *ngIf="loadingDiscussion" class="text-center text-muted py-3">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+          </div>
+          <div *ngIf="!loadingDiscussion && discussion.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-comments"></i>
+            </div>
+            <h4>No hay mensajes</h4>
+            <p>Inicia la conversación con tu grupo.</p>
+          </div>
+          <div *ngIf="discussion.length > 0" class="list-group">
+            <div class="list-group-item d-flex align-items-start" *ngFor="let msg of discussion">
+              <div class="me-3">
+                <i class="fas fa-user-circle" style="font-size: 1.8rem;"></i>
+              </div>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center">
+                  <strong>{{ msg.author?.name }} {{ msg.author?.surname }}</strong>
+                  <button *ngIf="userRole === 'teacher' || msg.author?._id === currentUserId" class="btn btn-sm btn-outline-danger" (click)="deleteDiscussionMessage(msg._id)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                <p class="mb-1">{{ msg.content }}</p>
+                <small class="text-muted">{{ msg.createdAt | date:'short' }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resources Tab -->
+        <div class="tab-pane fade" id="resources" role="tabpanel">
+          <div class="tab-header d-flex align-items-center justify-content-between">
+            <h3 class="m-0">Recursos del Grupo</h3>
+            <div *ngIf="userRole === 'teacher'" class="d-flex align-items-center" style="gap: 8px;">
+              <input [(ngModel)]="selectedResourceId" class="form-control" placeholder="Pega el ID del recurso a importar" style="max-width: 340px;" />
+              <button class="btn btn-success" [disabled]="addingResource || !selectedResourceId" (click)="addResourceToGroup()">
+                <span *ngIf="addingResource" class="spinner-border spinner-border-sm me-2"></span>
+                Importar
+              </button>
+            </div>
+          </div>
+          <div *ngIf="groupResources.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-folder-open"></i>
+            </div>
+            <h4>Sin recursos</h4>
+            <p>Importa recursos desde la sección de Recursos.</p>
+          </div>
+          <div *ngIf="groupResources.length > 0" class="lessons-grid">
+            <div *ngFor="let r of groupResources" class="lesson-card">
+              <div class="lesson-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 text-truncate" style="max-width: 70%">{{ r.name }}</h4>
+                <button *ngIf="userRole === 'teacher'" class="btn btn-sm btn-outline-danger" (click)="removeResourceFromGroup(r._id)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div class="lesson-content">
+                <p class="mb-1">{{ r.description }}</p>
+                <div class="lesson-meta d-flex justify-content-between">
+                  <small><i class="fas fa-user"></i> {{ r.author?.name }} {{ r.author?.surname }}</small>
+                  <small><i class="fas fa-star"></i> {{ (r.score || 0) | number:'1.1-2' }}</small>
+                </div>
               </div>
             </div>
           </div>

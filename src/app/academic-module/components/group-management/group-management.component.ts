@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AcademicGroupService } from '../../services/academic-group.service';
 import { AcademicGroup } from '../../models/academic-group.model';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-group-management',
@@ -23,7 +24,8 @@ export class GroupManagementComponent implements OnInit {
 
   constructor(
     private academicGroupService: AcademicGroupService,
-    private router: Router
+    private router: Router,
+    private userService: UserService
   ) { }
 
   ngOnInit(): void {
@@ -32,7 +34,15 @@ export class GroupManagementComponent implements OnInit {
 
   loadGroups(): void {
     this.loading = true;
-    this.academicGroupService.getTeacherGroups().subscribe({
+    const role = (this.userService.getIdentity()?.role || '').toString().toLowerCase();
+    const isAdmin = role === 'admin' || role === 'delegated_admin';
+    const isLessonManager = role === 'lesson_manager';
+
+    const source$ = (isAdmin || isLessonManager)
+      ? this.academicGroupService.getAllGroups(true)
+      : this.academicGroupService.getTeacherGroups();
+
+    source$.subscribe({
       next: (response) => {
         this.groups = response.data || [];
         this.loading = false;
@@ -50,11 +60,12 @@ export class GroupManagementComponent implements OnInit {
   }
 
   viewGroupDetails(groupId: string): void {
-    this.router.navigate(['/academia/group', groupId]);
+    this.router.navigate(['/academia/groups', groupId]);
   }
 
   editGroup(group: AcademicGroup): void {
-    this.router.navigate(['/academia/group', group._id, 'edit']);
+    // Redirigir al detalle del grupo; la edición se gestiona desde allí
+    this.router.navigate(['/academia/groups', group._id]);
   }
 
   deleteGroup(groupId: string): void {
