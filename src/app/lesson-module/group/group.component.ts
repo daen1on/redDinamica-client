@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { GLOBAL } from 'src/app/services/global';
 import { LESSON_STATES } from 'src/app/services/DATA';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
@@ -30,6 +30,7 @@ export class GroupComponent implements OnInit {
     public labelP = LABEL_PROFILE;
     constructor(
         private _route: ActivatedRoute,
+        private _router: Router,
         private _userService: UserService,
         private _lessonService: LessonService
     ) {
@@ -122,9 +123,24 @@ export class GroupComponent implements OnInit {
     ngOnInit(): void {
         this.initExpertSelect(); 
 
-        this._route.parent.url.subscribe(value => {
-            this.parentUrl = value[0].path;
+        this._route.parent?.url.subscribe(segments => {
+            const first = (segments && segments.length > 0) ? segments[0] : null;
+            this.parentUrl = (first && first.path)
+                || this._route.parent?.snapshot?.routeConfig?.path?.split('/')?.[0]
+                || '';
         });
+
+        // Fallback robusto: si la URL contiene '/admin', forzar contexto admin
+        try {
+            const currentUrl = this._router?.url || '';
+            if (currentUrl.includes('/admin')) {
+                this.parentUrl = 'admin';
+            } else if (!this.parentUrl) {
+                // Extraer primer segmento como último recurso
+                const firstSegment = currentUrl.split('?')[0].split('#')[0].split('/').filter(Boolean)[0] || '';
+                this.parentUrl = firstSegment;
+            }
+        } catch (e) {}
 
         if (this.lesson.development_group) {
             this.groupForm.patchValue({
@@ -192,7 +208,8 @@ export class GroupComponent implements OnInit {
 
         this.lesson.development_group = this.groupForm.value.members;
         this.lesson.expert = this.groupForm.value.expert._id;
-        this.lesson.leader = this.groupForm.value.leader;
+        // Enviar líder como ID para evitar problemas de serialización en backend
+        this.lesson.leader = this.groupForm.value.leader ? this.groupForm.value.leader._id : null;
         this.belongsTo(this.groupForm.value.expert);
         
         console.log("Enviando actualización de lección:", {
