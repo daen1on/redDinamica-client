@@ -186,7 +186,7 @@
           class="form-control"
           [class.is-invalid]="isFieldInvalid('methodology')"
           rows="4"
-          placeholder="¿Cómo se desarrollará la lección? Describe el enfoque pedagógico y las actividades principales..."></textarea>
+          placeholder="¿Cómo se desarrollará la lección? Justifica el modelo de dinámica de sistemas que se llevará a cabo y las actividades principales..."></textarea>
         <div *ngIf="isFieldInvalid('methodology')" class="invalid-feedback">
           {{ getErrorMessage('methodology') }}
         </div>
@@ -203,7 +203,7 @@
           class="form-control"
           [class.is-invalid]="isFieldInvalid('objectives')"
           rows="3"
-          placeholder="¿Qué aprenderán los estudiantes con esta lección? Define las competencias y conocimientos que se adquirirán..."></textarea>
+          placeholder="¿Qué se espera lograr con esta lección? Define las competencias y conocimientos que se adquirirán..."></textarea>
         <div *ngIf="isFieldInvalid('objectives')" class="invalid-feedback">
           {{ getErrorMessage('objectives') }}
         </div>
