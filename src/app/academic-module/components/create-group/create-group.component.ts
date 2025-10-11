@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AcademicGroupService } from '../../services/academic-group.service';
@@ -17,10 +17,17 @@ import { KnowledgeArea } from '../../../models/knowledge-area.model';
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule]
 })
 export class CreateGroupComponent implements OnInit {
+  @ViewChild('successAlert') successAlertRef?: ElementRef<HTMLDivElement>;
   groupForm: FormGroup;
   academicLevels = ['Colegio', 'Universidad'];
   validGrades: string[] = [];
   knowledgeAreas: KnowledgeArea[] = [];
+  // Autocompletado de materias/áreas
+  selectedSubjects: Array<{ _id?: string; name: string }> = [];
+  subjectInput = '';
+  filteredSubjects: Array<{ _id?: string; name: string }> = [];
+  showSubjectDropdown = false;
+  submitted = false;
   loading = false;
   errorMessage = '';
   successMessage = '';
@@ -67,10 +74,29 @@ export class CreateGroupComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.groupForm.valid) {
-      this.loading = true;
-      this.errorMessage = '';
-      this.successMessage = '';
+    // Evita envíos duplicados por doble clic
+    if (this.loading) {
+      return;
+    }
+    this.submitted = true;
+    const subjectsArray: string[] = this.groupForm.value.subjects || [];
+    if (subjectsArray.length === 0 && this.selectedSubjects.length > 0) {
+      // Sincroniza por si vienen solo desde chips
+      this.groupForm.patchValue({ subjects: this.selectedSubjects.map(s => s.name) });
+    }
+
+    // Bloquea inmediatamente el botón para evitar múltiples envíos por doble clic
+    this.loading = true;
+
+    const hasSubjects = (this.groupForm.value.subjects?.length || 0) > 0;
+    if (!(this.groupForm.valid && hasSubjects)) {
+      // Si el formulario no es válido, libera el bloqueo
+      this.loading = false;
+      return;
+    }
+
+    this.errorMessage = '';
+    this.successMessage = '';
 
       const groupData: CreateAcademicGroupRequest = {
         name: this.groupForm.value.name,
@@ -88,6 +114,14 @@ export class CreateGroupComponent implements OnInit {
           console.log('Respuesta exitosa:', response); // Debug log
           this.loading = false;
           this.successMessage = response.message;
+          // Enfoca y desplaza hacia el mensaje de éxito para dar feedback inmediato
+          setTimeout(() => {
+            const el = this.successAlertRef?.nativeElement;
+            if (el) {
+              el.focus();
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 0);
           setTimeout(() => {
             this.router.navigate(['/academia/groups']);
           }, 2000);
@@ -98,7 +132,7 @@ export class CreateGroupComponent implements OnInit {
           this.errorMessage = error.error?.message || error.message || 'Error al crear el grupo';
         }
       });
-    }
+    
   }
 
   loadKnowledgeAreas(): void {
@@ -121,10 +155,17 @@ export class CreateGroupComponent implements OnInit {
 
   addSubject(): void {
     const subjects = this.groupForm.get('subjects')?.value || [];
-    const newSubject = prompt('Ingrese el nombre de la materia:');
-    if (newSubject && newSubject.trim()) {
-      subjects.push(newSubject.trim());
-      this.groupForm.get('subjects')?.setValue(subjects);
+    const newSubject = (this.subjectInput || '').trim();
+    if (newSubject) {
+      if (!subjects.includes(newSubject)) {
+        subjects.push(newSubject);
+        this.groupForm.get('subjects')?.setValue(subjects);
+      }
+      if (!this.selectedSubjects.some(s => s.name.toLowerCase() === newSubject.toLowerCase())) {
+        this.selectedSubjects.push({ name: newSubject });
+      }
+      this.subjectInput = '';
+      this.showSubjectDropdown = false;
     }
   }
 
@@ -134,12 +175,55 @@ export class CreateGroupComponent implements OnInit {
       subjects.push(area.name);
       this.groupForm.get('subjects')?.setValue(subjects);
     }
+    if (!this.selectedSubjects.some(s => s.name === area.name)) {
+      this.selectedSubjects.push({ _id: (area as any)._id, name: area.name });
+    }
   }
 
   removeSubject(index: number): void {
     const subjects = this.groupForm.get('subjects')?.value || [];
     subjects.splice(index, 1);
     this.groupForm.get('subjects')?.setValue(subjects);
+  }
+
+  // Manejo de chips del nuevo UI
+  selectSubject(area: { _id?: string; name: string }): void {
+    if (!this.selectedSubjects.some(s => s.name.toLowerCase() === area.name.toLowerCase())) {
+      this.selectedSubjects.push(area);
+    }
+    const subjects = this.groupForm.get('subjects')?.value || [];
+    if (!subjects.includes(area.name)) {
+      subjects.push(area.name);
+      this.groupForm.get('subjects')?.setValue(subjects);
+    }
+    this.subjectInput = '';
+    this.showSubjectDropdown = false;
+  }
+
+  removeSubjectChip(area: { _id?: string; name: string }): void {
+    this.selectedSubjects = this.selectedSubjects.filter(s => s.name !== area.name);
+    const subjects = (this.groupForm.get('subjects')?.value || []).filter((s: string) => s !== area.name);
+    this.groupForm.get('subjects')?.setValue(subjects);
+  }
+
+  onSubjectInputChange(): void {
+    const term = (this.subjectInput || '').toLowerCase().trim();
+    if (term) {
+      const base = this.knowledgeAreas.map(a => ({ _id: (a as any)._id, name: a.name }));
+      this.filteredSubjects = base.filter(a => 
+        a.name.toLowerCase().includes(term) &&
+        !this.selectedSubjects.some(s => s.name.toLowerCase() === a.name.toLowerCase())
+      );
+      this.showSubjectDropdown = true;
+    } else {
+      this.showSubjectDropdown = false;
+    }
+  }
+
+  addNewSubjectFromInput(): void {
+    const name = (this.subjectInput || '').trim();
+    if (!name) return;
+    this.selectSubject({ name });
   }
 
   cancel(): void {
