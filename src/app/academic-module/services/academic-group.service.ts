@@ -96,9 +96,42 @@ export class AcademicGroupService {
     return this.http.get<CanCreateLessonsResponse>(`${this.apiUrl}/${groupId}/can-create-lessons`);
   }
 
-  // ===== Discusión del grupo =====
+  // ===== Sistema de Foro/Threads =====
+  getDiscussionThreads(groupId: string): Observable<{status: string, data: any[]}> {
+    return this.http.get<{status: string, data: any[]}>(`${this.apiUrl}/${groupId}/threads`);
+  }
+
+  createDiscussionThread(groupId: string, title: string, description?: string): Observable<{status: string, message: string, data: any[]}> {
+    return this.http.post<{status: string, message: string, data: any[]}>(`${this.apiUrl}/${groupId}/threads`, { title, description });
+  }
+
+  getDiscussionThread(groupId: string, threadId: string): Observable<{status: string, data: any}> {
+    return this.http.get<{status: string, data: any}>(`${this.apiUrl}/${groupId}/threads/${threadId}`);
+  }
+
+  deleteDiscussionThread(groupId: string, threadId: string): Observable<{status: string, message: string}> {
+    return this.http.delete<{status: string, message: string}>(`${this.apiUrl}/${groupId}/threads/${threadId}`);
+  }
+
+  addMessageToThread(groupId: string, threadId: string, content: string): Observable<{status: string, message: string, data: any}> {
+    return this.http.post<{status: string, message: string, data: any}>(`${this.apiUrl}/${groupId}/threads/${threadId}/messages`, { content });
+  }
+
+  deleteMessageFromThread(groupId: string, threadId: string, messageId: string): Observable<{status: string, message: string}> {
+    return this.http.delete<{status: string, message: string}>(`${this.apiUrl}/${groupId}/threads/${threadId}/messages/${messageId}`);
+  }
+
+  togglePinThread(groupId: string, threadId: string): Observable<{status: string, message: string, data: {isPinned: boolean}}> {
+    return this.http.put<{status: string, message: string, data: {isPinned: boolean}}>(`${this.apiUrl}/${groupId}/threads/${threadId}/pin`, {});
+  }
+
+  toggleLockThread(groupId: string, threadId: string): Observable<{status: string, message: string, data: {isLocked: boolean}}> {
+    return this.http.put<{status: string, message: string, data: {isLocked: boolean}}>(`${this.apiUrl}/${groupId}/threads/${threadId}/lock`, {});
+  }
+
+  // ===== Discusión del grupo (métodos antiguos para compatibilidad) =====
   getDiscussion(groupId: string): Observable<{status: string, data: any[]}> {
-    return this.http.get<{status: string, data: any[]}>(`${this.apiUrl}/${groupId}/discussion`);
+    return this.getDiscussionThreads(groupId);
   }
 
   addDiscussionMessage(groupId: string, content: string): Observable<{status: string, message: string, data: any[]}> {
