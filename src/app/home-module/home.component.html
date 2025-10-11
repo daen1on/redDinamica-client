@@ -88,7 +88,7 @@
               <div>
                 <i class="text-ligth fas fa-graduation-cap"></i>
                 <span class="ms-2">RedDinámica Académica</span>
-                <span *ngIf="identity.studentBadge" class="badge bg-warning text-dark ms-2">
+                <span *ngIf="identity && (identity.role == 'student' || identity.role == 'guest')" class="badge bg-warning text-dark ms-2">
                   <i class="fas fa-user-graduate"></i> Estudiante
                 </span>
               </div>
