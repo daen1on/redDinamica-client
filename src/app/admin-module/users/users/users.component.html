@@ -36,7 +36,7 @@
                         <img *ngIf="user.picture" class="img-fluid" [src]="url+'get-image-user/'+ user.picture">
                     </div>
                     <div class="flex-grow-1 ms-3">
-                        <a class="text-primary" [routerLink]="['/perfil', user._id]">
+                        <a class="text-primary user-name" [routerLink]="['/perfil', user._id]">
                             <h5>{{ user.name }} {{ user.surname }}</h5>
                         </a>
                         <ng-container *ngIf="labelProfile[user.role]">
@@ -52,7 +52,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="modal fade" id="confirmDelete{{user._id}}" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteTitle{{user._id}}" aria-hidden="true">
+                <div class="modal fade" id="confirmDelete{{user._id}}" tabindex="-1" role="dialog" [attr.aria-labelledby]="'confirmDeleteTitle' + user._id" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -81,7 +81,7 @@
                         <img *ngIf="user.picture" class="img-fluid" [src]="url+'get-image-user/'+ user.picture">
                     </div>
                     <div class="flex-grow-1 ms-3">
-                        <a class="text-primary" [routerLink]="['/perfil', user._id]">
+                        <a class="text-primary user-name" [routerLink]="['/perfil', user._id]">
                             <h5>{{ user.name }} {{ user.surname }}</h5>
                         </a>
                         <ng-container *ngIf="labelProfile[user.role]">
@@ -97,7 +97,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="modal fade" id="confirmDelete{{user._id}}" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteTitle{{user._id}}" aria-hidden="true">
+                <div class="modal fade" id="confirmDelete{{user._id}}" tabindex="-1" role="dialog" [attr.aria-labelledby]="'confirmDeleteTitle' + user._id" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
