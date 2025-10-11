@@ -35,9 +35,9 @@ export class LessonDetailComponent implements OnInit {
   gradeData = { grade: 0, feedback: '' };
 
   // Colaboración y conversación
-  inviteEmail: string = '';
-  inviteRole: 'member' | 'reviewer' | 'contributor' = 'member';
+  inviteStudentId: string = '';
   inviteMessage: string = '';
+  groupStudents: Array<{ _id: string, name: string, surname?: string }> = [];
   chatMessage: string = '';
   uploading = false;
   selectedFile: File | null = null;
@@ -88,6 +88,12 @@ export class LessonDetailComponent implements OnInit {
           type: 'text'
         }));
         this.lesson = { ...(response.data as any), chatMessages: mappedChat } as AcademicLesson;
+        // Precargar estudiantes actuales del grupo para selector de invitación
+        try {
+          const group: any = (this.lesson as any).academicGroup;
+          const students: any[] = Array.isArray(group?.students) ? group.students : [];
+          this.groupStudents = students.map((s: any) => ({ _id: String(s._id || s), name: s.name || s.fullname || s.username || s.email || 'Estudiante' }));
+        } catch {}
         // Actualizar el rol contextual en base a la lección/grupo
         this.userRole = this.computeContextRole();
         this.loading = false;
@@ -211,7 +217,22 @@ export class LessonDetailComponent implements OnInit {
   }
 
   editLesson(): void {
-    this.router.navigate(['/academia/lessons', this.lessonId, 'edit']);
+    // Cambiar estado de 'draft' a 'proposed' y notificar al profesor
+    if (!this.lesson) return;
+    if (this.lesson.status !== 'draft') return;
+    this.loading = true;
+    this.academicLessonService.updateLessonStatus(this.lessonId, { state: 'proposed', message: 'Lección propuesta para revisión del profesor' }).subscribe({
+      next: (res) => {
+        this.successMessage = res.message || 'Lección propuesta correctamente';
+        this.loadLesson();
+        this.loading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'No se pudo proponer la lección';
+        this.loading = false;
+      }
+    });
   }
 
   // Métodos para abrir/cerrar modales
@@ -245,10 +266,10 @@ export class LessonDetailComponent implements OnInit {
   // Métodos helper para verificar permisos
   canEdit(): boolean {
     if (!this.lesson) return false;
-    // Autor puede editar si es estudiante del grupo, líder o docente del grupo y la lección está en borrador
-    const isAuthor = this.isCurrentUserAuthor();
-    const isMemberOrTeacher = this.isCurrentUserInGroupStudents();
-    return isAuthor && isMemberOrTeacher && (this.lesson.status === 'draft');
+    // Solo el líder puede editar cuando está en borrador (para moverla a propuesta)
+    const leaderId = this.getIdFromRef((this.lesson as any)?.leader);
+    const isLeader = leaderId && leaderId === this.currentUserId;
+    return isLeader && (this.lesson.status === 'draft');
   }
 
   canDelete(): boolean {
@@ -259,11 +280,10 @@ export class LessonDetailComponent implements OnInit {
   }
 
   canApprove(): boolean {
-    // Docente del grupo o líder pueden aprobar si el estado es 'proposed'
+    // Solo el docente del grupo puede aprobar/rechazar si el estado es 'proposed'
     if (!this.lesson) return false;
     const isTeacher = this.getIdFromRef((this.lesson as any)?.academicGroup?.teacher) === this.currentUserId;
-    const isLeader = this.getIdFromRef((this.lesson as any)?.leader) === this.currentUserId;
-    return (isTeacher || isLeader) && this.lesson?.status === 'proposed';
+    return isTeacher && this.lesson?.status === 'proposed';
   }
 
   canGrade(): boolean {
@@ -425,20 +445,19 @@ export class LessonDetailComponent implements OnInit {
   // Nueva funcionalidad: Invitaciones a compañeros del mismo grupo
   inviteCollaborator(): void {
     if (!this.lesson) return;
-    if (!this.inviteEmail) {
-      this.errorMessage = 'Ingrese el correo del compañero a invitar.';
+    if (!this.inviteStudentId) {
+      this.errorMessage = 'Seleccione un estudiante del grupo.';
       return;
     }
     this.loading = true;
     this.academicLessonService.inviteCollaborator({
       lessonId: this.lesson._id,
-      userEmail: this.inviteEmail,
-      role: this.inviteRole,
+      userId: this.inviteStudentId,
       message: this.inviteMessage
     }).subscribe({
       next: (res) => {
         this.successMessage = res.message || 'Invitación enviada';
-        this.inviteEmail = '';
+        this.inviteStudentId = '';
         this.inviteMessage = '';
         this.loadLesson();
         this.loading = false;

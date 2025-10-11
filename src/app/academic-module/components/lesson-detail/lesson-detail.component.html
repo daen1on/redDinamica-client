@@ -350,21 +350,12 @@
           <!-- Invitar colaborador -->
           <div class="invite-section" *ngIf="userRole === 'student' && canEdit()">
             <hr class="my-4">
-            <h6><i class="fas fa-user-plus me-2"></i>Invitar compañero</h6>
+            <h6><i class="fas fa-user-plus me-2"></i>Invitar estudiante del grupo</h6>
             <div class="row g-3">
-              <div class="col-md-5">
-                <input 
-                  type="email" 
-                  class="form-control" 
-                  placeholder="Email del compañero" 
-                  [(ngModel)]="inviteEmail"
-                  [disabled]="loading">
-              </div>
-              <div class="col-md-3">
-                <select class="form-select" [(ngModel)]="inviteRole" [disabled]="loading">
-                  <option value="member">Miembro</option>
-                  <option value="reviewer">Revisor</option>
-                  <option value="contributor">Colaborador</option>
+              <div class="col-md-8">
+                <select class="form-select" [(ngModel)]="inviteStudentId" [disabled]="loading">
+                  <option value="">Seleccione estudiante...</option>
+                  <option *ngFor="let st of groupStudents" [value]="st._id">{{ st.name }}</option>
                 </select>
               </div>
               <div class="col-md-4">
@@ -378,7 +369,7 @@
                   <button 
                     class="btn btn-primary" 
                     (click)="inviteCollaborator()" 
-                    [disabled]="!inviteEmail || loading">
+                    [disabled]="!inviteStudentId || loading">
                     <i class="fas fa-paper-plane"></i> Invitar
                   </button>
                 </div>
