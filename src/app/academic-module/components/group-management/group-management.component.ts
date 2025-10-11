@@ -56,7 +56,7 @@ export class GroupManagementComponent implements OnInit {
   }
 
   createNewGroup(): void {
-    this.router.navigate(['/academia/create-group']);
+    this.router.navigate(['/academia/groups/create']);
   }
 
   viewGroupDetails(groupId: string): void {
@@ -65,7 +65,7 @@ export class GroupManagementComponent implements OnInit {
 
   editGroup(group: AcademicGroup): void {
     // Redirigir al detalle del grupo; la edición se gestiona desde allí
-    this.router.navigate(['/academia/groups', group._id]);
+    this.router.navigate(['/academia/groups', group._id], { queryParams: { editMode: 'true' } });
   }
 
   deleteGroup(groupId: string): void {
