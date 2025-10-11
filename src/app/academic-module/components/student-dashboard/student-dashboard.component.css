@@ -358,3 +358,49 @@
 .permission-notice span {
   flex: 1;
 }
+
+/* ===== Modo oscuro ===== */
+:host-context(.theme-dark) .student-dashboard {
+  background: linear-gradient(135deg, #0b1020 0%, #0c121a 100%);
+  color: var(--rd-text);
+}
+:host-context(.theme-dark) .dashboard-header { color: var(--rd-text); }
+:host-context(.theme-dark) .loading-container { color: var(--rd-text); }
+
+:host-context(.theme-dark) .stat-card {
+  background: rgba(26, 31, 36, 0.95);
+  border-color: #2a2f36;
+  color: var(--rd-text);
+}
+:host-context(.theme-dark) .stat-content h3 { color: var(--rd-primary); }
+:host-context(.theme-dark) .stat-content p { color: var(--rd-muted); }
+
+:host-context(.theme-dark) .section {
+  background: rgba(26, 31, 36, 0.95);
+  border-color: #2a2f36;
+  color: var(--rd-text);
+}
+:host-context(.theme-dark) .section-header { border-bottom-color: #2a2f36; }
+:host-context(.theme-dark) .section-header h3 { color: var(--rd-text); }
+
+:host-context(.theme-dark) .empty-state { color: var(--rd-muted); }
+:host-context(.theme-dark) .empty-state h4 { color: var(--rd-text); }
+
+:host-context(.theme-dark) .groups-grid .group-card,
+:host-context(.theme-dark) .lessons-grid .lesson-card {
+  background: #0f1420;
+  border-color: #2a2f36;
+  color: var(--rd-text);
+}
+
+:host-context(.theme-dark) .detail-item { color: var(--rd-muted); }
+:host-context(.theme-dark) .stat small { color: var(--rd-muted); }
+:host-context(.theme-dark) .stat strong { color: var(--rd-text); }
+
+:host-context(.theme-dark) .permission-notice {
+  background: rgba(255, 193, 7, 0.08);
+  border-color: rgba(255, 193, 7, 0.3);
+  color: #e6c269;
+}
+
+:host-context(.theme-dark) .badge.bg-secondary { background: #374151 !important; }

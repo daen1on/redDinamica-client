@@ -13,3 +13,8 @@
     object-fit: cover;
     height: 100%;
 }
+
+/* Dark mode: nombre de usuario en blanco */
+:host-context(.theme-dark) .user-name {
+    color: #ffffff !important;
+}

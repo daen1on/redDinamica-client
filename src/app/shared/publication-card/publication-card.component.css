@@ -578,3 +578,8 @@ a.text-primary:hover {
 .btn-link:hover i.fas {
     transform: scale(1.1);
 }
+
+/* ===== Modo oscuro: nombre del autor en blanco ===== */
+:host-context(.theme-dark) .author-name {
+    color: #ffffff !important;
+}
