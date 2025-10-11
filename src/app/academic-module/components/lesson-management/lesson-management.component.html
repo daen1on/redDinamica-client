@@ -32,14 +32,13 @@
       </div>
       <div class="col-lg-3 col-md-6">
         <select [(ngModel)]="filterStatus" class="form-select" (change)="applyFilters()">
-          <option value="">📋 Todos los estados</option>
-          <option value="draft">📝 Borrador</option>
-          <option value="proposed">📤 Propuesta</option>
-          <option value="approved">✅ Aprobada</option>
-          <option value="rejected">❌ Rechazada</option>
-          <option value="in_development">🔨 En desarrollo</option>
-          <option value="completed">✔️ Completada</option>
-          <option value="graded">⭐ Calificada</option>
+          <option value="">Todos los estados</option>
+          <option value="draft">Borrador</option>
+          <option value="proposed">Propuesta</option>
+          <option value="rejected"> Rechazada</option>
+          <option value="in_development"> En desarrollo</option>
+          <option value="completed"> Completada</option>
+          <option value="graded"> Calificada</option>
         </select>
       </div>
       <div class="col-lg-3 col-md-6" *ngIf="userRole === 'teacher'">
