@@ -253,46 +253,176 @@
           </div>
         </div>
 
-        <!-- Discussion Tab -->
+        <!-- Discussion Tab (Sistema de Foro) -->
         <div class="tab-pane fade" id="discussion" role="tabpanel">
-          <div class="tab-header d-flex align-items-center justify-content-between">
-            <h3 class="m-0">Discusión del Grupo</h3>
-          </div>
-          <div class="mb-3" *ngIf="canPostDiscussion()">
-            <div class="input-group">
-              <textarea [(ngModel)]="newDiscussionText" class="form-control" rows="2" placeholder="Escribe un mensaje..."></textarea>
-              <button class="btn btn-primary" [disabled]="addingMessage || !newDiscussionText" (click)="addDiscussion()">
-                <span *ngIf="addingMessage" class="spinner-border spinner-border-sm me-2"></span>
-                Publicar
+          <!-- Vista de lista de threads -->
+          <div *ngIf="showThreadsList">
+            <div class="tab-header d-flex align-items-center justify-content-between mb-3">
+              <h3 class="m-0">
+                <i class="fas fa-comments me-2"></i>Foro del Grupo
+              </h3>
+              <button *ngIf="canPostInForum()" class="btn btn-success" (click)="openNewThreadModal()">
+                <i class="fas fa-plus me-2"></i>Nueva Conversación
               </button>
             </div>
-          </div>
-          <div *ngIf="loadingDiscussion" class="text-center text-muted py-3">
-            <div class="spinner-border" role="status">
-              <span class="visually-hidden">Cargando...</span>
-            </div>
-          </div>
-          <div *ngIf="!loadingDiscussion && discussion.length === 0" class="empty-state">
-            <div class="empty-icon">
-              <i class="fas fa-comments"></i>
-            </div>
-            <h4>No hay mensajes</h4>
-            <p>Inicia la conversación con tu grupo.</p>
-          </div>
-          <div *ngIf="discussion.length > 0" class="list-group">
-            <div class="list-group-item d-flex align-items-start" *ngFor="let msg of discussion">
-              <div class="me-3">
-                <i class="fas fa-user-circle" style="font-size: 1.8rem;"></i>
+
+            <!-- Loading state -->
+            <div *ngIf="loadingThreads" class="text-center py-5">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Cargando...</span>
               </div>
-              <div class="flex-grow-1">
-                <div class="d-flex justify-content-between align-items-center">
-                  <strong>{{ msg.author?.name }} {{ msg.author?.surname }}</strong>
-                  <button *ngIf="userRole === 'teacher' || msg.author?._id === currentUserId" class="btn btn-sm btn-outline-danger" (click)="deleteDiscussionMessage(msg._id)">
-                    <i class="fas fa-trash"></i>
+              <p class="mt-3 text-muted">Cargando conversaciones...</p>
+            </div>
+
+            <!-- Empty state -->
+            <div *ngIf="!loadingThreads && discussionThreads.length === 0" class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <h4>No hay conversaciones</h4>
+              <p>Inicia una nueva conversación con tu grupo.</p>
+              <button *ngIf="canPostInForum()" class="btn btn-primary" (click)="openNewThreadModal()">
+                <i class="fas fa-plus me-2"></i>Crear Primera Conversación
+              </button>
+            </div>
+
+            <!-- Lista de threads -->
+            <div *ngIf="!loadingThreads && discussionThreads.length > 0" class="threads-list">
+              <div *ngFor="let thread of discussionThreads" class="thread-item" (click)="selectThread(thread)">
+                <div class="thread-header-row">
+                  <div class="thread-icons">
+                    <i *ngIf="thread.isPinned" class="fas fa-thumbtack text-warning me-2" title="Fijado"></i>
+                    <i *ngIf="thread.isLocked" class="fas fa-lock text-danger me-2" title="Bloqueado"></i>
+                    <i class="fas fa-comment-dots text-primary"></i>
+                  </div>
+                  <div class="thread-info flex-grow-1">
+                    <h5 class="thread-title mb-1">{{ thread.title }}</h5>
+                    <p *ngIf="thread.description" class="thread-description text-muted mb-1">{{ thread.description }}</p>
+                    <div class="thread-meta">
+                      <span class="text-muted small">
+                        <i class="fas fa-user"></i> {{ thread.author?.name }} {{ thread.author?.surname }}
+                      </span>
+                      <span class="text-muted small ms-3">
+                        <i class="fas fa-comments"></i> {{ getThreadMessagesCount(thread) }} mensajes
+                      </span>
+                      <span class="text-muted small ms-3">
+                        <i class="fas fa-clock"></i> {{ getThreadLastUpdate(thread) | date:'short' }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="thread-actions" *ngIf="userRole === 'teacher'">
+                    <button class="btn btn-sm btn-outline-primary me-1" 
+                            (click)="togglePinThread(thread); $event.stopPropagation()" 
+                            [title]="thread.isPinned ? 'Desfijar' : 'Fijar'">
+                      <i class="fas fa-thumbtack"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning me-1" 
+                            (click)="toggleLockThread(thread); $event.stopPropagation()" 
+                            [title]="thread.isLocked ? 'Desbloquear' : 'Bloquear'">
+                      <i class="fas fa-lock"></i>
+                    </button>
+                    <button *ngIf="!thread.isPinned || thread.title !== 'Conversación General'" 
+                            class="btn btn-sm btn-outline-danger" 
+                            (click)="deleteThread(thread._id); $event.stopPropagation()" 
+                            title="Eliminar">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vista de thread individual con mensajes -->
+          <div *ngIf="!showThreadsList && selectedThread">
+            <div class="thread-view-header mb-3">
+              <button class="btn btn-outline-secondary mb-3" (click)="backToThreadsList()">
+                <i class="fas fa-arrow-left me-2"></i>Volver al foro
+              </button>
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h3 class="mb-1">
+                    <i *ngIf="selectedThread.isPinned" class="fas fa-thumbtack text-warning me-2"></i>
+                    <i *ngIf="selectedThread.isLocked" class="fas fa-lock text-danger me-2"></i>
+                    {{ selectedThread.title }}
+                  </h3>
+                  <p *ngIf="selectedThread.description" class="text-muted">{{ selectedThread.description }}</p>
+                  <small class="text-muted">
+                    Creado por {{ selectedThread.author?.name }} {{ selectedThread.author?.surname }} 
+                    el {{ selectedThread.createdAt | date:'medium' }}
+                  </small>
+                </div>
+                <div *ngIf="userRole === 'teacher'" class="thread-actions-toolbar">
+                  <button class="btn btn-sm btn-outline-primary me-1" 
+                          (click)="togglePinThread(selectedThread)" 
+                          [title]="selectedThread.isPinned ? 'Desfijar' : 'Fijar'">
+                    <i class="fas fa-thumbtack"></i>
+                    {{ selectedThread.isPinned ? 'Desfijar' : 'Fijar' }}
+                  </button>
+                  <button class="btn btn-sm btn-outline-warning me-1" 
+                          (click)="toggleLockThread(selectedThread)" 
+                          [title]="selectedThread.isLocked ? 'Desbloquear' : 'Bloquear'">
+                    <i class="fas fa-lock"></i>
+                    {{ selectedThread.isLocked ? 'Desbloquear' : 'Bloquear' }}
+                  </button>
+                  <button *ngIf="!selectedThread.isPinned || selectedThread.title !== 'Conversación General'" 
+                          class="btn btn-sm btn-outline-danger" 
+                          (click)="deleteThread(selectedThread._id)" 
+                          title="Eliminar">
+                    <i class="fas fa-trash"></i> Eliminar
                   </button>
                 </div>
-                <p class="mb-1">{{ msg.content }}</p>
-                <small class="text-muted">{{ msg.createdAt | date:'short' }}</small>
+              </div>
+            </div>
+
+            <!-- Formulario para nuevo mensaje -->
+            <div class="new-message-form mb-4" *ngIf="canPostInForum() && (!selectedThread.isLocked || userRole === 'teacher')">
+              <div class="input-group">
+                <textarea [(ngModel)]="newMessageText" 
+                          class="form-control" 
+                          rows="3" 
+                          placeholder="Escribe tu mensaje..."></textarea>
+              </div>
+              <button class="btn btn-primary mt-2" 
+                      [disabled]="addingMessage || !newMessageText?.trim()" 
+                      (click)="addMessageToSelectedThread()">
+                <span *ngIf="addingMessage" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!addingMessage" class="fas fa-paper-plane me-2"></i>
+                Enviar
+              </button>
+            </div>
+
+            <div *ngIf="selectedThread.isLocked && userRole !== 'teacher'" class="alert alert-warning">
+              <i class="fas fa-lock me-2"></i>
+              Esta conversación está bloqueada. Solo el profesor puede publicar mensajes.
+            </div>
+
+            <!-- Lista de mensajes -->
+            <div class="messages-container">
+              <div *ngIf="selectedThread.messages.length === 0" class="empty-state-small">
+                <p class="text-muted">No hay mensajes todavía. ¡Sé el primero en participar!</p>
+              </div>
+              
+              <div *ngFor="let message of selectedThread.messages" class="message-item">
+                <div class="message-avatar">
+                  <img *ngIf="message.author?.picture" 
+                       [src]="url + 'get-image-user/' + message.author.picture" 
+                       class="rounded-circle"
+                       style="width: 40px; height: 40px; object-fit: cover;">
+                  <i *ngIf="!message.author?.picture" class="fas fa-user-circle" style="font-size: 2.5rem; color: #6c757d;"></i>
+                </div>
+                <div class="message-content">
+                  <div class="message-header">
+                    <strong>{{ message.author?.name }} {{ message.author?.surname }}</strong>
+                    <small class="text-muted ms-2">{{ message.createdAt | date:'short' }}</small>
+                    <button *ngIf="userRole === 'teacher' || message.author?._id === currentUserId" 
+                            class="btn btn-sm btn-outline-danger ms-auto" 
+                            (click)="deleteMessage(message._id)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                  <p class="message-text">{{ message.content }}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -302,40 +432,233 @@
         <div class="tab-pane fade" id="resources" role="tabpanel">
           <div class="tab-header d-flex align-items-center justify-content-between">
             <h3 class="m-0">Recursos del Grupo</h3>
-            <div *ngIf="userRole === 'teacher'" class="d-flex align-items-center" style="gap: 8px;">
-              <input [(ngModel)]="selectedResourceId" class="form-control" placeholder="Pega el ID del recurso a importar" style="max-width: 340px;" />
-              <button class="btn btn-success" [disabled]="addingResource || !selectedResourceId" (click)="addResourceToGroup()">
-                <span *ngIf="addingResource" class="spinner-border spinner-border-sm me-2"></span>
-                Importar
-              </button>
-            </div>
+            <button *ngIf="userRole === 'teacher'" class="btn btn-success" (click)="openResourcesModal()">
+              <i class="fas fa-plus"></i> Importar Recursos
+            </button>
           </div>
           <div *ngIf="groupResources.length === 0" class="empty-state">
             <div class="empty-icon">
               <i class="fas fa-folder-open"></i>
             </div>
             <h4>Sin recursos</h4>
-            <p>Importa recursos desde la sección de Recursos.</p>
+            <p>Importa recursos desde el repositorio.</p>
+            <button *ngIf="userRole === 'teacher'" class="btn btn-primary" (click)="openResourcesModal()">
+              <i class="fas fa-plus"></i> Importar Recursos
+            </button>
           </div>
-          <div *ngIf="groupResources.length > 0" class="lessons-grid">
-            <div *ngFor="let r of groupResources" class="lesson-card">
-              <div class="lesson-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 text-truncate" style="max-width: 70%">{{ r.name }}</h4>
-                <button *ngIf="userRole === 'teacher'" class="btn btn-sm btn-outline-danger" (click)="removeResourceFromGroup(r._id)">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-              <div class="lesson-content">
-                <p class="mb-1">{{ r.description }}</p>
-                <div class="lesson-meta d-flex justify-content-between">
-                  <small><i class="fas fa-user"></i> {{ r.author?.name }} {{ r.author?.surname }}</small>
-                  <small><i class="fas fa-star"></i> {{ (r.score || 0) | number:'1.1-2' }}</small>
+          
+          <!-- Resources List -->
+          <div *ngIf="groupResources.length > 0">
+            <div *ngFor="let resource of groupResources" class="resource-item-card mb-3">
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <!-- Icon Column -->
+                    <div class="col-auto">
+                      <div class="text-center p-2 rounded-lg border border-light {{iconResource[resource.type]?.class}}" style="width: 80px; height: 80px; overflow:hidden">
+                        <i class="text-white fas {{iconResource[resource.type]?.icon}}" style="font-size:62px"></i>
+                      </div>
+                      <div class="mt-2">
+                        <button class="btn w-100 btn-sm" disabled title="Descargas">
+                          <i class="fas fa-download"></i> {{resource.downloads || 0}}
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Content Column -->
+                    <div class="col">
+                      <h5 class="mt-0 text-truncate">
+                        <strong>{{resource.name}}</strong>
+                      </h5>
+                      <p>{{resource.description}}</p>
+                      <p><strong>Subido por:</strong></p>
+                      <div class="row">
+                        <div class="col-auto pe-0">
+                          <div class="flex-shrink-0 rounded-circle border-1 overflow-hidden" style="width: 40px; height:40px; background-color: aqua">
+                            <img *ngIf="!resource.author?.picture" class="img-fluid" src="assets/images/user-default.png">
+                            <img *ngIf="resource.author?.picture" class="img-fluid" [src]="url + 'get-image-user/' + resource.author.picture">
+                          </div>
+                        </div>
+                        <div class="col rounded px-2">
+                          <h6 class="mb-1">
+                            <strong>{{resource.author?.name}} {{resource.author?.surname}}</strong>
+                          </h6>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Actions Column -->
+                    <div class="col-auto d-flex flex-column justify-content-center gap-2">
+                      <ng-container *ngIf="resource.type == 'link'; else getResource">
+                        <button class="btn btn-secondary" title="Ir al enlace" (click)="goToUrl(resource.url); increaseDownloads(resource)">
+                          <i class="fas fa-hand-pointer"></i> Abrir
+                        </button>
+                      </ng-container>
+                      <ng-template #getResource>
+                        <a class="btn btn-secondary" [title]="'Descargar: ' + resource.file" [href]="url + 'get-resource/' + resource.file" target="_blank" (click)="increaseDownloads(resource)">
+                          <i class="fas fa-download"></i> Descargar
+                        </a>
+                      </ng-template>
+                      <button *ngIf="userRole === 'teacher'" class="btn btn-sm btn-outline-danger" (click)="removeResourceFromGroup(resource._id)">
+                        <i class="fas fa-times"></i> Remover
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Selección de Recursos -->
+<div *ngIf="showResourcesModal" class="resources-modal-overlay" (click)="closeResourcesModal()">
+  <div class="resources-modal-container" (click)="$event.stopPropagation()">
+    <div class="resources-modal-header">
+      <h3 class="m-0">Importar Recursos al Grupo</h3>
+      <button class="btn-close-modal" (click)="closeResourcesModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="resources-modal-body">
+      <!-- Loading State -->
+      <div *ngIf="loadingResources" class="text-center py-5">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Cargando recursos...</span>
+        </div>
+        <p class="mt-3 text-muted">Cargando recursos disponibles...</p>
+      </div>
+
+      <!-- Two Column Layout -->
+      <div *ngIf="!loadingResources" class="row h-100">
+        <!-- Left Column: Available Resources -->
+        <div class="col-md-6 resources-column">
+          <div class="column-header">
+            <h5><i class="fas fa-folder-open me-2"></i>Recursos Disponibles ({{availableResources.length}})</h5>
+          </div>
+          <div class="resources-list">
+            <div *ngIf="availableResources.length === 0" class="empty-state-small">
+              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <p class="text-muted">No hay recursos disponibles para importar</p>
+            </div>
+            
+            <div *ngFor="let resource of availableResources" class="resource-item" 
+                 [class.selected]="isResourceSelected(resource)"
+                 (click)="toggleResourceSelection(resource)">
+              <div class="d-flex align-items-start">
+                <div class="resource-icon-small {{iconResource[resource.type]?.class}} me-3">
+                  <i class="fas {{iconResource[resource.type]?.icon}}"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-1 resource-name">{{resource.name}}</h6>
+                  <p class="mb-1 text-muted small resource-description">{{resource.description}}</p>
+                  <div class="d-flex align-items-center gap-3 text-muted small">
+                    <span><i class="fas fa-user"></i> {{resource.author?.name}}</span>
+                    <span><i class="fas fa-download"></i> {{resource.downloads || 0}}</span>
+                  </div>
+                </div>
+                <div class="resource-check">
+                  <i *ngIf="isResourceSelected(resource)" class="fas fa-check-circle text-success"></i>
+                  <i *ngIf="!isResourceSelected(resource)" class="far fa-circle"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Selected Resources -->
+        <div class="col-md-6 resources-column selection-column">
+          <div class="column-header">
+            <h5><i class="fas fa-check-square me-2"></i>Recursos Seleccionados ({{selectedResourcesToAdd.length}})</h5>
+          </div>
+          <div class="resources-list">
+            <div *ngIf="selectedResourcesToAdd.length === 0" class="empty-state-small">
+              <i class="fas fa-hand-pointer fa-3x text-muted mb-3"></i>
+              <p class="text-muted">Haz clic en los recursos de la izquierda para seleccionarlos</p>
+            </div>
+            
+            <div *ngFor="let resource of selectedResourcesToAdd" class="resource-item selected-item">
+              <div class="d-flex align-items-start">
+                <div class="resource-icon-small {{iconResource[resource.type]?.class}} me-3">
+                  <i class="fas {{iconResource[resource.type]?.icon}}"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-1 resource-name">{{resource.name}}</h6>
+                  <p class="mb-1 text-muted small resource-description">{{resource.description}}</p>
+                  <div class="d-flex align-items-center gap-3 text-muted small">
+                    <span><i class="fas fa-user"></i> {{resource.author?.name}}</span>
+                    <span><i class="fas fa-download"></i> {{resource.downloads || 0}}</span>
+                  </div>
+                </div>
+                <button class="btn-remove-selection" (click)="removeFromSelection(resource)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="resources-modal-footer">
+      <button class="btn btn-secondary" (click)="closeResourcesModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn btn-success" 
+              [disabled]="selectedResourcesToAdd.length === 0 || addingResource" 
+              (click)="importSelectedResources()">
+        <span *ngIf="addingResource" class="spinner-border spinner-border-sm me-2"></span>
+        <i *ngIf="!addingResource" class="fas fa-download me-2"></i>
+        Importar ({{selectedResourcesToAdd.length}})
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Crear Nuevo Thread -->
+<div *ngIf="showNewThreadModal" class="modal-overlay" (click)="closeNewThreadModal()">
+  <div class="modal-dialog-custom" (click)="$event.stopPropagation()">
+    <div class="modal-header-custom">
+      <h4 class="m-0"><i class="fas fa-plus-circle me-2"></i>Nueva Conversación</h4>
+      <button class="btn-close-custom" (click)="closeNewThreadModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body-custom">
+      <div class="mb-3">
+        <label class="form-label fw-bold">Título de la conversación *</label>
+        <input type="text" 
+               class="form-control" 
+               [(ngModel)]="newThreadTitle" 
+               placeholder="Ej: Dudas sobre cómo hacer un modelo de dinámica de sistemas, Materiales adicionales, etc."
+               maxlength="150">
+        <small class="text-muted">Máximo 150 caracteres</small>
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-bold">Descripción (opcional)</label>
+        <textarea class="form-control" 
+                  rows="4" 
+                  [(ngModel)]="newThreadDescription" 
+                  placeholder="Describe brevemente de qué trata esta conversación..."
+                  maxlength="500"></textarea>
+        <small class="text-muted">Máximo 500 caracteres</small>
+      </div>
+    </div>
+    <div class="modal-footer-custom">
+      <button class="btn btn-secondary" (click)="closeNewThreadModal()">
+        <i class="fas fa-times me-2"></i>Cancelar
+      </button>
+      <button class="btn btn-success" 
+              [disabled]="!newThreadTitle?.trim() || creatingThread" 
+              (click)="createNewThread()">
+        <span *ngIf="creatingThread" class="spinner-border spinner-border-sm me-2"></span>
+        <i *ngIf="!creatingThread" class="fas fa-check me-2"></i>
+        Crear Conversación
+      </button>
     </div>
   </div>
 </div>
