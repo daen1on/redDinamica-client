@@ -103,6 +103,7 @@ export interface AcademicLesson {
   _id: string;
   title: string;
   resume: string;
+  references?: string;
   academicGroup: string;
   author: string | UserRef;
   teacher?: string | UserRef;
@@ -225,12 +226,14 @@ export interface UpdateAcademicLessonRequest {
   };
   tags?: string;
   knowledge_areas?: string[];
+  status?: 'draft' | 'proposed' | 'rejected' | 'in_development' | 'completed' | 'graded' | 'ready_for_migration';
 }
 
 export interface InviteCollaboratorRequest {
   lessonId: string;
-  userEmail: string;
-  role: 'member' | 'reviewer' | 'contributor';
+  userId?: string; // preferimos invitar por id
+  userEmail?: string; // fallback por email
+  role?: 'member'; // forzado a member en backend
   message?: string;
 }
 
