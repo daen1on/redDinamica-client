@@ -17,6 +17,7 @@ export class ReportErrorComponent implements OnInit {
   successMessage: string = '';
   errorMessage: string = '';
   lockPublicationId: boolean = false;
+  lockReportedUserId: boolean = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -39,7 +40,9 @@ export class ReportErrorComponent implements OnInit {
     // Prellenar desde parámetros de consulta
     const categoryParam = this.route.snapshot.queryParamMap.get('category');
     const publicationIdParam = this.route.snapshot.queryParamMap.get('publicationId');
+    const reportedUserIdParam = this.route.snapshot.queryParamMap.get('reportedUserId');
 
+    // Manejar denuncia de publicación
     if (categoryParam === 'publication' || publicationIdParam) {
       // Establecer categoría y validadores
       this.f.category.setValue('publication');
@@ -51,17 +54,38 @@ export class ReportErrorComponent implements OnInit {
         this.lockPublicationId = true;
       }
     }
+
+    // Manejar denuncia de usuario
+    if (categoryParam === 'user' || reportedUserIdParam) {
+      // Establecer categoría y validadores
+      this.f.category.setValue('user');
+      this.onCategoryChange();
+
+      if (reportedUserIdParam) {
+        this.f.reportedUserId.setValue(reportedUserIdParam);
+        this.f.reportedUserId.updateValueAndValidity();
+        this.lockReportedUserId = true;
+      }
+    }
   }
 
   get f() { return this.reportErrorForm.controls; }
 
   onCategoryChange(): void {
-    // Resetear campos cuando cambia la categoría
+    // Resetear campos cuando cambia la categoría (excepto los bloqueados)
     this.f.type.setValue('');
     this.f.module.setValue('');
     this.f.steps.setValue('');
-    this.f.publicationId.setValue('');
-    this.f.reportedUserId.setValue('');
+    
+    // Solo resetear publicationId si no está bloqueado
+    if (!this.lockPublicationId) {
+      this.f.publicationId.setValue('');
+    }
+    
+    // Solo resetear reportedUserId si no está bloqueado
+    if (!this.lockReportedUserId) {
+      this.f.reportedUserId.setValue('');
+    }
     
     // Actualizar validadores según la categoría
     const category = this.f.category.value;

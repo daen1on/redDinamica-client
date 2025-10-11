@@ -93,9 +93,10 @@
     <!-- Campos para Denuncias de Usuarios -->
     <div *ngIf="f.category.value === 'user'">
       <div class="form-group">
-        <label for="reportedUserId">ID o Nombre del Usuario <span class="required">*</span></label>
-        <input type="text" formControlName="reportedUserId" class="form-control" placeholder="Ingrese el ID o nombre de usuario" [ngClass]="{'is-invalid': submitted && f.reportedUserId?.errors}">
-        <small class="form-text">Ingrese el nombre de usuario o ID del perfil denunciado</small>
+        <label for="reportedUserId">ID del Usuario <span class="required">*</span></label>
+        <input type="text" formControlName="reportedUserId" class="form-control" placeholder="Ingrese el ID del usuario" [readonly]="lockReportedUserId" [ngClass]="{'is-invalid': submitted && f.reportedUserId?.errors}">
+        <small class="form-text" *ngIf="!lockReportedUserId">Puede encontrar el ID en la URL del perfil del usuario</small>
+        <small class="form-text" *ngIf="lockReportedUserId">Este ID fue prellenado desde el perfil que acabas de denunciar y no se puede modificar.</small>
         <div *ngIf="submitted && f.reportedUserId?.errors" class="invalid-feedback">
           <div *ngIf="f.reportedUserId?.errors.required">El campo es obligatorio.</div>
         </div>
