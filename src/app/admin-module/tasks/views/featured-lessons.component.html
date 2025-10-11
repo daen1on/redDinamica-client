@@ -38,6 +38,25 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal de confirmación -->
+  <div class="modal fade show" tabindex="-1" aria-modal="true" role="dialog" *ngIf="showConfirmModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar movimiento</h5>
+          <button type="button" class="btn-close" (click)="cancelarMovimiento()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Vas a mover esta lección a la RedDinámica principal. Podrás editar todos los campos allí (nivel permanece como universidad, áreas de conocimiento y niveles podrán ampliarse desde admin). ¿Deseas continuar?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancelarMovimiento()">Cancelar</button>
+          <button type="button" class="btn btn-primary" (click)="confirmarMovimiento()">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 
