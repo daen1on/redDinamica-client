@@ -67,7 +67,7 @@
 
 .dashboard-content {
   max-width: 1400px;
-  margin: 0 auto;
+  margin: 3.5rem auto;
   padding: 0 2rem;
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -431,28 +431,37 @@
 }
 
 /* ===== Modo oscuro ===== */
-.theme-dark .academic-dashboard {
-  background: linear-gradient(135deg, #0b1020 0%, #0e0f1a 100%);
+/* ===== Modo oscuro (usa :host-context para atravesar el encapsulado) ===== */
+:host-context(.theme-dark) .academic-dashboard {
+  background: linear-gradient(135deg, #0b1020 0%, #0c121a 100%);
 }
-.theme-dark .dashboard-header {
-  background: rgba(17, 20, 24, 0.6);
+:host-context(.theme-dark) .dashboard-header {
+  background: rgba(17, 20, 24, 0.7);
   color: var(--rd-text);
   border-bottom: 1px solid #2a2f36;
 }
-.theme-dark .sidebar,
-.theme-dark .main-content {
-  background: rgba(26, 31, 36, 0.95);
+:host-context(.theme-dark) .sidebar,
+:host-context(.theme-dark) .main-content {
+  background: rgba(26, 31, 36, 0.96);
   border-color: #2a2f36;
   color: var(--rd-text);
 }
-.theme-dark .nav-link { color: var(--rd-text); }
-.theme-dark .nav-link:hover { color: var(--rd-primary); }
-.theme-dark .nav-link.active { color: #fff; }
+:host-context(.theme-dark) .nav-link { color: var(--rd-text); }
+:host-context(.theme-dark) .nav-link:hover { color: var(--rd-primary); }
+:host-context(.theme-dark) .nav-link.active { color: #fff; }
 
-.theme-dark .role-card {
-  background: rgba(26, 31, 36, 0.9);
+:host-context(.theme-dark) .role-card {
+  background: rgba(26, 31, 36, 0.92);
   box-shadow: 0 15px 35px rgba(0,0,0,0.35);
 }
-.theme-dark .role-card h3 { color: var(--rd-text); }
-.theme-dark .role-card p { color: var(--rd-muted); }
-.theme-dark .role-card:hover p { color: var(--rd-text); }
+:host-context(.theme-dark) .role-card h3 { color: var(--rd-text); }
+:host-context(.theme-dark) .role-card p { color: var(--rd-muted); }
+:host-context(.theme-dark) .role-card:hover p { color: var(--rd-text); }
+
+/* Nota informativa bajo las tarjetas */
+.access-note {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  color: #666;
+}
+:host-context(.theme-dark) .access-note { color: var(--rd-muted); }
