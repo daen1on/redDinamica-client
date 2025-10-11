@@ -72,6 +72,11 @@ export class AcademicLessonService {
     return this.http.post<{status: string, message: string, data: AcademicLesson}>(`${this.apiUrl}/${lessonId}/grade`, gradeData);
   }
 
+  // Cambiar estado (líder): draft -> proposed, etc.
+  updateLessonStatus(lessonId: string, body: { state: AcademicLesson['status'], message?: string }): Observable<{status: string, message: string, data: any}> {
+    return this.http.put<{status: string, message: string, data: any}>(`${this.apiUrl}/${lessonId}/state`, body);
+  }
+
   // Exportar lección a RedDinámica principal
   exportToMain(lessonId: string): Observable<{status: string, message: string, data: AcademicLesson}> {
     return this.http.post<{status: string, message: string, data: AcademicLesson}>(`${this.apiUrl}/${lessonId}/export`, {});
@@ -80,7 +85,9 @@ export class AcademicLessonService {
   // Invitar colaborador (compañero del mismo grupo)
   inviteCollaborator(payload: InviteCollaboratorRequest): Observable<{status: string, message: string, data: AcademicLesson}> {
     const { lessonId, ...body } = payload;
-    return this.http.post<{status: string, message: string, data: AcademicLesson}>(`${this.apiUrl}/${lessonId}/invite`, body);
+    // Enviar siempre role=member por consistencia, aunque backend lo fuerza
+    const requestBody: any = { ...body, role: 'member' };
+    return this.http.post<{status: string, message: string, data: AcademicLesson}>(`${this.apiUrl}/${lessonId}/invite`, requestBody);
   }
 
   // Enviar mensaje de chat (texto)
