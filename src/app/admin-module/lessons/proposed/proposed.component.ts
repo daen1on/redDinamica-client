@@ -3,6 +3,7 @@ import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GLOBAL } from 'src/app/services/global';
+import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({
     selector: 'proposed',
@@ -33,7 +34,8 @@ export class ProposedComponent implements OnInit {
         private _userService: UserService,
         private _lessonService: LessonService,
         private _router: Router,
-        private _route: ActivatedRoute     
+        private _route: ActivatedRoute,
+        private _notificationService: NotificationService    
     ) {
         this.title = 'Lecciones propuestas';
         this.url = GLOBAL.url;
@@ -118,6 +120,32 @@ export class ProposedComponent implements OnInit {
             next: (response) => {                
                 if (response && response.lesson._id) {        
                     console.log("Lesson updated successfully", response.lesson);
+                    // Enviar notificación al líder/autor para abrir convocatoria
+                    try {
+                        const updated = response.lesson;
+                        const leaderId = (updated.leader && (updated.leader._id || updated.leader)) || (updated.author && (updated.author._id || updated.author));
+                        if (leaderId) {
+                            const notificationPayload = {
+                                user: leaderId,
+                                type: 'lesson',
+                                title: '¡Tu lección ha sido aprobada!',
+                                content: `Un administrador ha aprobado tu lección "${updated.title}". Ahora puedes gestionar la convocatoria y activar la lección cuando tengas suficientes participantes.`,
+                                link: `/inicio/convocatorias?lesson=${updated._id}&action=manage`,
+                                relatedId: updated._id,
+                                relatedModel: 'Lesson',
+                                from: this.identity?._id,
+                                priority: 'high'
+                            };
+                            this._notificationService.createNotification(notificationPayload).subscribe({
+                                next: () => console.log('Notificación enviada al líder/autor para abrir convocatoria'),
+                                error: (err) => console.error('Error enviando notificación al líder/autor:', err)
+                            });
+                        } else {
+                            console.warn('No se pudo determinar el líder/autor para notificar');
+                        }
+                    } catch (e) {
+                        console.error('Excepción preparando notificación:', e);
+                    }
                     this.getLessons(this.page);
                 }
             },
