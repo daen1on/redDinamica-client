@@ -1,0 +1,48 @@
+<div class="modal fade show" *ngIf="show" style="display: block; background: rgba(0,0,0,0.5);" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-clipboard-check me-2"></i>Calificar Lección
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="close.emit()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label for="gradeValue" class="form-label"><strong>Calificación <span class="text-danger">*</span></strong></label>
+              <select id="gradeValue" class="form-select form-select-lg" [(ngModel)]="gradeData.grade" [disabled]="loading">
+                <option value="0" disabled>Seleccione...</option>
+                <option value="1">1.0 - Deficiente</option>
+                <option value="2">2.0 - Insuficiente</option>
+                <option value="3">3.0 - Aceptable</option>
+                <option value="4">4.0 - Bueno</option>
+                <option value="5">5.0 - Excelente</option>
+              </select>
+              <small class="form-text text-muted">Escala de 1 a 5</small>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="mb-3">
+              <label for="gradeFeedback" class="form-label"><strong>Retroalimentación Detallada <span class="text-danger">*</span></strong></label>
+              <textarea id="gradeFeedback" class="form-control" rows="6" placeholder="Proporciona retroalimentación detallada..." [(ngModel)]="gradeData.feedback" [disabled]="loading"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="close.emit()" [disabled]="loading">
+          <i class="fas fa-times me-1"></i>Cancelar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="save.emit()" [disabled]="gradeData.grade === 0 || !gradeData.feedback?.trim() || loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          <i *ngIf="!loading" class="fas fa-check me-1"></i>
+          {{ loading ? 'Calificando...' : 'Guardar Calificación' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+

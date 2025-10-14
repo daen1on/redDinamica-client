@@ -7,6 +7,7 @@ import { GLOBAL } from 'src/app/services/global';
 import { CommentService } from 'src/app/services/comment.service';
 import { Comment } from 'src/app/models/comment.model'
 import { LESSON_STATES } from 'src/app/services/DATA';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 
 @Component({
@@ -29,7 +30,7 @@ export class RatingComponent implements OnInit, OnDestroy {
     public comment;
 
     public ratingForm;
-    private formSubscription: any;
+    private formSubscription: Subscription = new Subscription();
 
     public errorMsg;
     public successMsg;
@@ -66,14 +67,27 @@ export class RatingComponent implements OnInit, OnDestroy {
 
 
     ngOnInit(): void {
-        // Suscribir una sola vez a los cambios del formulario
-        this.formSubscription = this.ratingForm.valueChanges.subscribe(val => {
-            if (val) {
-                this.status = null;
-                this.submitted = false;
-                this.userAlreadyCommented = null;
-            }
-        });
+        // Suscribir cambios del formulario para limpiar estados
+        this.formSubscription.add(
+            this.ratingForm.valueChanges.subscribe(val => {
+                if (val) {
+                    this.status = null;
+                    this.submitted = false;
+                    this.userAlreadyCommented = null;
+                }
+            })
+        );
+
+        // Logs de depuración del control rating
+        const ratingControl = this.ratingForm.get('rating');
+        if (ratingControl) {
+            this.formSubscription.add(
+                ratingControl.valueChanges.subscribe(value => {
+                    console.log('[Rating] valueChanges rating', { raw: value, parsed: parseFloat(value) });
+                })
+            );
+        }
+
     }
 
     ngOnDestroy(): void {
@@ -109,14 +123,20 @@ export class RatingComponent implements OnInit, OnDestroy {
             this.identity._id
         );
 
-        this.comment.score = Number(this.ratingForm.value.rating);
+        const selectedRatingRaw = this.ratingForm.value.rating;
+        const selectedRating = parseFloat(selectedRatingRaw);
+        console.log('[Rating] onSubmit -> selected rating', { raw: selectedRatingRaw, parsed: selectedRating, form: this.ratingForm.value });
+        this.comment.score = selectedRating;
 
 
-        let response = await this._commentService.addComment(this.token, this.comment)
-            .toPromise().catch(error => {
-                this.status = 'error';
-                console.log(<any>error);
-            });
+        let response: any = null;
+        try {
+            response = await firstValueFrom(this._commentService.addComment(this.token, this.comment));
+            console.log('[Rating] addComment response', response);
+        } catch (error) {
+            this.status = 'error';
+            console.error('[Rating] addComment error', error);
+        }
 
 
 
@@ -126,6 +146,12 @@ export class RatingComponent implements OnInit, OnDestroy {
             const totalRatingsBefore = Array.isArray(this.lesson.comments) ? this.lesson.comments.length : 0;
             const currentTotal = (Number(this.lesson.score) || 0) * totalRatingsBefore;
             const newAverage = (currentTotal + Number(response.comment.score)) / (totalRatingsBefore + 1);
+            console.log('[Rating] average recompute', {
+                beforeCount: totalRatingsBefore,
+                currentScore: Number(this.lesson.score) || 0,
+                added: Number(response.comment.score),
+                newAverage
+            });
             this.lesson.score = newAverage;
 
             // Agregar el nuevo comentario por ID a la lección
@@ -135,7 +161,8 @@ export class RatingComponent implements OnInit, OnDestroy {
             this.lesson.comments.push(response.comment._id);
 
             this._lessonService.editLesson(this.token, this.lesson).subscribe(
-                response => {
+                (response) => {
+                    console.log('[Rating] editLesson response', response);
                     if (response && response.lesson && response.lesson._id) {                        
                         this.status = "success";
                         // La API devuelve la lección con comentarios poblados
@@ -143,9 +170,9 @@ export class RatingComponent implements OnInit, OnDestroy {
                         this.ratingForm.reset();
                     }
                 },
-                error => {
+                (error) => {
                     this.status = 'error';
-                    console.log(<any>error);
+                    console.error('[Rating] editLesson error', error);
                 }
             )
 

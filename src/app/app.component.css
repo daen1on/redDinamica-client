@@ -23,6 +23,14 @@ body:has(#header-home) {
     padding-top: 62px ;
 }
 
+/* Separador estructural bajo el navbar para evitar solapamiento del primer bloque */
+.rd-navbar-spacer {
+    height: 76px; /* coincide con #header */
+}
+.rd-navbar-spacer--home {
+    height: 62px; /* coincide con #header-home */
+}
+
 /* Compensación específica para la vista Academia cuando el usuario está logueado */
 @media (min-width: 992px) {
     body:has(#header-home):has(.academic-dashboard) {
@@ -364,4 +372,29 @@ img {
 .navbar-nav .dropdown-item:hover {
     background-color: #f8f9fa;
     transform: translateX(2px);
+}
+
+/* --- Security Options scoped styles (mientras se resuelve el stylesheet del componente) --- */
+.security-options-container,
+.configuration-container {
+    padding-top: 3.25rem; /* evitar colapso de márgenes contra el navbar */
+}
+
+.security-options-container .card,
+.configuration-container .card {
+    border-radius: 0.5rem;
+}
+
+.security-options-container .card-header h3,
+.configuration-container .card-header h3 {
+    margin: 0;
+}
+
+.security-options-container .modal .modal-content,
+.configuration-container .modal .modal-content {
+    border-radius: 0.5rem;
+}
+
+.security-options-container input[type="password"] {
+    letter-spacing: 0.05em;
 }

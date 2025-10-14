@@ -12,13 +12,13 @@
         </div>
     </div>
 
-    <div *ngIf="lessons.length == 0 && !loading" class="card-body">
+    <div *ngIf="lessons.length == 0 && !loading && selectedStates.length == 0" class="card-body">
         <h4 class="text-muted">
             No tienes ninguna lección asignada para asesorar.
         </h4>
     </div>
 
-    <div *ngIf="lessons.length != 0" class="card-body">
+    <div *ngIf="lessons.length != 0 " class="card-body">
 
         <!-- checkbox filter -->
         <div class="row">

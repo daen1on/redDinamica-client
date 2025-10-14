@@ -19,41 +19,195 @@
 
   <div class="row" *ngIf="!loading && lessons.length > 0">
     <div class="col-12">
-      <div class="list-group">
-        <div class="list-group-item" *ngFor="let lesson of lessons">
-          <div class="d-flex w-100 justify-content-between align-items-center">
-            <div>
-              <h5 class="mb-1">{{ lesson.title }}</h5>
-              <small class="text-muted">{{ lesson.author?.name || 'Autor' }}</small>
-            </div>
-            <div>
-              <button class="btn btn-primary" (click)="moverARedDinamica(lesson._id)">
-                <i class="fas fa-upload"></i>
-                <span class="ms-2">Mover a RedDinámica</span>
-              </button>
-            </div>
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <i class="fas fa-trophy text-warning me-2"></i>
+            <strong>Mejores lecciones candidatas</strong>
           </div>
-          <p class="mb-1 mt-2 text-muted">{{ lesson.resume }}</p>
+          <span class="badge bg-primary">{{lessons.length}}</span>
+        </div>
+        <div class="list-group list-group-flush">
+          <div class="list-group-item lesson-item" *ngFor="let lesson of lessons">
+            <div class="d-flex w-100 justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <h6 class="mb-1">
+                  <a [routerLink]="['/academia/lessons', lesson._id]" class="text-decoration-none text-primary lesson-title-link">
+                    {{ lesson.title }}
+                  </a>
+                </h6>
+                <div class="small text-muted">{{ lesson.author?.name || 'Autor desconocido' }}</div>
+              </div>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-outline-secondary" title="Ver detalles" (click)="moverARedDinamica(lesson._id)">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-primary" (click)="moverARedDinamica(lesson._id)" title="Publicar en RedDinámica">
+                  <i class="fas fa-upload"></i>
+                </button>
+              </div>
+            </div>
+            <p class="mb-0 mt-2 text-muted small">{{ lesson.resume }}</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal de confirmación -->
-  <div class="modal fade show" tabindex="-1" aria-modal="true" role="dialog" *ngIf="showConfirmModal">
-    <div class="modal-dialog">
+<!-- Modal de confirmación -->
+  <div class="modal fade show" tabindex="-1" aria-modal="true" role="dialog" *ngIf="showConfirmModal" style="display: block; background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Confirmar movimiento</h5>
-          <button type="button" class="btn-close" (click)="cancelarMovimiento()" aria-label="Close"></button>
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Confirmar publicación</h5>
+          <button type="button" class="btn-close btn-close-white" (click)="cancelarMovimiento()" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>Vas a mover esta lección a la RedDinámica principal. Podrás editar todos los campos allí (nivel permanece como universidad, áreas de conocimiento y niveles podrán ampliarse desde admin). ¿Deseas continuar?</p>
+          <div class="alert alert-info mb-3">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Mapeo de roles:</strong>
+            <ul class="mb-0 mt-2">
+              <li>El <strong>autor</strong> académico se mantiene como <strong>autor</strong> en RedDinámica</li>
+              <li>El <strong>líder</strong> académico se mantiene como <strong>líder</strong> en RedDinámica</li>
+              <li>El <strong>profesor</strong> académico se convierte en <strong>Facilitador</strong> en RedDinámica</li>
+            </ul>
+          </div>
+          <p>¿Estás seguro de que deseas publicar esta lección en la RedDinámica principal?</p>
+          <p class="mb-0 text-muted small">
+            <i class="fas fa-bell me-1"></i>
+            Se notificará a todos los participantes (author, leader, teacher y miembros del equipo de desarrollo) sobre la publicación.
+          </p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="cancelarMovimiento()">Cancelar</button>
-          <button type="button" class="btn btn-primary" (click)="confirmarMovimiento()">Confirmar</button>
+          <button type="button" class="btn btn-secondary" (click)="cancelarMovimiento()">
+            <i class="fas fa-times me-2"></i>Cancelar
+          </button>
+          <button type="button" class="btn btn-primary" (click)="confirmarMovimiento()" [disabled]="loading">
+            <span *ngIf="!loading"><i class="fas fa-rocket me-2"></i>Publicar lección</span>
+            <span *ngIf="loading">
+              <span class="spinner-border spinner-border-sm me-2"></span>Publicando...
+            </span>
+          </button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Preview modal -->
+<div class="modal fade show" tabindex="-1" aria-modal="true" role="dialog" *ngIf="showPreviewModal" style="display: block; background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title"><i class="fas fa-eye me-2"></i>Previsualización de lección a publicar</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cancelarMovimiento()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          <div *ngIf="previewLesson">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h4 class="mb-1">{{previewLesson.title}}</h4>
+                <div class="text-muted">
+                  por {{previewLesson.author?.name || 'Autor'}} {{previewLesson.author?.surname || ''}} • 
+                  {{previewLesson.createdAt | date:'short'}}
+                </div>
+              </div>
+              <span class="badge bg-info">Academia</span>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-file-alt me-2"></i>Resumen</h6>
+              <p class="text-muted">{{previewLesson.resume || 'Sin resumen'}}</p>
+            </div>
+
+            <hr>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-book me-2"></i>Referencias</h6>
+              <pre class="bg-light p-2 rounded" style="white-space: pre-wrap;">{{previewLesson.references || 'Sin referencias'}}</pre>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-lightbulb me-2"></i>Justificación</h6>
+              <div class="bg-light p-2 rounded">
+                <div *ngIf="previewLesson.justification?.methodology" class="mb-2">
+                  <strong>Metodología:</strong>
+                  <p class="mb-0 mt-1">{{previewLesson.justification.methodology}}</p>
+                </div>
+                <div *ngIf="previewLesson.justification?.objectives">
+                  <strong>Objetivos:</strong>
+                  <p class="mb-0 mt-1">{{previewLesson.justification.objectives}}</p>
+                </div>
+                <p *ngIf="!previewLesson.justification?.methodology && !previewLesson.justification?.objectives" class="mb-0 text-muted">
+                  Sin justificación
+                </p>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-graduation-cap me-2"></i>Áreas de conocimiento</h6>
+              <div class="d-flex flex-wrap gap-2">
+                <span *ngFor="let area of (previewLesson.knowledge_areas || [])" class="badge bg-primary">
+                  {{area?.name || area}}
+                </span>
+                <span *ngIf="!previewLesson.knowledge_areas?.length" class="text-muted">Sin áreas asignadas</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-layer-group me-2"></i>Nivel(es)</h6>
+              <div class="d-flex flex-wrap gap-2">
+                <span *ngFor="let lvl of (previewLesson.level || [])" class="badge bg-secondary">{{lvl}}</span>
+                <span *ngIf="!previewLesson.level?.length" class="text-muted">Sin niveles asignados</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-paperclip me-2"></i>Archivos adjuntos</h6>
+              <div *ngIf="previewLesson.files?.length; else nofiles" class="bg-light p-2 rounded">
+                <ul class="mb-0">
+                  <li *ngFor="let f of previewLesson.files">
+                    <i class="fas fa-file me-2"></i>{{f.originalName || f.name}} 
+                    <span class="text-muted">({{(f.size/1024) | number:'1.0-0'}} KB)</span>
+                  </li>
+                </ul>
+              </div>
+              <ng-template #nofiles>
+                <span class="text-muted">Sin archivos adjuntos</span>
+              </ng-template>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-users me-2"></i>Equipo de desarrollo</h6>
+              <div class="bg-light p-2 rounded">
+                <div class="mb-2">
+                  <strong>Líder:</strong> 
+                  {{previewLesson.leader?.name || ''}} {{previewLesson.leader?.surname || '—'}}
+                </div>
+                <div *ngIf="previewLesson.development_group?.length">
+                  <strong>Miembros del equipo ({{previewLesson.development_group.length}}):</strong>
+                  <ul class="mb-0 mt-1">
+                    <li *ngFor="let member of previewLesson.development_group">
+                      {{member.user?.name || ''}} {{member.user?.surname || ''}}
+                      <span class="text-muted" *ngIf="member.role"> - {{member.role}}</span>
+                    </li>
+                  </ul>
+                </div>
+                <p *ngIf="!previewLesson.development_group?.length" class="mb-0 text-muted">Sin miembros adicionales</p>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-chalkboard-teacher me-2"></i>Docente</h6>
+              <p class="mb-0">
+                {{previewLesson.teacher?.name || ''}} {{previewLesson.teacher?.surname || 'No asignado'}}
+              </p>
+            </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelarMovimiento()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="showConfirmModal = true; showPreviewModal = false;">Continuar y publicar</button>
       </div>
     </div>
   </div>

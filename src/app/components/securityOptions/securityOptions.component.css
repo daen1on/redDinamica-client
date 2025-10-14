@@ -1,0 +1,25 @@
+/* Separación respecto al navbar fijo del AppComponent */
+.security-options-container {
+    /* Margen adicional además del padding-top global del body para evitar solapamiento */
+    margin-top: 1rem;
+}
+
+/* Mejora visual de tarjetas y títulos */
+.security-options-container .card {
+    border-radius: 0.5rem;
+}
+
+.security-options-container .card-header h3 {
+    margin: 0;
+}
+
+.security-options-container .modal .modal-content {
+    border-radius: 0.5rem;
+}
+
+/* Inputs de contraseña con mejor legibilidad */
+.security-options-container input[type="password"] {
+    letter-spacing: 0.05em;
+}
+
+

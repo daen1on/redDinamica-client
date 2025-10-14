@@ -5,8 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AcademicLessonService } from '../../services/academic-lesson.service';
 import { AcademicGroupService } from '../../services/academic-group.service';
-import { AcademicLesson } from '../../models/academic-lesson.model';
+import { AcademicLesson, UserRef } from '../../models/academic-lesson.model';
 import { AcademicGroup } from '../../models/academic-group.model';
+import { UserService } from '../../../services/user.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-lesson-management',
@@ -18,10 +20,14 @@ import { AcademicGroup } from '../../models/academic-group.model';
 export class LessonManagementComponent implements OnInit {
   lessons: AcademicLesson[] = [];
   filteredLessons: AcademicLesson[] = [];
-  groups: AcademicGroup[] = [];
+  teacherGroups: AcademicGroup[] = [];
   loading = false;
   errorMessage = '';
   userRole = '';
+  private currentUserId: string = '';
+
+  private userCache: { [userId: string]: UserRef } = {};
+  private requestedUserIds = new Set<string>();
 
   // Filtros
   searchTerm = '';
@@ -31,7 +37,8 @@ export class LessonManagementComponent implements OnInit {
   constructor(
     private academicLessonService: AcademicLessonService,
     private academicGroupService: AcademicGroupService,
-    private router: Router
+    private router: Router,
+    private _userService: UserService
   ) { }
 
   ngOnInit(): void {
@@ -40,61 +47,57 @@ export class LessonManagementComponent implements OnInit {
   }
 
   loadUserInfo(): void {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    this.userRole = user.role || '';
+    const raw = localStorage.getItem('user') || localStorage.getItem('identity') || '{}';
+    try {
+      const user = JSON.parse(raw);
+      this.userRole = user.role || '';
+      this.currentUserId = user._id || user.id || user.uid || '';
+    } catch {
+      this.userRole = '';
+      this.currentUserId = '';
+    }
   }
 
   loadData(): void {
     this.loading = true;
     
-    // Cargar grupos si es docente
-    if (this.userRole === 'teacher') {
-      this.academicGroupService.getTeacherGroups().subscribe({
-        next: (response) => {
-          if (response.status === 'success') {
-            this.groups = response.data;
-          }
-        },
-        error: (error) => {
-          console.error('Error loading groups:', error);
+    // Ejecutar en paralelo: grupos del profesor, mis lecciones y lecciones de grupos donde soy profesor
+    forkJoin({
+      teacherGroups: this.academicGroupService.getTeacherGroups(),
+      myLessons: this.academicLessonService.getMyLessons(),
+      teacherLessons: this.academicLessonService.getTeacherLessons()
+    }).subscribe({
+      next: (result) => {
+        // Cargar grupos donde el usuario es teacher por pertenencia al grupo (no por rol global)
+        if (result.teacherGroups?.status === 'success') {
+          this.teacherGroups = result.teacherGroups.data || [];
+        } else {
+          this.teacherGroups = [];
         }
-      });
-    }
 
-    // Cargar lecciones según el rol
-    if (this.userRole === 'teacher') {
-      this.academicLessonService.getTeacherLessons().subscribe({
-        next: (response) => {
-          if (response.status === 'success') {
-            this.lessons = response.data;
-            this.applyFilters();
+        // Unir lecciones: propias + como docente del grupo
+        const own = (result.myLessons?.status === 'success') ? (result.myLessons.data || []) : [];
+        const teaching = (result.teacherLessons?.status === 'success') ? (result.teacherLessons.data || []) : [];
+        const mapById: { [id: string]: AcademicLesson } = {};
+        for (const l of [...own, ...teaching]) {
+          const id = (l as any)?._id || '';
+          if (id && !mapById[id]) {
+            mapById[id] = l;
           }
-        },
-        error: (error) => {
-          console.error('Error loading lessons:', error);
-          this.errorMessage = 'Error al cargar las lecciones';
-        },
-        complete: () => {
-          this.loading = false;
         }
-      });
-    } else {
-      this.academicLessonService.getMyLessons().subscribe({
-        next: (response) => {
-          if (response.status === 'success') {
-            this.lessons = response.data;
-            this.applyFilters();
-          }
-        },
-        error: (error) => {
-          console.error('Error loading lessons:', error);
-          this.errorMessage = 'Error al cargar las lecciones';
-        },
-        complete: () => {
-          this.loading = false;
-        }
-      });
-    }
+        this.lessons = Object.values(mapById);
+
+        this.enrichLessonsAuthors(this.lessons);
+        this.applyFilters();
+      },
+      error: (error) => {
+        console.error('Error loading lessons/groups:', error);
+        this.errorMessage = 'Error al cargar las lecciones';
+      },
+      complete: () => {
+        this.loading = false;
+      }
+    });
   }
 
   applyFilters(): void {
@@ -104,7 +107,8 @@ export class LessonManagementComponent implements OnInit {
         lesson.resume.toLowerCase().includes(this.searchTerm.toLowerCase());
       
       const matchesStatus = !this.filterStatus || lesson.status === this.filterStatus;
-      const matchesGroup = !this.filterGroup || lesson.academicGroup === this.filterGroup;
+      const lessonGroupId = this.getIdFromRef((lesson as any)?.academicGroup);
+      const matchesGroup = !this.filterGroup || lessonGroupId === this.filterGroup;
       
       return matchesSearch && matchesStatus && matchesGroup;
     });
@@ -182,52 +186,128 @@ export class LessonManagementComponent implements OnInit {
     console.log('Grading lesson:', lessonId);
   }
 
-  exportToMain(lessonId: string): void {
-    this.academicLessonService.exportToMain(lessonId).subscribe({
+  requestExport(lessonId: string): void {
+    this.academicLessonService.requestExport(lessonId).subscribe({
       next: (response) => {
         if (response.status === 'success') {
-          this.loadData(); // Recargar datos
+          this.loadData();
         }
       },
       error: (error) => {
-        console.error('Error exporting lesson:', error);
-        this.errorMessage = 'Error al exportar la lección';
+        console.error('Error requesting export:', error);
+        this.errorMessage = 'Error al solicitar la exportación de la lección';
       }
     });
   }
 
   // Métodos de permisos
   canEdit(lesson: AcademicLesson): boolean {
-    return this.userRole === 'student' && lesson.author === this.getCurrentUserId();
+    const currentUserId = this.getCurrentUserId();
+    if (!currentUserId) return false;
+    if (!lesson || !lesson.author) return false;
+    return typeof lesson.author === 'string'
+      ? lesson.author === currentUserId
+      : lesson.author._id === currentUserId;
   }
 
   canDelete(lesson: AcademicLesson): boolean {
-    return this.userRole === 'student' && lesson.author === this.getCurrentUserId();
+    const currentUserId = this.getCurrentUserId();
+    if (!currentUserId) return false;
+    if (!lesson || !lesson.author) return false;
+    return typeof lesson.author === 'string'
+      ? lesson.author === currentUserId
+      : lesson.author._id === currentUserId;
   }
 
   canApprove(lesson: AcademicLesson): boolean {
-    return this.userRole === 'teacher' && lesson.status === 'proposed';
+    const teacherId = this.getIdFromRef((lesson as any)?.academicGroup?.teacher);
+    return !!teacherId && teacherId === this.currentUserId && lesson.status === 'proposed';
   }
 
   canGrade(lesson: AcademicLesson): boolean {
-    return this.userRole === 'teacher' && lesson.status === 'completed';
+    const teacherId = this.getIdFromRef((lesson as any)?.academicGroup?.teacher);
+    return !!teacherId && teacherId === this.currentUserId && lesson.status === 'completed';
   }
 
-  canExport(lesson: AcademicLesson): boolean {
-    return this.userRole === 'teacher' && lesson.status === 'graded' && lesson.grade >= 4;
+  canRequestExport(lesson: AcademicLesson): boolean {
+    const teacherId = this.getIdFromRef((lesson as any)?.academicGroup?.teacher);
+    return !!teacherId && teacherId === this.currentUserId && 
+           lesson.status === 'graded' && 
+           !(lesson as any)?.isExported && 
+           (lesson as any)?.state !== 'ready_for_migration';
+  }
+
+  hasTeacherAction(lesson: AcademicLesson): boolean {
+    return this.canApprove(lesson) || this.canGrade(lesson) || this.canRequestExport(lesson);
   }
 
   // Métodos de utilidad
   getCurrentUserId(): string {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return user._id || '';
+    return this.currentUserId || '';
   }
 
-  // Mostrar nombre seguro sin [object Object]
-  displayUserName(user: any): string {
-    if (!user) return 'Autor';
-    if (typeof user === 'string') return user;
-    return user.name || user.surname ? `${user.name || ''} ${user.surname || ''}`.trim() : (user.email || 'Autor');
+  private getIdFromRef(ref: any): string {
+    if (!ref) return '';
+    if (typeof ref === 'string') return String(ref);
+    if (typeof ref === 'object') {
+      if (ref._id || ref.id) return String(ref._id || ref.id);
+      if (ref.user && (ref.user._id || ref.user.id)) return String(ref.user._id || ref.user.id);
+    }
+    return '';
+  }
+
+  // Mostrar nombre del usuario a partir de string o UserRef
+  displayUserName(author: string | UserRef | null | undefined): string {
+    if (!author) return 'Usuario';
+    if (typeof author === 'string') {
+      const cached = this.userCache[author];
+      if (cached) {
+        const email = cached.email ? ` <${cached.email}>` : '';
+        return `${cached.name || 'Usuario'}${email}`;
+      }
+      return 'Usuario';
+    }
+    const name = author.name || 'Usuario';
+    const email = author.email ? ` <${author.email}>` : '';
+    return `${name}${email}`;
+  }
+
+  private enrichLessonsAuthors(lessons: AcademicLesson[]): void {
+    if (!Array.isArray(lessons)) return;
+    for (const lesson of lessons) {
+      const author = lesson?.author as string | UserRef | undefined;
+      if (!author) continue;
+      if (typeof author === 'string') {
+        const userId = author;
+        const cached = this.userCache[userId];
+        if (cached) {
+          lesson.author = cached;
+          continue;
+        }
+        if (this.requestedUserIds.has(userId)) continue;
+        this.requestedUserIds.add(userId);
+        this._userService.getUser(userId).subscribe({
+          next: (response: any) => {
+            const user = response?.user;
+            if (!user) return;
+            const fullName = (user.name && user.surname)
+              ? `${user.name} ${user.surname}`
+              : (user.name || user.surname || user.nick || 'Usuario');
+            const userRef: UserRef = {
+              _id: user._id,
+              name: fullName,
+              email: user.email
+            };
+            this.userCache[userId] = userRef;
+            // actualizar esta lección
+            lesson.author = userRef;
+          },
+          error: () => {
+            // silencioso; dejamos 'Usuario' como fallback
+          }
+        });
+      }
+    }
   }
 
   displayGroupName(group: any): string {
@@ -254,6 +334,7 @@ export class LessonManagementComponent implements OnInit {
       'draft': 'Borrador',
       'proposed': 'Propuesta',
       'approved': 'Aprobada',
+      'in_development': 'En desarrollo',
       'rejected': 'Rechazada',
       'completed': 'Completada',
       'graded': 'Calificada'

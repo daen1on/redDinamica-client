@@ -31,7 +31,7 @@ export class AcademicLayoutComponent {
 
   navigateToAcademicDashboard(): void {
     const role = this.getCurrentRole();
-    if (role === 'teacher' || role === 'admin' || role === 'expert') {
+    if (role === 'teacher' || role === 'admin' || role === 'expert' || role === 'lesson_manager' || role === 'delegated_admin') {
       this.router.navigate(['/academia/teacher']);
     } else {
       this.router.navigate(['/academia/student']);

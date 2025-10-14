@@ -23,6 +23,7 @@ export class User {
     public socialNetworks:string;
     public getToken:Boolean;
     public canAdvise;
+    public emailDigestEnabled: boolean; // Preferencia de resumen mensual por correo
 
     constructor(){}
 }

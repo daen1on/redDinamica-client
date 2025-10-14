@@ -80,8 +80,7 @@
                     </button>
                 </ng-container>
                 <ng-template #leaveGroup>
-                    <button class="btn btn-danger me-2" title="Retirarse" data-bs-toggle="modal" data-bs-target="#leftconvo_details" 
-                    (click)="getLesson(lesson)">
+                    <button class="btn btn-danger me-2" title="Retirarse" (click)="onLeaveClick(lesson)">
                         <i class="fas fa-user-minus"></i> Retirarse
                     </button>
                 </ng-template>
@@ -94,27 +93,4 @@
 </div>
 <!-- /lesson call modal-->
 
-<!-- Modal warning left group (scoped to details component) -->
-<div class="modal fade" id="leftconvo_details" tabindex="-1" role="dialog" aria-labelledby="leaveGroup" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="leftconvocatoria">Retirarse del  grupo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body">
-                <div class="alert alert-warning mb-0" role="alert">
-                    <i class="fas fa-exclamation-triangle icon-message me-2"></i>
-                    ¿Estas seguro que quieres retirarte de este grupo de desarrollo?
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class=" btn btn-danger" data-bs-dismiss="modal" (click)="abandonLesson()">Sí</button>
-                <button class="btn btn-primary text-white" data-bs-dismiss="modal">No</button>
-            </div>
-
-        </div>
-    </div>
-</div>
-<!-- /Modal warning-->
+<!-- Eliminado modal de confirmación para evitar cierre inesperado y anidación -->

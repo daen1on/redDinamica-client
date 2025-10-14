@@ -1,0 +1,225 @@
+<!-- Vista de lista de threads -->
+<div *ngIf="showThreadsList">
+  <div class="tab-header d-flex align-items-center justify-content-between mb-3">
+    <h3 class="m-0">
+      <i class="fas fa-comments me-2"></i>Foro del Grupo
+    </h3>
+    <button *ngIf="canPostInForum" class="btn btn-success" (click)="openNewThreadModal()">
+      <i class="fas fa-plus me-2"></i>Nueva Conversación
+    </button>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loadingThreads" class="text-center py-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-3 text-muted">Cargando conversaciones...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loadingThreads && discussionThreads.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-comments"></i>
+    </div>
+    <h4>No hay conversaciones</h4>
+    <p>Inicia una nueva conversación con tu grupo.</p>
+    <button *ngIf="canPostInForum" class="btn btn-primary" (click)="openNewThreadModal()">
+      <i class="fas fa-plus me-2"></i>Crear Primera Conversación
+    </button>
+  </div>
+
+  <!-- Lista de threads -->
+  <div *ngIf="!loadingThreads && discussionThreads.length > 0" class="threads-list">
+    <div *ngFor="let thread of discussionThreads" class="thread-item" (click)="selectThread(thread)">
+      <div class="thread-header-row">
+        <div class="thread-icons">
+          <i *ngIf="thread.isPinned" class="fas fa-thumbtack text-warning me-2" title="Fijado"></i>
+          <i *ngIf="thread.isLocked" class="fas fa-lock text-danger me-2" title="Bloqueado"></i>
+          <i class="fas fa-comment-dots text-primary"></i>
+        </div>
+        <div class="thread-info flex-grow-1">
+          <h5 class="thread-title mb-1">{{ thread.title }}</h5>
+          <p *ngIf="thread.description" class="thread-description text-muted mb-1">{{ thread.description }}</p>
+          <div class="thread-meta">
+            <span class="text-muted small">
+              <i class="fas fa-user"></i> {{ thread.author?.name }} {{ thread.author?.surname }}
+            </span>
+            <span class="text-muted small ms-3">
+              <i class="fas fa-comments"></i> {{ getThreadMessagesCount(thread) }} mensajes
+            </span>
+            <span class="text-muted small ms-3">
+              <i class="fas fa-clock"></i> {{ getThreadLastUpdate(thread) | date:'short' }}
+            </span>
+          </div>
+        </div>
+        <div class="thread-actions" *ngIf="isGroupTeacher()">
+          <button class="btn btn-sm btn-outline-primary me-1" 
+                  (click)="togglePinThread(thread); $event.stopPropagation()" 
+                  [title]="thread.isPinned ? 'Desfijar' : 'Fijar'">
+            <i class="fas fa-thumbtack"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-warning me-1" 
+                  (click)="toggleLockThread(thread); $event.stopPropagation()" 
+                  [title]="thread.isLocked ? 'Desbloquear' : 'Bloquear'">
+            <i class="fas fa-lock"></i>
+          </button>
+          <button *ngIf="!thread.isPinned || thread.title !== 'Conversación General'" 
+                  class="btn btn-sm btn-outline-danger" 
+                  (click)="deleteThread(thread._id); $event.stopPropagation()" 
+                  title="Eliminar">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Vista de thread individual con mensajes -->
+<div *ngIf="!showThreadsList && selectedThread">
+  <div class="thread-view-header mb-3">
+    <button class="btn btn-outline-secondary mb-3" (click)="backToThreadsList()">
+      <i class="fas fa-arrow-left me-2"></i>Volver al foro
+    </button>
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <h3 class="mb-1">
+          <i *ngIf="selectedThread.isPinned" class="fas fa-thumbtack text-warning me-2"></i>
+          <i *ngIf="selectedThread.isLocked" class="fas fa-lock text-danger me-2"></i>
+          {{ selectedThread.title }}
+        </h3>
+        <p *ngIf="selectedThread.description" class="text-muted">{{ selectedThread.description }}</p>
+        <small class="text-muted">
+          Creado por {{ selectedThread.author?.name }} {{ selectedThread.author?.surname }} 
+          el {{ selectedThread.createdAt | date:'medium' }}
+        </small>
+      </div>
+      <div *ngIf="isGroupTeacher()" class="thread-actions-toolbar">
+        <button class="btn btn-sm btn-outline-primary me-1" 
+                (click)="togglePinThread(selectedThread)" 
+                [title]="selectedThread.isPinned ? 'Desfijar' : 'Fijar'">
+          <i class="fas fa-thumbtack"></i>
+          {{ selectedThread.isPinned ? 'Desfijar' : 'Fijar' }}
+        </button>
+        <button class="btn btn-sm btn-outline-warning me-1" 
+                (click)="toggleLockThread(selectedThread)" 
+                [title]="selectedThread.isLocked ? 'Desbloquear' : 'Bloquear'">
+          <i class="fas fa-lock"></i>
+          {{ selectedThread.isLocked ? 'Desbloquear' : 'Bloquear' }}
+        </button>
+        <button *ngIf="!selectedThread.isPinned || selectedThread.title !== 'Conversación General'" 
+                class="btn btn-sm btn-outline-danger" 
+                (click)="deleteThread(selectedThread._id)" 
+                title="Eliminar">
+          <i class="fas fa-trash"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario para nuevo mensaje -->
+  <div class="new-message-form mb-4" *ngIf="canPostInForum && (!selectedThread.isLocked || userRole === 'teacher')">
+    <textarea [(ngModel)]="newMessageText" 
+              class="form-control mb-2" 
+              rows="3" 
+              placeholder="Escribe tu mensaje..."></textarea>
+    <button class="btn btn-primary" 
+            [disabled]="addingMessage || !newMessageText?.trim()" 
+            (click)="addMessageToSelectedThread()">
+      <span *ngIf="addingMessage" class="spinner-border spinner-border-sm me-2"></span>
+      <i *ngIf="!addingMessage" class="fas fa-paper-plane me-2"></i>
+      Enviar
+    </button>
+  </div>
+
+  <div *ngIf="selectedThread.isLocked && userRole !== 'teacher'" class="alert alert-warning">
+    <i class="fas fa-lock me-2"></i>
+    Esta conversación está bloqueada. Solo el profesor puede publicar mensajes.
+  </div>
+
+  <!-- Lista de mensajes -->
+  <div class="messages-container">
+    <div *ngIf="selectedThread.messages.length === 0" class="empty-state-small">
+      <p class="text-muted">No hay mensajes todavía. ¡Sé el primero en participar!</p>
+    </div>
+    
+    <div *ngFor="let message of selectedThread.messages" class="message-item">
+      <div class="message-avatar">
+        <img *ngIf="message.author?.picture" 
+             [src]="url + 'get-image-user/' + message.author.picture" 
+             class="rounded-circle"
+             style="width: 40px; height: 40px; object-fit: cover;">
+        <i *ngIf="!message.author?.picture" class="fas fa-user-circle" style="font-size: 2.5rem; color: #6c757d;"></i>
+      </div>
+      <div class="message-content">
+        <div class="message-header">
+          <strong>{{ message.author?.name }} {{ message.author?.surname }}</strong>
+          <small class="text-muted ms-2">{{ message.createdAt | date:'short' }}</small>
+          <button *ngIf="isOwnMessage(message)" 
+                  class="btn btn-sm btn-outline-danger ms-auto" 
+                  [disabled]="deletingMessageId === message._id"
+                  (click)="deleteMessage(message._id)">
+            <span *ngIf="deletingMessageId === message._id" class="spinner-border spinner-border-sm me-1"></span>
+            <i *ngIf="deletingMessageId !== message._id" class="fas fa-trash"></i>
+          </button>
+        </div>
+        <p class="message-text">{{ message.content }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Crear Nuevo Thread (Bootstrap-like) -->
+<div class="modal fade" 
+     [class.show]="showNewThreadModal" 
+     [style.display]="showNewThreadModal ? 'block' : 'none'" 
+     tabindex="-1" role="dialog" 
+     aria-labelledby="newThreadModalLabel" 
+     [attr.aria-hidden]="!showNewThreadModal">
+  <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="newThreadModalLabel">
+          <i class="fas fa-plus-circle me-2"></i>Nueva Conversación
+        </h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="closeNewThreadModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Título de la conversación *</label>
+          <input type="text"
+                 class="form-control"
+                 [(ngModel)]="newThreadTitle"
+                 placeholder="Ej: Dudas sobre materiales, recursos, etc."
+                 maxlength="150">
+          <small class="text-muted">Máximo 150 caracteres</small>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Descripción (opcional)</label>
+          <textarea class="form-control"
+                    rows="4"
+                    [(ngModel)]="newThreadDescription"
+                    placeholder="Describe brevemente de qué trata esta conversación..."
+                    maxlength="500"></textarea>
+          <small class="text-muted">Máximo 500 caracteres</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeNewThreadModal()">
+          <i class="fas fa-times me-2"></i>Cancelar
+        </button>
+        <button type="button" class="btn btn-success"
+                [disabled]="creatingThread || !newThreadTitle?.trim()"
+                (click)="createNewThread()">
+          <span *ngIf="creatingThread" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!creatingThread" class="fas fa-check me-2"></i>
+          Crear Conversación
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal backdrop -->
+<div class="modal-backdrop fade" [class.show]="showNewThreadModal" *ngIf="showNewThreadModal"></div>
+

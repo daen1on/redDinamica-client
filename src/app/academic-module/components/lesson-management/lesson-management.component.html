@@ -41,10 +41,10 @@
           <option value="graded"> Calificada</option>
         </select>
       </div>
-      <div class="col-lg-3 col-md-6" *ngIf="userRole === 'teacher'">
+      <div class="col-lg-3 col-md-6" *ngIf="teacherGroups?.length > 0">
         <select [(ngModel)]="filterGroup" class="form-select" (change)="applyFilters()">
           <option value="">👥 Todos los grupos</option>
-          <option *ngFor="let group of groups" [value]="group._id">{{ group.name }}</option>
+          <option *ngFor="let group of teacherGroups" [value]="group._id">{{ group.name }}</option>
         </select>
       </div>
       <div class="col-lg-1 col-md-6">
@@ -181,7 +181,7 @@
       </div>
 
       <!-- Card Footer con acciones del docente -->
-      <div class="lesson-card-footer" *ngIf="userRole === 'teacher'">
+      <div class="lesson-card-footer" *ngIf="hasTeacherAction(lesson)">
         <div class="d-flex flex-wrap gap-2">
           <button 
             *ngIf="canApprove(lesson)" 
@@ -202,10 +202,10 @@
             <i class="fas fa-star me-1"></i>Calificar
           </button>
           <button 
-            *ngIf="canExport(lesson)" 
+            *ngIf="canRequestExport(lesson)" 
             class="btn btn-sm btn-info" 
-            (click)="exportToMain(lesson._id)">
-            <i class="fas fa-upload me-1"></i>Exportar
+            (click)="requestExport(lesson._id)">
+            <i class="fas fa-paper-plane me-1"></i>Solicitar exportación
           </button>
         </div>
       </div>

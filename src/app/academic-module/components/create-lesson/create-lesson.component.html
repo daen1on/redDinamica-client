@@ -209,6 +209,20 @@
         </div>
       </div>
 
+      <!-- Referencias / Citas -->
+      <div class="mb-3">
+        <label for="references" class="form-label">
+          <strong>Referencias <small class="text-muted">(Requeridas al proponer)</small></strong>
+        </label>
+        <textarea
+          id="references"
+          formControlName="references"
+          class="form-control"
+          rows="4"
+          placeholder="Incluye las citas o enlaces de las fuentes utilizadas (APA/IEEE u otras). Puedes dejarlo vacío en borrador y completarlo cuando propongas la lección."></textarea>
+        <small class="form-text text-muted">Máximo 2000 caracteres. Acepta texto libre y URLs.</small>
+      </div>
+
       <!-- Resumen de selección -->
       <div class="card bg-light" *ngIf="selectedKnowledgeAreas.length > 0">
         <div class="card-body">

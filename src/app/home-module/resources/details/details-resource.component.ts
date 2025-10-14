@@ -1,6 +1,7 @@
 import { Component, Input, AfterViewInit, OnDestroy } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 import { GLOBAL } from 'src/app/services/global';
+import { ResourceService } from 'src/app/services/resource.service';
 
 import { FIELDS_DETAILS } from '../resourcesData';
 import { ICON_STYLE } from 'src/app/services/DATA';
@@ -19,11 +20,13 @@ export class DetailsResourceComponent implements AfterViewInit, OnDestroy {
 
     public fields;
     public types;
+    public saving: boolean = false;
 
     @Input() resource;
 
     constructor(
-        private _userService: UserService
+        private _userService: UserService,
+        private _resourceService: ResourceService
     ){
         this.title = 'Agregar recurso';
         this.identity = this._userService.getIdentity();
@@ -37,6 +40,29 @@ export class DetailsResourceComponent implements AfterViewInit, OnDestroy {
     private modalEventListeners: (() => void)[] = [];
 
     ngOnInit(): void {
+    }
+
+    saveAndResuggest() {
+        if (!this.resource) { return; }
+        this.saving = true;
+        const updated = { ...this.resource, accepted: false, rejected: false, visible: false };
+        this._resourceService.editResource(this.token, updated).subscribe({
+            next: (resp: any) => {
+                this.saving = false;
+                try {
+                    this.resource.rejected = false;
+                    this.resource.accepted = false;
+                    // limpiar flag interno
+                    delete this.resource._resubmit;
+                } catch {}
+                alert('Cambios guardados. El recurso fue vuelto a sugerir.');
+                this.closeModal();
+            },
+            error: () => {
+                this.saving = false;
+                alert('No se pudo guardar el recurso. Inténtalo de nuevo.');
+            }
+        });
     }
 
     ngAfterViewInit(): void {

@@ -14,33 +14,35 @@
 
                 <div *ngFor="let field of fields" class="row">
 
-                    <label *ngIf="resource[field.id]" for="{{field.id}}" class="col-3">
+                    <label class="col-3" for="{{field.id}}">
                         <strong>{{field.label}}:</strong>
                     </label>
 
                     <div class="col">
-
-                        <p *ngIf="resource[field.id] && field.id == 'type'">{{types[resource[field.id]].label}}</p>
-
-                        <p
-                            *ngIf="resource[field.id] && field.type != 'file' && field.id != 'type' && field.id != 'url'">
-                            {{resource[field.id]}}
-                        </p>
-
-                        <p *ngIf="resource[field.id] && field.id == 'url'">
-                            <a href="{{getLink(resource.url)}}" target="_blank">
-                                {{resource.url}}
-                            </a>
-                        </p>
-
-                        <p *ngIf="resource[field.id] && field.type == 'file'">
-                            <a class="btn btn-info" title="Descargar recurso: {{resource.file}}"
-                                href="{{this.url + 'get-resource/' + resource.file}}" target="_blank">
-                                <i class="fas fa-download"></i> {{resource.file}}
-                            </a>
-                        </p>
+                        <!-- Editable inputs when resubmitting or when resource belongs to the current user and not accepted -->
+                        <ng-container *ngIf="(resource?._resubmit || (!resource.accepted && identity?._id === resource?.author?._id)); else readOnlyField">
+                            <input *ngIf="field.type !== 'file' && field.id !== 'type' && field.id !== 'url'" class="form-control mb-2" [(ngModel)]="resource[field.id]" name="{{field.id}}"/>
+                            <select *ngIf="field.id === 'type'" class="form-select mb-2" [(ngModel)]="resource.type" name="type">
+                                <option value="document">Documento</option>
+                                <option value="video">Video</option>
+                                <option value="link">Enlace</option>
+                                <option value="software">Software</option>
+                            </select>
+                            <input *ngIf="field.id === 'url'" class="form-control mb-2" [(ngModel)]="resource.url" name="url"/>
+                        </ng-container>
+                        <ng-template #readOnlyField>
+                            <p *ngIf="field.id == 'type' && resource[field.id]">{{types[resource[field.id]].label}}</p>
+                            <p *ngIf="resource[field.id] && field.type != 'file' && field.id != 'type' && field.id != 'url'">{{resource[field.id]}}</p>
+                            <p *ngIf="resource[field.id] && field.id == 'url'">
+                                <a href="{{getLink(resource.url)}}" target="_blank">{{resource.url}}</a>
+                            </p>
+                            <p *ngIf="resource[field.id] && field.type == 'file'">
+                                <a class="btn btn-info" title="Descargar recurso: {{resource.file}}" href="{{this.url + 'get-resource/' + resource.file}}" target="_blank">
+                                    <i class="fas fa-download"></i> {{resource.file}}
+                                </a>
+                            </p>
+                        </ng-template>
                     </div>
-
 
                 </div>
 
@@ -114,6 +116,14 @@
             <!-- modal-footer -->
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button *ngIf="resource?._resubmit || (!resource.accepted && identity?._id === resource?.author?._id)"
+                        class="btn btn-primary"
+                        id="resubmitBtn"
+                        [disabled]="saving"
+                        (click)="saveAndResuggest()">
+                    <span *ngIf="!saving">Guardar y volver a sugerir</span>
+                    <span *ngIf="saving"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>
+                </button>
             </div>
             <!-- /modal-footer -->
 

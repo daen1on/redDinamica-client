@@ -52,8 +52,8 @@ export class AdminTasksService {
     return this.http.put(`${this.url}resource/${id}/approve`, {}, { headers: this.authHeaders() });
   }
 
-  rechazarRecurso(id: string): Observable<any> {
-    return this.http.put(`${this.url}resource/${id}/reject`, {}, { headers: this.authHeaders() });
+  rechazarRecurso(id: string, reason: string): Observable<any> {
+    return this.http.put(`${this.url}resource/${id}/reject`, { reason }, { headers: this.authHeaders() });
   }
 
   moverLeccionAcademica(id: string): Observable<any> {

@@ -2,8 +2,11 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+
+// En desarrollo, puedes activar/desactivar los logs, cambiando el valor de enableConsoleLogs a true/false
 export const environment = {
-  production: false
+  production: false,
+  enableConsoleLogs: true
 };
 
 /*

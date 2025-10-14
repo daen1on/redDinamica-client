@@ -72,4 +72,27 @@ export class AcademicDashboardComponent implements OnInit {
   switchToAcademicMode(): void {
     this.router.navigate(['/academia']);
   }
+
+  // Traduce el rol del usuario al español para mostrar en el dashboard
+  translateUserRole(role: string | null | undefined): string {
+    if (!role) return '';
+    const roleLc = role.toString().toLowerCase();
+    switch (roleLc) {
+      case 'admin':
+      case 'delegated_admin':
+        return 'administrador';
+      case 'lesson_manager':
+        return 'gestor de lecciones';
+      case 'expert':
+        return 'facilitador';
+      case 'teacher':
+        return 'docente';
+      case 'student':
+        return 'estudiante';
+      case 'guest':
+        return 'invitado';
+      default:
+        return role;
+    }
+  }
 }

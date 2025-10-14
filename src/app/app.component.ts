@@ -83,8 +83,6 @@ export class AppComponent implements OnInit, OnDestroy, DoCheck {
 
         // Subscribe to a specific event from UserService that signals a profile picture update
         this.profilePicUpdateSubscription = this._userService.profilePictureUpdated.subscribe(() => {
-            console.log('Profile picture updated event received in AppComponent, updating version.');
-            // It's good to ensure identity is fresh if the event doesn't carry the new picture name
             this.identity = this._userService.getIdentity(); 
             this.profilePicVersion = new Date().getTime();
         });

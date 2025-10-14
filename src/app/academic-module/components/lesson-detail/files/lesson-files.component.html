@@ -1,0 +1,56 @@
+<div class="content-card">
+  <h5 class="card-title"><i class="fas fa-paperclip me-2"></i>Archivos del Proyecto</h5>
+
+  <div class="files-grid" *ngIf="lesson?.files?.length; else noFiles">
+    <div *ngFor="let file of lesson?.files" class="file-card">
+      <div class="file-icon">
+        <i class="fas fa-file-alt"></i>
+      </div>
+      <div class="file-info">
+        <strong class="file-name">{{ file.name }}</strong>
+        <small class="text-muted d-block">{{ (file.size / 1024).toFixed(2) }} KB</small>
+        <small class="text-muted">Subido por: {{ getUploaderName(file.uploadedBy) }}</small>
+      </div>
+      <div class="file-actions">
+        <button class="btn btn-sm btn-outline-primary" title="Descargar" type="button" (click)="onDownload(file)">
+          <i class="fas fa-download"></i>
+        </button>
+        <button *ngIf="lesson?.leader" class="btn btn-sm btn-outline-danger ms-2" title="Eliminar" type="button" (click)="onDelete(file)">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <ng-template #noFiles>
+    <div class="empty-state">
+      <i class="fas fa-file text-muted"></i>
+      <p class="text-muted mb-0">No hay archivos subidos aún</p>
+    </div>
+  </ng-template>
+
+  <!-- Solo el líder de la lección puede subir archivos -->
+  <div class="upload-section" *ngIf="lesson?.leader">
+    <hr class="my-4">
+    <h6><i class="fas fa-cloud-upload-alt me-2"></i>Subir nuevo archivo</h6>
+    <form (submit)="$event.preventDefault(); upload.emit();">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <input type="file" class="form-control" (change)="onFileSelected($event)" [disabled]="uploading">
+        </div>
+        <div class="col-md-4">
+          <input type="text" class="form-control" name="resourceDescription" placeholder="Descripción (opcional)" [ngModel]="resourceDescription" (ngModelChange)="resourceDescriptionChange.emit($event)" [disabled]="uploading" [ngModelOptions]="{standalone: true}">
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100" [disabled]="!selectedFile || uploading">
+            <span *ngIf="!uploading"><i class="fas fa-upload me-2"></i>Subir</span>
+            <span *ngIf="uploading">
+              <span class="spinner-border spinner-border-sm me-2"></span>Subiendo...
+            </span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+

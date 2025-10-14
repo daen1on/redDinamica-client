@@ -23,17 +23,69 @@
                     {{successMsg}}
                 </div>
 
-                <div class="my-2 clasificacion">
-                    <input id="radio1" type="radio" name="rating" value="5" formControlName="rating">
-                    <label for="radio1"><i class="fas fa-star icon-message"></i></label>
-                    <input id="radio2" type="radio" name="rating" value="4" formControlName="rating">
-                    <label for="radio2"><i class="fas fa-star icon-message"></i></label>
-                    <input id="radio3" type="radio" name="rating" value="3" formControlName="rating">
-                    <label for="radio3"><i class="fas fa-star icon-message"></i></label>
-                    <input id="radio4" type="radio" name="rating" value="2" formControlName="rating">
-                    <label for="radio4"><i class="fas fa-star icon-message"></i></label>
-                    <input id="radio5" type="radio" name="rating" value="1" formControlName="rating">
-                    <label for="radio5"><i class="fas fa-star icon-message"></i></label>
+                <style>
+                    /* Estrellas con medias y fondo negro en selección/hover (soporte dark mode) */
+                    .clasificacion {
+                        display: inline-flex;
+                        flex-direction: row-reverse;
+                        gap: 6px;
+                        direction: rtl;
+                        unicode-bidi: bidi-override;
+                    }
+                    .clasificacion input {
+                        display: none;
+                    }
+                    .clasificacion label {
+                        cursor: pointer;
+                        padding: 6px;
+                        border-radius: 6px;
+                        background-color: transparent;
+                        transition: background-color .15s ease-in-out, transform .05s ease-in-out;
+                    }
+                    .clasificacion label:hover,
+                    .clasificacion label:hover ~ label {
+                        background-color: #000;
+                    }
+                    .clasificacion input:checked + label,
+                    .clasificacion input:checked + label ~ label {
+                        background-color: #000;
+                    }
+                    .clasificacion i.fas {
+                        color: #ffc107;
+                        font-size: 1.25rem;
+                    }
+                </style>
+                <div class="my-2 clasificacion" aria-label="Calificación por estrellas">
+                    <!-- 5.0 -->
+                    <input id="res-rate-5" type="radio" name="rating" value="5" formControlName="rating">
+                    <label for="res-rate-5" title="5.0" aria-label="5.0"><i class="fas fa-star icon-message"></i></label>
+                    <!-- 4.5 -->
+                    <input id="res-rate-45" type="radio" name="rating" value="4.5" formControlName="rating">
+                    <label for="res-rate-45" title="4.5" aria-label="4.5"><i class="fas fa-star-half-alt icon-message"></i></label>
+                    <!-- 4.0 -->
+                    <input id="res-rate-4" type="radio" name="rating" value="4" formControlName="rating">
+                    <label for="res-rate-4" title="4.0" aria-label="4.0"><i class="fas fa-star icon-message"></i></label>
+                    <!-- 3.5 -->
+                    <input id="res-rate-35" type="radio" name="rating" value="3.5" formControlName="rating">
+                    <label for="res-rate-35" title="3.5" aria-label="3.5"><i class="fas fa-star-half-alt icon-message"></i></label>
+                    <!-- 3.0 -->
+                    <input id="res-rate-3" type="radio" name="rating" value="3" formControlName="rating">
+                    <label for="res-rate-3" title="3.0" aria-label="3.0"><i class="fas fa-star icon-message"></i></label>
+                    <!-- 2.5 -->
+                    <input id="res-rate-25" type="radio" name="rating" value="2.5" formControlName="rating">
+                    <label for="res-rate-25" title="2.5" aria-label="2.5"><i class="fas fa-star-half-alt icon-message"></i></label>
+                    <!-- 2.0 -->
+                    <input id="res-rate-2" type="radio" name="rating" value="2" formControlName="rating">
+                    <label for="res-rate-2" title="2.0" aria-label="2.0"><i class="fas fa-star icon-message"></i></label>
+                    <!-- 1.5 -->
+                    <input id="res-rate-15" type="radio" name="rating" value="1.5" formControlName="rating">
+                    <label for="res-rate-15" title="1.5" aria-label="1.5"><i class="fas fa-star-half-alt icon-message"></i></label>
+                    <!-- 1.0 -->
+                    <input id="res-rate-1" type="radio" name="rating" value="1" formControlName="rating">
+                    <label for="res-rate-1" title="1.0" aria-label="1.0"><i class="fas fa-star icon-message"></i></label>
+                    <!-- 0.5 -->
+                    <input id="res-rate-05" type="radio" name="rating" value="0.5" formControlName="rating">
+                    <label for="res-rate-05" title="0.5" aria-label="0.5"><i class="fas fa-star-half-alt icon-message"></i></label>
                 </div>
 
                 <div class="form-group row mt-3">

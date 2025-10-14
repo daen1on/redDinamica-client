@@ -20,18 +20,18 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="d-flex align-items-start">
                         <h6 class="mb-1">
-                            <a class="text-primary text-decoration-none fw-bold" 
+                            <a class="text-primary text-decoration-none fw-bold author-name" 
                                [routerLink]="['/perfil', publication.user?._id || publication.user]">
                                 <span *ngIf="publication.user?.name; else userFallback">
-                                    {{publication.user.name}} {{publication.user.surname}}
+                                    {{publication.user.name}} {{publication.user.surname}}  
                                 </span>
                                 <ng-template #userFallback>
                                     <span class="text-muted">Cargando usuario...</span>
                                 </ng-template>
-                            </a>
-                        </h6>
-                        <small class="text-muted">
-                            {{ (publication.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL' }}
+                            </a>  
+                         </h6>  
+                        <small class="text-muted ms-2">
+                              {{ (publication.created_at | amFromUnix) | amLocale:'es' | amDateFormat:'LLL' }}
                         </small>
                     </div>
                     <div class="d-flex align-items-center">

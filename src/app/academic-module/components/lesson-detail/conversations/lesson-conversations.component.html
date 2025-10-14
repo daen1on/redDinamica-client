@@ -1,0 +1,116 @@
+<div class="content-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="card-title mb-0"><i class="fas fa-comments me-2"></i>Conversaciones del Equipo</h5>
+    <button *ngIf="canEdit" class="btn btn-sm btn-outline-primary" (click)="showNewConversationForm = !showNewConversationForm">
+      <i class="fas fa-plus me-1"></i>Nueva Conversación
+    </button>
+  </div>
+
+  <div class="row g-3">
+    <!-- Columna izquierda: selector compacto de conversaciones -->
+    <div class="col-md-3">
+      <div class="border rounded p-2 h-100">
+        <label class="form-label mb-2"><strong>Conversación</strong></label>
+        <div *ngIf="lesson?.conversations && lesson.conversations.length > 0; else noConvsLeft">
+          <select class="form-select" [(ngModel)]="currentConversationId" (ngModelChange)="currentConversationIdChange.emit($event)" size="8">
+            <option *ngFor="let conv of lesson?.conversations" [value]="conv._id">
+              {{ conv.title }} ({{ conv.messages?.length || 0 }})
+            </option>
+          </select>
+        </div>
+        <ng-template #noConvsLeft>
+          <div class="text-muted small">Sin conversaciones</div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Columna derecha: chat con tamaño fijo o formulario de nueva conversación -->
+    <div class="col-md-9">
+      <!-- Formulario de nueva conversación: al activarse oculta el chat -->
+      <ng-container *ngIf="showNewConversationForm; else chatArea">
+        <div class="p-3 border rounded bg-light">
+          <h6 class="mb-3"><i class="fas fa-plus-circle me-2"></i>Crear Nueva Conversación</h6>
+          <div class="mb-3">
+            <input type="text" class="form-control" placeholder="Título de la conversación..." [(ngModel)]="newConversationTitle" [disabled]="loading">
+          </div>
+          <div class="mb-3">
+            <textarea class="form-control" rows="4" placeholder="Mensaje inicial (opcional)" #initialMsg></textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary" (click)="onCreateConversation()" [disabled]="!newConversationTitle?.trim() || loading">
+              <i class="fas fa-check me-1"></i>Crear
+            </button>
+            <button class="btn btn-outline-secondary" (click)="showNewConversationForm = false">Cancelar</button>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Área de chat -->
+      <ng-template #chatArea>
+        <div class="chat-container">
+          <ng-container *ngIf="getCurrentConversation() as currentConv; else noConversation">
+            <div #messagesList class="messages-list border rounded p-2 mb-2" *ngIf="currentConv.messages?.length; else noMessages" style="height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
+              <div *ngFor="let msg of currentConv.messages" class="message-item d-flex gap-2">
+                <div class="message-avatar">
+                  <ng-container *ngIf="userPictureUrl(msg.author) as pic; else noAvatar">
+                    <img class="avatar" [src]="pic" alt="Avatar" />
+                  </ng-container>
+                  <ng-template #noAvatar>
+                    <i class="fas fa-user-circle"></i>
+                  </ng-template>
+                </div>
+                <div class="message-content flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="message-header">
+                      <strong>{{ displayUserName(msg.author) }}</strong>
+                      <small class="text-muted">{{ msg.timestamp | date:'short' }}</small>
+                      <small *ngIf="msg.edited" class="text-muted ms-2" title="Editado">(editado)</small>
+                    </div>
+                    <div class="btn-group" *ngIf="isEditable(msg) && currentConversationId !== 'default'">
+                      <button class="btn btn-sm btn-link text-decoration-none" (click)="startEdit(msg)"><i class="fas fa-pen"></i></button>
+                      <button class="btn btn-sm btn-link text-danger text-decoration-none" (click)="confirmDelete(msg)"><i class="fas fa-trash"></i></button>
+                    </div>
+                  </div>
+                  <div *ngIf="editingMessageId === msg._id; else showText">
+                    <textarea class="form-control" rows="3" name="editingContent" [(ngModel)]="editingContent" [ngModelOptions]="{standalone: true}"></textarea>
+                    <div class="mt-2 d-flex gap-2">
+                      <button class="btn btn-sm btn-primary" (click)="confirmEdit()"><i class="fas fa-save me-1"></i>Guardar</button>
+                      <button class="btn btn-sm btn-outline-secondary" (click)="cancelEdit()">Cancelar</button>
+                    </div>
+                  </div>
+                  <ng-template #showText>
+                    <p class="mb-0">{{ msg.content }}</p>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+            <ng-template #noMessages>
+              <div class="empty-state border rounded p-4 text-center mb-2">
+                <i class="fas fa-comments text-muted"></i>
+                <p class="text-muted mb-0">Aún no hay mensajes en esta conversación</p>
+              </div>
+            </ng-template>
+
+            <div class="chat-input-container" *ngIf="canChat && currentConversationId">
+              <div class="input-group">
+                <textarea class="form-control" rows="3" placeholder="Escribe un mensaje (puedes usar párrafos con Enter)..." name="chatMessage" [ngModel]="chatMessage" (ngModelChange)="onTyping($event)" [ngModelOptions]="{standalone: true}"></textarea>
+                <button class="btn btn-primary" (click)="onSendMessage()" [disabled]="!chatMessage?.trim() || loading">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-template #noConversation>
+            <div class="empty-state border rounded p-4 text-center">
+              <i class="fas fa-comment-slash text-muted"></i>
+              <p class="text-muted mb-0">No hay conversaciones disponibles. <span *ngIf="canEdit">Crea una nueva conversación para comenzar.</span></p>
+            </div>
+          </ng-template>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+

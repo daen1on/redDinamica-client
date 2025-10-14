@@ -87,8 +87,6 @@ export class EditComponent implements OnInit, AfterViewInit {
     }
 
     initializeLevels(): void {
-        console.log("Inicializando niveles con:", this.lesson.level);
-        console.log("ACADEMIC_LEVEL disponibles:", ACADEMIC_LEVEL);
         
         // Convertir los niveles de la lección (keys) a objetos con key y value
         if (this.lesson.level && Array.isArray(this.lesson.level)) {
@@ -136,7 +134,6 @@ export class EditComponent implements OnInit, AfterViewInit {
             this.selectedLevels = [{ key: 'UNIVERSITY', value: 'Universitario' }];
         }
         
-        console.log("Niveles seleccionados después de inicialización:", this.selectedLevels);
         this.updateLevelFormControl();
     }
 
@@ -153,8 +150,6 @@ export class EditComponent implements OnInit, AfterViewInit {
             this.lesson.visible = false;
         }
 
-        // Validar que areas exista y sea un array
-        console.log("Procesando áreas de conocimiento:", this.lessonForm.value.areas);
         
         if (this.lessonForm.value.areas && Array.isArray(this.lessonForm.value.areas)) {
             this.lessonForm.value.areas.forEach(element => {
@@ -181,7 +176,6 @@ export class EditComponent implements OnInit, AfterViewInit {
             console.warn("Areas no es un array válido:", this.lessonForm.value.areas);
         }
         
-        console.log("Áreas procesadas (IDs):", tempArray);
 
         // Asegurar que knowledge_area siempre sea un array
         this.lesson.knowledge_area = Array.isArray(tempArray) ? tempArray : [];
@@ -199,15 +193,7 @@ export class EditComponent implements OnInit, AfterViewInit {
             this.lesson.level = [this.lesson.level];
         }
 
-        // Validación final de tipos de datos
-        console.log("Validación final de datos:", {
-            knowledge_area_type: typeof this.lesson.knowledge_area,
-            knowledge_area_isArray: Array.isArray(this.lesson.knowledge_area),
-            knowledge_area_length: this.lesson.knowledge_area.length,
-            level_type: typeof this.lesson.level,
-            level_isArray: Array.isArray(this.lesson.level),
-            level_length: this.lesson.level.length
-        });
+  
         
         // Validar campos requeridos
         if (!this.lessonForm.value.title || !this.lessonForm.value.resume) {
@@ -227,7 +213,6 @@ export class EditComponent implements OnInit, AfterViewInit {
         console.log("Estado del formulario:", this.lessonForm.value.state);
         this.lesson.state = this.lessonForm.value.state;
         console.log("Estado asignado:", this.lesson.state);
-
         // Logging para debug
         console.log("Enviando actualización de lección (edit):", {
             id: this.lesson._id,
@@ -264,7 +249,6 @@ export class EditComponent implements OnInit, AfterViewInit {
         // Agregar timeout y loading state
         this.submitted = true;
         const startTime = Date.now();
-
         this._lessonService.editLesson(this.token, this.lesson).subscribe({
             next: response => {
                 const responseTime = Date.now() - startTime;
@@ -283,11 +267,11 @@ export class EditComponent implements OnInit, AfterViewInit {
                             Object.assign(this.lesson, response.lesson);
                         }
 
+                        // Recargar la página después de 1.5 segundos para salir del modo edición
                         setTimeout(() => {
-                            if (this.status === 'success') {
-                                this.status = null;
-                            }
-                        }, 3000);
+                            console.log("Recargando página para reflejar cambios y salir del modo edición...");
+                            window.location.reload();
+                        }, 1500);
                     } else {
                         this.status = 'error';
                         this.errorMsg = 'Error al actualizar la lección. Respuesta inválida del servidor.';

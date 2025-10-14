@@ -44,6 +44,7 @@ export class ResourcesComponent implements OnInit {
     public areas;    
 
     public loading = true;
+    private resubmitRequested: boolean = false;
 
     constructor(
         private _userService: UserService,
@@ -66,6 +67,33 @@ export class ResourcesComponent implements OnInit {
     ngOnInit(): void {
         this.getAllResources();
         this.actualPage();
+        // Abrir modal de edición si viene un resourceId en query param (tras rechazo)
+        this._route.queryParams.subscribe(params => {
+            const resourceId = params['resourceId'];
+            this.resubmitRequested = (params['resubmit'] === 'true' || params['resubmit'] === true);
+            if (resourceId) {
+                // Esperar a que carguen los recursos paginados
+                const tryOpen = () => {
+                    const all = [...(this.allResources || []), ...(this.resources || [])];
+                    const found = all.find((r: any) => r && (r._id === resourceId));
+                    if (found) {
+                        // Marcar el recurso como objetivo de re-sugerencia si aplica
+                        if (this.resubmitRequested) {
+                            found._resubmit = true;
+                        }
+                        this.openDetailsModal(found);
+                        return true;
+                    }
+                    return false;
+                };
+                setTimeout(() => {
+                    if (!tryOpen()) {
+                        // Si aún no está, reintentar brevemente tras siguiente tick
+                        setTimeout(() => tryOpen(), 300);
+                    }
+                }, 0);
+            }
+        });
     }
 
     ngDoCheck(): void {

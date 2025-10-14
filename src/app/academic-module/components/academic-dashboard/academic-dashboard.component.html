@@ -45,7 +45,7 @@
       <!-- Mensaje de bienvenida para usuarios con roles de docente/facilitador/admin -->
       <div *ngIf="canAccessTeacherPanel()" class="welcome-message">
         <h2>¡Bienvenido a RedDinámica Académica!</h2>
-        <p>Como {{ userRole }}, puedes acceder tanto al panel de docente como al panel de estudiante. Selecciona el modo que desees usar.</p>
+        <p>Como {{ translateUserRole(userRole) }}, puedes acceder tanto al panel de docente como al panel de estudiante. Selecciona el modo que desees usar.</p>
         <div class="role-cards">
           <div class="role-card" (click)="handleTeacherPanelAccess()">
             <i class="fas fa-chalkboard-teacher"></i>

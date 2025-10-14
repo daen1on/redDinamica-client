@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Notification } from '../models/notification.model';
+import { retry } from 'rxjs/operators';
 import { GLOBAL } from '../services/global';
 import { UserService } from './user.service';
 
@@ -62,7 +63,12 @@ export class NotificationService {
 
   deleteNotification(notificationId: string): Observable<any> {
     const headers = this.getHeaders();
-    return this.http.delete(`${this.url}notifications/${notificationId}`, { headers });
+    return this.http
+      .delete(`${this.url}notifications/${notificationId}`, { headers })
+      .pipe(
+        // Reintento simple para cubrir reinicios breves del API (nodemon)
+        retry({ count: 2, delay: 500 })
+      );
   }
 
   createNotification(notificationData: any): Observable<any> {

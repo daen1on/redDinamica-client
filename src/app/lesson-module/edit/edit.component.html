@@ -219,7 +219,7 @@
                 </div>
 
                 <div class="card mb-3">
-                    <div class="card-body">
+                    <div class="card-body proposed-by; text-color: #5078a0 !important">
                         <div class="card-title">
                             <strong>Propuesto por</strong>
                         </div>
@@ -252,6 +252,24 @@
                                 </div>
                             </div>
                         </div>
+                        <style>
+                            /* Forzar texto blanco en modo oscuro para bloque Propuesto por */
+                            @media (prefers-color-scheme: dark) {
+                                .proposed-by, .proposed-by *:not(img) { color: #fff !important; }
+                            }
+                            [data-bs-theme="dark"] .proposed-by,
+                            [data-bs-theme="dark"] .proposed-by *:not(img) {
+                                color: #fff !important;
+                            }
+                            .bg-dark .proposed-by,
+                            .bg-dark .proposed-by *:not(img),
+                            .text-bg-dark .proposed-by,
+                            .text-bg-dark .proposed-by *:not(img),
+                            .card.bg-dark .proposed-by,
+                            .card.bg-dark .proposed-by *:not(img) {
+                                color: #fff !important;
+                            }
+                        </style>
                     </div>
                 </div>
 

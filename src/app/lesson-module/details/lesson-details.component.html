@@ -40,7 +40,7 @@
                 </div>
                 
                 <!-- Mensaje Motivacional -->
-                <div *ngIf="lesson.state && showMotivationalMessage && getCurrentConfig()" 
+                <div *ngIf="lesson.state && showMotivationalMessage && getCurrentConfig() && isLessonMember()" 
                      class="alert alert-{{getCurrentConfig()?.color}} alert-dismissible fade show mb-3" 
                      role="alert">
                     <div class="d-flex align-items-start">
@@ -129,7 +129,7 @@
                 </div>
 
                 <div class="card mb-3">
-                    <div class="card-body">
+                    <div class="card-body proposed-by">
                         <div class="card-title">
                             <strong>Propuesto por</strong>
                         </div>
@@ -163,6 +163,7 @@
                                 </div>
                             </div>
                         </div>
+                        
                     </div>
                 </div>
             </div>

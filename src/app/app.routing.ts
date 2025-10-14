@@ -12,6 +12,9 @@ const routes: Routes = [
   { path: 'recuperar-pass', loadChildren: () => import('./components/recoverPassword/recover-password.module').then(m => m.RecoverPasswordModule), canActivate: [landingGuard] },
   { path: 'buscar', loadChildren: () => import('./components/search/search.module').then(m => m.SearchModule), canActivate: [landingGuard] },
   { path: 'seguridad', loadChildren: () => import('./components/securityOptions/security-options.module').then(m => m.SecurityOptionsModule) },
+  { path: 'configuracion', loadChildren: () => import('./components/configuration/configuration.module').then(m => m.ConfigurationModule), canActivate: [authGuard] },
+  // Redirección desde variante con tilde
+  { path: 'configuración', redirectTo: 'configuracion', pathMatch: 'full' },
   { path: 'reset-password/:token', loadChildren: () => import('./components/resetPassword/reset-password.module').then(m => m.ResetPasswordModule) },
   { path: 'inicio', loadChildren: () => import('./home-module/home.module').then(m => m.HomeModule), canActivate: [homeGuard] },
   { path: 'error', loadChildren: () => import('./error/error.module').then(m => m.ErrorModule), canActivate: [homeGuard]  },

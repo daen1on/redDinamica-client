@@ -174,8 +174,9 @@ export class AdviseLessonComponent implements OnInit {
             next: response => {
                 console.log('getAllLessonsToAdvise response:', response);
                 if (response.lessons) {
-                    this.allLessons = response.lessons;
-                    console.log('All lessons to advise:', this.allLessons.length);
+                    // Mantener la lista base completa en `lessons`
+                    this.lessons = response.lessons;
+                    console.log('All lessons to advise (base list):', this.lessons.length);
                     
                     // Log each lesson details
                     this.allLessons.forEach(lesson => {
@@ -183,24 +184,20 @@ export class AdviseLessonComponent implements OnInit {
                     });
 
                  
+                    // Por defecto, mostrar todas en `allLessons` (resultado de vista)
+                    this.allLessons = this.lessons;
+
                     // Filter by state
                     if (this.selectedStates.length > 0) {
                         console.log('Filtering by selected states:', this.selectedStates);
-                        this.selectedStates.forEach((state) => {
-                            filteredLessons = filteredLessons.concat(this.allLessons.filter((lesson) => {
-                                return lesson.state == state;
-                            }));
-                        });
-
-                        this.allLessons = filteredLessons;
-                        filteredLessons = [];
+                        const selectedStatesSet = new Set(this.selectedStates);
+                        this.allLessons = this.lessons.filter(lesson => selectedStatesSet.has(lesson.state));
                         console.log('Filtered lessons:', this.allLessons.length);
+                        console.log('Selected states:', this.selectedStates);
                     } else {
                         console.log('No states selected, showing all lessons');
                     }
 
-                    // Asegurarse de que this.lessons también se actualice para la vista
-                    this.lessons = this.allLessons;
                     this.loading = false;
                 }
             },
@@ -292,23 +289,13 @@ export class AdviseLessonComponent implements OnInit {
 
     // Verificar si el usuario actual es el facilitador sugerido para esta lección
     isSuggestedFacilitator(lesson: any): boolean {
-        console.log('=== DEBUG isSuggestedFacilitator ===');
-        console.log('Lesson expert:', lesson.expert);
-        console.log('Lesson suggested_facilitator:', lesson.suggested_facilitator);
-        console.log('Current identity:', this.identity);
-        console.log('Suggested facilitator ID:', lesson.suggested_facilitator?._id);
-        console.log('Identity ID:', this.identity._id);
-        console.log('Match:', lesson.suggested_facilitator && lesson.suggested_facilitator._id === this.identity._id);
-        
+   
         return lesson.suggested_facilitator && lesson.suggested_facilitator._id === this.identity._id;
     }
 
     // Verificar si la lección está en estado 'proposed'
     isProposedLesson(lesson: any): boolean {
-        console.log('=== DEBUG isProposedLesson ===');
-        console.log('Lesson state:', lesson.state);
-        console.log('Is proposed:', lesson.state === 'proposed');
-        
+  
         return lesson.state === 'proposed';
     }
 
@@ -320,11 +307,9 @@ export class AdviseLessonComponent implements OnInit {
         }
 
         if (confirm(`¿Estás seguro de que quieres avalar la lección "${lesson.title}" ? Esta acción notificará al líder para que abra la convocatoria.`)) {
-            console.log('Aprobando lección:', lesson._id);
             
             this._lessonService.approveFacilitatorSuggestion(this.token, lesson._id).subscribe({
                 next: response => {
-                    console.log('Lección aprobada exitosamente:', response);
                     alert('¡Lección aprobada exitosamente! El líder ha sido notificado para abrir la convocatoria.');
                     
                     // Cerrar modal si está abierto

@@ -40,6 +40,10 @@ const routes: Routes = [
         loadComponent: () => import('./components/create-lesson/create-lesson.component').then(m => m.CreateLessonComponent)
       },
       {
+        path: 'lessons/:id/edit',
+        loadComponent: () => import('./components/edit-lesson/edit-lesson.component').then(m => m.EditLessonComponent)
+      },
+      {
         path: 'lessons/:id',
         loadComponent: () => import('./components/lesson-detail/lesson-detail.component').then(m => m.LessonDetailComponent)
       }

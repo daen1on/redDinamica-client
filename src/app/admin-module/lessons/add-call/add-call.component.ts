@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
 
 import { Validators, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
@@ -20,7 +20,7 @@ import { Lesson } from 'src/app/models/lesson.model';
     templateUrl: './add-call.component.html',
     standalone: false
 })
-export class AddCallComponent implements OnInit, AfterViewInit {
+export class AddCallComponent implements OnInit, AfterViewInit, OnDestroy {
     public title;
     public identity;
     public token;
@@ -49,6 +49,8 @@ export class AddCallComponent implements OnInit, AfterViewInit {
     public filteredLevels = [];
     public selectedLevels = [];
     public showLevelDropdown = false;
+
+    private realtimeTimer: any;
 
     constructor(
         private _userService: UserService,
@@ -89,6 +91,10 @@ export class AddCallComponent implements OnInit, AfterViewInit {
     
     ngAfterViewInit(): void {
         this.setupClickOutsideListener();
+    }
+
+    ngOnDestroy(): void {
+        this.stopRealtimeSync();
     }
 
     ngDoCheck(): void {
@@ -297,6 +303,8 @@ export class AddCallComponent implements OnInit, AfterViewInit {
                 if (response.lesson && response.lesson._id) {
                     this.status = 'success';
                     this.added.emit();
+                    // Iniciar sincronización en vivo del estado de la lección tras el guardado
+                    this.startRealtimeSync(response.lesson._id);
                 } else {
                     this.status = 'error';
                     this.errorMsg = 'Error al actualizar la lección. Respuesta inválida del servidor.';
@@ -338,6 +346,8 @@ export class AddCallComponent implements OnInit, AfterViewInit {
                     this.newLesson.father_lesson = this.lesson._id;
                     this.editLesson(this.newLesson);
                     this.added.emit();
+                    // Iniciar sincronización en vivo del estado de la nueva lección
+                    this.startRealtimeSync(response.lesson._id);
                 } else {
                     this.status = 'error';
                     this.errorMsg = 'Error al crear la nueva lección. Respuesta inválida del servidor.';
@@ -361,4 +371,37 @@ export class AddCallComponent implements OnInit, AfterViewInit {
         this.submitted = false;
     }
     
+    private refreshLesson(lessonId: string): void {
+        if (!lessonId) { return; }
+        this._lessonService.getLesson(this.token, lessonId).subscribe({
+            next: (res) => {
+                if (res && res.lesson) {
+                    // Actualizar referencia local si corresponde
+                    if (this.lesson && this.lesson._id === lessonId) {
+                        this.lesson = res.lesson;
+                    }
+                    if (this.newLesson && this.newLesson._id === lessonId) {
+                        this.newLesson = res.lesson;
+                    }
+                }
+            },
+            error: (err) => {
+                console.warn('No se pudo actualizar la lección en tiempo real:', err);
+            }
+        });
+    }
+
+    private startRealtimeSync(lessonId: string): void {
+        this.stopRealtimeSync();
+        if (!lessonId) { return; }
+        this.realtimeTimer = setInterval(() => this.refreshLesson(lessonId), 7000);
+    }
+
+    private stopRealtimeSync(): void {
+        if (this.realtimeTimer) {
+            clearInterval(this.realtimeTimer);
+            this.realtimeTimer = null;
+        }
+    }
+
    }

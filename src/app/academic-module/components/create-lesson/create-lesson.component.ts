@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { GLOBAL } from '../../../services/global';
 import { AcademicLessonService } from '../../services/academic-lesson.service';
 import { AcademicGroupService } from '../../services/academic-group.service';
 import { CreateAcademicLessonRequest } from '../../models/academic-lesson.model';
@@ -35,6 +37,7 @@ export class CreateLessonComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
+    private http: HttpClient,
     private academicLessonService: AcademicLessonService,
     private academicGroupService: AcademicGroupService,
     private router: Router,
@@ -43,6 +46,7 @@ export class CreateLessonComponent implements OnInit {
     this.lessonForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(200)]],
       resume: ['', [Validators.required, Validators.maxLength(1000)]],
+      references: ['', [Validators.maxLength(2000)]],
       tags: ['', Validators.maxLength(500)],
       methodology: ['', [Validators.required, Validators.maxLength(1000)]],
       objectives: ['', [Validators.required, Validators.maxLength(1000)]],
@@ -98,10 +102,11 @@ export class CreateLessonComponent implements OnInit {
           methodology: this.lessonForm.value.methodology,
           objectives: this.lessonForm.value.objectives
         },
+        references: this.lessonForm.value.references?.trim() || undefined,
         tags: this.lessonForm.value.tags,
-        knowledge_areas: this.selectedKnowledgeAreas.map(area => area._id || area.name)
+        knowledge_areas: this.selectedKnowledgeAreas.map(area => area._id)
       };
-
+      console.log(lessonData);
       this.academicLessonService.createLesson(lessonData).subscribe({
         next: (response) => {
           this.loading = false;
@@ -174,19 +179,25 @@ export class CreateLessonComponent implements OnInit {
 
   // Métodos para áreas de conocimiento
   loadKnowledgeAreas(): void {
-    // Simular áreas de conocimiento - en producción esto vendría de un servicio
-    this.allKnowledgeAreas = [
-      { _id: '1', name: 'Matemáticas' },
-      { _id: '2', name: 'Física' },
-      { _id: '3', name: 'Química' },
-      { _id: '4', name: 'Biología' },
-      { _id: '5', name: 'Historia' },
-      { _id: '6', name: 'Geografía' },
-      { _id: '7', name: 'Literatura' },
-      { _id: '8', name: 'Filosofía' },
-      { _id: '9', name: 'Informática' },
-      { _id: '10', name: 'Ingeniería' }
-    ];
+    // Cargar áreas de conocimiento reales desde el backend
+    this.http.get<any>(`${GLOBAL.url}all-areas`).subscribe({
+      next: (response) => {
+        // El backend puede devolver { areas: [...] } o directamente el array
+        this.allKnowledgeAreas = response.areas || response || [];
+        console.log('Knowledge areas cargadas:', this.allKnowledgeAreas);
+      },
+      error: (error) => {
+        console.error('Error al cargar knowledge areas:', error);
+        // Fallback con datos básicos en caso de error
+        this.allKnowledgeAreas = [
+          { _id: 'temp1', name: 'Matemáticas' },
+          { _id: 'temp2', name: 'Física' },
+          { _id: 'temp3', name: 'Química' },
+          { _id: 'temp4', name: 'Biología' },
+          { _id: 'temp5', name: 'Ciencias de la Computación' }
+        ];
+      }
+    });
   }
 
   onKnowledgeAreaInputChange(): void {

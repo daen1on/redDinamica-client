@@ -46,12 +46,20 @@ export class LessonComponent implements OnInit {
         this.getUsers();
         this.getAllAreas();
         
-        this._route.parent?.url.subscribe(segments => {
-            const first = (segments && segments.length > 0) ? segments[0] : null;
-            this.parentUrl = (first && first.path)
-                || this._route.parent?.snapshot?.routeConfig?.path?.split('/')?.[0]
-                || '';
-        });
+        // Determinar contexto principal (admin/inicio) de forma robusta
+        const currentUrl = this._router.url || '';
+        if (currentUrl.startsWith('/admin')) {
+            this.parentUrl = 'admin';
+        } else if (currentUrl.startsWith('/inicio')) {
+            this.parentUrl = 'inicio';
+        } else {
+            // Fallback: inspeccionar el árbol de rutas para detectar prefijo conocido
+            const rootPaths = (this._route.snapshot.pathFromRoot || [])
+                .map(r => r.routeConfig?.path)
+                .filter(Boolean) as string[];
+            const top = rootPaths.find(p => p.startsWith('admin') || p.startsWith('inicio'));
+            this.parentUrl = (top && top.split('/')?.[0]) || 'inicio';
+        }
     }
 
     ngDoCheck(): void {
@@ -186,6 +194,7 @@ export class LessonComponent implements OnInit {
             response = true;
         }else{
             response = false;
+            console.log("parentUrl", this.parentUrl);
             if(this.parentUrl == 'admin'){
                 response = true;
             }

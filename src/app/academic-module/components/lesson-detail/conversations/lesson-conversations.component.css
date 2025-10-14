@@ -1,0 +1,82 @@
+.messages-list {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 6px;
+  background: transparent; /* transparente para integrarse con el fondo de la tarjeta */
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: .5rem;
+}
+
+.message-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.message-avatar {
+  color: #6c757d;
+  font-size: 28px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message-avatar .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.message-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chat-input-container {
+  margin-top: 12px;
+}
+
+/* Columna izquierda (selector) */
+.conversation-selector select.form-select {
+  height: 420px;
+  font-size: .9rem;
+}
+
+/* Dark mode básico: si el body o html tiene .dark o data-bs-theme=dark */
+:root[data-bs-theme='dark'] .messages-list,
+body.dark .messages-list {
+  background: #000; /* negro en modo oscuro */
+  border-color: rgba(255,255,255,0.12);
+}
+
+:root[data-bs-theme='dark'] .message-item,
+body.dark .message-item {
+  color: #e6edf3;
+}
+
+:root[data-bs-theme='dark'] .message-header small,
+body.dark .message-header small {
+  color: rgba(255,255,255,0.65) !important;
+}
+
+:root[data-bs-theme='dark'] .chat-input-container textarea.form-control,
+body.dark .chat-input-container textarea.form-control {
+  background: #0b0f16;
+  color: #e6edf3;
+  border-color: rgba(255,255,255,0.15);
+}
+
+:root[data-bs-theme='dark'] .chat-input-container .btn-primary,
+body.dark .chat-input-container .btn-primary {
+  background-color: #4776e6;
+  border-color: #4776e6;
+}
+
+

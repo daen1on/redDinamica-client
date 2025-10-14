@@ -21,7 +21,7 @@
 
     <div *ngIf="resources.length > 0" class="card-body">
         <!-- proposed-resource items -->
-        <div *ngFor="let resource of resources, let i=index">
+        <div *ngFor="let resource of resources, let i=index" [attr.id]="resource._id">
             <div class="card">
                 <div class="card-body">
                     <div class="media-body">

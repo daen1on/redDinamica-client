@@ -57,3 +57,16 @@
 }
 
 
+/* Link de marca: color acorde a la paleta y subrayado solo en hover */
+.academic-brand-link {
+  color: #17a2b8; /* teal/cián que armoniza con el gradiente */
+  text-decoration: none;
+}
+
+.academic-brand-link:hover {
+  color: #0ea5b3; /* tono ligeramente más intenso en hover */
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+

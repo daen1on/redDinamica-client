@@ -1,5 +1,5 @@
 <!-- group -->
-<div class="card-body">
+<div class="card-body group-dark-names">
 
     <div class="row">
         <div class="col">
@@ -41,7 +41,7 @@
                                         <div class="card">
                                             <div class="row p-1">
                                                 <div class="col-auto pe-0">
-                                                    <a class="text-primary">
+                                                    <a class="text-primary;">
                                                         <button [routerLink]="['/perfil', lesson.leader._id]"
                                                             class="btn flex-shrink-0 rounded-circle  overflow-hidden p-0"
                                                             style="width: 40px; height:40px;">
@@ -57,7 +57,7 @@
                                                     <h6 class="mb-1">
                                                         <a [routerLink]="['/perfil', lesson.leader._id]"
                                                             class="text-primary">
-                                                            <strong>
+                                                            <strong class="name-text">
                                                                 {{lesson.leader.name}} {{lesson.leader.surname}}
                                                             </strong>
                                                         </a>
@@ -94,7 +94,7 @@
                                                     <h6 class="mb-1">
                                                         <a [routerLink]="['/perfil', lesson.expert._id]"
                                                             class="text-primary">
-                                                            <strong>
+                                                            <strong class="name-text">
                                                                 {{lesson.expert.name}} {{lesson.expert.surname}}
                                                             </strong>
                                                         </a>
@@ -139,7 +139,7 @@
                                                             <h6 class="mb-1">
                                                                 <a [routerLink]="['/perfil', user._id]"
                                                                     class="text-primary">
-                                                                    <strong>
+                                                                    <strong class="name-text">
                                                                         {{user.name}} {{user.surname}}
                                                                     </strong>
                                                                 </a>
@@ -238,10 +238,7 @@
                                             </ng-template>
                                         </ng-select>
 
-                                        <!-- <select class="form-control" [formControl]="expert">
-                                            <option *ngFor="let user of expertUsers" value="{{user._id}}">{{user.name}}
-                                                {{user.surname}}</option>
-                                        </select> -->
+                                    
 
                                     </div>
                                 </div>
@@ -270,3 +267,4 @@
     </form>
 </div>
 <!-- /group -->
+ 

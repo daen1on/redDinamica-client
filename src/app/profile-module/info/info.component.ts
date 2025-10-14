@@ -16,13 +16,16 @@ export class InfoComponent implements AfterViewInit {
     public title: string;
     public fieldsForm;
     public identity;
+    public viewer; // usuario autenticado (puede ser null)
 
     constructor(
         private _userService: UserService,
         private _router:Router,
         private _route: ActivatedRoute,
     ) {
-        this.identity = _userService.getIdentity();
+        // Guardar el usuario autenticado (si existe) por separado
+        this.viewer = _userService.getIdentity();
+        this.identity = this.viewer;
         this.title = 'Información';
         this.fieldsForm = INFO_FIELDS;
     }    
@@ -45,7 +48,8 @@ export class InfoComponent implements AfterViewInit {
     }
 
     loadPage(){
-        this.identity = this._userService.getIdentity();     
+        // Refrescar el viewer por si hubo cambios de sesión
+        this.viewer = this._userService.getIdentity();     
 
         this._route.parent.params.subscribe(params => {
             let id = params['id'];
@@ -59,6 +63,18 @@ export class InfoComponent implements AfterViewInit {
             response => {
                 if(response.user){
                     this.identity = response.user;
+
+                    // Regla de visibilidad:
+                    // - Siempre permitir vista completa al dueño del perfil
+                    // - Permitir vista completa a usuarios con actived === true
+                    // - En cualquier otro caso, limitar a solo nombre y apellido
+                    const isOwner = this.viewer && this.identity && this.viewer._id === this.identity._id;
+                    const isActivatedViewer = !!(this.viewer && this.viewer.actived === true);
+                    if (isOwner || isActivatedViewer) {
+                        this.fieldsForm = INFO_FIELDS;
+                    } else {
+                        this.fieldsForm = INFO_FIELDS.filter(f => f.id === 'name' || f.id === 'surname');
+                    }
                 }else{
                     
                     this.identity = this.identity;              

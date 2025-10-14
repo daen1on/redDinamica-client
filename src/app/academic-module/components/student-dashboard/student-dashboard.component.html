@@ -43,7 +43,7 @@
           <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
-          <h3>{{ lessonsByStatus['completed'] || 0 }}</h3>
+          <h3>{{ completedLessonsCount }}</h3>
           <p>Lecciones Completadas</p>
         </div>
       </div>
@@ -101,11 +101,11 @@
             </div>
             <div class="stat">
               <small>Activas</small>
-              <strong>0</strong>
+              <strong>{{ getActiveLessonsCountForGroup(group._id) }}</strong>
             </div>
             <div class="stat">
               <small>Completadas</small>
-              <strong>0</strong>
+              <strong>{{ getCompletedLessonsCountForGroup(group._id) }}</strong>
             </div>
           </div>
         </div>
@@ -150,7 +150,7 @@
           <div class="lesson-details">
             <div class="detail-item">
               <i class="fas fa-layer-group"></i>
-              <span>{{ lesson.academicGroup }}</span>
+              <span>{{ getGroupName(lesson.academicGroup) }}</span>
             </div>
             <div class="detail-item">
               <i class="fas fa-calendar"></i>
@@ -165,4 +165,58 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal de selección de grupo -->
+  <div class="modal fade" [class.show]="showGroupSelectionModal" [style.display]="showGroupSelectionModal ? 'block' : 'none'" 
+       tabindex="-1" role="dialog" aria-labelledby="groupSelectionModalLabel" [attr.aria-hidden]="!showGroupSelectionModal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="groupSelectionModalLabel">
+            <i class="fas fa-layer-group"></i> Selecciona un Grupo
+          </h5>
+          <button type="button" class="btn-close" (click)="closeGroupSelectionModal()" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted mb-3">Elige el grupo académico para el cual deseas crear la lección:</p>
+          <div class="group-selection-list">
+            <div *ngFor="let group of groupsWithPermission" 
+                 class="group-selection-item" 
+                 (click)="selectGroupFromModal(group)"
+                 role="button"
+                 tabindex="0"
+                 (keydown.enter)="selectGroupFromModal(group)"
+                 (keydown.space)="selectGroupFromModal(group)">
+              <div class="group-selection-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="group-selection-details">
+                <h6>{{ group.name }}</h6>
+                <p class="mb-1">{{ group.description }}</p>
+                <div class="group-selection-meta">
+                  <small class="text-muted">
+                    <i class="fas fa-chalkboard-teacher"></i> {{ group.teacher }}
+                  </small>
+                  <small class="text-muted ms-3">
+                    <i class="fas fa-graduation-cap"></i> {{ group.academicLevel }} - {{ group.grade }}
+                  </small>
+                </div>
+              </div>
+              <div class="group-selection-arrow">
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeGroupSelectionModal()">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal backdrop -->
+  <div class="modal-backdrop fade" [class.show]="showGroupSelectionModal" *ngIf="showGroupSelectionModal"></div>
 </div>

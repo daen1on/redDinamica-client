@@ -2,22 +2,34 @@
   <div class="row mb-4">
     <div class="col-12">
       <h2 class="mb-3">Gestión académica y tareas</h2>
+    
       <ul class="nav nav-tabs mb-4">
         <li class="nav-item">
           <a class="nav-link" [ngClass]="{'active': activeTab === 'convocatorias'}" (click)="setActiveTab('convocatorias')" style="cursor: pointer;">
             Convocatorias por gestionar
+            <span class="badge-notify" *ngIf="convocatorias.length > 0 || convocatoriasAbiertas.length > 0">
+              {{ convocatorias.length + convocatoriasAbiertas.length }}
+            </span>
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link" [ngClass]="{'active': activeTab === 'sugerencias'}" (click)="setActiveTab('sugerencias')" style="cursor: pointer;">
             Sugerencias de lecciones
+            <span class="badge-notify" *ngIf="sugerencias.length > 0">{{ sugerencias.length }}</span>
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link" [ngClass]="{'active': activeTab === 'recursos'}" (click)="setActiveTab('recursos')" style="cursor: pointer;">
             Recursos por aprobar
+            <span class="badge-notify" *ngIf="recursos.length > 0">{{ recursos.length }}</span>
           </a>
         </li>
+
+       <li class="nav-item" >
+        <a class="nav-link" [ngClass]="{'active': activeTab === 'mejores-lecciones'}" (click)="setActiveTab('mejores-lecciones')" style="cursor: pointer;">Mejores lecciones
+          <span class="badge-notify" *ngIf="featuredLessonsCount > 0">{{ featuredLessonsCount }}</span>
+        </a>
+      </li>
       </ul>
     </div>
   </div>
@@ -75,10 +87,11 @@
                   </td>
                   <td class="text-end">
                     <a [routerLink]="['/admin/lecciones']" [queryParams]="{ lesson: c._id, action: 'openAddCall' }" 
-                       class="btn btn-sm btn-outline-primary" title="Abrir convocatoria para nueva versión">
+                       class="btn btn-sm btn-outline-primary" 
+                       [title]="c.state === 'completed' ? 'Abrir convocatoria para nueva versión' : 'Abrir convocatoria'">
                       <i class="fas fa-bullhorn me-1"></i>
                       <span *ngIf="c.state === 'proposed'">Abrir convocatoria</span>
-                      <span *ngIf="c.state === 'completed'">Abrir V{{(c.version + 1).toFixed(1)}}</span>
+                      <span *ngIf="c.state === 'completed'">Abrir nueva versión</span>
                     </a>
                   </td>
                 </tr>
@@ -212,8 +225,18 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let r of recursos">
-                  <td>{{r.name}}</td>
+                <tr *ngFor="let r of recursos" [attr.id]="'res-' + r._id">
+                  <td>
+                    {{r.name}}
+                    <a
+                      class="ms-2 small"
+                      [routerLink]="['/admin/recursos-propuestos']"
+                      [queryParams]="{ resourceId: r._id }"
+                      title="Ver en recursos propuestos"
+                    >
+                      Ver en lista
+                    </a>
+                  </td>
                   <td>
                     <span *ngIf="r.author">{{r.author.name}} {{r.author.surname}}</span>
                     <span *ngIf="!r.author" class="text-muted">Sin autor</span>
@@ -225,9 +248,12 @@
                     <button class="btn btn-sm btn-success me-2" (click)="aprobar(r._id)" title="Aprobar recurso">
                       <i class="fas fa-check me-1"></i>Aprobar
                     </button>
-                    <button class="btn btn-sm btn-danger" (click)="rechazar(r._id)" title="Rechazar recurso">
+                    <button class="btn btn-sm btn-danger me-2" (click)="rechazar(r._id)" title="Rechazar recurso">
                       <i class="fas fa-times me-1"></i>Rechazar
                     </button>
+                    <a *ngIf="r.rejected" class="btn btn-sm btn-outline-primary" [routerLink]="['/inicio/recursos']" [queryParams]="{ resourceId: r._id, resubmit: true }" title="Volver a sugerir">
+                      <i class="fas fa-edit me-1"></i>Volver a sugerir
+                    </a>
                   </td>
                 </tr>
               </tbody>
@@ -235,6 +261,11 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Mejores lecciones -->
+    <div *ngSwitchCase="'mejores-lecciones'" class="col-12">
+      <app-featured-lessons (lessonsCountChange)="onFeaturedLessonsCountChange($event)"></app-featured-lessons>
     </div>
 
   </div>

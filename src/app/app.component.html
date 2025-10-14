@@ -55,6 +55,8 @@
     </div>
   </div>
 </nav>
+<!-- Spacer para navbar cuando NO hay sesión -->
+<div class="rd-navbar-spacer" *ngIf="!(identity && token)"></div>
 <!-- /Header -->
 
 <!-- Header user logged -->
@@ -203,6 +205,10 @@
               problema o sugerencia
             </a>
             <div class="dropdown-divider"></div>
+            <a class="dropdown-item" [routerLink]="['/configuracion']">
+              <i class="fas fa-cog me-2"></i> Configuración
+            </a>
+            <div class="dropdown-divider"></div>
             <a class="dropdown-item" [routerLink]="['/']" (click)="logout()">
               <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
             </a>
@@ -212,6 +218,8 @@
     </div>
   </div>
 </nav>
+<!-- Spacer para navbar cuando hay sesión -->
+<div class="rd-navbar-spacer rd-navbar-spacer--home" *ngIf="identity && token"></div>
 
 <router-outlet></router-outlet>
 <footer_rd *ngIf="!(identity && token)"></footer_rd>

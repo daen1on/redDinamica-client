@@ -21,6 +21,8 @@ export class GroupManagementComponent implements OnInit {
   searchTerm = '';
   filterLevel = '';
   filterGrade = '';
+  // Cache local de nombres de docentes por ID para evitar múltiples peticiones
+  private teacherNameMap: { [userId: string]: string } = {};
 
   constructor(
     private academicGroupService: AcademicGroupService,
@@ -44,7 +46,39 @@ export class GroupManagementComponent implements OnInit {
 
     source$.subscribe({
       next: (response) => {
-        this.groups = response.data || [];
+        // Normalizar y enriquecer los grupos
+        const rawGroups: any[] = response?.data || [];
+        this.groups = rawGroups.map((g: any) => {
+          // Normalizar teacher: puede venir como string (ObjectId) o como objeto
+          const teacherObj = g?.teacher;
+          const teacherId = teacherObj && typeof teacherObj === 'object' ? (teacherObj._id || '') : (teacherObj || '');
+          const teacherName = teacherObj && typeof teacherObj === 'object'
+            ? [teacherObj.name, teacherObj.surname].filter(Boolean).join(' ').trim()
+            : undefined;
+
+          // Calcular lessonsCount si no viene
+          const lessonsCount = typeof g?.lessonsCount === 'number'
+            ? g.lessonsCount
+            : (Array.isArray(g?.lessons) ? g.lessons.length : 0);
+
+          const normalized = {
+            ...g,
+            teacher: teacherId,
+            lessonsCount,
+            teacherName
+          } as AcademicGroup & { teacherName?: string };
+
+          // Sembrar cache si ya tenemos el nombre
+          if (teacherId && teacherName && !this.teacherNameMap[teacherId]) {
+            this.teacherNameMap[teacherId] = teacherName;
+          }
+
+          return normalized;
+        });
+
+        // Prefetch de nombres de docentes faltantes
+        this.prefetchTeacherNames();
+
         this.loading = false;
       },
       error: (error) => {
@@ -107,5 +141,41 @@ export class GroupManagementComponent implements OnInit {
     this.searchTerm = '';
     this.filterLevel = '';
     this.filterGrade = '';
+  }
+
+  // Devuelve el nombre del docente para mostrar en la vista
+  getTeacherDisplayName(teacher: any): string {
+    if (!teacher) { return '—'; }
+    const teacherId = typeof teacher === 'object' ? (teacher._id || '') : teacher;
+    if (teacherId && this.teacherNameMap[teacherId]) {
+      return this.teacherNameMap[teacherId];
+    }
+    // Si vino como objeto y tiene nombre, usarlo mientras carga desde API
+    if (typeof teacher === 'object') {
+      const fallback = [teacher.name, teacher.surname].filter(Boolean).join(' ').trim();
+      return fallback || '—';
+    }
+    return '—';
+  }
+
+  // Prefetch de nombres de docentes ausentes en cache
+  private prefetchTeacherNames(): void {
+    const missingIds = Array.from(new Set(
+      (this.groups || [])
+        .map((g: any) => (g?.teacher && typeof g.teacher !== 'object' ? g.teacher : (g?.teacher?._id || '')))
+        .filter((id: string) => !!id && !this.teacherNameMap[id])
+    ));
+
+    missingIds.forEach((id: string) => {
+      this.userService.getUser(id).subscribe({
+        next: (res: any) => {
+          const name = res?.user ? [res.user.name, res.user.surname].filter(Boolean).join(' ').trim() : '';
+          this.teacherNameMap[id] = name || 'Usuario';
+        },
+        error: () => {
+          this.teacherNameMap[id] = 'Usuario';
+        }
+      });
+    });
   }
 }

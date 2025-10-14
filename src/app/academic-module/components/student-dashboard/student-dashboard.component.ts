@@ -27,9 +27,18 @@ export class StudentDashboardComponent implements OnInit {
   lessonsByStatus: { [key: string]: number } = {};
   averageGrade = 0;
   totalGradedLessons = 0;
+  completedLessonsCount = 0;
+  activeLessonsCount = 0;
 
   // Permisos de grupos
   groupPermissions: { [groupId: string]: boolean } = {};
+
+  // Modal de selección de grupos
+  showGroupSelectionModal = false;
+  groupsWithPermission: AcademicGroup[] = [];
+
+  // Mapa para resolver nombres de grupos
+  groupMap: { [groupId: string]: string } = {};
 
   constructor(
     private academicGroupService: AcademicGroupService,
@@ -42,6 +51,8 @@ export class StudentDashboardComponent implements OnInit {
   }
 
   loadDashboardData(): void {
+      console.log("initial load");
+
     this.loading = true;
     
     // Cargar grupos del estudiante
@@ -51,7 +62,7 @@ export class StudentDashboardComponent implements OnInit {
           this.groups = (response.data || []).map((g: any) => {
             // Normalizar campo teacher para evitar [object Object]
             const teacher = g?.teacher;
-            console.log(teacher);
+            console.log("teacher", teacher);
             if (teacher && typeof teacher === 'object') {
               const name = [teacher.name, teacher.surname].filter(Boolean).join(' ').trim();
               console.log(name);
@@ -60,6 +71,9 @@ export class StudentDashboardComponent implements OnInit {
             return g;
           });
           this.totalGroups = this.groups.length;
+          
+          // Crear mapa de grupos para resolver nombres
+          this.buildGroupMap();
           
           // Verificar permisos para cada grupo
           this.checkGroupPermissions();
@@ -75,9 +89,24 @@ export class StudentDashboardComponent implements OnInit {
     this.academicLessonService.getMyLessons().subscribe({
       next: (response) => {
         if (response.status === 'success') {
-          this.myLessons = response.data;
+          // Normalizar academicGroup para aceptar tanto id como objeto poblado
+          this.myLessons = (response.data || []).map((lesson: any) => {
+            const groupRef = lesson?.academicGroup;
+            if (groupRef && typeof groupRef === 'object') {
+              const id = groupRef._id || groupRef.id;
+              const name = groupRef.name;
+              if (id && name) {
+                // Guardar en el mapa si aún no existe
+                this.groupMap[id] = this.groupMap[id] || name;
+              }
+              return { ...lesson, academicGroup: id || groupRef };
+            }
+            return lesson;
+          });
           this.totalLessons = this.myLessons.length;
           this.calculateStatistics();
+          // Extender el mapa de grupos con posibles nombres venidos en las lecciones pobladas
+          this.extendGroupMapFromLessons();
         }
       },
       error: (error) => {
@@ -108,6 +137,35 @@ export class StudentDashboardComponent implements OnInit {
     } else {
       this.averageGrade = 0;
     }
+
+    // Calcular contadores agregados requeridos
+    this.completedLessonsCount = this.myLessons.filter(lesson => lesson.status === 'completed' || lesson.status === 'graded').length;
+    this.activeLessonsCount = this.myLessons.filter(lesson => lesson.status !== 'completed' && lesson.status !== 'graded').length;
+  }
+
+  // Construir mapa de grupos para resolución rápida de nombres
+  buildGroupMap(): void {
+    this.groupMap = {};
+    this.groups.forEach(group => {
+      this.groupMap[group._id] = group.name;
+    });
+  }
+
+  // Obtener nombre del grupo por ID
+  getGroupName(groupRef: any): string {
+    if (!groupRef) { return 'Grupo no encontrado'; }
+    // Si viene como objeto poblado
+    if (typeof groupRef === 'object') {
+      const id = groupRef._id || groupRef.id;
+      const name = groupRef.name;
+      if (id && name) {
+        this.groupMap[id] = this.groupMap[id] || name;
+        return name;
+      }
+      return name || 'Grupo no encontrado';
+    }
+    // Si viene como id
+    return this.groupMap[groupRef] || 'Grupo no encontrado';
   }
 
   // Métodos para el template
@@ -203,27 +261,71 @@ export class StudentDashboardComponent implements OnInit {
 
   // Mostrar selección de grupo para crear lección
   showGroupSelection(): void {
-    const groupsWithPermission = this.groups.filter(group => this.canCreateLessonsInGroup(group._id));
+    this.groupsWithPermission = this.groups.filter(group => this.canCreateLessonsInGroup(group._id));
     
-    if (groupsWithPermission.length === 0) {
+    if (this.groupsWithPermission.length === 0) {
       alert('No tienes permisos para crear lecciones en ningún grupo. Contacta al docente para habilitar esta funcionalidad.');
       return;
     }
 
-    if (groupsWithPermission.length === 1) {
+    if (this.groupsWithPermission.length === 1) {
       // Si solo hay un grupo con permisos, ir directamente
-      this.navigateToCreateLesson(groupsWithPermission[0]._id);
+      this.navigateToCreateLesson(this.groupsWithPermission[0]._id);
     } else {
-      // Si hay múltiples grupos, mostrar selección
-      const groupNames = groupsWithPermission.map(group => group.name).join('\n');
-      const selectedGroupName = prompt(`Selecciona un grupo para crear la lección:\n\n${groupNames}`);
-      
-      if (selectedGroupName) {
-        const selectedGroup = groupsWithPermission.find(group => group.name === selectedGroupName);
-        if (selectedGroup) {
-          this.navigateToCreateLesson(selectedGroup._id);
+      // Si hay múltiples grupos, mostrar modal de selección
+      this.openGroupSelectionModal();
+    }
+  }
+
+  // Abrir modal de selección de grupos
+  openGroupSelectionModal(): void {
+    this.showGroupSelectionModal = true;
+    // Agregar clase para prevenir scroll del body
+    document.body.classList.add('modal-open');
+  }
+
+  // Cerrar modal de selección de grupos
+  closeGroupSelectionModal(): void {
+    this.showGroupSelectionModal = false;
+    // Remover clase que previene scroll del body
+    document.body.classList.remove('modal-open');
+  }
+
+  // Seleccionar un grupo del modal
+  selectGroupFromModal(group: AcademicGroup): void {
+    this.closeGroupSelectionModal();
+    this.navigateToCreateLesson(group._id);
+  }
+
+  // Extiende el mapa de grupos a partir de las lecciones (en caso de venir pobladas)
+  private extendGroupMapFromLessons(): void {
+    this.myLessons.forEach((lesson: any) => {
+      const groupRef = lesson?.academicGroup;
+      if (groupRef && typeof groupRef === 'object') {
+        const id = groupRef._id || groupRef.id;
+        const name = groupRef.name;
+        if (id && name) {
+          this.groupMap[id] = this.groupMap[id] || name;
         }
       }
-    }
+    });
+  }
+
+  // Helpers para contadores por grupo
+  private getLessonGroupId(lesson: any): string {
+    const groupRef = lesson?.academicGroup;
+    return typeof groupRef === 'object' ? (groupRef._id || groupRef.id || '') : groupRef;
+  }
+
+  isLessonActive(status: string): boolean {
+    return status !== 'completed' && status !== 'graded';
+  }
+
+  getActiveLessonsCountForGroup(groupId: string): number {
+    return this.myLessons.filter(lesson => this.getLessonGroupId(lesson) === groupId && this.isLessonActive(lesson.status)).length;
+  }
+
+  getCompletedLessonsCountForGroup(groupId: string): number {
+    return this.myLessons.filter(lesson => this.getLessonGroupId(lesson) === groupId && (lesson.status === 'completed' || lesson.status === 'graded')).length;
   }
 }

@@ -1,22 +1,41 @@
-label{
-    color:#95a5a6;    
+/* Control de rating: 5 estrellas con medias (0.5) */
+.clasificacion {
+    /* variables para mantener consistencia */
+    --star-size: 1.4rem;
+
+    display: inline-flex;
+    flex-direction: row;
+    direction: rtl;
+    unicode-bidi: bidi-override;
+    gap: 0;
+    align-items: center;
+    line-height: var(--star-size);
 }
 
-input[type = "radio"]{ 
-    display:none;
+.clasificacion input[type="radio"] { display: none; }
+
+.clasificacion label {
+    position: relative;
+    display: inline-block;
+    width: var(--star-size);   /* ancho estrella */
+    height: var(--star-size);  /* alto estrella, consistente con line-height */
+    cursor: pointer;
+    color: #c7c7c7;  /* gris por defecto */
 }
 
-.clasificacion{
-    direction: rtl;/* right to left */
-    unicode-bidi: bidi-override;/* bidi de bidireccional */
+.clasificacion label::before {
+    content: "\f005"; /* fa-star */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    font-size: var(--star-size);
+    line-height: var(--star-size); /* asegura que no se recorte la parte inferior */
 }
 
-label:hover{
-    color:#F39C12;
-}
+/* ya no hay medias estrellas */
 
-label:hover ~ label{
-    color:#F39C12;
+/* Hover/selección: pinta desde la actual hacia las "anteriores" */
+.clasificacion label:hover,
+.clasificacion label:hover ~ label,
+.clasificacion input[type="radio"]:checked ~ label {
+    color: #ffc107; /* dorado */
 }
-
-input[type = "radio"]:checked ~ label{color:orange;}

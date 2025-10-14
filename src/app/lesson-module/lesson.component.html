@@ -23,20 +23,11 @@
                 <i class="fas fa-edit icon-message text-primary"></i>
             </button>            
 
-            <!-- <button class="btn border-left" title="Actividad de la lecciòn"
-                (click)="setSelectedOption('activity')">
-                <i class="fas fa-clock icon-message text-primary"></i>
-            </button> -->
 
             <button *ngIf="showCommentsOrConversations()    " class="btn border-left" title="Conversación"
                 (click)="setSelectedOption('conversation')">
                 <i class="fas fa-comment-dots icon-message text-primary"></i>
             </button>
-
-            <!-- <button *ngIf="lesson.state == 'test' && isInTheDevelopmentGroup()" class="btn border-left" title="Resultados de pruebas"
-                (click)="setSelectedOption('tests')">
-                <i class="fas fa-clipboard-check icon-message text-primary"></i>
-            </button> -->
 
             <button *ngIf="showCommentsOrConversations()" class="btn border-left" title="Comentarios del facilitador"
                 (click)="setSelectedOption('review')">
@@ -63,12 +54,21 @@
                 (click)="setSelectedOption('rating')">
                 <div class="vl">
                     <i class="fas fa-star icon-message text-warning"></i>                    
-                    <span *ngIf="lesson.score != undefined && lesson.score > 0"> {{lesson.score.toFixed(2)}}</span>
+                    <span *ngIf="lesson.score != undefined && lesson.score > 0" class="score-contrast"> {{lesson.score.toFixed(2)}}</span>
                 </div>
             </button>
 
         </div>
     </div>
+
+    <style>
+        /* Forzar contraste blanco en modo oscuro para el score en cabecera */
+        @media (prefers-color-scheme: dark) {
+            .score-contrast { color: #7c76ac !important; }
+        }
+        [data-bs-theme="dark"] .score-contrast { color: #fff !important; }
+        .bg-dark .score-contrast, .text-bg-dark .score-contrast { color: #fff !important; }
+    </style>
 
     <lesson-details *ngIf="lesson && selectedOption == 'details'" [lesson]="lesson">
     </lesson-details>

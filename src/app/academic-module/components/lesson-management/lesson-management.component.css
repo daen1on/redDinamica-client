@@ -263,7 +263,10 @@
   background-color: #28a745 !important;
   color: white !important;
 }
-
+.badge-assigned {
+  background-color: #28a745 !important;
+  color: white !important;
+}
 .badge-rejected {
   background-color: #dc3545 !important;
   color: white !important;
@@ -273,13 +276,20 @@
   background-color: #17a2b8 !important;
   color: white !important;
 }
-
+.badge-development {
+  background-color: #17a2b8 !important;
+  color: white !important;
+}
 .badge-completed {
   background-color: #007bff !important;
   color: white !important;
 }
 
 .badge-graded {
+  background-color: #6610f2 !important;
+  color: white !important;
+}
+.badge-test {
   background-color: #6610f2 !important;
   color: white !important;
 }

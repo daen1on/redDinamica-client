@@ -1,0 +1,53 @@
+<div class="content-card">
+  <h5 class="card-title"><i class="fas fa-chalkboard-teacher me-2"></i>Retroalimentación del Docente</h5>
+
+  <div class="feedback-list" *ngIf="lesson?.comments?.length; else noFeedback">
+    <div *ngFor="let comment of lesson?.comments" class="feedback-item">
+      <div class="feedback-header">
+        <div class="d-flex align-items-center gap-2">
+          <i class="fas fa-user-circle text-primary"></i>
+          <strong>{{ getAuthorName(comment.author) }}</strong>
+          <span class="badge" [ngClass]="getCommentTypeBadge(comment.type)">{{ getCommentTypeLabel(comment.type) }}</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <small class="text-muted">{{ comment.timestamp | date:'short' }}</small>
+          <button class="btn btn-sm btn-outline-danger" *ngIf="canDelete(comment)" (click)="deleteComment.emit(comment._id)" [disabled]="loading" title="Eliminar comentario">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </div>
+      <p class="feedback-content">{{ comment.content }}</p>
+    </div>
+  </div>
+  <ng-template #noFeedback>
+    <div class="empty-state">
+      <i class="fas fa-comment-slash text-muted"></i>
+      <p class="text-muted mb-0">Aún no hay retroalimentación del docente</p>
+    </div>
+  </ng-template>
+
+  <div class="feedback-form" *ngIf="canAddFeedback">
+    <hr class="my-4">
+    <h6><i class="fas fa-comment-medical me-2"></i>Agregar retroalimentación</h6>
+    <div class="row g-3">
+      <div class="col-md-3">
+        <select class="form-select" [ngModel]="teacherCommentType" (ngModelChange)="teacherCommentTypeChange.emit($event)" [disabled]="loading">
+          <option value="feedback">Feedback</option>
+          <option value="suggestion">Sugerencia</option>
+          <option value="approval">Aprobación</option>
+          <option value="correction">Corrección</option>
+        </select>
+      </div>
+      <div class="col-md-9">
+        <div class="input-group">
+          <textarea class="form-control" rows="2" placeholder="Escribe tu comentario..." name="teacherFeedback" [ngModel]="teacherFeedback" (ngModelChange)="teacherFeedbackChange.emit($event)" [ngModelOptions]="{standalone: true}" [disabled]="loading"></textarea>
+          <button class="btn btn-primary" (click)="addComment.emit()" [disabled]="!teacherFeedback?.trim() || loading">
+            <i class="fas fa-paper-plane"></i> Enviar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

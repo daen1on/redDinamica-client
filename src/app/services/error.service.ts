@@ -108,5 +108,33 @@ export class ErrorService {
     return this._http.get(`${this.url}/files/${fileName}`, { headers: headers, responseType: 'blob' });
   }
 
+  sendWarningToUser(userId: string, message: string): Observable<any> {
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': this.getToken() || ''
+    });
+
+    const body = {
+      userId: userId,
+      message: message
+    };
+
+    return this._http.post(`${this.url}/admin/send-warning`, body, { headers: headers });
+  }
+
+  resolveComplaint(complaintId: string, reporterId: string, message: string): Observable<any> {
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': this.getToken() || ''
+    });
+
+    const body = {
+      reporterId: reporterId,
+      message: message
+    };
+
+    return this._http.post(`${this.url}/error-reports/${complaintId}/resolve`, body, { headers: headers });
+  }
+
   
 }

@@ -1,0 +1,50 @@
+<div class="content-card">
+  <h5 class="card-title"><i class="fas fa-user-friends me-2"></i>Equipo de Desarrollo</h5>
+
+  <div class="team-list" *ngIf="lesson?.development_group?.length; else noTeam">
+    <div *ngFor="let member of lesson?.development_group" class="team-member">
+      <div class="member-avatar">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <div class="member-info">
+        <strong>{{ displayUserName(member.user) }}</strong>
+        <span class="badge bg-secondary ms-2">{{ translateRole(member.role) }}</span>
+        <small class="text-muted d-block">Se unió: {{ member.joinedAt | date:'short' }}</small>
+      </div>
+    </div>
+  </div>
+  <ng-template #noTeam>
+    <div class="empty-state">
+      <i class="fas fa-users text-muted"></i>
+      <p class="text-muted mb-0">Aún no hay miembros en el equipo</p>
+    </div>
+  </ng-template>
+
+  <div class="invite-section" *ngIf="canEdit">
+    <hr class="my-4">
+    <h6><i class="fas fa-user-plus me-2"></i>Invitar estudiante del grupo</h6>
+    <p class="text-muted small">Selecciona a un compañero del grupo para invitarlo a colaborar en esta lección.</p>
+    <div class="row g-3">
+      <div class="col-md-12">
+        <label for="selectStudent" class="form-label">Estudiante</label>
+        <select id="selectStudent" class="form-select" [ngModel]="inviteStudentId" (ngModelChange)="inviteStudentIdChange.emit($event)" [disabled]="loading">
+          <option value="">Seleccione estudiante...</option>
+          <option *ngFor="let st of getAvailableGroupStudents()" [value]="st._id">
+            {{ st.name }}{{ st.surname ? ' ' + st.surname : '' }} - {{ st.email || '' }}
+          </option>
+        </select>
+      </div>
+      <div class="col-md-12">
+        <label for="inviteMessageInput" class="form-label">Mensaje de invitación</label>
+        <textarea id="inviteMessageInput" class="form-control invite-textarea" rows="3" placeholder="Escribe un mensaje personalizado..." [ngModel]="inviteMessage" (ngModelChange)="inviteMessageChange.emit($event)" [disabled]="loading"></textarea>
+      </div>
+      <div class="col-md-12">
+        <button class="btn btn-primary w-100" (click)="invite.emit()" [disabled]="!inviteStudentId || loading">
+          <i class="fas fa-paper-plane me-2"></i>Enviar Invitación
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+

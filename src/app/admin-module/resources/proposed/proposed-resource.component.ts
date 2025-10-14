@@ -50,6 +50,13 @@ export class ProposedResourceComponent implements OnInit {
 
     ngOnInit(): void {
         this.actualPage();
+        // Intentar enfocar un recurso específico si viene como query param
+        this._route.queryParams.subscribe(params => {
+            const targetId = params['resourceId'];
+            if (targetId) {
+                setTimeout(() => this.focusResource(targetId), 0);
+            }
+        });
     }
 
     ngDoCheck(): void {
@@ -73,7 +80,12 @@ export class ProposedResourceComponent implements OnInit {
                         this._router.navigate(['/admin/recursos-propuestos']);
                     }
 
-                    this.loading = false;
+                this.loading = false;
+                // Si ya había un resourceId en la URL, reenfocar tras cargar
+                const targetId = this._route.snapshot.queryParamMap.get('resourceId');
+                if (targetId) {
+                    setTimeout(() => this.focusResource(targetId), 0);
+                }
                 }
             }, error => {
                 console.log(<any>error);
@@ -102,6 +114,17 @@ export class ProposedResourceComponent implements OnInit {
 
             this.getResources(this.page);
         });
+    }
+
+    private focusResource(id: string) {
+        const el = document.getElementById(id) || document.getElementById('res-' + id);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            try {
+                el.classList.add('focus-ring');
+                setTimeout(() => el.classList.remove('focus-ring'), 2000);
+            } catch {}
+        }
     }
 
     editResource(resource){

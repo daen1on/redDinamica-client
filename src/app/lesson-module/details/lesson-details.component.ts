@@ -6,6 +6,7 @@ import { UserService } from 'src/app/services/user.service';
 @Component({
     selector: 'lesson-details',
     templateUrl: './lesson-details.component.html',
+    styleUrls: ['./lesson-details.component.css'],
     standalone: false
 })
 export class LessonDetailsComponent {
@@ -97,6 +98,26 @@ export class LessonDetailsComponent {
         this.showMotivationalMessage = false;
     }
 
-    
+    // Verifica si el usuario actual es líder o miembro del grupo de desarrollo de la lección
+    isLessonMember(): boolean {
+        if (!this.identity || !this.lesson) return false;
+
+        const currentUserId = String(this.identity?._id || this.identity?.id || '');
+        if (!currentUserId) return false;
+
+        const leaderRef: any = (this.lesson as any).leader;
+        const leaderId = leaderRef ? String(leaderRef._id || leaderRef.id || leaderRef) : '';
+        if (leaderId && leaderId === currentUserId) return true;
+
+        const members: any[] = Array.isArray((this.lesson as any).development_group) ? (this.lesson as any).development_group : [];
+        return members.some((member: any) => {
+            const memberId = String(
+                (member && (member._id || member.id)) ||
+                (member && member.user && (member.user._id || member.user.id || member.user)) ||
+                ''
+            );
+            return !!memberId && memberId === currentUserId;
+        });
+    }
 
 }

@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../services/notification.service';
 import { Notification } from '../../models/notification.model';
 import { UserService } from '../../services/user.service';
-import { Subject } from 'rxjs';
+import { Subject, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
@@ -12,7 +12,8 @@ import { takeUntil } from 'rxjs/operators';
     templateUrl: './notifications.component.html',
     styleUrls: ['./notifications.component.css'],
     standalone: true,
-    imports: [CommonModule]
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
   public notifications: Notification[] = [];
@@ -24,11 +25,13 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   public hasMoreNotifications: boolean = true;
   public isPageView: boolean = false;
   private destroy$ = new Subject<void>();
+  private updateTimestampsInterval: any;
 
   constructor(
     private notificationService: NotificationService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -37,11 +40,21 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       this.loadNotifications();
       this.loadUnreadCount();
     }, 100);
+    
+    // Actualizar timestamps cada minuto de forma controlada
+    this.updateTimestampsInterval = setInterval(() => {
+      this.cdr.markForCheck();
+    }, 60000); // 60 segundos
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    
+    // Limpiar el intervalo de actualización de timestamps
+    if (this.updateTimestampsInterval) {
+      clearInterval(this.updateTimestampsInterval);
+    }
   }
 
   loadNotifications(reset: boolean = true): void {
@@ -104,12 +117,14 @@ export class NotificationsComponent implements OnInit, OnDestroy {
           this.hasMoreNotifications = newNotifications.length === 20;
           this.loading = false;
           this.loadingMore = false;
+          this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('Error loading notifications:', error);
           this.error = 'Error al cargar notificaciones';
           this.loading = false;
           this.loadingMore = false;
+          this.cdr.markForCheck();
         }
       });
   }
@@ -142,6 +157,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response: any) => {
           this.unreadCount = response.unreadCount || 0;
+          this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('Error loading unread count:', error);
@@ -164,6 +180,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   private navigateToNotificationTarget(notification: Notification): void {
     try {
       switch (notification.type) {
+        case 'group':
+          this.handleGroupNotification(notification);
+          break;
         case 'comment':
           this.handleCommentNotification(notification);
           break;
@@ -190,6 +209,17 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       if (notification.link) {
         this.router.navigateByUrl(notification.link);
       }
+    }
+  }
+
+  private handleGroupNotification(notification: Notification): void {
+    // Priorizar el link hacia el grupo
+    if (notification.link) {
+      this.router.navigateByUrl(notification.link);
+    } else if (notification.relatedId) {
+      this.router.navigate(['/academia/groups', notification.relatedId]);
+    } else {
+      this.router.navigate(['/academia/groups']);
     }
   }
 
@@ -286,6 +316,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         next: () => {
           notification.read = true;
           this.unreadCount = Math.max(0, this.unreadCount - 1);
+          this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('Error marking notification as read:', error);
@@ -300,6 +331,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         next: () => {
           this.notifications.forEach(notification => notification.read = true);
           this.unreadCount = 0;
+          this.cdr.markForCheck();
           console.log('Todas las notificaciones marcadas como leídas');
         },
         error: (error) => {
@@ -322,6 +354,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
           if (!notification.read) {
             this.unreadCount = Math.max(0, this.unreadCount - 1);
           }
+          this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('Error deleting notification:', error);

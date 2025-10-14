@@ -131,6 +131,29 @@ export class UserService {
         return this._http.post(this.url + 'reset-password', params, { headers: headers });
     }
 
+    // === Preferencias del usuario ===
+    getMyPreferences(): Observable<{ emailDigestEnabled: boolean }> {
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Authorization': this.getToken() || ''
+        });
+        return this._http.get<{ emailDigestEnabled: boolean }>(`${this.url}users/me/preferences`, { headers });
+    }
+
+    updateMyPreferences(prefs: { emailDigestEnabled: boolean }): Observable<any> {
+        const headers = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Authorization': this.getToken() || ''
+        });
+        return this._http.put(`${this.url}users/me/preferences`, prefs, { headers }).pipe(
+            tap((response: any) => {
+                if (response?.user) {
+                    this.setIdentity(response.user);
+                }
+            })
+        );
+    }
+
 
     getUsers(page = null):Observable<any>{
         let headers = new HttpHeaders({
@@ -158,8 +181,16 @@ export class UserService {
             'Content-Type':'application/json', 
             'Authorization': this.getToken() || ''
         });
-        const params = `?q=${encodeURIComponent(q)}&limit=${limit}`;
-        return this._http.get(this.url + 'users/search' + params, {headers:headers});
+        const ts = Date.now();
+        const params = `?q=${encodeURIComponent(q)}&limit=${limit}&_ts=${ts}`; // anti-cache
+        const url = this.url + 'users/search' + params;
+        console.log('[UserService] searchUsers request', { q, limit, ts, url });
+        return this._http.get(url, {headers:headers}).pipe(
+            tap({
+                next: (res) => console.log('[UserService] searchUsers response', { q, limit, ts, count: (res as any)?.users?.length }),
+                error: (err) => console.error('[UserService] searchUsers error', { q, limit, ts, err })
+            })
+        );
     }
 
     getNewUsers(page = null):Observable<any>{

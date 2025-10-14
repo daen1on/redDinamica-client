@@ -1,0 +1,296 @@
+/* Contenedor principal */
+.edit-lesson-container {
+  max-width: 900px;
+  margin: 20px auto;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  padding: 20px 30px;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Formulario */
+.form-container {
+  padding: 30px;
+}
+
+.lesson-form {
+  max-width: 100%;
+}
+
+/* Labels y campos */
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.form-control {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  display: block;
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Textarea */
+textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Select */
+.form-select {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+/* Botones de acción */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+}
+
+.form-actions .btn {
+  padding: 12px 24px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.form-actions .btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.form-actions .btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+.form-actions .btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.form-actions .btn-success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.form-actions .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Información adicional */
+.info-section {
+  padding: 20px 30px;
+  background-color: #f8f9fa;
+  border-radius: 0 0 10px 10px;
+}
+
+.info-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.info-card h4 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+}
+
+.info-card ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.info-card ul li {
+  padding: 8px 0;
+  padding-left: 20px;
+  position: relative;
+}
+
+.info-card ul li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #28a745;
+  font-weight: bold;
+}
+
+/* Alertas personalizadas */
+.alert {
+  border-radius: 8px;
+  border: none;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Loading */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15rem;
+}
+
+/* Badges */
+.badge {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Text helpers */
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .edit-lesson-container {
+    margin: 10px;
+    border-radius: 8px;
+  }
+
+  .header {
+    padding: 15px 20px;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .header h2 {
+    font-size: 1.25rem;
+  }
+
+  .form-container {
+    padding: 20px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+
+  .info-section {
+    padding: 15px 20px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .edit-lesson-container {
+    background: #2d3748;
+    color: #e2e8f0;
+  }
+
+  .form-control,
+  .form-select {
+    background-color: #4a5568;
+    color: #e2e8f0;
+    border-color: #4a5568;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    background-color: #4a5568;
+    color: #e2e8f0;
+  }
+
+  .form-label {
+    color: #e2e8f0;
+  }
+
+  .info-card {
+    background: #4a5568;
+    border-color: #4a5568;
+  }
+
+  .info-card h4 {
+    color: #e2e8f0;
+  }
+}
+

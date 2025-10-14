@@ -12,11 +12,9 @@ export interface KnowledgeArea {
 
 export interface Collaborator {
   user: string | UserRef;
-  role: 'member' | 'reviewer' | 'contributor';
-  joinedAt: string;
-  contribution?: string;
-  status: 'active' | 'inactive' | 'left';
+  role: 'member';
 }
+
 
 export interface ChatMessage {
   _id: string;
@@ -44,17 +42,7 @@ export interface SharedResource {
   category: 'document' | 'image' | 'video' | 'audio' | 'link' | 'other';
 }
 
-export interface Milestone {
-  _id: string;
-  title: string;
-  description: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  assignedTo?: string | UserRef;
-  dueDate?: string;
-  completedAt?: string;
-  order: number;
-}
-
+ 
 export interface LessonFile {
   _id?: string;
   name: string;
@@ -149,7 +137,6 @@ export interface AcademicLesson {
     completed: boolean;
     completedAt?: string;
     timeSpent: number;
-    milestones: Milestone[];
   };
   
   views: number;
@@ -213,6 +200,8 @@ export interface CreateAcademicLessonRequest {
     methodology: string;
     objectives: string;
   };
+  // Citas y fuentes de la lección (opcional en borrador, requerido al proponer)
+  references?: string;
   tags?: string;
   knowledge_areas: string[];
 }
@@ -224,6 +213,7 @@ export interface UpdateAcademicLessonRequest {
     methodology?: string;
     objectives?: string;
   };
+  references?: string;
   tags?: string;
   knowledge_areas?: string[];
   status?: 'draft' | 'proposed' | 'rejected' | 'in_development' | 'completed' | 'graded' | 'ready_for_migration';
@@ -233,12 +223,12 @@ export interface InviteCollaboratorRequest {
   lessonId: string;
   userId?: string; // preferimos invitar por id
   userEmail?: string; // fallback por email
-  role?: 'member'; // forzado a member en backend
+  role?: 'guest'; // forzado a guest en backend
   message?: string;
 }
 
 export interface UpdateLessonStatusRequest {
-  status: 'draft' | 'proposed' | 'approved' | 'rejected' | 'in_development' | 'completed' | 'graded' | 'ready_for_migration';
+  status: 'draft' | 'proposed' | 'rejected' | 'in_development' | 'completed' | 'graded' | 'ready_for_migration';
   message?: string;
 }
 

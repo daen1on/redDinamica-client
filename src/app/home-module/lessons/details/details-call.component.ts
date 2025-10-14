@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges } from "@angular/core";
 import { UserService } from "src/app/services/user.service";
 import { GLOBAL } from "src/app/services/global";
 import { LABEL_PROFILE } from "../../homeData";
@@ -9,7 +9,7 @@ import { LessonService } from "src/app/services/lesson.service";
   templateUrl: "./details-call.component.html",
   standalone: false,
 })
-export class DetailsCallComponent {
+export class DetailsCallComponent implements OnInit, OnDestroy, OnChanges {
   public title;
   public identity;
   public token;
@@ -24,6 +24,8 @@ export class DetailsCallComponent {
   @Input() isJoin;
   @Output() isJoined = new EventEmitter();
 
+  private realtimeTimer: any;
+
   constructor(
     private _userService: UserService,
     private _lessonService: LessonService,
@@ -36,7 +38,19 @@ export class DetailsCallComponent {
     this.profile_label = LABEL_PROFILE;
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.startRealtimeSync();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes["lesson"]) {
+      this.restartRealtimeSync();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.stopRealtimeSync();
+  }
 
   getLink(url) {
     if (url.includes("http://") || url.includes("https://")) {
@@ -67,6 +81,12 @@ export class DetailsCallComponent {
     }
     this.editLesson(this.Templesson, "remove");
   }
+  onLeaveClick(lesson: any): void {
+    const confirmed = confirm('¿Estas seguro que quieres retirarte de este grupo de desarrollo?');
+    if (!confirmed) { return; }
+    this.getLesson(lesson);
+    this.abandonLesson();
+  }
   editLesson(lesson, action) {
     if (!lesson || !lesson.call) {
       return;
@@ -95,7 +115,8 @@ export class DetailsCallComponent {
     this._lessonService.editLesson(this.token, editLesson).subscribe({
       next: (response) => {
         if (response && response.lesson && response.lesson._id) {
-          this.lesson = response.lesson;
+          // Re-cargar la lección para asegurar que los interesados vengan populados
+          this.refreshLesson(response.lesson._id);
           this.isJoined.emit();
         }
       },
@@ -103,5 +124,38 @@ export class DetailsCallComponent {
         console.log(<any>error);
       },
     });
+  }
+
+  private refreshLesson(lessonId: string): void {
+    if (!lessonId) { return; }
+    this._lessonService.getLesson(this.token, lessonId).subscribe({
+      next: (res) => {
+        if (res && res.lesson) {
+          this.lesson = res.lesson;
+        }
+      },
+      error: (err) => {
+        console.warn('No se pudo actualizar la lección en tiempo real:', err);
+      }
+    });
+  }
+
+  private startRealtimeSync(): void {
+    this.stopRealtimeSync();
+    const id = this.lesson?._id;
+    if (!id) { return; }
+    // Polling ligero cada 5s mientras el modal está abierto
+    this.realtimeTimer = setInterval(() => this.refreshLesson(id), 5000);
+  }
+
+  private stopRealtimeSync(): void {
+    if (this.realtimeTimer) {
+      clearInterval(this.realtimeTimer);
+      this.realtimeTimer = null;
+    }
+  }
+
+  private restartRealtimeSync(): void {
+    this.startRealtimeSync();
   }
 }

@@ -59,4 +59,35 @@
   background-color: #1f2937 !important;
 }
 
+/* Badge de notificación en pestañas */
+.badge-notify {
+  display: inline-block;
+  min-width: 20px;
+  padding: 3px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+  background-color: #dc3545;
+  border-radius: 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+.theme-dark .badge-notify {
+  background-color: #e74c3c;
+}
+
 

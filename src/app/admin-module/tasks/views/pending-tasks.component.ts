@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { OnInit } from '@angular/core';
 import { AdminTasksService } from '../../services/admin-tasks.service';
+import { FeaturedLessonsComponent } from './featured-lessons.component';
 import { UserService } from '../../../services/user.service';
 import { LessonService } from '../../../services/lesson.service';
 
 @Component({
   selector: 'admin-pending-tasks',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FeaturedLessonsComponent],
   templateUrl: './pending-tasks.component.html',
   styleUrls: ['./pending-tasks.component.css']
 })
@@ -19,15 +20,29 @@ export class PendingTasksComponent implements OnInit {
   convocatoriasAbiertas: any[] = [];
   recursos: any[] = [];
   sugerencias: any[] = [];
+  // Count de lecciones académicas listas para exportar (recibido del componente hijo)
+  featuredLessonsCount = 0;
 
   constructor(
     private tasks: AdminTasksService,
     private userService: UserService,
-    private lessonService: LessonService
+    private lessonService: LessonService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
-    this.loadActiveTabData();
+    // Verificar si hay un parámetro 'tab' en la URL para abrir una pestaña específica
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        this.activeTab = params['tab'];
+      }
+    });
+
+    // Cargar todas las pestañas al inicio para mostrar los badges de notificación
+    this.reloadConvocatorias();
+    this.reloadConvocatoriasAbiertas();
+    this.reloadSugerencias();
+    this.reloadRecursos();
   }
 
   setActiveTab(tab: string): void {
@@ -75,6 +90,8 @@ export class PendingTasksComponent implements OnInit {
       next: (res: any) => this.recursos = res.resources || [], 
       error: () => this.recursos = [] 
     });
+    console.log(this.recursos);
+
   }
 
   reloadSugerencias(): void {
@@ -100,8 +117,8 @@ export class PendingTasksComponent implements OnInit {
 
   rechazar(id: string): void {
     const motivo = prompt('Por favor, introduce el motivo del rechazo:');
-    if (motivo) {
-      this.tasks.rechazarRecurso(id).subscribe({ 
+    if (motivo !== null && motivo.trim() !== '') {
+      this.tasks.rechazarRecurso(id, motivo.trim()).subscribe({ 
         next: () => {
           alert('Recurso rechazado exitosamente');
           this.reloadRecursos();
@@ -159,6 +176,10 @@ export class PendingTasksComponent implements OnInit {
 
   getInterestedCount(item: any): number {
     return (item && item.call && Array.isArray(item.call.interested)) ? item.call.interested.length : 0;
+  }
+
+  onFeaturedLessonsCountChange(count: number): void {
+    this.featuredLessonsCount = count;
   }
 }
 

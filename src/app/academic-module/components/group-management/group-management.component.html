@@ -94,15 +94,15 @@
           </div>
           
           <div class="info-item">
-            <i class="fas fa-calendar"></i>
-            <span>{{ group.academicYear }}</span>
+            <i class="fas fa-user"></i>
+            <span>{{ getTeacherDisplayName(group.teacher) }}</span>
           </div>
         </div>
         
         <div class="group-stats">
           <div class="stat-item">
             <span class="stat-label">Lecciones:</span>
-            <span class="stat-value">{{ group.lessonsCount || 0 }}</span>
+            <span class="stat-value">{{ group.lessonsCount || (group.lessons?.length || 0) }}</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">Activo:</span>

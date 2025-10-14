@@ -11,6 +11,7 @@ import { LABEL_PROFILE } from 'src/app/profile-module/services/profileData';
 @Component({
     selector: 'group',
     templateUrl: './group.component.html',
+    styleUrls: ['./group.component.css'],
     standalone: false
 })
 export class GroupComponent implements OnInit {

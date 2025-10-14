@@ -1,0 +1,19 @@
+/* Modo claro: forzar negro cuando NO estamos en dark */
+:host-context(:not([data-bs-theme="dark"])) .group-dark-names .name-text,
+.group-dark-names .name-text {
+  color: #5078a0 !important;
+}
+
+/* Modo oscuro: blanco cuando el tema es dark o el contenedor es dark */
+:host-context([data-bs-theme="dark"]) .group-dark-names .name-text,
+.bg-dark .group-dark-names .name-text,
+.text-bg-dark .group-dark-names .name-text,
+.card.bg-dark .group-dark-names .name-text {
+  color: #fff !important;
+}
+
+/* Links: sin subrayado por defecto, subrayado al hover */
+.group-dark-names a.text-primary { text-decoration: none; }
+.group-dark-names a.text-primary:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+

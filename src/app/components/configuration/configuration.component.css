@@ -1,0 +1,9 @@
+.configuration-container {
+  margin-top: 1rem;
+}
+
+.configuration-container .card {
+  border-radius: 0.5rem;
+}
+
+

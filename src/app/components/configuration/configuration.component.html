@@ -1,0 +1,25 @@
+<div class="container my-3 configuration-container">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="m-0 text-primary fw-bold">Configuración</h3>
+    </div>
+    <div class="card-body">
+      <h4 class="card-title">Preferencias de correo</h4>
+      <p class="text-muted">Activa o desactiva el resumen mensual por correo.</p>
+
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="emailDigestSwitch"
+               [checked]="emailDigestEnabled" (change)="onToggleEmailDigest()">
+        <label class="form-check-label" for="emailDigestSwitch">
+          Recibir resumen mensual al correo
+        </label>
+      </div>
+
+      <div class="alert mt-3" [ngClass]="emailDigestEnabled ? 'alert-success' : 'alert-secondary'">
+        {{ emailDigestEnabled ? 'Recibirás el resumen mensual por correo.' : 'Has desactivado el resumen mensual por correo.' }}
+      </div>
+    </div>
+  </div>
+</div>
+
+

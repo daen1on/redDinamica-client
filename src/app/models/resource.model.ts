@@ -6,6 +6,7 @@ export class Resource {
     public score;
     public justification;
     public accepted;
+    public rejected;
     public file;
     public url;
     public created_at;    

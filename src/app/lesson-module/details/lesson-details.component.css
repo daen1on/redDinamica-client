@@ -1,0 +1,24 @@
+/* Modo claro: forzar negro cuando NO estamos en dark */
+:host-context(:not([data-bs-theme="dark"])) .proposed-by,
+:host-context(:not([data-bs-theme="dark"])) .proposed-by *:not(img),
+.proposed-by, .proposed-by *:not(img) {
+  color: #5078a0 !important;
+}
+
+/* Modo oscuro: respetar tema Bootstrap 5 (data-bs-theme) y contenedores oscuros */
+:host-context([data-bs-theme="dark"]) .proposed-by,
+:host-context([data-bs-theme="dark"]) .proposed-by *:not(img),
+.bg-dark .proposed-by,
+.bg-dark .proposed-by *:not(img),
+.text-bg-dark .proposed-by,
+.text-bg-dark .proposed-by *:not(img),
+.card.bg-dark .proposed-by,
+.card.bg-dark .proposed-by *:not(img) {
+  color: #fff !important;
+}
+
+/* Links: sin subrayado por defecto, subrayado al hover */
+.proposed-by a.text-primary { text-decoration: none; }
+.proposed-by a.text-primary:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+

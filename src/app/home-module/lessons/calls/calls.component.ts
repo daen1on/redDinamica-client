@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, UntypedFormControl } from '@angular/forms';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
@@ -12,7 +12,7 @@ import { GLOBAL } from 'src/app/services/global';
     templateUrl: './calls.component.html',
     standalone: false
 })
-export class CallsComponent implements OnInit {
+export class CallsComponent implements OnInit, OnDestroy {
     public title: string;
     public identity;
     public token;
@@ -81,6 +81,8 @@ export class CallsComponent implements OnInit {
     // Borradores de convocatoria por lección
     private callDraftByLessonId: { [lessonId: string]: { text: string; visible: boolean } } = {};
     public isSavingCall: { [lessonId: string]: boolean } = {};
+    // Polling de actualizaciones cuando el listado está visible
+    private realtimeTimer: any;
 
     constructor(
         private _userService: UserService,
@@ -125,6 +127,8 @@ export class CallsComponent implements OnInit {
         });
 
         this.getAllAreas();
+        // Iniciar polling para ver cambios de interesados en tiempo casi real
+        this.startRealtimeSync();
     }
 
     getAllAreas() {
@@ -349,6 +353,13 @@ export class CallsComponent implements OnInit {
         this._lessonService.editLesson(this.token, editLesson).subscribe(
             (response: any) => {
                 if (response && response.lesson._id) {
+                    // Reemplazar la lección actualizada en memoria para efecto inmediato
+                    const updated = response.lesson;
+                    const ix = this.lessons.findIndex(l => l._id === updated._id);
+                    if (ix >= 0) {
+                        this.lessons[ix] = { ...this.lessons[ix], ...updated };
+                    }
+                    // Actualizar listados auxiliares
                     this.getCalls(this.page);
                     this.fetchAllCalls();
                     
@@ -359,6 +370,7 @@ export class CallsComponent implements OnInit {
                     // Notificar al líder cuando alguien se une
                     if (action === 'add') {
                         this.notifyLeaderUserJoined(lesson);
+                        
                     } else if (action === 'remove') {
                         this.notifyLeaderUserLeft(lesson);
                     }
@@ -457,6 +469,8 @@ export class CallsComponent implements OnInit {
                     modal.addEventListener('hidden.bs.modal', () => {
                         // limpiar lección enfocada al cerrar
                         this.callLesson = null;
+                        // refrescar datos tras cerrar para evitar formularios rotos
+                        this.actualPage();
                     }, { once: true });
                     bootstrapModal.show();
                 }
@@ -477,6 +491,8 @@ export class CallsComponent implements OnInit {
                         existingInstance.dispose();
                     }
                     const bootstrapModal = new (window as any).bootstrap.Modal(modal);
+                    // Evitar cierre inmediato por propagación de eventos
+                    modal.addEventListener('hidePrevented.bs.modal', (e: any) => e.preventDefault());
                     bootstrapModal.show();
                 }
             } catch (error) {
@@ -777,5 +793,24 @@ export class CallsComponent implements OnInit {
     // Verificar si hay suficientes participantes (mínimo sugerido)
     hasSufficientParticipants(lesson: any): boolean {
         return this.getParticipantCount(lesson) >= 2; // Mínimo 2 participantes incluyendo el autor
+    }
+
+    ngOnDestroy(): void {
+        this.stopRealtimeSync();
+    }
+
+    private startRealtimeSync(): void {
+        this.stopRealtimeSync();
+        this.realtimeTimer = setInterval(() => {
+            // Refrescar sin bloquear UI
+            this.getCalls(this.page || 1);
+        }, 7000);
+    }
+
+    private stopRealtimeSync(): void {
+        if (this.realtimeTimer) {
+            clearInterval(this.realtimeTimer);
+            this.realtimeTimer = null;
+        }
     }
 }

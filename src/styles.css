@@ -1519,6 +1519,20 @@ body {
   color: var(--rd-text) !important;
 }
 
+/* ===== Espaciado consistente para páginas de autenticación ===== */
+#register,
+#login {
+  padding-top: 3rem; /* móviles/tablet */
+  padding-bottom: 2rem;
+}
+
+@media (min-width: 992px) {
+  #register,
+  #login {
+    padding-top: 6rem; /* desktops */
+  }
+}
+
 /* Mejoras adicionales para accesibilidad */
 .theme-dark .invalid-feedback {
   color: #f5a7a7 !important;
