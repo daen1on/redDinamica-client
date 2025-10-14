@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GLOBAL } from '../../../../services/global';
+import { GLOBAL } from '../../../../services/GLOBAL';
 import { UserService } from '../../../../services/user.service';
 import { AcademicGroupService } from '../../../services/academic-group.service';
 

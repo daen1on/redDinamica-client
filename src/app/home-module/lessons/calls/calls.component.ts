@@ -5,7 +5,7 @@ import { LessonService } from 'src/app/services/lesson.service';
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NotificationService } from 'src/app/services/notification.service';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 
 @Component({
     selector: 'calls',

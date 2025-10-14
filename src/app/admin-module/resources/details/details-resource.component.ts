@@ -3,7 +3,7 @@ import { Component, OnInit, OnDestroy, Input} from '@angular/core';
 
 import { UserService } from 'src/app/services/user.service';
 
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { FIELDS_FORM } from '../resources/resourcesData';
 import { ICON_STYLE } from 'src/app/services/DATA';
 

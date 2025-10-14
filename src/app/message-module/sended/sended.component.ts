@@ -4,7 +4,7 @@ import { MessageService } from 'src/app/services/message.service';
 
 import { UserService } from 'src/app/services/user.service';
 
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { LABEL_ROLE } from '../services/messageData';
 
 @Component({

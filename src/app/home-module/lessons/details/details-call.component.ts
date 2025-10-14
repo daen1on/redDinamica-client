@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges } from "@angular/core";
 import { UserService } from "src/app/services/user.service";
-import { GLOBAL } from "src/app/services/global";
+import { GLOBAL } from "src/app/services/GLOBAL";
 import { LABEL_PROFILE } from "../../homeData";
 import { LessonService } from "src/app/services/lesson.service";
 

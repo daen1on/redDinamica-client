@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { LABEL_PROFILE } from '../../users/services/usersData';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { User } from 'src/app/models/user.model';
 import { UntypedFormControl, Validators } from '@angular/forms';
 

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HOME_MENU } from './services/homeMenu';
-import { GLOBAL } from '../services/global';
+import { GLOBAL } from '../services/GLOBAL';
 import { UserService } from '../services/user.service';
 import { Router } from '@angular/router';
 

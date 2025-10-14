@@ -4,7 +4,7 @@ import { Validators, UntypedFormControl } from '@angular/forms';
 import { LessonService } from 'src/app/services/lesson.service';
 
 import { UserService } from 'src/app/services/user.service';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { UploadService } from 'src/app/services/upload.service';
 import { LessonFile } from 'src/app/models/lesson-file.model';
 import { Router, ActivatedRoute } from '@angular/router';

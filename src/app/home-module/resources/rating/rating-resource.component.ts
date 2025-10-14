@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy, Output, EventEmitter, Inpu
 import { UserService } from 'src/app/services/user.service';
 import { ResourceService } from 'src/app/services/resource.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { CommentService } from 'src/app/services/comment.service';
 import { Comment } from 'src/app/models/comment.model';
 

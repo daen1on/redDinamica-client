@@ -3,7 +3,7 @@ import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
 import { tap, map, catchError } from 'rxjs/operators';
 
-import { GLOBAL } from './global';
+import { GLOBAL } from './GLOBAL';
 import { User } from '../models/user.model';
 
 @Injectable()

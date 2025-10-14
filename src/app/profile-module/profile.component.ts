@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { UserService } from '../services/user.service';
 
 import { PROFILE_MENU, LABEL_PROFILE } from './services/profileData';
-import { GLOBAL } from '../services/global';
+import { GLOBAL } from '../services/GLOBAL';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 

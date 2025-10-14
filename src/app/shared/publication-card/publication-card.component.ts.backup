@@ -11,7 +11,7 @@ import { LinkyModule } from 'ngx-linky';
 import { UserService } from 'src/app/services/user.service';
 import { PublicationService } from 'src/app/services/publication.service';
 import { CommentService } from 'src/app/services/comment.service';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { Comment } from 'src/app/models/comment.model';
 
 @Component({

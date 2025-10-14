@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { LESSON_STATES } from 'src/app/services/DATA';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';

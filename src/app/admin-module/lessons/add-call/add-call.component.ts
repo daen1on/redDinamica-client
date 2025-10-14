@@ -5,7 +5,7 @@ import { Validators, UntypedFormControl, UntypedFormGroup } from '@angular/forms
 import { UserService } from 'src/app/services/user.service';
 
 
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { UploadService } from 'src/app/services/upload.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { BasicDataService } from 'src/app/services/basicData.service';

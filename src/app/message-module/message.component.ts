@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { UserService } from '../services/user.service';
 
 import { MESSAGE_MENU } from './services/messageData';
-import { GLOBAL } from '../services/global';
+import { GLOBAL } from '../services/GLOBAL';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { User } from '../models/user.model';

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { GLOBAL } from './global';
+import { GLOBAL } from './GLOBAL';
 import { Resource } from '../models/resource.model';
 
 @Injectable()

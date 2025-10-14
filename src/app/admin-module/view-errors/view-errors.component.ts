@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ErrorService } from '../../services/error.service'; // Ajusta la ruta según tu estructura
-import { GLOBAL } from '../../services/global'; // Ajusta la ruta según tu estructura
+import { GLOBAL } from '../../services/GLOBAL'; // Ajusta la ruta según tu estructura
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EditErrorComponent } from '../edit-error/edit-error.component';
 import { PublicationService } from '../../services/publication.service';

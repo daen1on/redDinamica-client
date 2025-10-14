@@ -9,7 +9,7 @@ import { AcademicGroup } from '../../models/academic-group.model';
 import { AcademicLesson } from '../../models/academic-lesson.model';
 import { UserService } from '../../../services/user.service';
 import { ResourceService } from '../../../services/resource.service';
-import { GLOBAL } from '../../../services/global';
+import { GLOBAL } from '../../../services/GLOBAL';
 import { ICON_STYLE } from '../../../services/DATA';
 import { GroupStudentsComponent } from './students/group-students.component';
 import { GroupResourcesComponent } from './resources/group-resources.component';

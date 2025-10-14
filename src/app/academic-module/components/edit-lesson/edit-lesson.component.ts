@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { GLOBAL } from '../../../services/global';
+import { GLOBAL } from '../../../services/GLOBAL';
 import { AcademicLessonService } from '../../services/academic-lesson.service';
 import { UpdateAcademicLessonRequest, AcademicLesson } from '../../models/academic-lesson.model';
 import { CommonModule } from '@angular/common';

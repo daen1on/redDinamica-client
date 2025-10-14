@@ -4,7 +4,7 @@ import { UserService } from 'src/app/services/user.service';
 
 import { UntypedFormBuilder, UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { User } from 'src/app/models/user.model';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MustMatch } from 'src/app/helpers/must-match.validator';
 import { Location } from '@angular/common';

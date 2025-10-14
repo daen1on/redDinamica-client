@@ -5,7 +5,7 @@ import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { NotificationService } from 'src/app/services/notification.service';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { Lesson } from 'src/app/models/lesson.model';
 import { User } from 'src/app/models/user.model';
 import { KnowledgeArea } from 'src/app/models/knowledge-area.model';

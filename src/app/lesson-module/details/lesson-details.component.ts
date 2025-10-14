@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { LESSON_STATES, ACADEMIC_LEVEL } from 'src/app/services/DATA';
 import { UserService } from 'src/app/services/user.service';
 

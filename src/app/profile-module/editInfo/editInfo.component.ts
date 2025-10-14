@@ -5,7 +5,7 @@ import { FIELDS_FORM } from '../services/profileData';
 import { UntypedFormBuilder, UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { User } from 'src/app/models/user.model';
 import { UploadService } from 'src/app/services/upload.service';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { BasicDataService } from 'src/app/services/basicData.service';
 
 import { City } from 'src/app/models/city.model';

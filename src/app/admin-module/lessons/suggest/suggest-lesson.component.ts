@@ -3,7 +3,7 @@ import { Validators, UntypedFormGroup, FormBuilder } from '@angular/forms';
 import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { BasicDataService } from 'src/app/services/basicData.service';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { Lesson } from 'src/app/models/lesson.model';
 import { ACADEMIC_LEVEL } from 'src/app/services/DATA';
 import { KnowledgeArea } from 'src/app/models/knowledge-area.model';

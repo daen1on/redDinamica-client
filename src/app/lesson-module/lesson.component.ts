@@ -4,7 +4,7 @@ import { Lesson } from '../models/lesson.model';
 import { UserService } from '../services/user.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { LessonService } from '../services/lesson.service';
-import { GLOBAL } from '../services/global';
+import { GLOBAL } from '../services/GLOBAL';
 import { BasicDataService } from '../services/basicData.service';
 
 @Component({

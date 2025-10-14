@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 
-import { GLOBAL } from './global';
+import { GLOBAL } from './GLOBAL';
 import { Comment } from '../models/comment.model';
 
 @Injectable()

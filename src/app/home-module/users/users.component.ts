@@ -13,7 +13,7 @@ import { User } from 'src/app/models/user.model';
 import { City } from 'src/app/models/city.model';
 import { Profession } from 'src/app/models/profession.model';
 import { Institution } from 'src/app/models/institution.model';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';

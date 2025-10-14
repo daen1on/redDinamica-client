@@ -5,7 +5,7 @@ import { Resource } from 'src/app/models/resource.model';
 import { UserService } from 'src/app/services/user.service';
 import { ResourceService } from 'src/app/services/resource.service';
 import { UploadService } from 'src/app/services/upload.service';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { MAX_FILE_SIZE, ACADEMIC_LEVEL } from 'src/app/services/DATA';
 import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Subscription } from 'rxjs';

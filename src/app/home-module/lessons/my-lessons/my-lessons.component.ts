@@ -5,7 +5,7 @@ import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 
 @Component({
     selector: 'my-lessons',

@@ -5,7 +5,7 @@ import { Subject, takeUntil, forkJoin } from 'rxjs';
 import { LessonService } from 'src/app/services/lesson.service';
 import { UserService } from 'src/app/services/user.service';
 import { UserLessonsService, PublicLesson, UserLessonsStats, LessonFilters } from 'src/app/services/user-lessons.service';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 
 @Component({
     selector: 'lessons',

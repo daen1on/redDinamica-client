@@ -2,7 +2,7 @@ import { Component, Input} from '@angular/core';
 
 import { UserService } from 'src/app/services/user.service';
 
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 
 
 @Component({

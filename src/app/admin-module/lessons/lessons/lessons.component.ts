@@ -6,7 +6,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { FormControl, UntypedFormControl } from '@angular/forms';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { BasicDataService } from 'src/app/services/basicData.service';
 import { ACADEMIC_LEVEL, LESSON_STATES } from 'src/app/services/DATA';
 

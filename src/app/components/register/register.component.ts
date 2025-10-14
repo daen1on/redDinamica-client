@@ -9,7 +9,7 @@ import { Profession } from 'src/app/models/profession.model';
 import { Institution } from 'src/app/models/institution.model';
 import { MessageService } from 'src/app/services/message.service';
 import { TYC_FILE } from 'src/app/services/DATA';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 
 import { firstValueFrom, Subject, throwError } from 'rxjs';
 import { takeUntil, tap, catchError } from 'rxjs/operators';

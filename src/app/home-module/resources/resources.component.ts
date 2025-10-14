@@ -4,7 +4,7 @@ import { ResourceService } from 'src/app/services/resource.service';
 
 import { UntypedFormControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { TYPE_OF_RESOURCES } from './resourcesData';
 import { ICON_STYLE } from 'src/app/services/DATA';
 

@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
-import { GLOBAL } from './global';
+import { GLOBAL } from './GLOBAL';
 
 // Interfaces según el diseño
 export interface PublicLesson {

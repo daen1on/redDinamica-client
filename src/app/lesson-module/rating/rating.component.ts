@@ -3,7 +3,7 @@ import { UserService } from 'src/app/services/user.service';
 import { LessonService } from 'src/app/services/lesson.service';
 
 import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { CommentService } from 'src/app/services/comment.service';
 import { Comment } from 'src/app/models/comment.model'
 import { LESSON_STATES } from 'src/app/services/DATA';

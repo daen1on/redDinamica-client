@@ -9,7 +9,7 @@ import { PublicationService } from 'src/app/services/publication.service';
 import { UploadService } from 'src/app/services/upload.service';
 import { CommentService } from 'src/app/services/comment.service';
 
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { Publication } from 'src/app/models/publication.model';
 import { Comment } from 'src/app/models/comment.model';
 import { MAX_FILE_SIZE } from 'src/app/services/DATA';

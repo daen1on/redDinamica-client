@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { GLOBAL } from './global';
+import { GLOBAL } from './GLOBAL';
 import { Institution } from '../models/institution.model';
 import { City } from '../models/city.model';
 import { Profession } from '../models/profession.model';

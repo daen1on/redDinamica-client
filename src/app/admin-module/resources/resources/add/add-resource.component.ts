@@ -5,7 +5,7 @@ import { Resource } from 'src/app/models/resource.model';
 import { UserService } from 'src/app/services/user.service';
 import { ResourceService } from 'src/app/services/resource.service';
 import { FIELDS_FORM } from '../resourcesData';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { UploadService } from 'src/app/services/upload.service';
 import { CachedSource } from 'webpack-sources';
 import { MAX_FILE_SIZE } from 'src/app/services/DATA';

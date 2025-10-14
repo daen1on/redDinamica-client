@@ -5,7 +5,7 @@ import { Resource } from 'src/app/models/resource.model';
 import { UserService } from 'src/app/services/user.service';
 import { ResourceService } from 'src/app/services/resource.service';
 
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { UploadService } from 'src/app/services/upload.service';
 import { FIELDS_FORM } from '../resources/resourcesData';
 

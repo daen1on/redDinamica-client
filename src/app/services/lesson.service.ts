@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
-import { GLOBAL } from './global';
+import { GLOBAL } from './GLOBAL';
 import { Lesson } from '../models/lesson.model';
 
 @Injectable()

@@ -13,7 +13,7 @@ import { PublicationService } from 'src/app/services/publication.service';
 import { CommentService } from 'src/app/services/comment.service';
 import { ViewportDetectionService } from 'src/app/services/viewport-detection.service';
 import { GdprRestrictionsService } from 'src/app/services/gdpr-restrictions.service';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { Comment } from 'src/app/models/comment.model';
 
 @Component({

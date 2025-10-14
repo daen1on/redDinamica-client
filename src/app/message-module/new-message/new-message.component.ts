@@ -5,7 +5,7 @@ import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms
 
 import { UserService } from 'src/app/services/user.service';
 
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { LABEL_ROLE } from '../services/messageData';
 import { User } from 'src/app/models/user.model';
 import { Message } from 'src/app/models/message.model';

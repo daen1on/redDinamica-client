@@ -11,7 +11,7 @@ import { Publication } from '../../models/publication.model';
 import { UserService } from '../../services/user.service';
 import { PublicationService } from '../../services/publication.service';
 import { UploadService } from '../../services/upload.service';
-import { GLOBAL } from '../../services/global';
+import { GLOBAL } from '../../services/GLOBAL';
 import { MAX_FILE_SIZE } from '../../services/DATA';
 import { PublicationCardComponent } from '../../shared/publication-card/publication-card.component';
 

@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Notification } from '../models/notification.model';
 import { retry } from 'rxjs/operators';
-import { GLOBAL } from '../services/global';
+import { GLOBAL } from '../services/GLOBAL';
 import { UserService } from './user.service';
 
 @Injectable({

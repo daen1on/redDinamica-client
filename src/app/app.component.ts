@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, DoCheck } from '@angular/core';
 import { UserService } from './services/user.service';
 import { Router } from '@angular/router';
-import { GLOBAL } from './services/global';
+import { GLOBAL } from './services/GLOBAL';
 import { NotificationService } from './services/notification.service';
 import { MessageService } from './services/message.service';
 import { Subscription, interval } from 'rxjs';

@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { UserService } from 'src/app/services/user.service';
 import { User } from 'src/app/models/user.model';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { FIELDS_FORM, LABEL_PROFILE} from 'src/app/profile-module/services/profileData';
 
 import { Subject } from 'rxjs';

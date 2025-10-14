@@ -1,6 +1,6 @@
 import { Component, Input, AfterViewInit, OnDestroy } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
-import { GLOBAL } from 'src/app/services/global';
+import { GLOBAL } from 'src/app/services/GLOBAL';
 import { ResourceService } from 'src/app/services/resource.service';
 
 import { FIELDS_DETAILS } from '../resourcesData';
