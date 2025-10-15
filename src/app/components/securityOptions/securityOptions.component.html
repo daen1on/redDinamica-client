@@ -72,7 +72,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" class=" btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete">Eliminar
+                    <button type="button" class=" btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete">Eliminar
                         cuenta</button>
                 </div>
 
@@ -84,7 +84,7 @@
 <!-- Security options -->
 
 <!--  Confirm password Modal -->
-<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="delete" aria-hidden="true">
+<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="deleteTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -92,7 +92,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form (ngSubmit)="onDeleteAccount()">
+            <form (submit)="$event.preventDefault(); onDeleteAccount()">
                 <div class="modal-body">
 
                     <div *ngIf="deleteStatus === 'error'" class="alert alert-danger fade show text-center" role="alert">
@@ -134,7 +134,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary text-white" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary text-white" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-danger">
                         Eliminar cuenta</button>
                 </div>

@@ -101,8 +101,8 @@ export class SecurityOptionsComponent {
         this.user.password = this.editPassword.value.actualPassword;
         this.user.email = this.identity.email;
 
-        this._userService.validatePass(this.user).subscribe(
-            response => {
+        this._userService.validatePass(this.user).subscribe({
+            next: (response) => {
                 if (response) {
                     this.status = 'success';
                     this.user.password = this.editPassword.value.newPassword;
@@ -126,34 +126,32 @@ export class SecurityOptionsComponent {
                 this.editPassword.reset();
                 this.submitted = false;
             },
-            error => {
+            error: (error) => {
                 this.status = 'error';
                 this.editPassword.reset();
                 this.submitted = false;
                 console.log(<any>error);
             }
 
-        );
+        });
     }
 
     onDeleteAccount() {
         this.deleteSubmitted = true;
         this.user = this.identity;
-
         if (this.password.invalid) {
             return;
         }
-
         this.user.password = this.password.value;
 
-        this._userService.validatePass(this.user).subscribe(
-            response => {
+        this._userService.validatePass(this.user).subscribe({
+            next: (response) => {
                 if (response) {
                     this.deleteStatus = 'success';
-
-                    this._userService.deleteUser().subscribe(
-                        response => {
-
+                    console.log("validatePass response", response);
+                    this._userService.deleteUser().subscribe({
+                        next: (response) => {
+                            console.log("deleteUser response", response);
                             if (response.user && response.user._id) {
                                 this.deleteStatus = 'success';
                                 localStorage.clear();
@@ -165,21 +163,21 @@ export class SecurityOptionsComponent {
                                 this.deleteStatus = 'error2';
                             }
                         },
-                        error => {
+                        error: (error) => {
                             this.deleteStatus = 'error2';
                             console.log(<any>error);
                         }
-                    )
+                    });
                 } else {
                     this.deleteStatus = 'error';
                 }
                 this.editPassword.reset();
                 this.submitted = false;
             },
-            error => {
+            error: (error) => {
                 this.deleteStatus = 'error';
                 console.log(<any>error);
             }
-        );
+        });
     }
 }

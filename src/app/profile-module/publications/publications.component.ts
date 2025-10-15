@@ -10,6 +10,7 @@ import { User } from '../../models/user.model';
 import { Publication } from '../../models/publication.model';
 import { UserService } from '../../services/user.service';
 import { PublicationService } from '../../services/publication.service';
+import { CommentService } from '../../services/comment.service';
 import { UploadService } from '../../services/upload.service';
 import { GLOBAL } from '../../services/GLOBAL';
 import { MAX_FILE_SIZE } from '../../services/DATA';
@@ -59,6 +60,7 @@ export class PublicationsComponent implements OnInit, OnDestroy, AfterViewInit {
     constructor(
         private _userService: UserService,
         private _publicationService: PublicationService,
+        private _commentService: CommentService,
         private _uploadService: UploadService,
         private _route: ActivatedRoute,
         private _router: Router
@@ -356,6 +358,79 @@ export class PublicationsComponent implements OnInit, OnDestroy, AfterViewInit {
                 console.log(<any>error);
             }
         );
+    }
+
+    // =============================
+    // Eliminación de comentarios/respuestas
+    // =============================
+    public tempCommentId;
+    setDeleteComment(commentId: string) {
+        this.tempCommentId = commentId;
+        const modalElement = document.getElementById('deleteComment');
+        if (modalElement) {
+            const modal = new (window as any).bootstrap.Modal(modalElement);
+            modal.show();
+        }
+    }
+
+    deleteComment() {
+        if (!this.tempCommentId) {
+            return;
+        }
+
+        this._commentService.removeComment(this.token, this.tempCommentId).pipe(takeUntil(this.unsubscribe$)).subscribe({
+            next: () => {
+                // Intentar remover localmente el comentario/respuesta de las publicaciones cargadas
+                this.removeCommentFromPublications(this.tempCommentId);
+                this.tempCommentId = null;
+            },
+            error: (error) => {
+                console.error('Error al eliminar comentario/respuesta:', error);
+                // Fallback: recargar publicaciones
+                this.getUserPublications(1);
+                this.tempCommentId = null;
+            }
+        });
+    }
+
+    private removeCommentFromPublications(commentId: string): void {
+        if (!this.publications || !Array.isArray(this.publications)) {
+            return;
+        }
+
+        for (const publication of this.publications) {
+            if (publication?.comments && Array.isArray(publication.comments)) {
+                const removed = this.removeCommentFromList(publication.comments, commentId);
+                if (removed) {
+                    return;
+                }
+            }
+        }
+    }
+
+    // Borrado recursivo en lista de comentarios y sus respuestas (máximo 2 niveles)
+    private removeCommentFromList(comments: any[], commentId: string): boolean {
+        if (!Array.isArray(comments) || !commentId) {
+            return false;
+        }
+
+        const index = comments.findIndex((c: any) => c && c._id === commentId);
+        if (index !== -1) {
+            comments.splice(index, 1);
+            return true;
+        }
+
+        for (const comment of comments) {
+            if (comment?.replies && Array.isArray(comment.replies)) {
+                const replyIndex = comment.replies.findIndex((r: any) => r && r._id === commentId);
+                if (replyIndex !== -1) {
+                    comment.replies.splice(replyIndex, 1);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     setErrorMessage(message: string) {
