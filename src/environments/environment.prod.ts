@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  enableConsoleLogs: false
+  enableConsoleLogs: false,
+  useHashRouter: true
 };

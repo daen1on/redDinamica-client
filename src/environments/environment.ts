@@ -6,7 +6,8 @@
 // En desarrollo, puedes activar/desactivar los logs, cambiando el valor de enableConsoleLogs a true/false
 export const environment = {
   production: false,
-  enableConsoleLogs: true
+  enableConsoleLogs: true,
+  useHashRouter: true
 };
 
 /*

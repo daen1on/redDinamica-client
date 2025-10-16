@@ -194,7 +194,6 @@ export class LessonComponent implements OnInit {
             response = true;
         }else{
             response = false;
-            console.log("parentUrl", this.parentUrl);
             if(this.parentUrl == 'admin'){
                 response = true;
             }

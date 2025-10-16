@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { environment } from '../environments/environment';
 
 import { landingGuard } from './guards/landing.guard';
 import { homeGuard } from './home-module/guards/home.guard';
@@ -29,6 +30,7 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
+    useHash: environment.useHashRouter,
     scrollPositionRestoration: 'top',
     onSameUrlNavigation: 'reload',
     paramsInheritanceStrategy: 'always',
