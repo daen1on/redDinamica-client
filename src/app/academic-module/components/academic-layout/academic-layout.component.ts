@@ -28,7 +28,9 @@ export class AcademicLayoutComponent {
       return '';
     }
   }
-
+  navigateToAcademia(): void {
+    this.router.navigate(['/academia']);
+  }
   navigateToAcademicDashboard(): void {
     const role = this.getCurrentRole();
     if (role === 'teacher' || role === 'admin' || role === 'expert' || role === 'lesson_manager' || role === 'delegated_admin') {

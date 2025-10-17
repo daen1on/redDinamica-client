@@ -9,6 +9,10 @@
     top: 63px; /* compensación en pantallas grandes */
   }
 }
+.academic-brand-link:hover {
+  cursor: pointer;
+}
+
 
 /* Fondo del header sutil que se desvanece, sin banda blanca */
 .dashboard-header {

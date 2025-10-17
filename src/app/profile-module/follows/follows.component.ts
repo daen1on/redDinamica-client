@@ -60,10 +60,10 @@ export class FollowsComponent implements OnInit {
         this.activeButton = 'followers'; // Default
         this.followingPage = 1;
 
-        this._route.parent.params.subscribe(params => {
+        this._route.parent.params.subscribe({next: (params) => {
             let id = params['id'];
             this.ownProfile._id = id;
-        });
+        }});
     }
 
     ngOnInit(){
@@ -71,7 +71,7 @@ export class FollowsComponent implements OnInit {
         this.loadPage();
         
         // Leer query parameters para determinar qué pestaña mostrar
-        this._route.queryParams.subscribe(params => {
+        this._route.queryParams.subscribe({next: (params) => {
             const tab = params['tab'];
             if (tab === 'following') {
                 this.activeButton = 'following';
@@ -84,7 +84,7 @@ export class FollowsComponent implements OnInit {
                 this.activeButton = 'followers';
                 this.setActiveButton('followers');
             }
-        });
+        }});
     }
     
     setActiveButton(activeButton) {
@@ -98,21 +98,21 @@ export class FollowsComponent implements OnInit {
     }
     
     loadPage() {
-        this._route.parent.params.subscribe(params => {
+        this._route.parent.params.subscribe({next: (params) => {
             let id = params['id'];
             this.getUser(id);
-        });
+        }});
 
-        this._route.params.subscribe(params => {
+        this._route.params.subscribe({next: (params) => {
             let reload = params['reload'];
             if (reload) {
                this._router.navigate(['perfil', this.ownProfile._id, 'red']);
             }
-        });
+        }});
     }
 
     actualPage() {
-        this._route.parent.params.subscribe(params => {
+        this._route.parent.params.subscribe({next: (params) => {
             let page = +params['page'];
 
             this.page = page;
@@ -128,12 +128,13 @@ export class FollowsComponent implements OnInit {
                     this.prevPage = 1;
                 }
             }
-        });
+        }});
     }
 
     getUser(userId) {
         this._userService.getUser(userId).subscribe(
-            response => {
+            { 
+                next: (response) => {
                 if (response.user) {
                     this.ownProfile = response.user;
                     this.followersPage = 1;
@@ -143,21 +144,21 @@ export class FollowsComponent implements OnInit {
                     this.ownProfile = this.identity;
                 }
             },
-            error => {
+            error: (error) => {
                 console.log(<any>error);
                 this.ownProfile = this.identity;
             }
-        );
+    });
     }
 
     getFollowingUsers(page) {
         this._followService.getFollowingUsers(this.token, this.ownProfile._id, page).subscribe(
-            response => {
+            { next: (response) => {
                 if (response) {
                     if (page == 1) {
                         this.status = 'success';
                         this.following = response.follows;
-                        this.followingPages = response.pages;
+                        this.followingPages = response.totalPages || response.pages;
                         this.followingTotal = response.total;
                     } else {
                         // Cuando se hace scroll, se envía por acá la petición
@@ -169,20 +170,20 @@ export class FollowsComponent implements OnInit {
                     this.status = 'error';
                 }
             },
-            error => {
+            error: (error) => {
                 console.log(<any>error);
             }
-        );
+        });
     }
 
     getFollowerUsers(page) {
         this._followService.getFollowersUsers(this.token, this.ownProfile._id, page).subscribe(
-            response => {
+            { next: (response) => {
                 if (response) {
                     if (page == 1) {
                         this.status = 'success';
                         this.followers = response.follows;
-                        this.followersPages = response.pages;
+                        this.followersPages = response.totalPages || response.pages;
                         this.followersTotal = response.total;
                         this.followingUsersId = response.following; // los que esta siguiendo el perfil logueado
                     } else {
@@ -195,10 +196,10 @@ export class FollowsComponent implements OnInit {
                     this.status = 'error';
                 }
             },
-            error => {
+            error: (error) => {
                 console.log(<any>error);
             }
-        );
+        });
     }
 
     // Follower systems buttons
@@ -217,16 +218,16 @@ export class FollowsComponent implements OnInit {
         follow.followed = userId;
 
         this._followService.addFollow(this.token, follow).subscribe(
-            response => {
+            {next: (response) => {
                 if (response) {
                     this.getFollowerUsers(this.page);
                     this.getFollowingUsers(this.page);
                 }
             },
-            error => {
+            error: (error) => {
                 console.log(<any>error);
             }
-        )
+        });
     }
     
     public TempU;
@@ -264,15 +265,15 @@ export class FollowsComponent implements OnInit {
 
     unfollowUser(userId) {
         this._followService.removeFollow(this.token, userId).subscribe(
-            response => {
+            {next: (response) => {
                 if (response) {
                     this.getFollowerUsers(this.page);
                     this.getFollowingUsers(this.page);
                 }
             },
-            error => {
+            error: (error) => {
                 console.log(<any>error);
             }
-        )
+        });
     }
 }
