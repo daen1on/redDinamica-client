@@ -34,7 +34,7 @@ export const LESSON_STATES = {
         class: "primary"
     },
     completed: {
-        label: "Terminada",
+        label: "En uso por la comunidad",
         value: "completed",
         class: "success"
     }
