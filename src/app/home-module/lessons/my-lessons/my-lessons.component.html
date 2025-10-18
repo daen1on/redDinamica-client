@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <div *ngIf="lessons.length == 0 && !loading" class="card-body">
+    <div *ngIf="lessons.length == 0 && !loading && selectedStates.length == 0" class="card-body">
         <h4 class="text-muted">
             Aquí se muestran las lecciones en las que estas participando. Aún no hay lecciones que mostrar.
         </h4>
@@ -27,7 +27,7 @@
         </p>
     </div>
 
-    <div *ngIf="lessons.length != 0" class="card-body">
+    <div *ngIf="lessons.length != 0 || selectedStates.length > 0" class="card-body">
 
         <!-- checkbox filter -->
         <div class="row">
@@ -200,15 +200,13 @@
 
         <!-- lesson items filtered -->
         <div *ngIf="selectedStates.length > 0">
-            <ng-container *ngIf="allLessons.length == 0 && !loading; else elseTemplate">
-                <div class="card-body">
-                    <h4 class="text-muted">
-                        No se encontraron lecciones para los criterios de búsqueda seleccionados.
-                    </h4>
-                </div>
-            </ng-container>
-            <ng-template #elseTemplate>
-                <div *ngFor="let lesson of allLessons, let i=index">
+            <div *ngIf="allLessons.length == 0 && !loading" class="card-body">
+                <h4 class="text-muted">
+                    No se encontraron lecciones para los criterios de búsqueda seleccionados.
+                </h4>
+            </div>
+            <div *ngIf="allLessons.length > 0">
+                <div *ngFor="let lesson of allLessons; let i = index">
                     <div class="card mb-2">
                         <div class="card-body">
                             <div class="media-body">
@@ -353,7 +351,7 @@
                         </div>
                     </div>
                 </div>
-            </ng-template>
+            </div>
 
         </div>
         <!-- /lesson items filtered -->
