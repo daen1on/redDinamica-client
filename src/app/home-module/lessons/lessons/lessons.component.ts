@@ -288,10 +288,6 @@ export class LessonsComponent implements OnInit {
     }
 
     reloadLessons() {
-        if (!this.needReloadData) {
-            return;
-        }
-
         if (this.orderControl.value == 'views') {
             this.orderBy = 'views';
         } else if (this.orderControl.value == 'score') {
@@ -305,7 +301,6 @@ export class LessonsComponent implements OnInit {
         if ((this._lessonService as any).getLessons) {
             this.getLessons(this.page || 1);
         }
-        this.needReloadData = false;
     }    
 
     public needReloadData;
