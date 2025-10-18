@@ -20,6 +20,10 @@ export class LessonFeedbackComponent {
   @Output() teacherCommentTypeChange = new EventEmitter<'feedback' | 'suggestion' | 'approval' | 'correction'>();
   @Output() addComment = new EventEmitter<void>();
   @Output() deleteComment = new EventEmitter<string>();
+  @Output() editComment = new EventEmitter<{ commentId: string; content: string }>();
+
+  editingCommentId: string = '';
+  editingFeedback: string = '';
 
   getCommentTypeBadge(type: string): string {
     const badges: { [key: string]: string } = {
@@ -56,6 +60,29 @@ export class LessonFeedbackComponent {
       const authorId = typeof comment?.author === 'string' ? String(comment.author) : String(comment?.author?._id || comment?.author?.id || '');
       return !!authorId && !!this.currentUserId && authorId === this.currentUserId;
     } catch { return false; }
+  }
+
+  startEdit(comment: any): void {
+    try {
+      const authorId = typeof comment?.author === 'string' ? String(comment.author) : String(comment?.author?._id || comment?.author?.id || '');
+      if (!authorId || authorId !== this.currentUserId) return;
+      this.editingCommentId = String(comment?._id || '');
+      this.editingFeedback = String(comment?.content || '');
+    } catch {}
+  }
+
+  cancelEdit(): void {
+    this.editingCommentId = '';
+    this.editingFeedback = '';
+  }
+
+  confirmEdit(comment: any): void {
+    const rawContent = this.editingFeedback ?? '';
+    if (!rawContent.trim()) return;
+    const id = String(comment?._id || this.editingCommentId || '');
+    if (!id) return;
+    this.editComment.emit({ commentId: id, content: rawContent });
+    this.cancelEdit();
   }
 }
 

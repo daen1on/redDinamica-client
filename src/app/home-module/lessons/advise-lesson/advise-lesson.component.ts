@@ -114,11 +114,29 @@ export class AdviseLessonComponent implements OnInit {
         this._route.queryParams.subscribe(params => {
             this.focusedLessonId = params['lesson'] || null;
             this.actionType = params['action'] || null;
-            
+
+            // Flujo original: aprobar
             if (this.focusedLessonId && this.actionType === 'approve') {
                 console.log('Enfocando lección desde notificación:', this.focusedLessonId);
                 this.showFocusedLesson = true;
                 this.title = 'Aprobar Lección como Facilitador';
+            }
+
+            // Nuevo flujo: abrir modal de previsualización directo
+            const openPreview = String(params['openPreview'] || '').toLowerCase() === 'true';
+            const lessonId = params['lessonId'] || params['lesson_id'] || null;
+            if (openPreview && lessonId) {
+                this._lessonService.getLesson(this.token, lessonId).subscribe({
+                    next: (response) => {
+                        const lesson = response?.lesson || response?.data || null;
+                        if (lesson) {
+                            this.openPreviewModal(lesson);
+                        }
+                    },
+                    error: (error) => {
+                        console.error('Error cargando lección para openPreview:', error);
+                    }
+                });
             }
         });
         

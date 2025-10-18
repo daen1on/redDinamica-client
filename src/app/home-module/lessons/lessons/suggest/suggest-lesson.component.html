@@ -281,13 +281,25 @@
                     <i class="fas fa-times me-1"></i>
                     Cancelar
                 </button>
-                <button type="submit" 
-                        [disabled]="loading || addForm.invalid" 
-                        class="btn btn-success">
-                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    <i *ngIf="!loading" class="fas fa-paper-plane me-1"></i>
-                    {{loading ? 'Enviando...' : 'Enviar Sugerencia'}}
-                </button>
+                <ng-container *ngIf="!isResuggest; else resuggestBtn">
+                    <button type="submit" 
+                            [disabled]="loading || addForm.invalid" 
+                            class="btn btn-success">
+                        <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <i *ngIf="!loading" class="fas fa-paper-plane me-1"></i>
+                        {{loading ? 'Enviando...' : submitLabel}}
+                    </button>
+                </ng-container>
+                <ng-template #resuggestBtn>
+                    <button type="button" 
+                            (click)="onResuggest()" 
+                            [disabled]="loading || addForm.invalid" 
+                            class="btn btn-primary">
+                        <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <i *ngIf="!loading" class="fas fa-redo me-1"></i>
+                        {{loading ? 'Enviando...' : 'Sugerir nuevamente'}}
+                    </button>
+                </ng-template>
             </div>
             <!-- /modal-footer -->
         </form>

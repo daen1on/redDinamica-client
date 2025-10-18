@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { Validators, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
 import { UserService } from 'src/app/services/user.service';
@@ -54,13 +54,20 @@ export class SuggestLessonComponent implements OnInit, AfterViewInit {
     public selectedLevels: any[] = [];
     public showLevelDropdown = false;
 
+    public submitLabel: string = 'Enviar Sugerencia';
+    private showModalRetries = 0;
+    public isResuggest: boolean = false;
+    private resuggestLessonId: string = '';
+    private pendingPrefillData: any = null;
+
     @Output() added = new EventEmitter();
 
     constructor(
         private _userService: UserService,
         private _lessonService: LessonService,
         private _bDService: BasicDataService,
-        private _notificationService: NotificationService
+        private _notificationService: NotificationService,
+        private cdr: ChangeDetectorRef
     ) {
         this.title = 'Sugerir lección';
         this.identity = this._userService.getIdentity();
@@ -95,6 +102,8 @@ export class SuggestLessonComponent implements OnInit, AfterViewInit {
 
     ngAfterViewInit(): void {
         this.setupModalEvents();
+        // Si la URL trae openSuggestModal, abrir el modal directamente
+        setTimeout(() => this.tryAutoOpenFromUrl(), 0);
     }
 
     setupModalEvents() {
@@ -102,6 +111,21 @@ export class SuggestLessonComponent implements OnInit, AfterViewInit {
         if (modal) {
             modal.addEventListener('shown.bs.modal', () => {
                 modal.removeAttribute('aria-hidden');
+                // Prefill al estar visible (más seguro para change detection)
+                try {
+                    const raw = localStorage.getItem('resuggestLessonPayload');
+                    if (raw) {
+                        this.pendingPrefillData = JSON.parse(raw);
+                        this.safePrefill();
+                        localStorage.removeItem('resuggestLessonPayload');
+                    } else if (this.pendingPrefillData) {
+                        this.safePrefill();
+                    }
+                } catch {}
+                console.log('[SuggestLesson] shown → current form values:', this.addForm.value, {
+                    selectedKnowledgeAreas: this.selectedKnowledgeAreas,
+                    selectedLevels: this.selectedLevels
+                });
             });
             modal.addEventListener('hidden.bs.modal', () => {
                 modal.setAttribute('aria-hidden', 'true');
@@ -112,12 +136,182 @@ export class SuggestLessonComponent implements OnInit, AfterViewInit {
         }
     }
 
+    // Prefill modal from an existing lesson suggestion
+    prefillFromLesson(existing: any): void {
+        if (!existing) { return; }
+        try {
+            this.isResuggest = true;
+            this.resuggestLessonId = String(existing._id || existing.id || '');
+            console.log('[SuggestLesson] prefillFromLesson payload:', existing);
+            // Título, resumen, justificación, referencias
+            this.addForm.patchValue({
+                title: existing.title || '',
+                resume: existing.resume || '',
+                justification: this.normalizeJustification(existing.justification, (existing as any).justificationText),
+                references: existing.references || '',
+                suggested_facilitator: (existing.suggested_facilitator && (existing.suggested_facilitator._id || existing.suggested_facilitator)) || ''
+            });
+
+            // Áreas de conocimiento por nombre
+            const areaNames: string[] = Array.isArray(existing.knowledge_area)
+                ? existing.knowledge_area.map((a: any) => typeof a === 'string' ? a : (a?.name || '')).filter((n: string) => !!n)
+                : [];
+            this.selectedKnowledgeAreas = this.knowledgeAreas.filter(ka => areaNames.includes(ka.name));
+            this.updateKnowledgeAreaFormControl();
+
+            // Niveles académicos: existing.level son claves; mapear a valores para el formulario
+            const levelArr: string[] = Array.isArray(existing.level)
+                ? existing.level
+                : (existing.level ? [existing.level] : []);
+            const entries = Object.entries(ACADEMIC_LEVEL) as Array<[string,string]>;
+            const toDisplay = (v: string) => {
+                // v puede ser key (GARDEN) o value (Preescolar)
+                const byKey = entries.find(([k]) => k === v);
+                if (byKey) return { key: byKey[0], value: byKey[1] };
+                const byValue = entries.find(([,val]) => val === v);
+                if (byValue) return { key: byValue[0], value: byValue[1] };
+                return null;
+            };
+            this.selectedLevels = levelArr.map(toDisplay).filter((x: any) => !!x) as any[];
+            this.updateLevelFormControl();
+
+            // Cambiar etiqueta del botón para re-sugerencia
+            this.submitLabel = 'Sugerir nuevamente';
+            this.status = null;
+            this.submitted = false;
+            this.showSuccessActions = false;
+            this.cdr.detectChanges();
+            console.log('[SuggestLesson] after prefill → form:', this.addForm.value, {
+                selectedKnowledgeAreas: this.selectedKnowledgeAreas,
+                selectedLevels: this.selectedLevels
+            });
+        } catch (e) {
+            console.error('Error prellenando formulario de sugerencia:', e);
+        }
+    }
+
+    private normalizeJustification(justification: any, fallbackText?: string): string {
+        if (!justification && fallbackText) return String(fallbackText);
+        if (!justification) return '';
+        if (typeof justification === 'string') return justification;
+        try {
+            const parts: string[] = [];
+            if (justification.methodology) parts.push(String(justification.methodology));
+            if (justification.objectives) parts.push(String(justification.objectives));
+            return parts.join('\n\n');
+        } catch { return '' }
+    }
+
+    private safePrefill(): void {
+        if (!this.pendingPrefillData) {
+            console.log('[SuggestLesson] safePrefill: no pendingPrefillData');
+            return;
+        }
+        // Esperar a que las áreas y niveles estén cargados
+        const areasReady = Array.isArray(this.knowledgeAreas) && this.knowledgeAreas.length > 0;
+        if (!areasReady) {
+            console.log('[SuggestLesson] safePrefill: knowledgeAreas not ready, len=', this.knowledgeAreas?.length || 0);
+            setTimeout(() => this.safePrefill(), 100);
+            return;
+        }
+        const data = this.pendingPrefillData;
+        this.pendingPrefillData = null;
+        console.log('[SuggestLesson] safePrefill applying:', data);
+        this.prefillFromLesson(data);
+        this.cdr.detectChanges();
+        console.log('[SuggestLesson] safePrefill applied → form:', this.addForm.value, {
+            selectedKnowledgeAreas: this.selectedKnowledgeAreas,
+            selectedLevels: this.selectedLevels
+        });
+    }
+
+    onResuggest(): void {
+        this.submitted = true;
+        this.loading = true;
+        if (this.addForm.invalid || !this.resuggestLessonId) {
+            this.loading = false;
+            return;
+        }
+
+        const selectedLevels = Array.isArray(this.addForm.value.level)
+            ? this.addForm.value.level
+            : [this.addForm.value.level];
+
+        const levelKeys = Object.entries(ACADEMIC_LEVEL)
+            .filter(([key, value]) => selectedLevels.includes(value))
+            .map(([key]) => key);
+
+        const updatedLesson: any = {
+            _id: this.resuggestLessonId,
+            title: this.addForm.value.title,
+            resume: this.addForm.value.resume,
+            justification: this.addForm.value.justification,
+            references: this.addForm.value.references,
+            knowledge_area: this.addForm.value.knowledge_area || [],
+            level: levelKeys,
+            suggested_facilitator: this.addForm.value.suggested_facilitator || '',
+            state: 'proposed',
+            accepted: false
+        };
+
+        this._lessonService.editLesson(this.token, updatedLesson).subscribe({
+            next: (response) => {
+                this.status = 'success';
+                this.showSuccessActions = true;
+                this.loading = false;
+            },
+            error: (error) => {
+                this.status = 'error';
+                this.loading = false;
+                console.error('Error re-sugiriendo lección:', error);
+            }
+        });
+    }
+
+    private tryAutoOpenFromUrl(): void {
+        try {
+            const url = new URL(window.location.href.replace('#/', '')); // soportar hash routing
+            const params = new URLSearchParams(url.search);
+            const open = String(params.get('openSuggestModal') || '').toLowerCase() === 'true';
+            if (!open) return;
+            this.openModalWithRetry();
+        } catch {}
+    }
+
+    private openModalWithRetry(): void {
+        try {
+            const modal = document.getElementById('add');
+            const BootstrapModal = (window as any).bootstrap?.Modal;
+            if (!modal || !BootstrapModal) {
+                if (this.showModalRetries < 20) {
+                    this.showModalRetries++;
+                    setTimeout(() => this.openModalWithRetry(), 100);
+                    return;
+                }
+                return;
+            }
+            const instance = BootstrapModal.getInstance(modal);
+            if (instance) { try { instance.dispose(); } catch {} }
+            const bootstrapModal = new BootstrapModal(modal, { backdrop: 'static', keyboard: false });
+            bootstrapModal.show();
+            this.showModalRetries = 0;
+        } catch (e) {
+            if (this.showModalRetries < 20) {
+                this.showModalRetries++;
+                setTimeout(() => this.openModalWithRetry(), 100);
+                return;
+            }
+        }
+    }
+
     loadKnowledgeAreas(): void {
         this._bDService.getKnowledgeAreas().subscribe({
             next: (response) => {
                 if (response && Array.isArray(response.areas)) {
                     this.knowledgeAreas = response.areas;
                     console.log('Áreas de conocimiento cargadas:', this.knowledgeAreas);
+                    // Si hay un prefill pendiente, aplicarlo ahora
+                    this.safePrefill();
                 } else {
                     this.knowledgeAreas = [];
                     console.error('La respuesta de áreas de conocimiento no es un array:', response);

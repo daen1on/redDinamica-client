@@ -11,12 +11,26 @@
         </div>
         <div class="d-flex align-items-center gap-2">
           <small class="text-muted">{{ comment.timestamp | date:'short' }}</small>
-          <button class="btn btn-sm btn-outline-danger" *ngIf="canDelete(comment)" (click)="deleteComment.emit(comment._id)" [disabled]="loading" title="Eliminar comentario">
-            <i class="fas fa-trash-alt"></i>
-          </button>
+          <ng-container *ngIf="canDelete(comment)">
+            <button class="btn btn-sm btn-outline-secondary" (click)="startEdit(comment)" [disabled]="loading" title="Editar comentario">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="deleteComment.emit(comment._id)" [disabled]="loading" title="Eliminar comentario">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </ng-container>
         </div>
       </div>
-      <p class="feedback-content">{{ comment.content }}</p>
+      <ng-container *ngIf="editingCommentId === comment._id; else showComment">
+        <textarea class="form-control" rows="3" name="editingFeedback" [(ngModel)]="editingFeedback" [ngModelOptions]="{standalone: true}" [disabled]="loading"></textarea>
+        <div class="mt-2 d-flex gap-2">
+          <button class="btn btn-sm btn-primary" (click)="confirmEdit(comment)"><i class="fas fa-save me-1"></i>Guardar</button>
+          <button class="btn btn-sm btn-outline-secondary" (click)="cancelEdit()">Cancelar</button>
+        </div>
+      </ng-container>
+      <ng-template #showComment>
+        <p class="feedback-content" style="white-space: pre-wrap; word-break: break-word;">{{ comment.content }}</p>
+      </ng-template>
     </div>
   </div>
   <ng-template #noFeedback>
@@ -49,5 +63,6 @@
     </div>
   </div>
 </div>
+
 
 

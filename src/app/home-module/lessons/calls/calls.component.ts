@@ -615,7 +615,9 @@ export class CallsComponent implements OnInit, OnDestroy {
 
     generateDefaultCallText(lesson: any): string {
         const areas = (lesson.knowledge_area || []).map(a => a.name).join(', ');
-        const levels = (lesson.level || []).join(', ');
+        const levels = (lesson.level || [])
+         .map(key => this.academic_level[key]) 
+         .join(', '); 
         const lines = [
             `El facilitador ha aprobado esta lección. ¡Abrimos convocatoria para el desarrollo!`,
             `Título: ${lesson.title}`,

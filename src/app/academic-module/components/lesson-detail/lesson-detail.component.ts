@@ -882,12 +882,12 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   // Nueva funcionalidad: Comentarios del docente sobre la lección
   addTeacherComment(): void {
     if (!this.lesson) return;
-    const content = (this.teacherFeedback || '').trim();
-    if (!content) return;
+    const rawContent = this.teacherFeedback ?? '';
+    if (!rawContent.trim()) return;
     this.loading = true;
     // Mantener la pestaña de feedback activa tras recargar
     this.pendingFocusTab = 'feedback';
-    this.academicLessonService.addTeacherComment(this.lesson._id, content, this.teacherCommentType).subscribe({
+    this.academicLessonService.addTeacherComment(this.lesson._id, rawContent, this.teacherCommentType).subscribe({
       next: (res) => {
         this.successMessage = res.message || 'Comentario agregado';
         this.teacherFeedback = '';
@@ -897,6 +897,27 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Error al agregar comentario';
+        this.loading = false;
+      }
+    });
+  }
+
+  onEditTeacherComment(e: { commentId: string; content: string }): void {
+    if (!this.lesson) return;
+    const rawContent = e?.content ?? '';
+    if (!rawContent.trim()) return;
+    this.loading = true;
+    // Mantener la pestaña de feedback activa tras recargar
+    this.pendingFocusTab = 'feedback';
+    this.academicLessonService.updateTeacherComment(this.lesson._id, e.commentId, rawContent).subscribe({
+      next: (res) => {
+        this.successMessage = res.message || 'Comentario actualizado';
+        this.loadLesson();
+        this.loading = false;
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al actualizar comentario';
         this.loading = false;
       }
     });

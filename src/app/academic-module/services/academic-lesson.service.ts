@@ -171,6 +171,15 @@ export class AcademicLessonService {
     );
   }
 
+  // Actualizar comentario del docente
+  updateTeacherComment(lessonId: string, commentId: string, content: string): Observable<{status: string, message: string, data: AcademicLesson}> {
+    return this.http.put(`${this.apiUrl}/${lessonId}/teacher-comments/${commentId}`, { content }, { responseType: 'text' }).pipe(
+      map((text: string) => {
+        try { return JSON.parse(text); } catch { return { status: 'success', message: text, data: {} as any }; }
+      })
+    );
+  }
+
   // Retirarse de la lección (miembro del equipo de desarrollo)
   leaveLesson(lessonId: string): Observable<{status: string, message: string, data: AcademicLesson}> {
     return this.http.post<{status: string, message: string, data: AcademicLesson}>(`${this.apiUrl}/${lessonId}/leave`, {});

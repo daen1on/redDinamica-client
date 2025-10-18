@@ -326,7 +326,8 @@
           [teacherCommentType]="teacherCommentType"
           (teacherCommentTypeChange)="teacherCommentType = $event"
           (addComment)="addTeacherComment()"
-          (deleteComment)="onDeleteTeacherComment($event)">
+          (deleteComment)="onDeleteTeacherComment($event)"
+          (editComment)="onEditTeacherComment($event)">
         </app-lesson-feedback>
       </div>
     </div>

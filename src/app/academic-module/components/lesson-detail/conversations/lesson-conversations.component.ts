@@ -43,9 +43,9 @@ export class LessonConversationsComponent {
   }
 
   onSendMessage(): void {
-    const content = (this.chatMessage || '').trim();
-    if (!content || !this.currentConversationId) return;
-    this.sendMessage.emit({ conversationId: this.currentConversationId, content });
+    const rawContent = this.chatMessage ?? '';
+    if (!rawContent.trim() || !this.currentConversationId) return;
+    this.sendMessage.emit({ conversationId: this.currentConversationId, content: rawContent });
     this.chatMessage = '';
     this.typingChange.emit(false);
   }
@@ -74,9 +74,9 @@ export class LessonConversationsComponent {
   }
 
   confirmEdit(): void {
-    const content = (this.editingContent || '').trim();
-    if (!content || !this.currentConversationId || !this.editingMessageId) return;
-    this.editMessage.emit({ conversationId: this.currentConversationId, messageId: this.editingMessageId, content });
+    const rawContent = this.editingContent ?? '';
+    if (!rawContent.trim() || !this.currentConversationId || !this.editingMessageId) return;
+    this.editMessage.emit({ conversationId: this.currentConversationId, messageId: this.editingMessageId, content: rawContent });
     this.cancelEdit();
   }
 

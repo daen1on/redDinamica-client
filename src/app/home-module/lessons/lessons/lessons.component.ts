@@ -46,6 +46,7 @@ export class LessonsComponent implements OnInit {
     public orderControl;
 
     public loading = true;
+    private openModalRetries = 0;
 
     public states = [
         {
@@ -87,6 +88,10 @@ export class LessonsComponent implements OnInit {
         },
         {
             label: "Secundaria",
+            value: "midddleschool"
+        },
+        {
+            label: "Bachillerato",
             value: "highschool"
         },
         {
@@ -116,10 +121,75 @@ export class LessonsComponent implements OnInit {
 
     }
 
+    private normalizeLessonForPrefill(raw: any): any {
+        console.log('[LessonsComponent] normalize input:', raw);
+        const clone = JSON.parse(JSON.stringify(raw || {}));
+        // Asegurar que knowledge_area sea array de nombres para matching sencillo
+        try {
+            const areas = Array.isArray(clone.knowledge_area) ? clone.knowledge_area : [];
+            clone.knowledge_area = areas.map((a: any) => (typeof a === 'string' ? a : (a?.name || ''))).filter((s: string) => !!s);
+        } catch { clone.knowledge_area = []; }
+        // Justificación: conservar tanto objeto como texto
+        if (clone.justification && typeof clone.justification !== 'string') {
+            try {
+                const parts: string[] = [];
+                if (clone.justification.methodology) parts.push(String(clone.justification.methodology));
+                if (clone.justification.objectives) parts.push(String(clone.justification.objectives));
+                clone.justificationText = parts.join('\n\n');
+            } catch {}
+        }
+        console.log('[LessonsComponent] normalize output:', clone);
+        return clone;
+    }
+
     ngOnInit(): void {
         this.getAllLessons();        
         this.getAllAreas();
         this.actualPage();
+        // Abrir modal de sugerencia si viene desde notificación
+        this._route.queryParams.subscribe((params) => {
+            console.log('[LessonsComponent] queryParams:', params);
+            const open = String(params['openSuggestModal'] || '').toLowerCase() === 'true';
+            // ID desde query o, si no existe, desde el param de ruta (cuando /lecciones/:lessonId)
+            let lessonId = params['lessonId'] || params['lesson_id'] || '';
+            if (!lessonId) {
+                const routeParam = this._route.snapshot.params['page'];
+                if (routeParam && isNaN(parseInt(routeParam, 10))) {
+                    lessonId = routeParam;
+                }
+            }
+            console.log('[LessonsComponent] openSuggestModal=', open, ' lessonId=', lessonId);
+            if (open && lessonId) {
+                // Garantizar que las lecciones estén cargadas
+                const tryOpen = () => {
+                    const found = [...this.allLessons, ...this.lessons].find((l: any) => String(l._id) === String(lessonId));
+                    if (found) {
+                        // Prellenar y abrir el modal
+                        const normalized = this.normalizeLessonForPrefill(found);
+                        console.log('[LessonsComponent] found normalized:', normalized);
+                        try { localStorage.setItem('resuggestLessonPayload', JSON.stringify(normalized)); } catch {}
+                        this.openSuggestModal();
+                    } else {
+                        // Si aún no está en memoria, intentar cargarla desde API y luego abrir
+                        this._lessonService.getLesson(this.token, lessonId).subscribe({
+                            next: (res) => {
+                                const l = (res && (res.lesson || res.data)) || null;
+                                const normalized = l ? this.normalizeLessonForPrefill(l) : null;
+                                console.log('[LessonsComponent] fetched normalized:', normalized);
+                                try { if (normalized) { localStorage.setItem('resuggestLessonPayload', JSON.stringify(normalized)); } } catch {}
+                                this.openSuggestModal();
+                            },
+                            error: () => {
+                                // Fallback: abrir modal vacío
+                                this.openSuggestModal();
+                            }
+                        });
+                    }
+                };
+                // Dar un pequeño tiempo para que getAllLessons complete
+                setTimeout(tryOpen, 300);
+            }
+        });
     }
 
     setArea(selectedArea) {
@@ -215,6 +285,10 @@ export class LessonsComponent implements OnInit {
                                     ? lesson.development_level
                                     : (lesson?.development_level ? [lesson.development_level] : []);
                                 const combinedLevels = levelArray.concat(devLevelArray);
+                                console.log("levelArray: ", levelArray);
+                                console.log("devLevelArray: ", devLevelArray);
+                                console.log("combinedLevels: ", combinedLevels);
+                                console.log("level: ", level);
                                 return combinedLevels.includes(level);
                             }));
                         });
@@ -345,28 +419,43 @@ export class LessonsComponent implements OnInit {
 
     // Métodos para abrir modales con manejo correcto del DOM
     openSuggestModal() {
-        // Esperar a que Angular actualice el DOM
-        setTimeout(() => {
+        // Intentar abrir cuando el DOM ya tenga el modal disponible
+        const tryOpen = () => {
             try {
                 const modal = document.getElementById('add');
-                if (modal) {
-                    // Limpiar cualquier instancia previa
-                    const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
-                    if (existingInstance) {
-                        existingInstance.dispose();
+                if (!modal) {
+                    if (this.openModalRetries < 20) {
+                        this.openModalRetries++;
+                        return setTimeout(tryOpen, 100);
                     }
-                    
-                    // Crear nueva instancia
-                    const bootstrapModal = new (window as any).bootstrap.Modal(modal, {
-                        backdrop: 'static',
-                        keyboard: false
-                    });
-                    bootstrapModal.show();
+                    return;
                 }
+                // Limpiar cualquier instancia previa
+                const existingInstance = (window as any).bootstrap?.Modal?.getInstance(modal);
+                if (existingInstance) {
+                    existingInstance.dispose();
+                }
+                // Crear nueva instancia
+                const BootstrapModal = (window as any).bootstrap?.Modal;
+                if (!BootstrapModal) {
+                    // Bootstrap JS no cargado todavía; reintentar brevemente
+                    if (this.openModalRetries < 20) {
+                        this.openModalRetries++;
+                        return setTimeout(tryOpen, 100);
+                    }
+                    return;
+                }
+                const bootstrapModal = new BootstrapModal(modal, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                bootstrapModal.show();
+                this.openModalRetries = 0;
             } catch (error) {
                 console.log('Error al abrir modal de sugerir lección:', error);
             }
-        }, 0);
+        };
+        setTimeout(tryOpen, 0);
     }
 
     openSendExperienceModal() {
