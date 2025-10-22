@@ -83,6 +83,8 @@ export class ResourcesComponent implements OnInit {
         
         this.name = new UntypedFormControl('', Validators.required);
         this.files = new UntypedFormControl('', Validators.required);
+        // Exponer referencia global (fallback) para que el padre pueda usar el modal
+        try { (window as any).__lastResourcesComponentRef = this; } catch {}
     }
 
     ngOnInit(): void {
@@ -341,6 +343,7 @@ export class ResourcesComponent implements OnInit {
                                             this.name.reset();
                                         }
                                         this.loading = false;
+                                        this.getGroups();
                                         break;
                                 }
                             },
@@ -407,7 +410,7 @@ export class ResourcesComponent implements OnInit {
     @HostListener('window:beforeunload', ['$event'])
     handleBeforeUnload(event: BeforeUnloadEvent): void {
         const hasPendingUpload = this.loading || this.barWidth !== '0%';
-        const hasUnsaved = (this.name?.value && this.name.value !== '') || (this.filesToUpload && this.filesToUpload.length > 0) || this.editMode || this.submitted;
+        const hasUnsaved = this.hasPendingDraft();
         if (hasPendingUpload || hasUnsaved) {
             event.preventDefault();
             event.returnValue = '';
@@ -498,6 +501,28 @@ export class ResourcesComponent implements OnInit {
         });
     }
 
+    // Expone si hay borrador/carga pendiente
+    public hasPendingDraft(): boolean {
+        const hasDraft = (this.name?.value && this.name.value !== '')
+            || (this.filesToUpload && this.filesToUpload.length > 0)
+            || this.editMode
+            || this.submitted;
+        return !!hasDraft;
+    }
+
+    // Método público para que el padre pida confirmación al salir
+    public confirmLeaveIfNeeded(): Promise<boolean> {
+        const uploadInProgress = this.loading || this.barWidth !== '0%';
+        const hasDraft = this.hasPendingDraft();
+        if (uploadInProgress || hasDraft) {
+            const message = uploadInProgress
+                ? 'Hay una carga de archivos en progreso. Si sales ahora, se cancelará. ¿Deseas continuar?'
+                : 'Tienes cambios sin guardar. ¿Deseas descartar y continuar?';
+            return this.openConfirmLeave(message);
+        }
+        return Promise.resolve(true);
+    }
+
     // Intercepta clic en pestaña de grupo
     handleTabClick(event: Event, group: string): void {
         const uploadInProgress = this.loading || this.barWidth !== '0%';
@@ -516,6 +541,7 @@ export class ResourcesComponent implements OnInit {
             return;
         }
         this.restartValues(group);
+        this.addingNewGroup = false;
     }
 
     // Intercepta clic en pestaña "Agregar grupo"
@@ -541,6 +567,7 @@ export class ResourcesComponent implements OnInit {
             return;
         }
         this.startAddGroup();
+        this.selectedGroup = null;
     }
 
 }

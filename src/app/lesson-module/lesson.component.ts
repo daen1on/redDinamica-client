@@ -115,18 +115,31 @@ export class LessonComponent implements OnInit {
         );       
     }
     
-    setSelectedOption(selectedOption){
-        // Si estamos en la vista de recursos, intentemos respetar su guardado/bloqueo
-        if (this.selectedOption === 'resources') {
-            try {
-                const resourcesCmpEl = document.querySelector('resources') as any;
-                const ngCmp = (resourcesCmpEl as any) ? (resourcesCmpEl as any).__ngContext__ : null;
-                // Fallback: simplemente cambiamos. La protección real la hace el guard y beforeunload
-            } catch (e) {}
+    async setSelectedOption(selectedOption){
+        // Si estamos en la vista de recursos, pedir confirmación usando su propio modal
+        if (this.selectedOption === 'resources' && selectedOption !== 'resources') {
+            const cmp = this.getResourcesComponentInstance();
+            if (cmp && typeof (cmp as any).confirmLeaveIfNeeded === 'function') {
+                const ok = await (cmp as any).confirmLeaveIfNeeded();
+                if (!ok) { return; }
+            }
         }
 
         this.selectedOption = selectedOption;
         this.needReloadData = true;
+    }
+
+    private getResourcesComponentInstance(): any | null {
+        try {
+            // Busca el componente hijo por selector
+            const host = document.querySelector('resources');
+            const key = Object.keys(host || {}).find(k => k.startsWith('__ngContext__')) as any;
+            const ctx = key ? (host as any)[key] : null;
+            // En Angular 14+ no es estable, así que agregamos fallback vía referencia del componente en window
+            return (window as any).__lastResourcesComponentRef || null;
+        } catch {
+            return null;
+        }
     }
 
     public needReloadData;
@@ -142,8 +155,8 @@ export class LessonComponent implements OnInit {
                 return this.identity._id == user._id;
             })
         }
- 
-        if(response || this.lesson.expert && this.lesson.expert._id == this.identity){
+
+        if(response || this.lesson.expert && this.lesson.expert._id == this.identity._id){
             return true;
         }else{            
             return false;
@@ -163,8 +176,8 @@ export class LessonComponent implements OnInit {
         // Bloquear en estado 'proposed'
         if (this.lesson?.state === 'proposed') { return false; }
 
-        // Requiere asignación de experto y líder
-        return !!(this.lesson?.expert && this.lesson?.leader);
+        // Requiere asignación de experto o líder
+        return !!(this.lesson?.expert || this.lesson?.leader);
     }
 
     private isAdminPanelViewerAllowed(): boolean {

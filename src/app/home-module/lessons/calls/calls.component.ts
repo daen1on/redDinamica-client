@@ -101,28 +101,52 @@ export class CallsComponent implements OnInit, OnDestroy {
 
     ngDoCheck(): void {
         if (this.needReloadData) {
-            this.actualPage();
+            // Si estamos en modo de gestión enfocada, recargar solo la lección enfocada
+            if (this.showFocusedLesson) {
+                this.loadFocusedLesson();
+            } else {
+                this.actualPage();
+            }
             this.needReloadData = false;
         }
     }
 
     ngOnInit(): void {
-        // Verificar si viene desde una notificación con parámetros específicos
-        this._route.queryParams.subscribe(params => {
-            this.focusedLessonId = params['lesson'] || null;
-            this.actionType = params['action'] || null;
+        // Lectura inmediata de parámetros (soporta carga directa con la URL)
+        const snapshotLesson = this._route.snapshot.queryParams['lesson'] || null;
+        const snapshotAction = this._route.snapshot.queryParams['action'] || null;
+        if (snapshotLesson && snapshotAction === 'manage') {
+            this.focusedLessonId = snapshotLesson;
+            this.actionType = snapshotAction;
+            this.showFocusedLesson = true;
+            this.isLeaderManagement = true;
+            this.title = 'Gestionar Convocatoria - Lección Aprobada';
+            this.loadFocusedLesson();
+        } else {
+            this.showFocusedLesson = false;
+            this.isLeaderManagement = false;
+            this.title = 'Convocatorias';
+            this.loadInitialData();
+        }
 
-            if (this.focusedLessonId && this.actionType === 'manage') {
-                console.log('Enfocando convocatoria desde notificación:', this.focusedLessonId);
-                this.showFocusedLesson = true;
-                this.isLeaderManagement = true;
-                this.title = 'Gestionar Convocatoria - Lección Aprobada';
-                this.loadFocusedLesson();
-            } else {
-                this.showFocusedLesson = false;
-                this.isLeaderManagement = false;
-                this.title = 'Convocatorias';
-                this.loadInitialData();
+        // Suscripción a cambios posteriores en los parámetros de consulta
+        this._route.queryParams.subscribe(params => {
+            const newLesson = params['lesson'] || null;
+            const newAction = params['action'] || null;
+            if (newLesson !== this.focusedLessonId || newAction !== this.actionType) {
+                this.focusedLessonId = newLesson;
+                this.actionType = newAction;
+                if (this.focusedLessonId && this.actionType === 'manage') {
+                    this.showFocusedLesson = true;
+                    this.isLeaderManagement = true;
+                    this.title = 'Gestionar Convocatoria - Lección Aprobada';
+                    this.loadFocusedLesson();
+                } else {
+                    this.showFocusedLesson = false;
+                    this.isLeaderManagement = false;
+                    this.title = 'Convocatorias';
+                    this.loadInitialData();
+                }
             }
         });
 
@@ -157,6 +181,10 @@ export class CallsComponent implements OnInit, OnDestroy {
 
 
     getCalls(page = 1) {
+        // No sobreescribir la vista enfocada con el listado paginado
+        if (this.showFocusedLesson) {
+            return;
+        }
 
         this._lessonService.getCalls(this.token, page).subscribe({
             next: response => {
@@ -180,6 +208,10 @@ export class CallsComponent implements OnInit, OnDestroy {
     }
 
     actualPage() {
+        // En modo gestión enfocada no se debe recalcular la paginación/listado
+        if (this.showFocusedLesson) {
+            return;
+        }
 
         this._route.params.subscribe(params => {
             let page = +params['page'];
@@ -206,14 +238,15 @@ export class CallsComponent implements OnInit, OnDestroy {
         let res;
 
         this._lessonService.getAllCalls(this.token).subscribe(
-            response => {
+            {next: response => {
                 if (response.lessons) {
                     this.allLessons = response.lessons;
                     this.applyFilters(); // Aplicar filtros iniciales
                 }
-            }, error => {
+            }, error: error => {
                 console.log(<any>error);
-            });
+            }
+        });
     }
 
     applyFilters() {
@@ -360,7 +393,11 @@ export class CallsComponent implements OnInit, OnDestroy {
                         this.lessons[ix] = { ...this.lessons[ix], ...updated };
                     }
                     // Actualizar listados auxiliares
-                    this.getCalls(this.page);
+                    if (this.showFocusedLesson) {
+                        this.loadFocusedLesson();
+                    } else {
+                        this.getCalls(this.page);
+                    }
                     this.fetchAllCalls();
                     
                     // Mostrar mensaje de confirmación
@@ -469,8 +506,12 @@ export class CallsComponent implements OnInit, OnDestroy {
                     modal.addEventListener('hidden.bs.modal', () => {
                         // limpiar lección enfocada al cerrar
                         this.callLesson = null;
-                        // refrescar datos tras cerrar para evitar formularios rotos
-                        this.actualPage();
+                        // refrescar datos tras cerrar según el modo de vista
+                        if (this.showFocusedLesson) {
+                            this.loadFocusedLesson();
+                        } else {
+                            this.actualPage();
+                        }
                     }, { once: true });
                     bootstrapModal.show();
                 }
@@ -805,7 +846,11 @@ export class CallsComponent implements OnInit, OnDestroy {
         this.stopRealtimeSync();
         this.realtimeTimer = setInterval(() => {
             // Refrescar sin bloquear UI
-            this.getCalls(this.page || 1);
+            if (this.showFocusedLesson) {
+                this.loadFocusedLesson();
+            } else {
+                this.getCalls(this.page || 1);
+            }
         }, 7000);
     }
 

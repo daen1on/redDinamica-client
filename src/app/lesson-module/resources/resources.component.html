@@ -44,10 +44,12 @@
             <div class="border rounded nav flex-column nav-pills" id="v-pills-tab" role="tablist"
                 aria-orientation="vertical">
 
-                <div *ngFor="let group of groups, let ix = index" class="nav-link" [ngClass]="{'active': ix == 0 && !addingNewGroup}"
-                    id="{{removeSpaces(group)}}-tab" data-bs-toggle="pill" attr.href="#{{removeSpaces(group)}}" role="tab"
-                    attr.aria-controls="{{removeSpaces(group)}}" aria-selected="true"
-                    [ngClass]="{disable: loading}"
+                <div *ngFor="let group of groups, let ix = index" class="nav-link"
+                    id="{{removeSpaces(group)}}-tab" data-bs-toggle="pill"
+                    [attr.href]="'#' + removeSpaces(group)" role="tab"
+                    [attr.aria-controls]="removeSpaces(group)"
+                    [attr.aria-selected]="selectedGroup === group ? 'true' : 'false'"
+                    [ngClass]="{ 'active': selectedGroup === group && !addingNewGroup, 'disable': loading }"
                     (click)="handleTabClick($event, group)">
                     {{group}}
                     <section *ngIf="selectedGroup == group && showResources()" class="float-right">
@@ -63,9 +65,9 @@
                 </div>
 
 
-                <div *ngIf="showResources()" class="nav-link" style="cursor: pointer;" 
-                    [ngClass]="{'show active': lesson.files.length == 0 || addingNewGroup}" id="addGroup-tab" data-bs-toggle="pill"
-                    [ngClass]="{disable: loading}" href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
+                <div *ngIf="showResources()" class="nav-link" style="cursor: pointer;"
+                    [ngClass]="{ 'active': addingNewGroup, 'disable': loading }" id="addGroup-tab" data-bs-toggle="pill"
+                    href="#addGroup" role="tab" aria-controls="addGroup" aria-selected="false"
                     (click)="handleAddGroupTabClick($event)">
                     <i class="fas fa-plus"></i> Agregar grupo de recursos
                 </div>
@@ -79,7 +81,7 @@
 
             <div class="tab-content" id="v-pills-tabContent">
                 <div *ngFor="let group of groups, let ix = index" class="tab-pane fade"
-                    [ngClass]="{'show active': ix == 0 && !addingNewGroup && groups.length > 0}" id="{{removeSpaces(group)}}" role="tabpanel"
+                    [ngClass]="{ 'show active': selectedGroup === group && !addingNewGroup }" id="{{removeSpaces(group)}}" role="tabpanel"
                     attr.aria-labelledby="{{removeSpaces(group)}}-tab">
 
                     <div class="row">
@@ -173,7 +175,7 @@
                 </div>
                 <!--need to pop up a modal once it abruptly exits-->
                 <div *ngIf="showResources()" class="tab-pane fade"
-                    [ngClass]="{'show active': lesson.files.length == 0 || addingNewGroup}" id="addGroup" role="tabpanel"
+                    [ngClass]="{ 'show active': addingNewGroup }" id="addGroup" role="tabpanel"
                     aria-labelledby="addGroup-tab">
 
 

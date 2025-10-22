@@ -1,4 +1,4 @@
-.disable{ pointer-events: none; opacity: 2.0;}
+.disable{ pointer-events: none; opacity: 0.5;}
 
 .resource-edit,
 .resource-delete{
@@ -11,4 +11,12 @@
 
 .resource-delete:hover{
     color: #dc3545; /* bootstrap danger */
+}
+
+/* Asegura que los tabs tipo nav-link muestren hover y activo correctamente */
+.nav-pills .nav-link{
+    transition: background-color .15s ease, color .15s ease;
+}
+.nav-pills .nav-link:hover{
+    background-color: rgba(13,110,253,.1);
 }

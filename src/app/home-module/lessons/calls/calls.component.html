@@ -130,8 +130,8 @@
                                                 </p>
                                             </ng-container>
                                             <ng-template #noCallYet>
-                                                <p class="text-muted" *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)">
-                                                    Aún no has abierto la convocatoria. Completa el formulario a la derecha para publicarla.
+                                                <p class="text-danger fw-bold" *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)">
+                                                    Aún no has abierto la convocatoria. Completa el formulario para publicarla.
                                                 </p>
                                             </ng-template>
                                         </div>
@@ -330,7 +330,7 @@
                                                     </p>
                                                 </ng-container>
                                                 <ng-template #noCallYet2>
-                                                    <p class="text-muted" *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)">
+                                                    <p class="text-danger fw-bold" *ngIf="isLessonLeader(lesson) && isApprovedByFacilitator(lesson)">
                                                         Aún no has abierto la convocatoria. Completa el formulario a la derecha para publicarla.
                                                     </p>
                                                 </ng-template>
