@@ -44,7 +44,7 @@ export class DeleteResourceComponent implements OnInit {
 
     delete(){
         this._resourceService.deleteResource(this.token, this.resourceId).subscribe(
-            response => {
+           {next: (response: any) => {
                 if(response && response.resource){
                     this.deleted.emit();
                     // Cerrar el modal manualmente después de la eliminación exitosa
@@ -57,9 +57,9 @@ export class DeleteResourceComponent implements OnInit {
                     }
                 }
             },
-            error =>{
+            error: (error: any) =>{
                 console.log(<any>error);
             }
-        )
+    })
     }
 }

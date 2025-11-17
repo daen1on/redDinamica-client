@@ -3,7 +3,7 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { of } from 'rxjs';
 import { LessonService } from './lesson.service';
 import { Lesson } from '../models/lesson.model';
-import { GLOBAL } from './global';
+import { GLOBAL } from './GLOBAL';
 
 describe('LessonService', () => {
   let service: LessonService;

@@ -116,21 +116,17 @@
 
       <!-- Grado -->
       <div class="mb-3">
-        <label for="grade">Grado *</label>
+        <label for="grade">Grado </label>
         <select 
           id="grade"
           formControlName="grade"
           class="form-control"
-          [class.is-invalid]="isFieldInvalid('grade')"
           [disabled]="!groupForm.get('academicLevel')?.value">
           <option value="">Selecciona un grado</option>
           <option *ngFor="let grade of validGrades" [value]="grade">
             {{ grade }}
           </option>
         </select>
-        <div *ngIf="isFieldInvalid('grade')" class="invalid-feedback">
-          {{ getErrorMessage('grade') }}
-        </div>
         <small class="form-text text-muted" *ngIf="!groupForm.get('academicLevel')?.value">
           Primero selecciona el nivel académico
         </small>

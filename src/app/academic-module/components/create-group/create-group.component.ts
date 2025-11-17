@@ -42,7 +42,7 @@ export class CreateGroupComponent implements OnInit {
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.maxLength(500)]],
       academicLevel: ['', Validators.required],
-      grade: ['', Validators.required],
+      grade: [''],
       maxStudents: [30, [Validators.required, Validators.min(1), Validators.max(100)]],
       subjects: [[]]
     });

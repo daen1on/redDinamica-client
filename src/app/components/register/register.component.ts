@@ -25,7 +25,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     public registerForm: FormGroup;
     public submitted = false;
     public url;
-    public tyc_file = 'assets/TyC_RedDinamica.pdf';
+    public tyc_file = '#/assets/TyC_RedDinamica.pdf';
     public user: User;
     public message: string;
 

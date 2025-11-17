@@ -45,6 +45,9 @@ export class FollowsComponent implements OnInit {
     public throttle = 0;
     public distance = 2;
     public activeButton;
+    public searchTerm: string = '';
+    public filteredFollowers: any[] = [];
+    public filteredFollowing: any[] = [];
 
 
     constructor(
@@ -69,6 +72,8 @@ export class FollowsComponent implements OnInit {
     ngOnInit(){
         this.actualPage();
         this.loadPage();
+        // Cargar la lista de IDs que el usuario logueado sigue (para pintar botones correctamente)
+        this.loadMyFollowingIds();
         
         // Leer query parameters para determinar qué pestaña mostrar
         this._route.queryParams.subscribe({next: (params) => {
@@ -87,14 +92,94 @@ export class FollowsComponent implements OnInit {
         }});
     }
     
+    private loadMyFollowingIds(): void {
+        if (!this.identity?._id || !this.token) return;
+        // Obtener a quién sigue el usuario autenticado (página 1 basta para poblar IDs base)
+        this._followService.getFollowingUsers(this.token, this.identity._id, 1).subscribe({
+            next: (resp: any) => {
+                if (Array.isArray(resp?.following)) {
+                    this.followingUsersId = resp.following;
+                } else if (Array.isArray(resp?.follows)) {
+                    // Fallback: mapear desde objetos retornados
+                    this.followingUsersId = resp.follows
+                        .map((f: any) => f?.followed?._id || f?.followed)
+                        .filter((id: any) => !!id);
+                }
+            },
+            error: () => {}
+        });
+    }
+    
+    private normalizeForSearch(value: string): string {
+        if (!value) return '';
+        // Normaliza a lower-case y elimina acentos/diacríticos
+        return value
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    private matchTerm(text: string, term: string): boolean {
+        if (!term) return true;
+        return this.normalizeForSearch(text).includes(this.normalizeForSearch(term));
+    }
+
+    private matchUserFields(user: any, term: string): boolean {
+        if (!user) return false;
+        const name = user?.name || '';
+        const surname = user?.surname || '';
+        const email = user?.email || '';
+        const full = `${name} ${surname}`.trim();
+        return this.matchTerm(name, term) ||
+               this.matchTerm(surname, term) ||
+               this.matchTerm(full, term) ||
+               this.matchTerm(email, term);
+    }
+
+    private applyFilter(): void {
+        const term = (this.searchTerm || '').trim();
+        if (this.activeButton === 'followers') {
+            const base = this.followers || [];
+            this.filteredFollowers = !term ? base : base.filter((f: any) => {
+                // Para seguidores, el objeto con datos es f.user (f.followed puede ser solo un ID)
+                const u = typeof f?.user === 'object' ? f.user : null;
+                return this.matchUserFields(u, term);
+            });
+        } else {
+            const base = this.following || [];
+            this.filteredFollowing = !term ? base : base.filter((f: any) => {
+                // Para siguiendo, el objeto con datos es f.followed (f.user puede ser solo un ID)
+                const u = typeof f?.followed === 'object' ? f.followed : null;
+                return this.matchUserFields(u, term);
+            });
+        }
+    }
+
+    onSearchChange(): void {
+        console.log('searchTerm', this.searchTerm);
+        console.log('filteredFollowers', this.filteredFollowers);
+        console.log('filteredFollowing', this.filteredFollowing);
+        this.applyFilter();
+    }
+
     setActiveButton(activeButton) {
         this.activeButton = activeButton;
 
         if (this.activeButton == 'followers') {
-            this.getFollowerUsers(this.page || 1);
+            // reset paginación y lista al cambiar de pestaña
+            this.followersPage = 1;
+            this.followers = [];
+            this.getFollowerUsers(1);
+            this.filteredFollowers = [];
         } else {
-            this.getFollowingUsers(this.page || 1);
+            this.followingPage = 1;
+            this.following = [];
+            this.getFollowingUsers(1);
+            this.filteredFollowing = [];
+            // Asegurar que los IDs del usuario logueado estén cargados para pintar botones
+            this.loadMyFollowingIds();
         }
+        this.applyFilter();
     }
     
     loadPage() {
@@ -160,11 +245,28 @@ export class FollowsComponent implements OnInit {
                         this.following = response.follows;
                         this.followingPages = response.totalPages || response.pages;
                         this.followingTotal = response.total;
+                        // Si es el propio perfil, poblar IDs de seguidos desde el listado
+                        if (this.identity?._id && this.ownProfile?._id && this.identity._id === this.ownProfile._id) {
+                            this.followingUsersId = (this.following || [])
+                                .map((f: any) => f?.followed?._id || f?.followed)
+                                .filter((id: any) => !!id);
+                        }
+                        this.applyFilter();
                     } else {
                         // Cuando se hace scroll, se envía por acá la petición
                         for (let i in response.follows) {
                             this.following.push(response.follows[i]);
                         }
+                        // Si es el propio perfil, acumular IDs para pintar correctamente los botones en páginas siguientes
+                        if (this.identity?._id && this.ownProfile?._id && this.identity._id === this.ownProfile._id) {
+                            const newIds = (response.follows || [])
+                                .map((f: any) => f?.followed?._id || f?.followed)
+                                .filter((id: any) => !!id);
+                            const merged = [...(this.followingUsersId || []), ...newIds];
+                            // Eliminar duplicados
+                            this.followingUsersId = Array.from(new Set(merged));
+                        }
+                        this.applyFilter();
                     }
                 } else {
                     this.status = 'error';
@@ -186,11 +288,13 @@ export class FollowsComponent implements OnInit {
                         this.followersPages = response.totalPages || response.pages;
                         this.followersTotal = response.total;
                         this.followingUsersId = response.following; // los que esta siguiendo el perfil logueado
+                        this.applyFilter();
                     } else {
                         // se envia al array de followers
                         for (let i in response.follows) {
                             this.followers.push(response.follows[i]);
                         }
+                        this.applyFilter();
                     }
                 } else {
                     this.status = 'error';
@@ -242,20 +346,25 @@ export class FollowsComponent implements OnInit {
     }
 
     onScrolld() {
+        if (this.loading) return;
         if (this.activeButton == 'followers') {
-            this.followersPage += 1;
-            if (this.followersPage <= this.followersPages) {
-                this.loading = true;
-                this.getFollowerUsers(this.followersPage);
-                this.loading = false;
+            const next = (this.followersPage || 1) + 1;
+            if (this.followersPages && next > this.followersPages) {
+                return;
             }
+            this.loading = true;
+            this.getFollowerUsers(next);
+            this.followersPage = next;
+            this.loading = false;
         } else {
-            this.followingPage += 1;
-            if (this.followingPage <= this.followingPages) {
-                this.loading = true;
-                this.getFollowingUsers(this.followingPage);
-                this.loading = false;
+            const next = (this.followingPage || 1) + 1;
+            if (this.followingPages && next > this.followingPages) {
+                return;
             }
+            this.loading = true;
+            this.getFollowingUsers(next);
+            this.followingPage = next;
+            this.loading = false;
         }
     }
 

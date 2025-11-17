@@ -219,7 +219,7 @@ export class EditLessonComponent implements OnInit {
         // Recargar la página después de 1.5 segundos para salir del modo edición
         // Esto evita que el usuario pueda seguir editando después de cambios importantes de estado
         setTimeout(() => {
-          window.location.href = `/academia/lessons/${this.lessonId}`;
+          this.router.navigate(['/academia/lessons', this.lessonId]);
         }, 1500);
       },
       error: (error) => {

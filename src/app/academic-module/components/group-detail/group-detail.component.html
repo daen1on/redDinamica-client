@@ -46,6 +46,39 @@
           <label class="form-label">Nombre del Grupo *</label>
           <input type="text" class="form-control" [(ngModel)]="editedGroup.name" placeholder="Nombre del grupo" />
         </div>
+        <!-- Líder (solo admins/gestores) -->
+        <div class="mb-3" *ngIf="allowOwnerChange">
+          <label class="form-label"><strong>Líder (Docente/Facilitador)</strong></label>
+          <div class="mb-2">
+            <small class="text-muted">Líder actual: {{ getLeaderName() }}</small>
+          </div>
+          <div class="position-relative">
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="ownerSearchTerm"
+              (ngModelChange)="onOwnerSearchInputChange()"
+              placeholder="Buscar docente o facilitador por nombre o email..."
+              autocomplete="off"
+            />
+            <div *ngIf="showOwnerDropdown" class="dropdown-menu show position-absolute w-100 mt-1" style="z-index: 1050; max-height: 220px; overflow-y: auto;">
+              <button
+                *ngFor="let u of ownerSearchResults"
+                type="button"
+                class="dropdown-item"
+                (click)="selectNewOwner(u)"
+              >
+                {{u.name}} {{u.surname}} <small class="text-muted">({{u.email}})</small>
+              </button>
+            </div>
+          </div>
+          <div class="mt-2" *ngIf="selectedNewOwner">
+            <span class="badge bg-info">Nuevo líder: {{selectedNewOwner.name}} {{selectedNewOwner.surname}}</span>
+            <button class="btn btn-sm btn-outline-primary ms-2" type="button" (click)="transferOwnership(selectedNewOwner._id)" [disabled]="savingGroup">
+              Cambiar líder
+            </button>
+          </div>
+        </div>
         <div class="mb-3">
           <label class="form-label">Descripción *</label>
           <textarea class="form-control" rows="3" [(ngModel)]="editedGroup.description" placeholder="Descripción del grupo"></textarea>

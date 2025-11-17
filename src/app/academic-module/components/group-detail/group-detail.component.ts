@@ -44,6 +44,12 @@ export class GroupDetailComponent implements OnInit {
   // Recursos del grupo
   groupResources: any[] = [];
   token: string = '';
+  // Transferencia de dueño (solo admin)
+  allowOwnerChange = false;
+  ownerSearchTerm = '';
+  ownerSearchResults: any[] = [];
+  showOwnerDropdown = false;
+  selectedNewOwner: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -211,6 +217,47 @@ export class GroupDetailComponent implements OnInit {
     if (this.editedGroup.academicLevel) {
       this.loadValidGrades(this.editedGroup.academicLevel);
     }
+    // Solo admin/delegated_admin/lesson_manager pueden cambiar dueño
+    this.allowOwnerChange = ['admin', 'delegated_admin', 'lesson_manager'].includes(this.currentUserRole);
+    if (this.allowOwnerChange) {
+      (this.editedGroup as any).newOwnerId = (this.group as any)?.teacher?._id || '';
+    }
+  }
+
+  onOwnerSearchInputChange(): void {
+    const term = (this.ownerSearchTerm || '').trim();
+    if (!term) {
+      this.ownerSearchResults = [];
+      this.showOwnerDropdown = false;
+      return;
+    }
+    this.userService.searchUsers(term, 8).subscribe({
+      next: (res: any) => {
+        const users = (res?.users || res || []).filter((u: any) => {
+          const role = (u?.role || '').toLowerCase();
+          return ['teacher', 'facilitator', 'expert'].includes(role) || !role; // fallback si no viene rol
+        });
+        this.ownerSearchResults = users;
+        this.showOwnerDropdown = users.length > 0;
+      },
+      error: () => {
+        this.ownerSearchResults = [];
+        this.showOwnerDropdown = false;
+      }
+    });
+  }
+
+  selectNewOwner(user: any): void {
+    this.selectedNewOwner = user;
+    this.ownerSearchTerm = `${user?.name || ''} ${user?.surname || ''}`.trim();
+    this.showOwnerDropdown = false;
+  }
+
+  getLeaderName(): string {
+    const t: any = this.group?.teacher;
+    if (!t) return '';
+    if (typeof t === 'string') return t;
+    return `${t?.name || ''} ${t?.surname || ''}`.trim();
   }
 
   loadValidGrades(academicLevel: string): void {
@@ -225,7 +272,7 @@ export class GroupDetailComponent implements OnInit {
   }
 
   saveGroup(): void {
-    if (!this.editedGroup.name || !this.editedGroup.description || !this.editedGroup.academicLevel || !this.editedGroup.grade) {
+    if (!this.editedGroup.name || !this.editedGroup.description || !this.editedGroup.academicLevel) {
       alert('Por favor completa todos los campos obligatorios');
       return;
     }
@@ -250,6 +297,31 @@ export class GroupDetailComponent implements OnInit {
     this.editedGroup = {};
   }
 
+  // Transferir propiedad del grupo (solo admin/roles elevados)
+  transferOwnership(newOwnerUserId: string): void {
+    if (!this.allowOwnerChange) {
+      alert('No tienes permisos para cambiar el dueño del grupo.');
+      return;
+    }
+    if (!newOwnerUserId) {
+      alert('Selecciona un nuevo dueño para el grupo.');
+      return;
+    }
+    this.savingGroup = true;
+    // Nota: el backend debe aceptar la actualización del campo teacher
+    this.academicGroupService.updateGroup(this.groupId, { teacher: newOwnerUserId } as any).subscribe({
+      next: () => {
+        this.savingGroup = false;
+        alert('Dueño del grupo actualizado.');
+        this.loadGroupDetails();
+      },
+      error: (error) => {
+        console.error('Error al transferir dueño del grupo:', error);
+        this.savingGroup = false;
+        alert(error.error?.message || 'No se pudo cambiar el dueño del grupo');
+      }
+    });
+  }
   deleteGroup(): void {
     if (confirm('¿Estás seguro de que quieres eliminar este grupo? Esta acción no se puede deshacer.')) {
       this.academicGroupService.deleteGroup(this.groupId).subscribe({
