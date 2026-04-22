@@ -3,7 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { of, throwError, Subject } from 'rxjs';
 
 import { LessonsComponent } from './lessons.component';
@@ -26,7 +26,7 @@ describe('Admin LessonsComponent', () => {
   let userService: jasmine.SpyObj<UserService>;
   let basicDataService: jasmine.SpyObj<BasicDataService>;
   let router: jasmine.SpyObj<Router>;
-  let changeDetectorRef: jasmine.SpyObj<ChangeDetectorRef>;
+  // ChangeDetectorRef se espiará directamente desde la instancia del componente
 
   const mockToken = 'mock-jwt-token';
   const mockIdentity = {
@@ -62,11 +62,8 @@ describe('Admin LessonsComponent', () => {
     { _id: '2', name: 'Science' }
   ];
 
-  const mockParamsSubject = new Subject();
-  const mockActivatedRoute = {
-    params: mockParamsSubject.asObservable(),
-    queryParams: of({})
-  };
+  let mockParamsSubject: Subject<any>;
+  let mockActivatedRoute: { params: any; queryParams: any };
 
   beforeEach(async () => {
     const lessonServiceSpy = jasmine.createSpyObj('LessonService', [
@@ -82,9 +79,13 @@ describe('Admin LessonsComponent', () => {
       'getAllKnowledgeAreas'
     ]);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    const changeDetectorRefSpy = jasmine.createSpyObj('ChangeDetectorRef', [
-      'detectChanges'
-    ]);
+
+    // Crear un Subject nuevo para cada test y un ActivatedRoute fresco
+    mockParamsSubject = new Subject<any>();
+    mockActivatedRoute = {
+      params: mockParamsSubject.asObservable(),
+      queryParams: of({})
+    };
 
     await TestBed.configureTestingModule({
       declarations: [LessonsComponent],
@@ -100,8 +101,7 @@ describe('Admin LessonsComponent', () => {
         { provide: UserService, useValue: userServiceSpy },
         { provide: BasicDataService, useValue: basicDataServiceSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: ChangeDetectorRef, useValue: changeDetectorRefSpy }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute }
       ]
     }).compileComponents();
     
@@ -110,7 +110,6 @@ describe('Admin LessonsComponent', () => {
     userService = TestBed.inject(UserService) as jasmine.SpyObj<UserService>;
     basicDataService = TestBed.inject(BasicDataService) as jasmine.SpyObj<BasicDataService>;
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    changeDetectorRef = TestBed.inject(ChangeDetectorRef) as jasmine.SpyObj<ChangeDetectorRef>;
 
     userService.getToken.and.returnValue(mockToken);
     userService.getIdentity.and.returnValue(mockIdentity as any);
@@ -128,7 +127,8 @@ describe('Admin LessonsComponent', () => {
   });
 
   afterEach(() => {
-    mockParamsSubject.complete();
+    // completar subject si no fue completado
+    try { mockParamsSubject.complete(); } catch {}
   });
 
   it('should create', () => {
@@ -407,13 +407,14 @@ describe('Admin LessonsComponent', () => {
       spyOn(component, 'fetchAllLessons');
       spyOn(console, 'log');
       const eventData = { reload: true };
+      const detectSpy = spyOn((component as any).cdr, 'detectChanges');
 
       component.setNeedReload(eventData);
 
       expect(console.log).toHaveBeenCalledWith(eventData);
       expect(component.actualPage).toHaveBeenCalled();
       expect(component.fetchAllLessons).toHaveBeenCalled();
-      expect(changeDetectorRef.detectChanges).toHaveBeenCalled();
+      expect(detectSpy).toHaveBeenCalled();
     });
   });
 

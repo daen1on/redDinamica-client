@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -10,7 +9,7 @@ import { LessonsComponent } from './lessons.component';
 import { LessonService } from 'src/app/services/lesson.service';
 import { UserService } from 'src/app/services/user.service';
 import { BasicDataService } from 'src/app/services/basicData.service';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, provideRouter } from '@angular/router';
 
 @Pipe({ name: 'filter', standalone: true })
 class FilterPipeStub implements PipeTransform {
@@ -40,7 +39,8 @@ describe('LessonsComponent', () => {
     resume: 'Test lesson resume',
     type: 'consideration',
     level: 'basic',
-    state: 'proposed',
+    state: 'completed',
+    visible: true,
     knowledge_area: [{ name: 'Mathematics' }],
     development_level: 'garden',
     views: 5
@@ -76,7 +76,6 @@ describe('LessonsComponent', () => {
       declarations: [LessonsComponent],
       imports: [
         CommonModule,
-        RouterTestingModule,
         HttpClientTestingModule,
         ReactiveFormsModule,
         FilterPipeStub
@@ -86,11 +85,13 @@ describe('LessonsComponent', () => {
         { provide: UserService, useValue: userServiceSpy },
         { provide: BasicDataService, useValue: basicDataServiceSpy },
         { provide: Router, useValue: routerSpy },
+        provideRouter([]),
         {
           provide: ActivatedRoute,
           useValue: {
             params: of({}),
-            queryParams: of({})
+            queryParams: of({}),
+            snapshot: { params: {} }
           }
         }
       ]
@@ -105,6 +106,7 @@ describe('LessonsComponent', () => {
     userService.getToken.and.returnValue(mockToken);
     userService.getIdentity.and.returnValue(mockIdentity as any);
     lessonService.getAllLessons.and.returnValue(of(mockLessonsResponse));
+    lessonService.getLessons.and.returnValue(of(mockLessonsResponse));
     // ensure editLesson exists to avoid TypeError in increaseViews
     (lessonService as any).editLesson = jasmine.createSpy('editLesson').and.returnValue(of({ lesson: { ...mockLesson } }));
     basicDataService.getAllKnowledgeAreas.and.returnValue(of({ areas: mockAreas.map(area => ({ ...area, used: false })) }));
@@ -174,8 +176,8 @@ describe('LessonsComponent', () => {
       component.selectedAreas = ['Mathematics'];
       const mockLessonsWithAreas = {
         lessons: [
-          { ...mockLesson, knowledge_area: [{ name: 'Mathematics' }] },
-          { ...mockLesson, _id: '2', knowledge_area: [{ name: 'Science' }] }
+          { ...mockLesson, knowledge_area: [{ name: 'Mathematics' }], state: 'completed', visible: true },
+          { ...mockLesson, _id: '2', knowledge_area: [{ name: 'Science' }], state: 'completed', visible: true }
         ]
       };
       lessonService.getAllLessons.and.returnValue(of(mockLessonsWithAreas));
@@ -190,8 +192,8 @@ describe('LessonsComponent', () => {
       component.selectedLevels = ['garden'];
       const mockLessonsWithLevels = {
         lessons: [
-          { ...mockLesson, level: 'garden' },
-          { ...mockLesson, _id: '2', level: 'school' }
+          { ...mockLesson, level: 'garden', state: 'completed', visible: true },
+          { ...mockLesson, _id: '2', level: 'school', development_level: 'school', state: 'completed', visible: true }
         ]
       };
       lessonService.getAllLessons.and.returnValue(of(mockLessonsWithLevels));
@@ -378,7 +380,7 @@ describe('LessonsComponent', () => {
       spyOn(component, 'getLessons');
     });
 
-    it('should reload lessons when needReloadData is true', () => {
+    it('should reload lessons (independent of needReloadData flag)', () => {
       component.needReloadData = true;
       component.page = 2;
 
@@ -386,16 +388,15 @@ describe('LessonsComponent', () => {
 
       expect(component.getAllLessons).toHaveBeenCalled();
       expect(component.getLessons).toHaveBeenCalledWith(2);
-      expect(component.needReloadData).toBe(false);
     });
 
-    it('should not reload lessons when needReloadData is false', () => {
+    it('should also reload lessons when needReloadData is false', () => {
       component.needReloadData = false;
 
       component.reloadLessons();
 
-      expect(component.getAllLessons).not.toHaveBeenCalled();
-      expect(component.getLessons).not.toHaveBeenCalled();
+      expect(component.getAllLessons).toHaveBeenCalled();
+      expect(component.getLessons).toHaveBeenCalled();
     });
   });
 
@@ -450,19 +451,25 @@ describe('LessonsComponent', () => {
           { 
             ...mockLesson, 
             knowledge_area: [{ name: 'Mathematics' }],
-            development_level: 'garden'
+            development_level: 'garden',
+            state: 'completed',
+            visible: true
           },
           { 
             ...mockLesson, 
             _id: '2',
             knowledge_area: [{ name: 'Science' }],
-            development_level: 'garden'
+            development_level: 'garden',
+            state: 'completed',
+            visible: true
           },
           { 
             ...mockLesson, 
             _id: '3',
             knowledge_area: [{ name: 'Mathematics' }],
-            development_level: 'school'
+            development_level: 'school',
+            state: 'completed',
+            visible: true
           }
         ]
       };

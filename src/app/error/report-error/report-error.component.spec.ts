@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 import { ReportErrorComponent } from './report-error.component';
 import { ErrorService } from '../../services/error.service';
 
@@ -18,7 +19,8 @@ describe('ReportErrorComponent', () => {
       providers: [
         ErrorService,
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideRouter([])
       ]
     })
     .compileComponents();

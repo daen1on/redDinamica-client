@@ -38,7 +38,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     readonly deletedMsg = 'Se ha eliminado la conversación';
     public selectedGroup;
     public parentUrl;
-   
+
     @Input() lesson;
     @Output() added = new EventEmitter();
 
@@ -67,8 +67,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
         this.errorMsg = 'Hubo un error agregando la conversación. Intentalo de nuevo más tarde.';
         this.successMsg = 'Se ha creado la conversación correctamente.';
-        this.warningMsg =  'Se estan subiendo los archivos, por favor espera mientras finaliza y evita cerrar esta ventana.';
-        
+        this.warningMsg = 'Se estan subiendo los archivos, por favor espera mientras finaliza y evita cerrar esta ventana.';
+
         this.name = new UntypedFormControl('', Validators.required);
         this.message = new UntypedFormControl('', Validators.required);
         this.files = new UntypedFormControl('');
@@ -87,16 +87,20 @@ export class ConversationComponent implements OnInit, OnDestroy {
         // Iniciar polling de la lección para refresco en tiempo real
         this.startPolling();
     }
-    
-  
+
+    public messagesByGroup: { [key: string]: any[] } = {};
+
     getGroups() {
         this.groups = [];
+        this.messagesByGroup = {};
 
-        if (this.lesson.conversations.length > 0) {
+        if (this.lesson && this.lesson.conversations && this.lesson.conversations.length > 0) {
             this.lesson.conversations.forEach(message => {
                 if (!this.groups.includes(message.conversationTitle)) {
                     this.groups.push(message.conversationTitle);
+                    this.messagesByGroup[message.conversationTitle] = [];
                 }
+                this.messagesByGroup[message.conversationTitle].push(message);
             });
         }
 
@@ -113,39 +117,26 @@ export class ConversationComponent implements OnInit, OnDestroy {
         this.getGroups();
 
     }
-    //pensar como traer los mensajes una vez se envian o una vez llegan 
-    //probar a crear un nuevo servicio que traiga los mensajes 
-    ngDoCheck(){
-        // Evitar recálculo constante si no hay grupo seleccionado
-        if (this.selectedGroup) {
-            this.getMessages(this.selectedGroup);
-        }
-    }
-
-    
-    showResources(){
+    showResources() {
         let response;
-        if(this.lesson.leader && this.lesson.leader._id == this.identity._id
-            && ['proposed', 'assigned', 'development', 'test'].includes(this.lesson.state)){
+        if (this.lesson.leader && this.lesson.leader._id == this.identity._id
+            && ['proposed', 'assigned', 'development', 'test'].includes(this.lesson.state)) {
             response = true;
-        }else{
+        } else {
             response = false;
-            if(this.parentUrl == 'admin'){
+            if (this.parentUrl == 'admin') {
                 response = true;
             }
         }
-        //console.log(response);
         return response;
     }
-    getMessages(group) {
-        let messages = [];
 
-        if (this.lesson.conversations.length > 0) {
-            messages = this.lesson.conversations.filter(message => {
-                return message.conversationTitle == group;
-            });
-        }
-        return messages;
+    getMessages(group) {
+        return this.messagesByGroup[group] || [];
+    }
+
+    trackByMessageId(index: number, message: any): string {
+        return message._id || index.toString();
     }
 
     removeSpaces(text) {
@@ -153,16 +144,16 @@ export class ConversationComponent implements OnInit, OnDestroy {
     }
 
     public index;
-    getIndex(index){
-        this.index =index;
+    getIndex(index) {
+        this.index = index;
         //console.log(this.index)
 
     }
-    eliminar(){
+    eliminar() {
         //console.log("eliminar",index);
-        
+
         //console.log(this.index)
-        this.lesson.conversations.splice(this.index,1);
+        this.lesson.conversations.splice(this.index, 1);
         //console.log("eliminar",this.lesson.conversations);
 
         this._lessonService.editLesson(this.token, this.lesson).subscribe(
@@ -173,22 +164,22 @@ export class ConversationComponent implements OnInit, OnDestroy {
                     this.getGroups();
                     this.selectedGroup = this.groups[0];
                     this.status = 'deleted';
-                   
+
 
 
 
                 }
 
-            },error =>{
+            }, error => {
 
-                if (error!=null){
+                if (error != null) {
                     this.status = 'error';
                     console.log(<any>error);
                 }
-                else{
+                else {
                     this.status = 'error';
                 }
-            });     
+            });
     }
 
 
@@ -206,26 +197,26 @@ export class ConversationComponent implements OnInit, OnDestroy {
                 }
             }
         }
-       
+
 
     }
-    
+
     onSubmit(group = null) {
         let tempFile, tempMessage;
         this.submitted = true;
         this.disableForm(this.submitted);
         tempMessage = new LessonMessage(this.message.value);
-         // Check if your form controls have validation errors
+        // Check if your form controls have validation errors
         if (this.name.invalid || this.files.invalid || this.message.invalid || this.maxSizeError) {
             // Handle validation errors, e.g., display error messages to the user
-             return;
+            return;
         }
-        if(group){
+        if (group) {
             tempMessage.conversationTitle = group;
             this.name.setValue('dummy');
-        }else{
-            tempMessage.conversationTitle = this.name.value;            
-        }        
+        } else {
+            tempMessage.conversationTitle = this.name.value;
+        }
 
         if (this.filesToUpload.length > 0) {
 
@@ -270,20 +261,20 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
     }
 
-    disableForm(command:Boolean):void{
-        if(command == true){
-        this.name.disable();
-        this.message.disable();
-        this.files.disable();
-        
-        }    
-        else{
-            
-        this.name.enable();
-        this.message.enable();
-        this.files.enable();
+    disableForm(command: Boolean): void {
+        if (command == true) {
+            this.name.disable();
+            this.message.disable();
+            this.files.disable();
+
         }
-        
+        else {
+
+            this.name.enable();
+            this.message.enable();
+            this.files.enable();
+        }
+
     }
 
     editLesson(lesson) {
@@ -294,7 +285,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
             next: response => {
                 if (response.lesson && response.lesson._id) {
                     this.lesson = response.lesson;
-                    if (this.filesToUpload.length === 0){
+                    if (this.filesToUpload.length === 0) {
                         this.status = 'success';
                         this.submitted = false;
                         this.name.reset();
@@ -304,50 +295,50 @@ export class ConversationComponent implements OnInit, OnDestroy {
                         this.disableForm(false);
                         this.loading = false;
                     }
-                    
-                    else{ 
+
+                    else {
                         if (this.filesToUpload.length > 0) {
-                        //Upload profile imaage
-                        this._uploadService.makeFileRequest(
-                            this.url + 'upload-lesson/' + this.lesson._id,
-                            [],
-                            this.filesToUpload,
-                            this.token,
-                            'files'
-                        ).subscribe((event: HttpEvent<any>) => { // client call
-                            switch(event.type) { //checks events
-                            case HttpEventType.UploadProgress: // If upload is in progress
-                            this.status = 'warning';
-                            this.barWidth = Math.round(event.loaded / event.total * 100).toString()+'%'; // get upload percentage
-                            break;
-                            case HttpEventType.Response: // give final response
-                            console.log('User successfully added!', event.body);
-                            
-                            this.submitted = false;
-                            this.disableForm(false);
-                            this.name.reset();
-                            this.files.reset();
-                            this.message.reset();
-                            this.getGroups();
-                            this.status ='success';
-                            this.barWidth ='0%';
-                            this.loading = false;
-                            }
-                        }, error=>{
+                            //Upload profile imaage
+                            this._uploadService.makeFileRequest(
+                                this.url + 'upload-lesson/' + this.lesson._id,
+                                [],
+                                this.filesToUpload,
+                                this.token,
+                                'files'
+                            ).subscribe((event: HttpEvent<any>) => { // client call
+                                switch (event.type) { //checks events
+                                    case HttpEventType.UploadProgress: // If upload is in progress
+                                        this.status = 'warning';
+                                        this.barWidth = Math.round(event.loaded / event.total * 100).toString() + '%'; // get upload percentage
+                                        break;
+                                    case HttpEventType.Response: // give final response
+                                        console.log('User successfully added!', event.body);
 
-                             
-                            this.status = 'error';
-                            this.barWidth ='0%';
-                            this.submitted = false;
-                            this.loading = false;
-                            console.log(<any>error);
+                                        this.submitted = false;
+                                        this.disableForm(false);
+                                        this.name.reset();
+                                        this.files.reset();
+                                        this.message.reset();
+                                        this.getGroups();
+                                        this.status = 'success';
+                                        this.barWidth = '0%';
+                                        this.loading = false;
+                                }
+                            }, error => {
 
-                        });
+
+                                this.status = 'error';
+                                this.barWidth = '0%';
+                                this.submitted = false;
+                                this.loading = false;
+                                console.log(<any>error);
+
+                            });
                         }
-                        else{
-                            
+                        else {
+
                             this.status = 'error';
-                            this.submitted =false;
+                            this.submitted = false;
                             this.loading = false;
                         }
 
@@ -364,7 +355,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
                 this.submitted = false;
                 this.loading = false;
                 console.error('Error updating lesson conversation:', error);
-                
+
                 // Manejo específico de errores
                 if (error.status === 500) {
                     this.errorMsg = 'Error interno del servidor. Por favor, verifica que todos los campos estén correctamente completados.';
@@ -443,7 +434,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
                         this.getGroups();
                     }
                 },
-                error: () => {}
+                error: () => { }
             });
         }, 10000);
     }

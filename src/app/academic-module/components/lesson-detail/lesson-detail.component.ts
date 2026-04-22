@@ -10,6 +10,7 @@ import { LessonFilesComponent } from './files/lesson-files.component';
 import { LessonTeamComponent } from './team/lesson-team.component';
 import { LessonFeedbackComponent } from './feedback/lesson-feedback.component';
 import { LessonRatingComponent } from './rating/lesson-rating.component';
+import { GLOBAL } from '../../../services/GLOBAL'; // Importar configuración global
 
 @Component({
   selector: 'app-lesson-detail',
@@ -50,7 +51,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   resourceCategory: 'document' | 'image' | 'video' | 'audio' | 'link' | 'other' = 'document';
   teacherFeedback: string = '';
   teacherCommentType: 'feedback' | 'suggestion' | 'approval' | 'correction' = 'feedback';
-  
+
   // Conversaciones
   currentConversationId: string = '';
   newConversationTitle: string = '';
@@ -99,7 +100,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       try {
         if (!this.lessonId) return;
         this.refreshLessonSilently();
-      } catch {}
+      } catch { }
       // reprogramar dinámicamente según estado de escritura
       this.chatPollingHandle = setTimeout(tick, getInterval());
     };
@@ -108,7 +109,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   }
 
   private stopChatPolling(): void {
-    if (this.chatPollingHandle) { try { clearTimeout(this.chatPollingHandle); } catch {} }
+    if (this.chatPollingHandle) { try { clearTimeout(this.chatPollingHandle); } catch { } }
     this.chatPollingHandle = null;
   }
 
@@ -163,7 +164,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
 
         setTimeout(() => this.scrollMessagesToBottom(), 0);
       },
-      error: () => {}
+      error: () => { }
     });
   }
 
@@ -217,15 +218,15 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
         if (!exists && this.lesson.conversations.length > 0) {
           this.currentConversationId = (this.lesson.conversations[0] as any)._id || '';
         }
-        
+
         // Precargar estudiantes actuales del grupo para selector de invitación
         try {
           const group: any = (this.lesson as any).academicGroup;
           console.log('🔍 [loadLesson] academicGroup completo:', group);
           const students: any[] = Array.isArray(group?.students) ? group.students : [];
           console.log('🔍 [loadLesson] students array crudo:', students);
-          this.groupStudents = students.map((s: any) => ({ 
-            _id: String(s._id || s), 
+          this.groupStudents = students.map((s: any) => ({
+            _id: String(s._id || s),
             name: s.name || s.fullname || s.username || s.email || 'Estudiante',
             surname: s.surname || s.lastname || '',
             email: s.email || ''
@@ -244,7 +245,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
           const tabId = `${this.pendingFocusTab}-tab`;
           setTimeout(() => {
             const el = document.getElementById(tabId) as HTMLButtonElement | null;
-            if (el) { try { el.click(); } catch {} }
+            if (el) { try { el.click(); } catch { } }
             this.pendingFocusTab = null;
           }, 0);
         }
@@ -257,7 +258,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  
+
   deleteLesson(): void {
     if (confirm('¿Está seguro de que desea eliminar esta lección?')) {
       this.loading = true;
@@ -279,10 +280,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   editLesson(): void {
 
 
-      this.router.navigate(['/academia/lessons', this.lesson._id, 'edit']);
-  }  
-  
-   
+    this.router.navigate(['/academia/lessons', this.lesson._id, 'edit']);
+  }
+
+
 
   // Métodos para abrir/cerrar modales
   openApproveModal(): void {
@@ -450,10 +451,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     if (!this.lesson) return false;
     const isTeacher = this.getIdFromRef((this.lesson as any)?.academicGroup?.teacher) === this.currentUserId;
     // Mostrar el botón solo si es teacher, está graded, NO está exportada y NO está en proceso (ready_for_migration)
-    return isTeacher && 
-           this.lesson?.status === 'graded' && 
-           !this.lesson?.isExported && 
-           this.lesson?.state !== 'ready_for_migration';
+    return isTeacher &&
+      this.lesson?.status === 'graded' &&
+      !this.lesson?.isExported &&
+      this.lesson?.state !== 'ready_for_migration';
   }
 
   getStatusLabel(status: string): string {
@@ -650,13 +651,13 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       this.errorMessage = 'Seleccione un estudiante del grupo.';
       return;
     }
-    
+
     const payload = {
       lessonId: this.lesson._id,
       userId: this.inviteStudentId,
       message: this.inviteMessage
     };
-    
+
     this.loading = true;
     this.academicLessonService.inviteCollaborator(payload).subscribe({
       next: (res) => {
@@ -678,7 +679,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  
+
   sendChatMessage(): void {
     if (!this.lesson || !this.currentConversationId) return;
     const content = (this.chatMessage || '').trim();
@@ -722,8 +723,8 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     try {
       const a: any = author as any;
       if (a && a.picture) {
-        // Usar la URL base del backend
-        return `${(window as any)?.API_BASE_URL || 'http://localhost:3800/api/'}get-image-user/${a.picture}`;
+        // Usar la URL base del backend desde GLOBAL
+        return `${GLOBAL.url}get-image-user/${a.picture}`;
       }
       return '';
     } catch { return ''; }
@@ -809,7 +810,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
       if (el) {
         el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
       }
-    } catch {}
+    } catch { }
   }
 
   onFileSelected(event: any): void {
@@ -851,7 +852,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     const absoluteUrl = (file as any).url
       ? String((file as any).url)
       : `${base.replace(/\/$/, '/')}${String(file.path).replace(/^\//, '')}`;
-    try { window.open(absoluteUrl, '_blank'); } catch {}
+    try { window.open(absoluteUrl, '_blank'); } catch { }
   }
 
   // Eliminar archivo: quitar del array en memoria y hacer update (PUT)
@@ -957,7 +958,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
   leaveLesson(): void {
     if (!this.lesson || !this.currentUserId) return;
     if (!confirm('¿Estás seguro de que deseas retirarte de esta lección?')) return;
-    
+
     this.loading = true;
     // Llamar al backend para retirar al usuario del development_group
     this.academicLessonService.leaveLesson(this.lessonId).subscribe({
@@ -979,10 +980,10 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     if (!this.lesson || !this.currentUserId) return false;
     const leaderId = this.getIdFromRef((this.lesson as any)?.leader);
     const isLeader = leaderId && leaderId === this.currentUserId;
-    
+
     // No puede retirarse si es el líder
     if (isLeader) return false;
-    
+
     // Verificar si está en el equipo de desarrollo
     const members: any[] = Array.isArray(this.lesson?.development_group) ? (this.lesson as any).development_group : [];
     const memberIds = members.map((m: any) => this.getIdFromRef(m?.user)).filter((v: string) => !!v);
@@ -1000,7 +1001,7 @@ export class LessonDetailComponent implements OnInit, OnDestroy {
     if (!this.lesson) return;
     const title = (this.newConversationTitle || '').trim();
     if (!title) return;
-    
+
     this.loading = true;
     this.academicLessonService.createConversation(this.lesson._id, title).subscribe({
       next: (res) => {

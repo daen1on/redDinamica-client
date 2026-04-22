@@ -1,15 +1,17 @@
 <div class="container">
   <h2>Gestión de Reportes y Denuncias</h2>
-  
+
   <!-- Pestañas de navegación -->
   <ul class="nav nav-tabs mb-3" id="reportsTabs" role="tablist">
     <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="technical-tab" data-bs-toggle="tab" data-bs-target="#technical" type="button" role="tab" aria-controls="technical" aria-selected="true">
+      <button class="nav-link active" id="technical-tab" data-bs-toggle="tab" data-bs-target="#technical" type="button"
+        role="tab" aria-controls="technical" aria-selected="true">
         Errores y Sugerencias
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="complaints-tab" data-bs-toggle="tab" data-bs-target="#complaints" type="button" role="tab" aria-controls="complaints" aria-selected="false">
+      <button class="nav-link" id="complaints-tab" data-bs-toggle="tab" data-bs-target="#complaints" type="button"
+        role="tab" aria-controls="complaints" aria-selected="false">
         Denuncias
       </button>
     </li>
@@ -17,7 +19,7 @@
 
   <!-- Contenido de las pestañas -->
   <div class="tab-content" id="reportsTabsContent">
-    
+
     <!-- Pestaña de Errores y Sugerencias -->
     <div class="tab-pane fade show active" id="technical" role="tabpanel" aria-labelledby="technical-tab">
       <div class="mb-3">
@@ -25,7 +27,8 @@
           <div class="card">
             <div class="card-header" id="headingType">
               <h2 class="mb-0">
-                <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseType" aria-expanded="true" aria-controls="collapseType">
+                <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseType"
+                  aria-expanded="true" aria-controls="collapseType">
                   Filtrar por tipo
                 </button>
               </h2>
@@ -35,7 +38,8 @@
               <div class="card-body">
                 <div class="form-group">
                   <div *ngFor="let type of errorTypes" class="form-check">
-                    <input type="checkbox" class="form-check-input" [id]="type" (change)="toggleFilterType(type)" [checked]="filterType.includes(type)">
+                    <input type="checkbox" class="form-check-input" [id]="type" (change)="toggleFilterType(type)"
+                      [checked]="filterType.includes(type)">
                     <label class="form-check-label" [for]="type">{{ type }}</label>
                   </div>
                 </div>
@@ -46,7 +50,8 @@
           <div class="card">
             <div class="card-header" id="headingModule">
               <h2 class="mb-0">
-                <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseModule" aria-expanded="false" aria-controls="collapseModule">
+                <button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseModule" aria-expanded="false" aria-controls="collapseModule">
                   Filtrar por módulo
                 </button>
               </h2>
@@ -55,7 +60,8 @@
               <div class="card-body">
                 <div class="form-group">
                   <div *ngFor="let module of modules" class="form-check">
-                    <input type="checkbox" class="form-check-input" [id]="module" (change)="toggleFilterModule(module)" [checked]="filterModule.includes(module)">
+                    <input type="checkbox" class="form-check-input" [id]="module" (change)="toggleFilterModule(module)"
+                      [checked]="filterModule.includes(module)">
                     <label class="form-check-label" [for]="module">{{ module }}</label>
                   </div>
                 </div>
@@ -64,7 +70,7 @@
           </div>
         </div>
       </div>
-      
+
       <div *ngIf="loadingTechnical">Cargando reportes técnicos...</div>
       <div *ngIf="!loadingTechnical && technicalReports.length === 0">No hay reportes técnicos.</div>
       <div *ngIf="!loadingTechnical && technicalReports.length > 0">
@@ -87,14 +93,14 @@
               <td>{{ report.steps }}</td>
               <td>
                 <ng-container *ngIf="report.attachment && report.attachment.length > 0; else noAttachment">
-                  <a (click)="getFile(report.attachment[0].fileName)" style="cursor: pointer; color: blue;">{{ report.attachment[0].originalName }}</a>
+                  <a (click)="getFile(report.attachment[0].fileName)" style="cursor: pointer; color: blue;">{{
+                    report.attachment[0].originalName }}</a>
                 </ng-container>
                 <ng-template #noAttachment>No hay adjunto</ng-template>
               </td>
               <td>
-                <button class="btn btn-secondary btn-sm me-2"
-                        data-bs-toggle="modal"
-                        [attr.data-bs-target]="'#technicalDetailsModal-' + (report._id || i)">
+                <button class="btn btn-secondary btn-sm me-2" data-bs-toggle="modal"
+                  [attr.data-bs-target]="'#technicalDetailsModal-' + (report._id || i)">
                   <i class="fas fa-eye"></i>
                 </button>
                 <button class="btn btn-info btn-sm me-2" (click)="openEditModal(report)">Editar</button>
@@ -104,14 +110,17 @@
           </tbody>
         </table>
         <div class="pagination-controls">
-          <button class="btn btn-secondary me-2" (click)="previousTechnicalPage()" [disabled]="currentTechnicalPage === 1">Anterior</button>
+          <button class="btn btn-secondary me-2" (click)="previousTechnicalPage()"
+            [disabled]="currentTechnicalPage === 1">Anterior</button>
           <span class="mx-2">Página {{ currentTechnicalPage }} de {{ totalTechnicalPages }}</span>
-          <button class="btn btn-secondary" (click)="nextTechnicalPage()" [disabled]="currentTechnicalPage === totalTechnicalPages">Siguiente</button>
+          <button class="btn btn-secondary" (click)="nextTechnicalPage()"
+            [disabled]="currentTechnicalPage === totalTechnicalPages">Siguiente</button>
         </div>
-        
+
         <!-- Modales de detalle para reportes técnicos -->
         <div *ngFor="let report of technicalReports; let i = index">
-          <div class="modal fade" id="technicalDetailsModal-{{report._id || i}}" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal fade" id="technicalDetailsModal-{{report._id || i}}" tabindex="-1" role="dialog"
+            aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
               <div class="modal-content">
                 <div class="modal-header">
@@ -127,7 +136,8 @@
                     <strong>Adjuntos:</strong>
                     <ng-container *ngIf="report.attachment && report.attachment.length > 0; else noAttachmentModal">
                       <div>
-                        <a (click)="getFile(report.attachment[0].fileName)" style="cursor: pointer; color: blue;">{{ report.attachment[0].originalName }}</a>
+                        <a (click)="getFile(report.attachment[0].fileName)" style="cursor: pointer; color: blue;">{{
+                          report.attachment[0].originalName }}</a>
                       </div>
                     </ng-container>
                     <ng-template #noAttachmentModal>No hay adjunto</ng-template>
@@ -150,20 +160,25 @@
           <div class="card">
             <div class="card-header" id="headingComplaintType">
               <h2 class="mb-0">
-                <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#collapseComplaintType" aria-expanded="true" aria-controls="collapseComplaintType">
+                <button class="btn btn-link" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseComplaintType" aria-expanded="true" aria-controls="collapseComplaintType">
                   Filtrar por tipo de denuncia
                 </button>
               </h2>
             </div>
-            <div id="collapseComplaintType" class="collapse" aria-labelledby="headingComplaintType" data-parent="#complaintsFilterAccordion">
+            <div id="collapseComplaintType" class="collapse" aria-labelledby="headingComplaintType"
+              data-parent="#complaintsFilterAccordion">
               <div class="card-body">
                 <div class="form-group">
                   <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="publicationComplaint" (change)="toggleComplaintFilter('publication')" [checked]="complaintFilter.includes('publication')">
+                    <input type="checkbox" class="form-check-input" id="publicationComplaint"
+                      (change)="toggleComplaintFilter('publication')"
+                      [checked]="complaintFilter.includes('publication')">
                     <label class="form-check-label" for="publicationComplaint">Denuncias de publicación</label>
                   </div>
                   <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="userComplaint" (change)="toggleComplaintFilter('user')" [checked]="complaintFilter.includes('user')">
+                    <input type="checkbox" class="form-check-input" id="userComplaint"
+                      (change)="toggleComplaintFilter('user')" [checked]="complaintFilter.includes('user')">
                     <label class="form-check-label" for="userComplaint">Denuncias de usuario</label>
                   </div>
                 </div>
@@ -199,16 +214,14 @@
                 </span>
               </td>
               <td>
-                <a *ngIf="complaint.category === 'publication' && complaint.publicationId" 
-                   [routerLink]="['/inicio/publicacion', complaint.publicationId._id || complaint.publicationId]"
-                   target="_blank"
-                   class="btn btn-sm btn-outline-primary">
+                <a *ngIf="complaint.category === 'publication' && complaint.publicationId"
+                  [routerLink]="['/inicio/publicacion', complaint.publicationId._id || complaint.publicationId]"
+                  target="_blank" class="btn btn-sm btn-outline-primary">
                   <i class="fas fa-external-link-alt"></i> Ver
                 </a>
-                <a *ngIf="complaint.category === 'user' && complaint.reportedUserId" 
-                   [routerLink]="['/perfil', complaint.reportedUser?._id || complaint.reportedUserId._id || complaint.reportedUserId]"
-                   target="_blank"
-                   class="btn btn-sm btn-outline-primary">
+                <a *ngIf="complaint.category === 'user' && complaint.reportedUserId"
+                  [routerLink]="['/perfil', complaint.reportedUser?._id || complaint.reportedUserId._id || complaint.reportedUserId]"
+                  target="_blank" class="btn btn-sm btn-outline-primary">
                   <i class="fas fa-user"></i> {{ complaint.reportedUser?.name || 'Ver' }}
                 </a>
               </td>
@@ -218,9 +231,8 @@
                 </span>
               </td>
               <td>
-                <a *ngIf="complaint.reporter?._id" 
-                   [routerLink]="['/perfil', complaint.reporter._id]"
-                   class="text-primary">
+                <a *ngIf="complaint.reporter?._id" [routerLink]="['/perfil', complaint.reporter._id]"
+                  class="text-primary">
                   {{ complaint.reporter?.name }} {{ complaint.reporter?.surname }}
                 </a>
                 <span *ngIf="!complaint.reporter?._id">
@@ -229,39 +241,42 @@
               </td>
               <td>
                 <div class="btn-group-vertical" role="group">
-                  <button class="btn btn-secondary btn-sm mb-1"
-                          data-bs-toggle="modal"
-                          [attr.data-bs-target]="'#complaintDetailsModal-' + (complaint._id || i)">
+                  <button class="btn btn-secondary btn-sm mb-1" data-bs-toggle="modal"
+                    [attr.data-bs-target]="'#complaintDetailsModal-' + (complaint._id || i)">
                     <i class="fas fa-eye"></i> Detalle
                   </button>
-                  <button *ngIf="complaint.category === 'publication'" 
-                          class="btn btn-danger btn-sm mb-1" 
-                          (click)="confirmDeletePublication(complaint)">
+                  <button *ngIf="complaint.category === 'publication'" class="btn btn-danger btn-sm mb-1"
+                    (click)="confirmDeletePublication(complaint)">
                     <i class="fas fa-trash"></i> Eliminar
                   </button>
-                  <button *ngIf="complaint.category === 'user'" 
-                          class="btn btn-warning btn-sm mb-1" 
-                          (click)="openWarningModal(complaint)">
+                  <button *ngIf="complaint.category === 'user'" class="btn btn-warning btn-sm mb-1"
+                    (click)="openWarningModal(complaint)">
                     <i class="fas fa-exclamation-triangle"></i> Advertir
                   </button>
-                  <button class="btn btn-success btn-sm" 
-                          (click)="resolveComplaint(complaint, false)">
+                  <button *ngIf="complaint.status !== 'resolved'" class="btn btn-success btn-sm"
+                    (click)="resolveComplaint(complaint, false)">
                     <i class="fas fa-check"></i> Resolver
                   </button>
+                  <span *ngIf="complaint.status === 'resolved'" class="badge bg-success mt-1 p-2">
+                    <i class="fas fa-check-double"></i> Resuelta
+                  </span>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
         <div class="pagination-controls">
-          <button class="btn btn-secondary me-2" (click)="previousComplaintsPage()" [disabled]="currentComplaintsPage === 1">Anterior</button>
+          <button class="btn btn-secondary me-2" (click)="previousComplaintsPage()"
+            [disabled]="currentComplaintsPage === 1">Anterior</button>
           <span class="mx-2">Página {{ currentComplaintsPage }} de {{ totalComplaintsPages }}</span>
-          <button class="btn btn-secondary" (click)="nextComplaintsPage()" [disabled]="currentComplaintsPage === totalComplaintsPages">Siguiente</button>
+          <button class="btn btn-secondary" (click)="nextComplaintsPage()"
+            [disabled]="currentComplaintsPage === totalComplaintsPages">Siguiente</button>
         </div>
-        
+
         <!-- Modales de detalle para denuncias -->
         <div *ngFor="let complaint of complaints; let i = index">
-          <div class="modal fade" id="complaintDetailsModal-{{complaint._id || i}}" tabindex="-1" role="dialog" aria-hidden="true">
+          <div class="modal fade" id="complaintDetailsModal-{{complaint._id || i}}" tabindex="-1" role="dialog"
+            aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
               <div class="modal-content">
                 <div class="modal-header">
@@ -269,13 +284,13 @@
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <div class="mb-2"><strong>Categoría:</strong> {{ complaint.category === 'publication' ? 'Denuncia de publicación' : 'Denuncia de usuario' }}</div>
+                  <div class="mb-2"><strong>Categoría:</strong> {{ complaint.category === 'publication' ? 'Denuncia de
+                    publicación' : 'Denuncia de usuario' }}</div>
                   <div class="mb-2"><strong>Tipo:</strong> {{ complaint.type }}</div>
                   <div class="mb-2">
-                    <strong>Denunciante:</strong> 
-                    <a *ngIf="complaint.reporter?._id" 
-                       [routerLink]="['/perfil', complaint.reporter._id]"
-                       class="text-primary">
+                    <strong>Denunciante:</strong>
+                    <a *ngIf="complaint.reporter?._id" [routerLink]="['/perfil', complaint.reporter._id]"
+                      class="text-primary">
                       {{ complaint.reporter?.name }} {{ complaint.reporter?.surname }}
                     </a>
                     <span *ngIf="!complaint.reporter?._id">
@@ -285,26 +300,27 @@
                   <div class="mb-2" *ngIf="complaint.publicationId">
                     <strong>Publicación denunciada:</strong><br>
                     <a [routerLink]="['/inicio/publicacion', complaint.publicationId._id || complaint.publicationId]"
-                       target="_blank"
-                       class="btn btn-sm btn-outline-primary mt-1">
+                      target="_blank" class="btn btn-sm btn-outline-primary mt-1">
                       <i class="fas fa-external-link-alt me-2"></i>Ver publicación
                     </a>
                   </div>
                   <div class="mb-2" *ngIf="complaint.reportedUserId">
                     <strong>Usuario denunciado:</strong><br>
                     <a [routerLink]="['/perfil', complaint.reportedUser?._id || complaint.reportedUserId._id || complaint.reportedUserId]"
-                       target="_blank"
-                       class="btn btn-sm btn-outline-primary mt-1">
-                      <i class="fas fa-user me-2"></i>{{ complaint.reportedUser?.name }} {{ complaint.reportedUser?.surname }}
+                      target="_blank" class="btn btn-sm btn-outline-primary mt-1">
+                      <i class="fas fa-user me-2"></i>{{ complaint.reportedUser?.name }} {{
+                      complaint.reportedUser?.surname }}
                     </a>
                   </div>
                   <div class="mb-2"><strong>Descripción:</strong><br>{{ complaint.description }}</div>
                   <div class="mb-2"><strong>Detalles adicionales:</strong><br>{{ complaint.steps || 'N/A' }}</div>
                   <div class="mb-2">
                     <strong>Adjuntos:</strong>
-                    <ng-container *ngIf="complaint.attachment && complaint.attachment.length > 0; else noAttachmentModal2">
+                    <ng-container
+                      *ngIf="complaint.attachment && complaint.attachment.length > 0; else noAttachmentModal2">
                       <div>
-                        <a (click)="getFile(complaint.attachment[0].fileName)" style="cursor: pointer; color: blue;">{{ complaint.attachment[0].originalName }}</a>
+                        <a (click)="getFile(complaint.attachment[0].fileName)" style="cursor: pointer; color: blue;">{{
+                          complaint.attachment[0].originalName }}</a>
                       </div>
                     </ng-container>
                     <ng-template #noAttachmentModal2>No hay adjunto</ng-template>
@@ -331,10 +347,12 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p><strong>Usuario:</strong> {{ selectedComplaint?.reportedUser?.name }} {{ selectedComplaint?.reportedUser?.surname }}</p>
+        <p><strong>Usuario:</strong> {{ selectedComplaint?.reportedUser?.name }} {{
+          selectedComplaint?.reportedUser?.surname }}</p>
         <div class="form-group">
           <label for="warningMessage">Mensaje de advertencia:</label>
-          <textarea class="form-control" id="warningMessage" rows="4" [(ngModel)]="warningMessage" placeholder="Escribe el mensaje de advertencia aquí..."></textarea>
+          <textarea class="form-control" id="warningMessage" rows="4" [(ngModel)]="warningMessage"
+            placeholder="Escribe el mensaje de advertencia aquí..."></textarea>
         </div>
       </div>
       <div class="modal-footer">

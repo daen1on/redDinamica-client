@@ -130,12 +130,30 @@ describe('AuthInterceptor', () => {
         }
       });
 
-      // Simular error 403
+      // Simular error 403 con mensaje relacionado a autorización (para activar el flujo del interceptor)
       const req = httpMock.expectOne('/api/protected');
-      req.flush({ message: 'Forbidden' }, { status: 403, statusText: 'Forbidden' });
+      req.flush({ message: 'Authorization required' }, { status: 403, statusText: 'Forbidden' });
 
       // Assert
       expect(alertSpy).toHaveBeenCalledWith('La sesión ha expirado, por favor iniciar sesión de nuevo.');
+      expect(clearSpy).toHaveBeenCalled();
+      expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    });
+
+    it('should handle 403 with TOKEN_INVALIDATED and show specific message', () => {
+      // Arrange
+      const alertSpy = spyOn(window, 'alert');
+      const clearSpy = spyOn(userService, 'clearIdentityAndToken');
+
+      // Act
+      httpClient.get('/api/protected').subscribe({ error: () => {} });
+
+      // Simular 403 con código específico
+      const req = httpMock.expectOne('/api/protected');
+      req.flush({ code: 'TOKEN_INVALIDATED' }, { status: 403, statusText: 'Forbidden' });
+
+      // Assert
+      expect(alertSpy).toHaveBeenCalledWith('Su cuenta fue actualizada por un administrador. Por favor, inicie sesión nuevamente.');
       expect(clearSpy).toHaveBeenCalled();
       expect(router.navigate).toHaveBeenCalledWith(['/login']);
     });

@@ -1,4 +1,5 @@
 import { Injectable, EventEmitter} from '@angular/core';
+import { Router } from '@angular/router';
 import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
 import { tap, map, catchError } from 'rxjs/operators';
@@ -16,7 +17,8 @@ export class UserService {
     public profilePictureUpdated: EventEmitter<void> = new EventEmitter<void>();
 
     constructor(
-        private _http:HttpClient
+        private _http:HttpClient,
+        private router: Router
     ){
         this.url = GLOBAL.url;
     
@@ -408,8 +410,8 @@ uploadProfileImage(userId: string, file: File): Observable<any> {
         localStorage.clear();
 
         alert(finalMessage);
-        // Redirigir al login
-        window.location.href = '/login';
+        // Redirigir al login dentro del enrutador de Angular (preserva HashLocationStrategy)
+        this.router.navigate(['/login']);
     }
 
     // Método para verificar proactivamente el estado del token
