@@ -239,13 +239,47 @@ export class ConversationComponent implements OnInit, OnDestroy {
             next: (response) => {
                 if (response && response.lesson && response.lesson._id) {
                     this.lesson = response.lesson;
-                    this.status = 'success';
-                    this.submitted = false;
-                    this.name.reset();
-                    this.files.reset();
-                    this.message.reset();
-                    this.getGroups();
-                    this.disableForm(false);
+
+                    if (this.filesToUpload.length > 0) {
+                        this.status = 'warning';
+                        this._uploadService.makeFileRequest(
+                            this.url + 'upload-lesson/' + this.lesson._id,
+                            [],
+                            this.filesToUpload,
+                            this.token,
+                            'files'
+                        ).subscribe({
+                            next: (event: HttpEvent<any>) => {
+                                if (event.type === HttpEventType.UploadProgress) {
+                                    this.barWidth = Math.round(event.loaded / event.total * 100).toString() + '%';
+                                } else if (event.type === HttpEventType.Response) {
+                                    this.status = 'success';
+                                    this.submitted = false;
+                                    this.name.reset();
+                                    this.files.reset();
+                                    this.message.reset();
+                                    this.getGroups();
+                                    this.disableForm(false);
+                                    this.barWidth = '0%';
+                                    this.filesToUpload = [];
+                                }
+                            }, error: (error) => {
+                                this.status = 'error';
+                                this.submitted = false;
+                                this.disableForm(false);
+                                this.barWidth = '0%';
+                                console.error(error);
+                            }
+                        });
+                    } else {
+                        this.status = 'success';
+                        this.submitted = false;
+                        this.name.reset();
+                        this.files.reset();
+                        this.message.reset();
+                        this.getGroups();
+                        this.disableForm(false);
+                    }
                 } else {
                     this.status = 'error';
                     this.submitted = false;
@@ -305,34 +339,36 @@ export class ConversationComponent implements OnInit, OnDestroy {
                                 this.filesToUpload,
                                 this.token,
                                 'files'
-                            ).subscribe((event: HttpEvent<any>) => { // client call
-                                switch (event.type) { //checks events
-                                    case HttpEventType.UploadProgress: // If upload is in progress
-                                        this.status = 'warning';
-                                        this.barWidth = Math.round(event.loaded / event.total * 100).toString() + '%'; // get upload percentage
-                                        break;
-                                    case HttpEventType.Response: // give final response
-                                        console.log('User successfully added!', event.body);
+                            ).subscribe({
+                                next: (event: HttpEvent<any>) => { // client call
+                                    switch (event.type) { //checks events
+                                        case HttpEventType.UploadProgress: // If upload is in progress
+                                            this.status = 'warning';
+                                            this.barWidth = Math.round(event.loaded / event.total * 100).toString() + '%'; // get upload percentage
+                                            break;
+                                        case HttpEventType.Response: // give final response
+                                            console.log('User successfully added!', event.body);
 
-                                        this.submitted = false;
-                                        this.disableForm(false);
-                                        this.name.reset();
-                                        this.files.reset();
-                                        this.message.reset();
-                                        this.getGroups();
-                                        this.status = 'success';
-                                        this.barWidth = '0%';
-                                        this.loading = false;
+                                            this.submitted = false;
+                                            this.disableForm(false);
+                                            this.name.reset();
+                                            this.files.reset();
+                                            this.message.reset();
+                                            this.getGroups();
+                                            this.status = 'success';
+                                            this.barWidth = '0%';
+                                            this.loading = false;
+                                    }
+                                }, error: (error) => {
+
+
+                                    this.status = 'error';
+                                    this.barWidth = '0%';
+                                    this.submitted = false;
+                                    this.loading = false;
+                                    console.log(<any>error);
+
                                 }
-                            }, error => {
-
-
-                                this.status = 'error';
-                                this.barWidth = '0%';
-                                this.submitted = false;
-                                this.loading = false;
-                                console.log(<any>error);
-
                             });
                         }
                         else {
@@ -413,10 +449,25 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
     deleteMessage(message: any): void {
         if (!this.canEditMessage(message)) return;
-        const idx = this.lesson.conversations.findIndex((m: any) => m === message);
-        if (idx >= 0) {
-            this.lesson.conversations.splice(idx, 1);
-            this.editLesson(this.lesson);
+
+        if (window.confirm('¿Estás seguro que quieres eliminar este mensaje?')) {
+            const idx = this.lesson.conversations.findIndex((m: any) => m === message);
+            if (idx >= 0) {
+                this.lesson.conversations.splice(idx, 1);
+                this._lessonService.editLesson(this.token, this.lesson).subscribe({
+                    next: (response) => {
+                        if (response.lesson && response.lesson._id) {
+                            this.lesson = response.lesson;
+                            this.getGroups();
+                            this.status = 'deleted';
+                        }
+                    },
+                    error: (error) => {
+                        this.status = 'error';
+                        console.error('Error deleting message:', error);
+                    }
+                });
+            }
         }
     }
 

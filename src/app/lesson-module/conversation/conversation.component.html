@@ -174,6 +174,12 @@
                                                 {{filesToUpload[0].name}}
                                             </small>
 
+                                            <div class="progress mt-1" *ngIf="barWidth !== '0%'">
+                                                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                                    role="progressbar" [style.width]="barWidth" aria-valuenow="barWidth"
+                                                    aria-valuemin="0" aria-valuemax="100">{{barWidth}}</div>
+                                            </div>
+
                                         </div>
 
                                         <div class="col-auto ps-3 pe-0">
@@ -186,8 +192,9 @@
 
                                             <br>
                                             <button class="btn btn-sm btn-success" (click)="onSubmit(group)"
-                                                title="Enviar mensaje">
-                                                <i class="fas fa-paper-plane"></i>
+                                                title="Enviar mensaje" [disabled]="submitted">
+                                                <i *ngIf="!submitted" class="fas fa-paper-plane"></i>
+                                                <span *ngIf="submitted" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                             </button>
                                         </div>
 
