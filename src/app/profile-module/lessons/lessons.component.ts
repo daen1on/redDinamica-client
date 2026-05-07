@@ -18,18 +18,18 @@ export class LessonsComponent implements OnInit, OnDestroy {
     public token: string;
     public url: string;
     public ownProfile: any;
-    
+
     // Nuevas propiedades según el diseño
     public lessons: PublicLesson[] = [];
     public stats: UserLessonsStats | null = null;
     public loading = true;
     public status: string = '';
-    
+
     // Estados de la interfaz
     public isOwner = false;
     public showConfig = false;
     public hasPublicLessons = false;
-    
+
     // Filtros
     public activeFilters: LessonFilters = {};
     public availableRoles = [
@@ -39,20 +39,20 @@ export class LessonsComponent implements OnInit, OnDestroy {
         { value: 'reviewer', label: 'Revisor', icon: '🔍' }
     ];
     public selectedRole = 'all';
-    
+
     // Configuración de privacidad (simulada por ahora)
     public privacySettings = {
         showLessonsInProfile: true,
         hiddenLessonIds: [] as string[],
         allowCollaborationRequests: true
     };
-    
+
     // Paginación
     public page = 1;
     public pages = 0;
     public total = 0;
     public noMore = false;
-    
+
     private unsubscribe$ = new Subject<void>();
 
     constructor(
@@ -111,7 +111,7 @@ export class LessonsComponent implements OnInit, OnDestroy {
      */
     loadLessonsData(): void {
         this.loading = true;
-        
+
         // Cargar datos en paralelo
         const dataToLoad: any = {
             lessons: this._userLessonsService.getPublicLessons(this.ownProfile._id, this.page, this.activeFilters),
@@ -131,15 +131,15 @@ export class LessonsComponent implements OnInit, OnDestroy {
                 this.pages = result.lessons.totalPages;
                 this.hasPublicLessons = result.lessons.totalCount > 0;
                 this.noMore = !result.lessons.hasMore;
-                
+
                 // Actualizar configuración de privacidad si está disponible
                 if (result.privacy) {
                     this.privacySettings = result.privacy;
                 }
-                
+
                 this.determineStatus();
                 this.loading = false;
-                
+
                 console.log('Lessons data loaded:', {
                     lessons: this.lessons.length,
                     stats: this.stats,
@@ -214,7 +214,7 @@ export class LessonsComponent implements OnInit, OnDestroy {
 
     toggleLessonVisibility(lessonId: string): void {
         const isHidden = this.privacySettings.hiddenLessonIds.includes(lessonId);
-        
+
         if (isHidden) {
             this.privacySettings.hiddenLessonIds = this.privacySettings.hiddenLessonIds.filter(id => id !== lessonId);
         } else {
@@ -316,8 +316,27 @@ export class LessonsComponent implements OnInit, OnDestroy {
         return views.toString();
     }
 
-    formatDate(date: Date): string {
-        return new Date(date).toLocaleDateString('es-ES', {
+    formatDate(date: any): string {
+        console.log(date);
+        if (!date) return 'No disponible';
+
+        let d: Date;
+        // Si es un número o un string puramente numérico (como un timestamp)
+        if (!isNaN(Number(date)) && date !== '') {
+            let timestamp = Number(date);
+            // Si el timestamp es en segundos (aprox 10 dígitos), convertir a milisegundos
+            if (timestamp < 10000000000) {
+                timestamp *= 1000;
+            }
+            d = new Date(timestamp);
+        } else {
+            // Si es un string ISO (ej: "2025-10-15T13:11:01.973Z")
+            d = new Date(date);
+        }
+
+        if (isNaN(d.getTime())) return 'Fecha no disponible';
+
+        return d.toLocaleDateString('es-ES', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
@@ -326,8 +345,8 @@ export class LessonsComponent implements OnInit, OnDestroy {
 
     truncateDescription(description: string, maxLength: number = 150): string {
         if (!description) return '';
-        return description.length > maxLength 
-            ? description.substring(0, maxLength) + '...' 
+        return description.length > maxLength
+            ? description.substring(0, maxLength) + '...'
             : description;
     }
 

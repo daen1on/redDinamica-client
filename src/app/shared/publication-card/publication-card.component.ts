@@ -1213,7 +1213,7 @@ export class PublicationCardComponent implements OnInit, OnDestroy, OnChanges, A
       
       if (mentionedUser && mentionedUser._id) {
         // Crear hiperenlace al perfil del usuario que abre en nueva pestaña
-        const link = `<a href="/perfil/${mentionedUser._id}" target="_blank" class="mention-link" title="Ver perfil de ${trimmedName}">@${trimmedName}</a>`;
+        const link = `<a href="#/perfil/${mentionedUser._id}" target="_blank" class="mention-link" title="Ver perfil de ${trimmedName}">@${trimmedName}</a>`;
         //console.log('Created link:', link);
         return link;
       } else {

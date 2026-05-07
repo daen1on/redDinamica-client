@@ -196,19 +196,31 @@ export class UserLessonsService {
    */
   private transformBackendResponse(response: any): PublicLessonsResponse {
     const lessons = response.lessons || [];
-    const transformedLessons: PublicLesson[] = lessons.map((lesson: any) => ({
-      id: lesson._id,
-      title: lesson.title,
-      description: lesson.resume || lesson.description || '',
-      knowledgeAreas: lesson.knowledge_area || [],
-      userRole: lesson.userRole || 'author',
-      completionDate: new Date(lesson.completionDate || lesson.updated_at || lesson.created_at),
-      rating: lesson.score || 0,
-      views: lesson.views || 0,
-      thumbnailUrl: lesson.image || undefined,
-      state: lesson.state,
-      level: Array.isArray(lesson.level) ? lesson.level.join(', ') : (lesson.level || '')
-    }));
+    const transformedLessons: PublicLesson[] = lessons.map((lesson: any) => {
+      let rawDate = lesson.completionDate || lesson.updated_at || lesson.created_at;
+      let parsedDate: Date;
+      if (rawDate && !isNaN(Number(rawDate)) && String(rawDate).trim() !== '') {
+        let ts = Number(rawDate);
+        if (ts < 10000000000) ts *= 1000;
+        parsedDate = new Date(ts);
+      } else {
+        parsedDate = new Date(rawDate);
+      }
+
+      return {
+        id: lesson._id,
+        title: lesson.title,
+        description: lesson.resume || lesson.description || '',
+        knowledgeAreas: lesson.knowledge_area || [],
+        userRole: lesson.userRole || 'author',
+        completionDate: parsedDate,
+        rating: lesson.score || 0,
+        views: lesson.views || 0,
+        thumbnailUrl: lesson.image || undefined,
+        state: lesson.state,
+        level: Array.isArray(lesson.level) ? lesson.level.join(', ') : (lesson.level || '')
+      };
+    });
 
     return {
       lessons: transformedLessons,
